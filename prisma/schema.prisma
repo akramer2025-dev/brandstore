@@ -1,0 +1,785 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============ User Management ============
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  username      String?   @unique
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole  @default(CUSTOMER)
+  phone         String?
+  address       String?
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+  messagesSent  Message[] @relation("SentMessages")
+  messagesReceived Message[] @relation("ReceivedMessages")
+  vendor        Vendor?   // علاقة مع حساب البائع
+  deliveryStaff DeliveryStaff? // علاقة مع مندوب التوصيل
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  DELIVERY_STAFF
+  VENDOR        // أصحاب المحلات/البائعين
+  MANUFACTURER  // حسابنا للتصنيع الذاتي
+}
+
+// ============ Vendor/Store Management ============
+model Vendor {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Business Info
+  businessName    String?   @default("") // English name
+  businessNameAr  String?   @default("") // Arabic name
+  businessType    String?   @default("store") // store, factory, stationery, pharmacy, general
+  storeName       String?   @default("")
+  storeNameAr     String?   @default("")
+  storeDescription String?
+  storeDescriptionAr String?
+  logo            String?
+  banner          String?
+  
+  // Contact Info
+  phone           String?
+  alternativePhone String?
+  whatsapp        String?
+  
+  // Address
+  address         String?
+  city            String?
+  region          String?
+  postalCode      String?
+  
+  // Business Details
+  description     String?
+  descriptionAr   String?
+  category        String?   // Main business field
+  subCategory     String?   // Sub-category
+  yearsOfExperience Int     @default(0)
+  
+  // Commission settings
+  commissionRate  Float     @default(15) // نسبة العمولة %
+  
+  // Bank details for payments
+  bankName        String?
+  accountNumber   String?
+  accountHolderName String?
+  bankAccountName String?
+  bankAccountNumber String?
+  iban            String?
+  
+  // Official Documents
+  commercialRegister String?
+  taxCard         String?
+  nationalId      String?
+  businessLicense String?
+  
+  // Status
+  isApproved      Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  rating          Float     @default(0)
+  totalSales      Int       @default(0)
+  
+  // Relationships
+  products        Product[]
+  orders          Order[]
+  payouts         VendorPayout[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("vendors")
+}
+
+model VendorPayout {
+  id              String    @id @default(cuid())
+  vendorId        String
+  vendor          Vendor    @relation(fields: [vendorId], references: [id])
+  amount          Float
+  status          PayoutStatus @default(PENDING)
+  method          String    // "bank_transfer", "cash"
+  reference       String?   // رقم التحويل أو المرجع
+  notes           String?
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("vendor_payouts")
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// ============ Product Management ============
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  nameAr      String
+  description String?
+  image       String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  name        String
+  nameAr      String
+  description String?
+  descriptionAr String?
+  price       Float
+  originalPrice Float?       // السعر الأصلي قبل الخصم
+  categoryId  String
+  category    Category       @relation(fields: [categoryId], references: [id])
+  images      String?        // comma-separated URLs
+  stock       Int            @default(0)
+  isActive    Boolean        @default(true)
+  
+  // Vendor relationship
+  vendorId    String?        // null = منتج من تصنيعنا
+  vendor      Vendor?        @relation(fields: [vendorId], references: [id])
+  isOwnProduct Boolean       @default(false) // true = منتج من تصنيعنا
+  
+  // Flash Deals & Badges
+  isFlashDeal   Boolean      @default(false)
+  flashDealEndsAt DateTime?  // موعد انتهاء العرض الخاطف
+  badge         String?      // "جديد"، "الأكثر مبيعاً"، "خصم"، "محدود"
+  soldCount     Int          @default(0) // عدد المبيعات
+  viewCount     Int          @default(0) // عدد المشاهدات
+  
+  fabricPieces FabricPiece[]
+  orderItems  OrderItem[]
+  reviews     Review[]
+  wishlistItems WishlistItem[]
+  productions Production[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("products")
+}
+
+// ============ Fabric Management ============
+model Fabric {
+  id            String        @id @default(cuid())
+  name          String
+  nameAr        String
+  type          String        // قطن، حرير، بوليستر، etc
+  color         String
+  purchasePrice Float
+  totalLength   Float         // بالمتر
+  usedLength    Float         @default(0) // المستخدم
+  availableLength Float       // المتاح = totalLength - usedLength
+  supplier      String?
+  purchaseDate  DateTime      @default(now())
+  fabricPieces  FabricPiece[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("fabrics")
+}
+
+model FabricPiece {
+  id          String   @id @default(cuid())
+  fabricId    String
+  fabric      Fabric   @relation(fields: [fabricId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  lengthUsed  Float    // كم متر استخدمنا من القماش
+  quantity    Int      // كم قطعة انتجنا
+  costPerPiece Float   // التكلفة لكل قطعة
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("fabric_pieces")
+}
+
+// ============ Order Management ============
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique @default(cuid())
+  customerId      String
+  customer        User          @relation(fields: [customerId], references: [id])
+  vendorId        String?       // البائع المسؤول
+  vendor          Vendor?       @relation(fields: [vendorId], references: [id])
+  items           OrderItem[]
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   PaymentMethod @default(CASH_ON_DELIVERY)
+  totalAmount     Float
+  deliveryFee     Float         @default(0)
+  finalAmount     Float
+  
+  // Installment info
+  installmentPlan InstallmentPlan?
+  installmentId   String?       @unique
+  
+  deliveryStaffId String?
+  deliveryStaff   DeliveryStaff? @relation(fields: [deliveryStaffId], references: [id])
+  deliveryAddress String
+  deliveryPhone   String
+  customerNotes   String?
+  rejectionReason String?       // سبب الرفض في حالة عدم قبول العميل
+  inspectionResult InspectionResult?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("orders")
+}
+
+// ============ Payment & Installments ============
+enum PaymentMethod {
+  CASH_ON_DELIVERY    // الدفع عند الاستلام
+  BANK_TRANSFER       // تحويل بنكي
+  INSTALLMENT_4       // تقسيط 4 شهور
+  INSTALLMENT_6       // تقسيط 6 شهور
+  INSTALLMENT_12      // تقسيط 12 شهر
+  INSTALLMENT_24      // تقسيط 24 شهر
+}
+
+model InstallmentPlan {
+  id              String    @id @default(cuid())
+  orderId         String    @unique
+  order           Order     @relation(fields: [orderId], references: [id])
+  totalAmount     Float
+  downPayment     Float     // الدفعة المقدمة
+  monthlyAmount   Float     // القسط الشهري
+  numberOfMonths  Int       // عدد الأشهر
+  interestRate    Float     @default(0) // نسبة الفائدة %
+  
+  payments        InstallmentPayment[]
+  
+  status          InstallmentStatus @default(ACTIVE)
+  startDate       DateTime  @default(now())
+  endDate         DateTime
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("installment_plans")
+}
+
+model InstallmentPayment {
+  id              String    @id @default(cuid())
+  planId          String
+  plan            InstallmentPlan @relation(fields: [planId], references: [id])
+  amount          Float
+  dueDate         DateTime
+  paidDate        DateTime?
+  status          InstallmentPaymentStatus @default(PENDING)
+  paymentMethod   String?   // "bank_transfer", "cash", etc
+  reference       String?   // رقم التحويل
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("installment_payments")
+}
+
+enum InstallmentStatus {
+  ACTIVE          // نشط
+  COMPLETED       // مكتمل
+  DEFAULTED       // متعثر
+  CANCELLED       // ملغي
+}
+
+enum InstallmentPaymentStatus {
+  PENDING         // في الانتظار
+  PAID            // مدفوع
+  LATE            // متأخر
+  FAILED          // فشل
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float    // السعر وقت الطلب
+  createdAt DateTime @default(now())
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING           // في الانتظار
+  CONFIRMED         // تم التأكيد
+  PREPARING         // قيد التحضير
+  OUT_FOR_DELIVERY  // في الطريق للتوصيل
+  DELIVERED         // تم التوصيل
+  REJECTED          // تم الرفض من العميل
+  CANCELLED         // ملغي
+}
+
+enum PaymentStatus {
+  PENDING           // في الانتظار
+  PAID              // مدفوع
+  REJECTED          // مرفوض
+  DELIVERY_FEE_ONLY // دفع رسوم التوصيل فقط
+}
+
+enum InspectionResult {
+  ACCEPTED          // قبل المنتج ودفع كامل المبلغ
+  REJECTED          // رفض المنتج ودفع رسوم التوصيل فقط
+}
+
+// ============ Delivery Management ============
+model DeliveryStaff {
+  id          String   @id @default(cuid())
+  userId      String?  @unique
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String?  @default("")
+  phone       String   @unique
+  alternativePhone String?
+  whatsapp    String?
+  email       String?  @unique
+  password    String?  @default("")
+  
+  // Address
+  address     String?
+  city        String?
+  region      String?
+  
+  // Vehicle Info
+  vehicleType String?
+  vehicleNumber String?
+  
+  // Documents
+  drivingLicense String?
+  nationalId  String?
+  
+  // Bank Details
+  bankName    String?
+  accountNumber String?
+  iban        String?
+  accountHolderName String?
+  
+  // Status
+  isActive    Boolean  @default(true)
+  isAvailable Boolean  @default(true)
+  isApproved  Boolean  @default(false)
+  
+  // Location Tracking
+  currentLat  Float?   // خط العرض الحالي
+  currentLng  Float?   // خط الطول الحالي
+  lastLocationUpdate DateTime? // آخر تحديث للموقع
+  
+  // Stats
+  totalDeliveries Int  @default(0)
+  successfulDeliveries Int @default(0)
+  
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("delivery_staff")
+}
+
+// ============ Inventory Logs ============
+model InventoryLog {
+  id          String   @id @default(cuid())
+  productId   String
+  productName String
+  changeType  String   // PURCHASE, SALE, FABRIC_CUT, ADJUSTMENT
+  quantity    Int      // موجب للزيادة، سالب للنقصان
+  stockBefore Int
+  stockAfter  Int
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@map("inventory_logs")
+}
+
+// ============ Reviews & Ratings ============
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int      // من 1 إلى 5
+  comment   String?
+  isApproved Boolean @default(false) // موافقة المدير
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reviews")
+}
+
+// ============ Inventory & Materials Management ============
+model RawMaterial {
+  id            String   @id @default(cuid())
+  name          String
+  nameAr        String
+  category      MaterialCategory
+  unit          String   // متر، كيلو، قطعة، etc
+  quantity      Float
+  minQuantity   Float    @default(10) // حد الإنذار
+  unitPrice     Float
+  totalValue    Float    // القيمة الإجمالية
+  supplier      String?
+  location      String?  // موقع التخزين
+  lastPurchase  DateTime?
+  movements     MaterialMovement[]
+  productionUses ProductionMaterial[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("raw_materials")
+}
+
+model MaterialMovement {
+  id            String   @id @default(cuid())
+  materialId    String
+  material      RawMaterial @relation(fields: [materialId], references: [id])
+  type          MovementType
+  quantity      Float
+  unitPrice     Float?
+  totalCost     Float?
+  previousQty   Float
+  newQty        Float
+  reference     String?  // رقم الفاتورة أو الإشارة
+  notes         String?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+
+  @@map("material_movements")
+}
+
+enum MaterialCategory {
+  FABRIC        // أقمشة
+  THREAD        // خيوط
+  BUTTON        // أزرار
+  ZIPPER        // سحابات
+  ACCESSORY     // إكسسوارات
+  PACKAGING     // تغليف
+  OTHER         // أخرى
+}
+
+enum MovementType {
+  PURCHASE      // شراء
+  PRODUCTION    // استخدام في الإنتاج
+  RETURN        // إرجاع
+  ADJUSTMENT    // تسوية
+  DAMAGE        // تالف
+  TRANSFER      // نقل
+}
+
+// ============ Production Management ============
+model Production {
+  id              String   @id @default(cuid())
+  productionNumber String  @unique @default(cuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  quantity        Int
+  materials       ProductionMaterial[]
+  laborCost       Float    @default(0)
+  overheadCost    Float    @default(0)
+  totalMaterialCost Float
+  totalCost       Float    // مواد + عمالة + تكاليف عامة
+  costPerUnit     Float
+  status          ProductionStatus @default(PLANNED)
+  startDate       DateTime?
+  completionDate  DateTime?
+  notes           String?
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("productions")
+}
+
+model ProductionMaterial {
+  id            String   @id @default(cuid())
+  productionId  String
+  production    Production @relation(fields: [productionId], references: [id], onDelete: Cascade)
+  materialId    String
+  material      RawMaterial @relation(fields: [materialId], references: [id])
+  quantityUsed  Float
+  unitCost      Float
+  totalCost     Float
+  createdAt     DateTime @default(now())
+
+  @@map("production_materials")
+}
+
+enum ProductionStatus {
+  PLANNED       // مخطط
+  IN_PROGRESS   // قيد التنفيذ
+  COMPLETED     // مكتمل
+  CANCELLED     // ملغي
+}
+
+// ============ Accounting & Financial Management ============
+model PaymentVoucher {
+  id              String   @id @default(cuid())
+  voucherNumber   String   @unique
+  type            VoucherType
+  amount          Float
+  paymentMethod   AccountingPaymentMethod
+  recipientName   String?  // اسم المستلم (في حالة الصرف)
+  payerName       String?  // اسم الدافع (في حالة القبض)
+  category        ExpenseCategory?
+  reference       String?  // رقم مرجعي (فاتورة، طلب، etc)
+  description     String?
+  attachments     String?  // صور أو ملفات
+  status          VoucherStatus @default(PENDING)
+  approvedBy      String?
+  approvedAt      DateTime?
+  paidBy          String?  // المسؤول عن الدفع/القبض
+  transactionDate DateTime @default(now())
+  createdBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("payment_vouchers")
+}
+
+enum VoucherType {
+  RECEIPT       // سند قبض
+  PAYMENT       // سند صرف
+}
+
+enum AccountingPaymentMethod {
+  CASH          // نقدي
+  BANK_TRANSFER // تحويل بنكي
+  CHECK         // شيك
+  CARD          // بطاقة
+  MOBILE_WALLET // محفظة إلكترونية
+}
+
+enum ExpenseCategory {
+  MATERIALS     // مواد خام
+  SALARIES      // رواتب
+  RENT          // إيجار
+  UTILITIES     // مرافق
+  MARKETING     // تسويق
+  TRANSPORT     // نقل
+  MAINTENANCE   // صيانة
+  OTHER         // أخرى
+}
+
+enum VoucherStatus {
+  PENDING       // معلق
+  APPROVED      // موافق عليه
+  REJECTED      // مرفوض
+  PAID          // تم الدفع/القبض
+}
+
+// ============ Marketing & SEO Management ============
+model MarketingCampaign {
+  id            String   @id @default(cuid())
+  name          String
+  type          CampaignType
+  platform      String?  // Google Ads, Facebook, Instagram, etc
+  budget        Float
+  spent         Float    @default(0)
+  startDate     DateTime
+  endDate       DateTime?
+  status        CampaignStatus @default(ACTIVE)
+  targetAudience String?
+  keywords      String?  // للـ SEO/Google Ads
+  adCopy        String?
+  impressions   Int      @default(0)
+  clicks        Int      @default(0)
+  conversions   Int      @default(0)
+  ctr           Float    @default(0) // Click-through rate
+  cpc           Float    @default(0) // Cost per click
+  roi           Float    @default(0) // Return on investment
+  notes         String?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("marketing_campaigns")
+}
+
+model SeoKeyword {
+  id            String   @id @default(cuid())
+  keyword       String
+  searchVolume  Int?
+  difficulty    Int?     // 1-100
+  currentRank   Int?
+  targetRank    Int?
+  url           String?
+  status        String?  // ranking, not-ranking, improving, declining
+  lastChecked   DateTime?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("seo_keywords")
+}
+
+model WebsiteAnalytics {
+  id            String   @id @default(cuid())
+  date          DateTime @unique
+  pageViews     Int      @default(0)
+  uniqueVisitors Int     @default(0)
+  bounceRate    Float    @default(0)
+  avgSessionDuration Float @default(0)
+  topPages      String?  // JSON string
+  topProducts   String?  // JSON string
+  trafficSources String? // JSON string
+  conversions   Int      @default(0)
+  revenue       Float    @default(0)
+  createdAt     DateTime @default(now())
+
+  @@map("website_analytics")
+}
+
+// ============ Wishlist Management ============
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  notifyOnLowStock Boolean @default(true)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}
+
+// ============ Messages / Chat System ============
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String?
+  receiver  User?    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  isRead    Boolean  @default(false)
+  isAdminMessage Boolean @default(false) // true if sent by admin
+  orderId   String?  // optional: link to specific order
+  attachmentUrl String? // optional: image or file
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("messages")
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+// ============ Settings & Configuration ============
+model SiteSetting {
+  id            String   @id @default(cuid())
+  key           String   @unique // site_name, site_description, contact_email, etc
+  value         String
+  type          String   @default("text") // text, number, boolean, json
+  category      String   @default("general") // general, appearance, seo, social
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model SliderImage {
+  id          String   @id @default(cuid())
+  title       String
+  titleAr     String?
+  subtitle    String?
+  subtitleAr  String?
+  imageUrl    String
+  link        String?  // رابط عند الضغط على الصورة
+  buttonText  String?
+  buttonTextAr String?
+  order       Int      @default(0) // ترتيب الظهور
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("slider_images")
+}
+
+enum CampaignType {
+  SEO           // تحسين محركات البحث
+  GOOGLE_ADS    // إعلانات جوجل
+  FACEBOOK_ADS  // إعلانات فيسبوك
+  INSTAGRAM_ADS // إعلانات انستقرام
+  EMAIL         // البريد الإلكتروني
+  INFLUENCER    // المؤثرين
+  CONTENT       // المحتوى
+  OTHER         // أخرى
+}
+
+enum CampaignStatus {
+  DRAFT         // مسودة
+  ACTIVE        // نشط
+  PAUSED        // متوقف مؤقتاً
+  COMPLETED     // مكتمل
+  CANCELLED     // ملغي
+}

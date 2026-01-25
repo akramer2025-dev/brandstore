@@ -1,0 +1,134 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f472b6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="shineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#e0f2fe;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <!-- Glow Effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Shadow -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Outer Hexagon Layer 1 (Rotated) -->
+  <path d="M 100 10 L 170 50 L 170 150 L 100 190 L 30 150 L 30 50 Z" 
+        fill="url(#mainGradient)" 
+        opacity="0.2"
+        transform="rotate(15 100 100)">
+    <animateTransform attributeName="transform"
+                      type="rotate"
+                      from="15 100 100"
+                      to="375 100 100"
+                      dur="20s"
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Outer Hexagon Layer 2 (Counter-Rotated) -->
+  <path d="M 100 10 L 170 50 L 170 150 L 100 190 L 30 150 L 30 50 Z" 
+        fill="url(#accentGradient)" 
+        opacity="0.15"
+        transform="rotate(-15 100 100)">
+    <animateTransform attributeName="transform"
+                      type="rotate"
+                      from="-15 100 100"
+                      to="-375 100 100"
+                      dur="20s"
+                      repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Main Circle with Gradient -->
+  <circle cx="100" cy="100" r="85" 
+          fill="url(#mainGradient)" 
+          filter="url(#shadow)"/>
+  
+  <!-- Inner White Circle -->
+  <circle cx="100" cy="100" r="70" 
+          fill="url(#shineGradient)"/>
+  
+  <!-- Shopping Cart Icon (Stylized) -->
+  <g transform="translate(55, 45)">
+    <!-- Cart Body -->
+    <path d="M 0 10 L 5 10 L 10 40 L 60 40 L 68 15 L 15 15" 
+          fill="none" 
+          stroke="url(#mainGradient)" 
+          stroke-width="3.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    <!-- Cart Wheels -->
+    <circle cx="18" cy="48" r="4" fill="url(#accentGradient)"/>
+    <circle cx="52" cy="48" r="4" fill="url(#accentGradient)"/>
+    <!-- BS Letters inside cart -->
+    <text x="35" y="30" 
+          font-family="'Segoe UI', Arial, sans-serif" 
+          font-size="20" 
+          font-weight="900" 
+          text-anchor="middle" 
+          fill="url(#mainGradient)" 
+          letter-spacing="-1">BS</text>
+  </g>
+  
+  <!-- Brand Name at Bottom -->
+  <text x="100" y="135" 
+        font-family="'Segoe UI', Arial, sans-serif" 
+        font-size="14" 
+        font-weight="700" 
+        text-anchor="middle" 
+        fill="#0891b2" 
+        letter-spacing="1">BRAND</text>
+  <text x="100" y="150" 
+        font-family="'Segoe UI', Arial, sans-serif" 
+        font-size="12" 
+        font-weight="600" 
+        text-anchor="middle" 
+        fill="#6366f1" 
+        letter-spacing="2">STORE</text>
+  
+  <!-- Sparkle Elements -->
+  <g opacity="0.8">
+    <circle cx="40" cy="60" r="2.5" fill="#f472b6">
+      <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="160" cy="70" r="2" fill="#22d3ee">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="150" cy="130" r="2.5" fill="#a855f7">
+      <animate attributeName="opacity" values="1;0.3;1" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="50" cy="140" r="2" fill="#3b82f6">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Shopping Bag Icon (Small decorative) -->
+  <path d="M 170 40 L 175 40 L 178 55 L 167 55 Z" 
+        fill="#f472b6" 
+        opacity="0.6">
+    <animate attributeName="opacity" values="0.6;0.9;0.6" dur="3s" repeatCount="indefinite"/>
+  </path>
+  <path d="M 170.5 40 Q 172.5 35 174.5 40" 
+        fill="none" 
+        stroke="#f472b6" 
+        stroke-width="1.5"/>
+</svg>
