@@ -177,15 +177,15 @@ export default async function AdminProductionPage() {
                     </div>
                   </div>
 
-                  {production.materials.length > 0 && (
+                  {production.materials && production.materials.length > 0 && (
                     <div className="mt-4 bg-green-50 p-3 rounded-lg">
                       <p className="text-sm font-bold text-gray-700 mb-2">المواد المستخدمة:</p>
                       <div className="grid md:grid-cols-2 gap-2">
-                        {production.materials.map((pm) => (
+                        {production.materials.map((pm: any) => (
                           <div key={pm.id} className="text-sm flex justify-between">
-                            <span>{pm.material.nameAr}:</span>
+                            <span>{pm.material?.nameAr || 'N/A'}:</span>
                             <span className="font-bold">
-                              {pm.quantityUsed} {pm.material.unit} ({pm.totalCost.toFixed(2)} ج)
+                              {pm.quantityUsed} {pm.material?.unit || ''} ({pm.totalCost?.toFixed(2) || '0'} ج)
                             </span>
                           </div>
                         ))}
