@@ -4,21 +4,6 @@ export default async function AdminMaterialsPage() {
   redirect("/admin/warehouse?tab=materials");
 }
 
-  const materials = await prisma.rawMaterial.findMany({
-    include: {
-      movements: {
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      },
-    },
-    orderBy: { nameAr: "asc" },
-  });
-
-  const lowStockMaterials = materials.filter((m) => m.quantity <= m.minQuantity);
-  const totalValue = materials.reduce((sum, m) => sum + m.totalValue, 0);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl animate-float"></div>

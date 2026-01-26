@@ -4,26 +4,6 @@ export default async function AdminProductionPage() {
   redirect("/admin/warehouse?tab=production");
 }
 
-  const productions = await prisma.production.findMany({
-    include: {
-      product: true,
-      materials: {
-        include: {
-          material: true,
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  const stats = {
-    total: productions.length,
-    completed: productions.filter((p) => p.status === "COMPLETED").length,
-    inProgress: productions.filter((p) => p.status === "IN_PROGRESS").length,
-    planned: productions.filter((p) => p.status === "PLANNED").length,
-  };
-
-  return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
