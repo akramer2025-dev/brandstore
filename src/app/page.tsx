@@ -37,7 +37,12 @@ async function getCategories() {
 
 export default async function HomePage() {
   // التحقق من المستخدم وتحويله للصفحة المناسبة
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error('Auth error:', error);
+  }
   
   if (session?.user) {
     if (session.user.role === 'ADMIN') {
@@ -58,7 +63,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <SplashScreen />
+      {/* <SplashScreen /> */}
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 animate-fade-in" style={{ animationDelay: '0.5s', animationDuration: '1s' }}>
       {/* Hero Slider - Full Width */}
       <HeroSlider />

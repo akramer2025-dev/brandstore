@@ -8,6 +8,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
   secret: process.env.NEXTAUTH_SECRET,
   trustHost: true,
+  debug: process.env.NODE_ENV === 'development',
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -59,12 +60,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       
       // جلب vendor type من قاعدة البيانات
       if (token.id && token.role === 'VENDOR') {
-        const vendor = await prisma.vendor.findUnique({
-          where: { userId: token.id as string },
-          select: { businessType: true }
-        });
-        if (vendor) {
-          token.vendorType = vendor.businessType;
+        try {
+          const vendor = await prisma.vendor.findUnique({
+            where: { userId: token.id as string },
+            select: { businessType: true }
+          });
+          if (vendor) {
+            token.vendorType = vendor.businessType;
+          }
+        } catch (error) {
+          console.error('Error fetching vendor:', error);
         }
       }
       
