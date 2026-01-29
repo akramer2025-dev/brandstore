@@ -151,7 +151,7 @@ export default async function HomePage() {
             </div>
             <div className="mt-8 pt-6 border-t border-gray-800">
               <p className="text-sm text-gray-500 mb-2">
-                © 2024 براند ستور. جميع الحقوق محفوظة.
+                © 2026 براند ستور. جميع الحقوق محفوظة.
               </p>
               <p className="text-xs text-gray-600">
                 Developed by <span className="text-cyan-400 font-semibold">Eng/ Akram Elmasry</span>

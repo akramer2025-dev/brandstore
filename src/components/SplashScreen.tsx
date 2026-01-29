@@ -39,14 +39,15 @@ export default function SplashScreen() {
 
           {/* Main Logo */}
           <div 
-            className="relative w-40 h-40 md:w-52 md:h-52 bg-white/95 backdrop-blur-md shadow-2xl animate-logo-splash overflow-hidden" 
+            className="relative w-40 h-40 md:w-52 md:h-52 backdrop-blur-md shadow-2xl animate-logo-splash overflow-hidden" 
             style={{ clipPath: 'polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)' }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 via-transparent to-purple-400/20 animate-pulse"></div>
             <img 
               src="/logo.png" 
               alt="BS Brand Store" 
-              className="w-full h-full scale-150 -translate-y-3 object-contain"
+              className="w-full h-full scale-150 -translate-y-3 object-contain mix-blend-multiply"
+              style={{ filter: 'drop-shadow(0 0 10px rgba(6, 182, 212, 0.3))' }}
             />
           </div>
 
