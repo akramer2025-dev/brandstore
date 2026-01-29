@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,12 @@ export default function NewProductPage() {
   });
 
   // Fetch categories on mount
-  useState(() => {
+  useEffect(() => {
     fetch("/api/categories")
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
-  });
+  }, []);
 
   const handleImagesUpload = (imageUrls: string[]) => {
     // Store images as comma-separated string
