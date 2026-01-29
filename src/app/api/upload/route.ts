@@ -12,6 +12,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // في Production على Vercel، استخدم روابط خارجية أو خدمة تخزين سحابي
+    if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json(
+        { 
+          error: "File upload is disabled in production. Please use external image URLs (Unsplash, Cloudinary, etc.) or configure a cloud storage service.",
+          suggestion: "Use image URLs like: https://images.unsplash.com/... or configure Cloudinary"
+        },
+        { status: 501 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
