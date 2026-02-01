@@ -1,0 +1,13 @@
+# Files to ignore when zipping for Vercel
+node_modules/
+.next/
+.env.local
+.vercel/
+*.log
+.DS_Store
+.git/
+prisma/dev.db
+*.sqlite
+*.db
+coverage/
+.nyc_output/
