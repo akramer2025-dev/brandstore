@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
