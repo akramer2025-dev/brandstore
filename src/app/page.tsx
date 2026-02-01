@@ -36,7 +36,7 @@ async function getCategories() {
 
 
 export default async function HomePage() {
-  // التحقق من المستخدم وتحويله للصفحة المناسبة
+  // التحقق من المستخدم - بس الأدمن يتحول تلقائياً
   let session = null;
   try {
     session = await auth();
@@ -44,16 +44,9 @@ export default async function HomePage() {
     console.error('Auth error:', error);
   }
   
-  if (session?.user) {
-    if (session.user.role === 'ADMIN') {
-      redirect('/admin');
-    } else if (session.user.role === 'VENDOR') {
-      redirect('/vendor');
-    } else if (session.user.role === 'DELIVERY_STAFF') {
-      redirect('/delivery-dashboard');
-    } else if (session.user.role === 'CUSTOMER') {
-      redirect('/customer');
-    }
+  // بس الأدمن يتحول تلقائياً لصفحة الإدارة
+  if (session?.user?.role === 'ADMIN') {
+    redirect('/admin');
   }
 
   const [products, categories] = await Promise.all([
