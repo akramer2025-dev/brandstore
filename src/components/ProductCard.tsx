@@ -140,7 +140,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 {/* Logo */}
                 <div className="w-8 h-8 flex-shrink-0">
                   <img 
-                    src="/logo.png" 
+                    src="/logo.png?v=2026" 
                     alt="BS Brand" 
                     className="w-full h-full object-contain drop-shadow-lg"
                   />

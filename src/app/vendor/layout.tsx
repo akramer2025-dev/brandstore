@@ -12,7 +12,7 @@ export default function VendorLayout({
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <div className="relative w-10 h-10">
             <Image
-              src="/logo.png"
+              src="/logo.png?v=2026"
               alt="Nody Store"
               width={40}
               height={40}

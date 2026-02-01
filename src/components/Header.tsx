@@ -128,7 +128,7 @@ export function Header() {
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-28 h-28 md:w-32 md:h-32 transition-all duration-300 group-hover:scale-110 animate-logo-entrance overflow-visible flex-shrink-0">
               <img 
-                src="/logo.png" 
+                src="/logo.png?v=2026" 
                 alt="BS Brand Store Logo" 
                 className="w-full h-full object-contain drop-shadow-2xl transition-all duration-300 group-hover:rotate-6"
               />

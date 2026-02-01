@@ -62,7 +62,7 @@ export default function VendorRegisterPage() {
           <Link href="/" className="inline-flex items-center gap-3 mb-6 hover:opacity-80 transition-opacity group">
             <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-4 rounded-2xl border-2 border-purple-200 transition-all duration-300 group-hover:scale-110">
               <img 
-                src="/logo.png" 
+                src="/logo.png?v=2026" 
                 alt="BS Brand Store" 
                 className="w-20 h-20 rounded-full object-contain drop-shadow-lg"
               />

@@ -189,7 +189,7 @@ export default function ProductDetailPage() {
                 {/* Logo Watermark */}
                 <div className="absolute top-4 left-4 w-20 h-20 bg-white/98 backdrop-blur-md shadow-2xl animate-glow-rotate overflow-hidden" style={{ clipPath: 'polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)' }}>
                   <img 
-                    src="/logo.png" 
+                    src="/logo.png?v=2026" 
                     alt="BS Brand Store" 
                     className="w-full h-full scale-150 -translate-y-2 object-contain"
                   />
@@ -314,7 +314,7 @@ export default function ProductDetailPage() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 flex-shrink-0">
                   <img 
-                    src="/logo.png" 
+                    src="/logo.png?v=2026" 
                     alt="Brand Store" 
                     className="w-full h-full object-contain drop-shadow-2xl"
                   />
