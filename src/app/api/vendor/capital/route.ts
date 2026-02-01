@@ -1,0 +1,147 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+
+// جلب رأس المال
+export async function GET(req: NextRequest) {
+  try {
+    const session = await auth();
+    
+    if (!session || session.user?.role !== 'VENDOR') {
+      return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
+    }
+
+    const vendor = await prisma.vendor.findUnique({
+      where: { userId: session.user.id },
+      include: {
+        partners: {
+          where: { partnerType: 'OWNER' },
+          orderBy: { createdAt: 'desc' },
+          take: 1
+        }
+      }
+    });
+
+    if (!vendor) {
+      return NextResponse.json({ error: 'لم يتم العثور على الشريك' }, { status: 404 });
+    }
+
+    const capital = vendor.partners[0] || null;
+
+    return NextResponse.json({ capital });
+
+  } catch (error) {
+    console.error('Error fetching capital:', error);
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء جلب البيانات' },
+      { status: 500 }
+    );
+  }
+}
+
+// تسجيل رأس المال
+export async function POST(req: NextRequest) {
+  try {
+    const session = await auth();
+    
+    if (!session || session.user?.role !== 'VENDOR') {
+      return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
+    }
+
+    const vendor = await prisma.vendor.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!vendor) {
+      return NextResponse.json({ error: 'لم يتم العثور على الشريك' }, { status: 404 });
+    }
+
+    const { initialAmount, notes } = await req.json();
+
+    if (!initialAmount || initialAmount <= 0) {
+      return NextResponse.json({ error: 'المبلغ غير صحيح' }, { status: 400 });
+    }
+
+    // إنشاء سجل رأس المال
+    const capital = await prisma.partnerCapital.create({
+      data: {
+        vendorId: vendor.id,
+        partnerName: session.user.name || 'الشريك',
+        partnerType: 'OWNER',
+        initialAmount: parseFloat(initialAmount),
+        currentAmount: parseFloat(initialAmount),
+        capitalPercentage: 100, // 100% لأنه المالك
+        profitPercentage: 100,
+        notes: notes || null,
+      }
+    });
+
+    return NextResponse.json({
+      message: 'تم تسجيل رأس المال بنجاح',
+      capital
+    }, { status: 201 });
+
+  } catch (error) {
+    console.error('Error creating capital:', error);
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء الحفظ' },
+      { status: 500 }
+    );
+  }
+}
+
+// تحديث رأس المال
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await auth();
+    
+    if (!session || session.user?.role !== 'VENDOR') {
+      return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
+    }
+
+    const vendor = await prisma.vendor.findUnique({
+      where: { userId: session.user.id },
+      include: {
+        partners: {
+          where: { partnerType: 'OWNER' },
+          take: 1
+        }
+      }
+    });
+
+    if (!vendor || !vendor.partners[0]) {
+      return NextResponse.json({ error: 'لم يتم العثور على رأس المال' }, { status: 404 });
+    }
+
+    const { initialAmount, notes } = await req.json();
+
+    if (!initialAmount || initialAmount <= 0) {
+      return NextResponse.json({ error: 'المبلغ غير صحيح' }, { status: 400 });
+    }
+
+    const currentCapital = vendor.partners[0];
+    const difference = parseFloat(initialAmount) - currentCapital.initialAmount;
+
+    // تحديث رأس المال
+    const updated = await prisma.partnerCapital.update({
+      where: { id: currentCapital.id },
+      data: {
+        initialAmount: parseFloat(initialAmount),
+        currentAmount: currentCapital.currentAmount + difference,
+        notes: notes || null,
+      }
+    });
+
+    return NextResponse.json({
+      message: 'تم تحديث رأس المال بنجاح',
+      capital: updated
+    });
+
+  } catch (error) {
+    console.error('Error updating capital:', error);
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء التحديث' },
+      { status: 500 }
+    );
+  }
+}

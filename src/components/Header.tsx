@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ interface ProductSuggestion {
 
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = useSession();
   const totalItems = useCartStore((state) => state.getTotalItems());
   const { items: wishlistItems, notifications, fetchWishlist, fetchNotifications } = useWishlist();
@@ -36,6 +37,11 @@ export function Header() {
   const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // إخفاء الـ Header في صفحات الـ vendor والـ admin والـ delivery-dashboard
+  if (pathname?.startsWith('/vendor') || pathname?.startsWith('/admin') || pathname?.startsWith('/delivery-dashboard')) {
+    return null;
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

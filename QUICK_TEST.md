@@ -6,8 +6,7 @@
 
 #### Admin (الإدارة)
 ```
-البريد: admin@store.com
-الرقم السري: admin123
+قم بإنشاء حساب مدير من النظام
 الرابط: http://localhost:3000/auth/login
 ```
 

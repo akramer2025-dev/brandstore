@@ -124,8 +124,7 @@ See [SETUP.md](../SETUP.md) for detailed instructions.
 
 ## Default Credentials
 After seeding:
-- Admin: admin@store.com / admin123
-- Driver: driver@store.com / delivery123
+- (No default users created)
 
 ## Development Commands
 ```bash

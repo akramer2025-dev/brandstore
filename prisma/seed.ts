@@ -6,23 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 بدء تعبئة قاعدة البيانات...');
 
-  // إنشاء مستخدم مدير
-  const hashedPassword = await bcrypt.hash('admin123', 10);
-  
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@store.com' },
-    update: {},
-    create: {
-      email: 'admin@store.com',
-      username: 'admin',
-      name: 'المدير',
-      password: hashedPassword,
-      role: 'ADMIN',
-    },
-  });
-
-  console.log('✅ تم إنشاء المدير:', admin.email);
-
   // إنشاء فئات
   const categories = await Promise.all([
     prisma.category.upsert({
@@ -1913,22 +1896,6 @@ async function main() {
 
   console.log('✅ تم إنشاء', reviews.length, 'تقييم للمنتجات');
 
-  // إنشاء موظف توصيل
-  const deliveryPassword = await bcrypt.hash('delivery123', 10);
-  
-  const deliveryStaff = await prisma.deliveryStaff.upsert({
-    where: { email: 'driver@store.com' },
-    update: {},
-    create: {
-      name: 'محمد السائق',
-      phone: '01234567890',
-      email: 'driver@store.com',
-      password: deliveryPassword,
-    },
-  });
-
-  console.log('✅ تم إنشاء موظف توصيل:', deliveryStaff.name);
-
   // إنشاء قماش تجريبي
   const fabric = await prisma.fabric.create({
     data: {
@@ -2239,25 +2206,7 @@ async function main() {
   // إنشاء أوردرات مترابطة
   console.log('📦 إنشاء أوردرات مترابطة...');
 
-  // الحصول على موظف التوصيل من User أولاً
-  const deliveryStaffUser = await prisma.user.findUnique({
-    where: { email: 'driver@store.com' }
-  });
-
-  // ربط DeliveryStaff بالـ User إذا لم يكن مربوطاً
-  let deliveryStaffRecord = await prisma.deliveryStaff.findFirst({
-    where: { email: 'driver@store.com' }
-  });
-
-  if (deliveryStaffRecord && deliveryStaffUser && !deliveryStaffRecord.userId) {
-    deliveryStaffRecord = await prisma.deliveryStaff.update({
-      where: { id: deliveryStaffRecord.id },
-      data: { userId: deliveryStaffUser.id }
-    });
-    console.log('✅ تم ربط DeliveryStaff بالـ User');
-  }
-
-  // الحصول على المنتجات
+  // إنشاء المنتجات
   const product1 = await prisma.product.findUnique({ where: { id: 'prod1' } });
   const product2 = await prisma.product.findUnique({ where: { id: 'prod2' } });
   const product3 = await prisma.product.findUnique({ where: { id: 'prod3' } });
@@ -2720,9 +2669,6 @@ async function main() {
   console.log('✅ تم إضافة 9 صور للسلايدر');
 
   console.log('🎉 تمت تعبئة قاعدة البيانات بنجاح!');
-  console.log('\n📝 بيانات الدخول:');
-  console.log('المدير: admin@store.com / admin123');
-  console.log('موظف التوصيل: driver@store.com / delivery123');
   console.log('\n🤝 حسابات الشركاء (كلمة المرور: Aazxc):');
   console.log('1. صاحب محل: store@partner.com');
   console.log('2. صاحب مصنع: factory@partner.com');

@@ -45,13 +45,19 @@ function PartnerRegisterForm() {
     subCategory: '',
     yearsOfExperience: '',
     
-    // بيانات بنكية
+    // بيانات بنكية (اختيارية)
     bankName: '',
     accountNumber: '',
     iban: '',
     accountHolderName: '',
     
-    // الأوراق الرسمية
+    // المحافظ الإلكترونية (اختيارية)
+    instaPay: '',
+    etisalatCash: '',
+    vodafoneCash: '',
+    wePay: '',
+    
+    // الأوراق الرسمية (اختيارية)
     commercialRegister: '',
     taxCard: '',
     nationalId: '',
@@ -416,47 +422,96 @@ function PartnerRegisterForm() {
                 <div className={`w-8 h-8 rounded-lg bg-${typeInfo.color}-100 flex items-center justify-center`}>
                   <span className="text-lg">🏦</span>
                 </div>
-                البيانات البنكية (للمدفوعات)
+                البيانات البنكية (اختيارية - للمدفوعات)
               </h3>
               
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="bankName">اسم البنك *</Label>
+                  <Label htmlFor="bankName">اسم البنك</Label>
                   <Input
                     id="bankName"
-                    required
                     value={formData.bankName}
                     onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
                     placeholder="البنك الأهلي المصري"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="accountHolderName">اسم صاحب الحساب *</Label>
+                  <Label htmlFor="accountHolderName">اسم صاحب الحساب</Label>
                   <Input
                     id="accountHolderName"
-                    required
                     value={formData.accountHolderName}
                     onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value })}
                     placeholder="الاسم الكامل"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="accountNumber">رقم الحساب *</Label>
+                  <Label htmlFor="accountNumber">رقم الحساب</Label>
                   <Input
                     id="accountNumber"
-                    required
                     value={formData.accountNumber}
                     onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
                     placeholder="123456789"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="iban">IBAN (اختياري)</Label>
+                  <Label htmlFor="iban">IBAN</Label>
                   <Input
                     id="iban"
                     value={formData.iban}
                     onChange={(e) => setFormData({ ...formData, iban: e.target.value })}
                     placeholder="EG123456789012345678901234"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* المحافظ الإلكترونية */}
+            <section className="border-b pb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg bg-${typeInfo.color}-100 flex items-center justify-center`}>
+                  <span className="text-lg">💳</span>
+                </div>
+                المحافظ الإلكترونية (اختيارية)
+              </h3>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="instaPay">انستا باي</Label>
+                  <Input
+                    id="instaPay"
+                    value={formData.instaPay}
+                    onChange={(e) => setFormData({ ...formData, instaPay: e.target.value })}
+                    placeholder="رقم المحفظة أو المعرف"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="etisalatCash">اتصالات كاش</Label>
+                  <Input
+                    id="etisalatCash"
+                    type="tel"
+                    value={formData.etisalatCash}
+                    onChange={(e) => setFormData({ ...formData, etisalatCash: e.target.value })}
+                    placeholder="+20 100 000 0000"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="vodafoneCash">فودافون كاش</Label>
+                  <Input
+                    id="vodafoneCash"
+                    type="tel"
+                    value={formData.vodafoneCash}
+                    onChange={(e) => setFormData({ ...formData, vodafoneCash: e.target.value })}
+                    placeholder="+20 100 000 0000"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="wePay">وي باي (WE Pay)</Label>
+                  <Input
+                    id="wePay"
+                    type="tel"
+                    value={formData.wePay}
+                    onChange={(e) => setFormData({ ...formData, wePay: e.target.value })}
+                    placeholder="+20 100 000 0000"
                   />
                 </div>
               </div>
@@ -468,7 +523,7 @@ function PartnerRegisterForm() {
                 <div className={`w-8 h-8 rounded-lg bg-${typeInfo.color}-100 flex items-center justify-center`}>
                   <span className="text-lg">📄</span>
                 </div>
-                الأوراق الرسمية المطلوبة
+                الأوراق الرسمية (اختيارية)
               </h3>
               
               <div className="space-y-4">
@@ -477,7 +532,7 @@ function PartnerRegisterForm() {
                     <div>
                       <Label className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
-                        السجل التجاري * (PDF أو صورة)
+                        السجل التجاري (PDF أو صورة)
                       </Label>
                       <input
                         type="file"
@@ -490,7 +545,7 @@ function PartnerRegisterForm() {
                     <div>
                       <Label className="flex items-center gap-2">
                         <FileText className="w-4 h-4" />
-                        البطاقة الضريبية * (PDF أو صورة)
+                        البطاقة الضريبية (PDF أو صورة)
                       </Label>
                       <input
                         type="file"
@@ -505,7 +560,7 @@ function PartnerRegisterForm() {
                 <div>
                   <Label className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
-                    بطاقة الرقم القومي * (PDF أو صورة)
+                    بطاقة الرقم القومي (PDF أو صورة)
                   </Label>
                   <input
                     type="file"

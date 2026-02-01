@@ -473,3 +473,64 @@
 .animate-fade-out {
   animation: fade-out 0.5s ease-in-out forwards;
 }
+
+/* Pink Theme Animations */
+@keyframes pink-sparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(90deg);
+    filter: hue-rotate(15deg);
+  }
+  50% {
+    transform: scale(0.9) rotate(180deg);
+    filter: hue-rotate(30deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(270deg);
+    filter: hue-rotate(15deg);
+  }
+}
+
+@keyframes pink-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+    box-shadow: 0 0 15px rgba(255, 192, 203, 0.3);
+  }
+  50% {
+    transform: translateY(-15px) rotate(5deg);
+    box-shadow: 0 5px 25px rgba(255, 105, 180, 0.5);
+  }
+}
+
+@keyframes pink-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-pink-sparkle {
+  animation: pink-sparkle 3s ease-in-out infinite;
+}
+
+.animate-pink-float {
+  animation: pink-float 4s ease-in-out infinite;
+}
+
+/* Pink gradient text */
+.text-pink-gradient {
+  background: linear-gradient(-45deg, #ff69b4, #ff1493, #ffb6c1, #ffc0cb);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pink-gradient-shift 3s ease infinite;
+}

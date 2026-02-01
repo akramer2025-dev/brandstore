@@ -36,13 +36,19 @@ export async function POST(request: NextRequest) {
       subCategory,
       yearsOfExperience,
       
-      // Banking
+      // Banking (optional)
       bankName,
       accountNumber,
       iban,
       accountHolderName,
       
-      // Documents
+      // E-Wallets (optional)
+      instaPay,
+      etisalatCash,
+      vodafoneCash,
+      wePay,
+      
+      // Documents (optional)
       documents,
       
       // Delivery specific
@@ -111,6 +117,10 @@ export async function POST(request: NextRequest) {
           accountNumber,
           iban,
           accountHolderName,
+          instaPay,
+          etisalatCash,
+          vodafoneCash,
+          wePay,
         }
       })
     } else {
@@ -137,6 +147,10 @@ export async function POST(request: NextRequest) {
           accountNumber,
           iban,
           accountHolderName,
+          instaPay,
+          etisalatCash,
+          vodafoneCash,
+          wePay,
           commercialRegister: documents?.commercialRegister,
           taxCard: documents?.taxCard,
           nationalId: documents?.nationalId,

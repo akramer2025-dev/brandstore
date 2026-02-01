@@ -116,10 +116,13 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Circular Image */}
           <div className="relative w-44 h-44 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-white shadow-2xl">
-            <img
+            <Image
               src={firstImage}
               alt={product.nameAr}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              fill
+              sizes="(max-width: 768px) 176px, 224px"
+              className="object-cover group-hover:scale-110 transition-transform duration-700"
+              priority={product.id === 'prod1'}
               onError={(e) => {
                 (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600';
               }}

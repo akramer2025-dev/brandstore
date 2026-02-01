@@ -106,6 +106,7 @@ export function ProductsSlider({ products, direction = 'rtl' }: ProductsSliderPr
                     src={firstImage}
                     alt={product.nameAr}
                     fill
+                    sizes="224px"
                     className="object-cover group-hover:scale-110 transition-transform duration-700 pointer-events-none"
                     draggable={false}
                   />

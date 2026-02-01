@@ -47,10 +47,12 @@ export default async function VendorProductsPage() {
               <p className="text-gray-400 mt-1">عرض وإدارة جميع منتجاتك</p>
             </div>
           </div>
-          <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            إضافة منتج جديد
-          </Button>
+          <Link href="/vendor/products/new">
+            <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              إضافة منتج جديد
+            </Button>
+          </Link>
         </div>
 
         {/* Statistics */}
@@ -87,10 +89,12 @@ export default async function VendorProductsPage() {
             <CardContent className="py-16 text-center">
               <Package className="h-16 w-16 mx-auto text-gray-500 mb-4" />
               <p className="text-gray-400 text-lg mb-4">لا توجد منتجات حتى الآن</p>
-              <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                أضف منتجك الأول
-              </Button>
+              <Link href="/vendor/products/new">
+                <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  أضف منتجك الأول
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         ) : (

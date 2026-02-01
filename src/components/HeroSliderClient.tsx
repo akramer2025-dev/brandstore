@@ -72,6 +72,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
               src={slide.imageUrl}
               alt={slide.titleAr}
               fill
+              sizes="100vw"
               className="object-cover brightness-90"
               priority={index === 0}
             />
@@ -85,6 +86,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
                       src="/logo.png"
                       alt="Brand Store Logo"
                       fill
+                      sizes="(max-width: 768px) 40px, 56px"
                       className="object-contain"
                       priority
                     />
@@ -120,8 +122,9 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
                   <div className="relative w-5 h-5 flex-shrink-0">
                     <Image
                       src="/logo.png"
-                      alt="BS"
+                      alt="SP"
                       fill
+                      sizes="20px"
                       className="object-contain"
                     />
                   </div>

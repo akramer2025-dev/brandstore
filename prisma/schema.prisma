@@ -96,12 +96,19 @@ model Vendor {
   subCategory        String?
   yearsOfExperience  Int            @default(0)
   commissionRate     Float          @default(15)
+  // البيانات البنكية (اختيارية)
   bankName           String?
   accountNumber      String?
   accountHolderName  String?
   bankAccountName    String?
   bankAccountNumber  String?
   iban               String?
+  // المحافظ الإلكترونية (اختيارية)
+  instaPay           String?
+  etisalatCash       String?        // اتصالات كاش
+  vodafoneCash       String?        // فودافون كاش
+  wePay              String?        // وي باي
+  // الأوراق الرسمية (اختيارية)
   commercialRegister String?
   taxCard            String?
   nationalId         String?
@@ -115,6 +122,12 @@ model Vendor {
   orders             Order[]
   products           Product[]
   payouts            VendorPayout[]
+  partners           PartnerCapital[]
+  inventoryItems     InventoryItem[]
+  expenses           VendorExpense[]
+  vouchers           VendorVoucher[]
+  sales              Sale[]
+  purchases          Purchase[]
   user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("vendors")
@@ -168,6 +181,15 @@ model Product {
   badge           String?
   soldCount       Int            @default(0)
   viewCount       Int            @default(0)
+  // حقول جديدة
+  sizes           String?        // مقاسات متاحة (مفصولة بفواصل): "S,M,L,XL"
+  colors          String?        // ألوان متاحة (مفصولة بفواصل): "أحمر,أزرق,أسود"
+  saleType        SaleType       @default(SINGLE) // نوع البيع: قطعة واحدة أو عرض
+  bundleProducts  String?        // المنتجات المرفقة في العرض (IDs مفصولة بفواصل)
+  bundleDiscount  Float?         // خصم العرض بالنسبة المئوية
+  platformCommission Float       @default(5) // عمولة المتجر (افتراضي 5%)
+  isVisible       Boolean        @default(true) // يظهر في المتجر أم لا
+  productionCost  Float?         // تكلفة الإنتاج (للأرباح)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   fabricPieces    FabricPiece[]
@@ -177,6 +199,7 @@ model Product {
   vendor          Vendor?        @relation(fields: [vendorId], references: [id])
   reviews         Review[]
   wishlistItems   WishlistItem[]
+  inventoryItems  InventoryItem[]
 
   @@map("products")
 }
@@ -310,10 +333,16 @@ model DeliveryStaff {
   vehicleNumber        String?
   drivingLicense       String?
   nationalId           String?
+  // البيانات البنكية (اختيارية)
   bankName             String?
   accountNumber        String?
   iban                 String?
   accountHolderName    String?
+  // المحافظ الإلكترونية (اختيارية)
+  instaPay             String?
+  etisalatCash         String?
+  vodafoneCash         String?
+  wePay                String?
   isActive             Boolean   @default(true)
   isAvailable          Boolean   @default(true)
   isApproved           Boolean   @default(false)
@@ -591,6 +620,11 @@ enum UserRole {
   MANUFACTURER
 }
 
+enum SaleType {
+  SINGLE    // قطعة واحدة
+  BUNDLE    // عرض (مع منتجات أخرى)
+}
+
 enum PayoutStatus {
   PENDING
   PROCESSING
@@ -717,5 +751,212 @@ enum CampaignStatus {
   ACTIVE
   PAUSED
   COMPLETED
-  CANCELLED
 }
+
+// نظام الشركاء المتعددين (Multi-Partner System)
+model PartnerCapital {
+  id               String              @id @default(cuid())
+  vendorId         String
+  partnerName      String              // اسم الشريك
+  capitalAmount    Float               // المبلغ المساهم به
+  capitalPercent   Float               // نسبة المساهمة من إجمالي رأس المال
+  joinDate         DateTime            @default(now())
+  isActive         Boolean             @default(true)
+  notes            String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  vendor           Vendor              @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  profitShares     ProfitDistribution[]
+
+  @@map("partner_capitals")
+}
+
+// توزيع الأرباح على الشركاء
+model ProfitDistribution {
+  id              String         @id @default(cuid())
+  partnerId       String
+  vendorId        String
+  periodStart     DateTime
+  periodEnd       DateTime
+  totalRevenue    Float          // إجمالي الإيرادات
+  totalCost       Float          // إجمالي التكاليف
+  totalExpenses   Float          // إجمالي المصروفات
+  netProfit       Float          // صافي الربح
+  partnerShare    Float          // حصة الشريك من الربح
+  isPaid          Boolean        @default(false)
+  paidAt          DateTime?
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  partner         PartnerCapital @relation(fields: [partnerId], references: [id])
+
+  @@map("profit_distributions")
+}
+
+// المشتريات (Purchases)
+model Purchase {
+  id                  String        @id @default(cuid())
+  vendorId            String
+  productName         String
+  productNameAr       String?
+  quantity            Float
+  unitCost            Float         // سعر الوحدة (الشراء)
+  totalCost           Float         // إجمالي التكلفة
+  supplier            String?       // المورد
+  supplierPhone       String?
+  purchaseDate        DateTime      @default(now())
+  receiptNumber       String?       // رقم الفاتورة
+  receiptImage        String?       // صورة الفاتورة
+  notes               String?
+  fromCapital         Boolean       @default(true)  // من رأس المال أم بالنيابة
+  sellingPrice        Float?        // سعر البيع المتوقع
+  commissionFromStore Boolean       @default(true)  // هل يحسب عمولة المتجر 5%
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  vendor              Vendor        @relation(fields: [vendorId], references: [id])
+  sales               Sale[]
+  inventoryItemId     String?
+  inventoryItem       InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+
+  @@map("purchases")
+}
+
+// المبيعات (Sales)
+model Sale {
+  id             String    @id @default(cuid())
+  vendorId       String
+  purchaseId     String?
+  productName    String
+  productNameAr  String?
+  quantity       Float
+  unitPrice      Float     // سعر البيع للوحدة
+  totalAmount    Float     // إجمالي المبيعات
+  costPrice      Float?    // سعر التكلفة للوحدة
+  profit         Float?    // الربح
+  saleDate       DateTime  @default(now())
+  customerName   String?
+  customerPhone  String?
+  invoiceNumber  String?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  vendor         Vendor    @relation(fields: [vendorId], references: [id])
+  purchase       Purchase? @relation(fields: [purchaseId], references: [id])
+  returns        Return[]
+
+  @@map("sales")
+}
+
+// المخزون (Inventory)
+model InventoryItem {
+  id                String     @id @default(cuid())
+  vendorId          String
+  productId         String?
+  productName       String
+  productNameAr     String?
+  totalPurchased    Float      @default(0) // إجمالي الكمية المشتراة
+  totalSold         Float      @default(0) // إجمالي الكمية المباعة
+  currentStock      Float      @default(0) // المخزون الحالي
+  minStockAlert     Float      @default(10) // حد التنبيه
+  unitCost          Float      // متوسط سعر التكلفة
+  lastPurchaseDate  DateTime?
+  lastSaleDate      DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  vendor            Vendor     @relation(fields: [vendorId], references: [id])
+  product           Product?   @relation(fields: [productId], references: [id])
+  purchases         Purchase[]
+
+  @@map("inventory_items")
+}
+
+// المصروفات (Expenses)
+model VendorExpense {
+  id             String       @id @default(cuid())
+  vendorId       String
+  expenseType    ExpenseType
+  amount         Float
+  vendor         Vendor       @relation(fields: [vendorId], references: [id])
+  description    String
+  descriptionAr  String?
+  expenseDate    DateTime     @default(now())
+  receiptImage   String?
+  receiptNumber  String?      // رقم الفاتورة المرتبطة (للربط مع المشتريات)
+  isPaid         Boolean      @default(true)
+  paidBy         String?      // من دفع (اسم الشخص)
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("vendor_expenses")
+}
+
+enum ExpenseType {
+  SHIPPING       // شحن
+  PACKAGING      // تغليف
+  MARKETING      // تسويق
+  OPERATION      // تشغيل
+  SALARY         // رواتب
+  RENT           // إيجار
+  UTILITIES      // مرافق (كهرباء، ماء، إنترنت)
+  MAINTENANCE    // صيانة
+  TRANSPORTATION // مواصلات ومشاوير
+  OTHER          // متنوعة
+}
+
+// السندات (Vouchers)
+model VendorVoucher {
+  id             String        @id @default(cuid())
+  vendorId       String
+  voucherType    VoucherType
+  voucherNumber  String        @unique
+  amount         Float
+  description    String
+  descriptionAr  String?
+  recipientName  String?       // المستلم أو الدافع
+  voucherDate    DateTime      @default(now())
+  voucherImage   String?       // صورة السند
+  status         VoucherStatus @default(PENDING)
+  approvedBy     String?
+  approvedAt     DateTime?
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  vendor         Vendor        @relation(fields: [vendorId], references: [id])
+
+  @@map("vendor_vouchers")
+}
+
+// المرتجعات (Returns)
+model Return {
+  id             String      @id @default(cuid())
+  vendorId       String
+  saleId         String?
+  productName    String
+  productNameAr  String?
+  quantity       Float
+  unitPrice      Float
+  totalAmount    Float
+  reason         String
+  reasonAr       String?
+  returnDate     DateTime    @default(now())
+  status         ReturnStatus @default(PENDING)
+  returnedToStock Boolean    @default(false) // هل تم إعادته للمخزون
+  refundAmount   Float?
+  customerName   String?
+  notes          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  sale           Sale?       @relation(fields: [saleId], references: [id])
+
+  @@map("returns")
+}
+
+enum ReturnStatus {
+  PENDING        // قيد المراجعة
+  APPROVED       // تمت الموافقة
+  REJECTED       // مرفوض
+  REFUNDED       // تم الاسترداد
+  CANCELLED      // ملغي
+}
+

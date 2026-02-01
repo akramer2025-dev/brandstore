@@ -7,6 +7,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import { ProductActions } from "@/components/ProductActions";
+import { DeleteAllCategoriesButton } from "@/components/DeleteAllCategoriesButton";
 
 export default async function AdminProductsPage() {
   const session = await auth();
@@ -58,12 +59,15 @@ export default async function AdminProductsPage() {
               </h1>
               <p className="text-teal-100 mt-2 text-lg">إجمالي المنتجات: {products.length}</p>
             </div>
-            <Link href="/admin/products/new">
-              <Button size="lg" className="bg-white text-teal-600 hover:bg-teal-50 shadow-xl">
-                <Plus className="w-5 h-5 ml-2" />
-                إضافة منتج جديد
-              </Button>
-            </Link>
+            <div className="flex items-center gap-3">
+              <DeleteAllCategoriesButton />
+              <Link href="/admin/products/new">
+                <Button size="lg" className="bg-white text-teal-600 hover:bg-teal-50 shadow-xl">
+                  <Plus className="w-5 h-5 ml-2" />
+                  إضافة منتج جديد
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

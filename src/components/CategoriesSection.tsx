@@ -41,6 +41,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                       src={category.image || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400'}
                       alt={category.nameAr}
                       fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
                       className="object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400';
