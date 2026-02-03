@@ -83,7 +83,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
                 <div className="flex items-center gap-3">
                   <div className="relative w-10 h-10 md:w-14 md:h-14 flex-shrink-0">
                     <Image
-                      src="/logo.png?v=2026"
+                      src="/logo.png"
                       alt="Brand Store Logo"
                       fill
                       sizes="(max-width: 768px) 40px, 56px"
@@ -121,7 +121,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
                 <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full mb-4 animate-fade-in-down border border-white/30">
                   <div className="relative w-5 h-5 flex-shrink-0">
                     <Image
-                      src="/logo.png?v=2026"
+                      src="/logo.png"
                       alt="SP"
                       fill
                       sizes="20px"

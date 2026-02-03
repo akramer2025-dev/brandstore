@@ -20,8 +20,10 @@ import {
   Package,
   Calculator,
   Receipt,
-  Users
+  Users,
+  LogOut
 } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
 interface Product {
   id: string;
@@ -30,6 +32,8 @@ interface Product {
   price: number;
   stock: number;
   categoryId: string;
+  images?: string;
+  productionCost?: number; // سعر الشراء
   category?: {
     nameAr: string;
   };
@@ -38,6 +42,7 @@ interface Product {
 interface CartItem {
   product: Product;
   quantity: number;
+  customPrice: number; // السعر المخصص (قابل للتعديل)
   subtotal: number;
 }
 
@@ -86,7 +91,7 @@ export default function POSPage() {
       if (existingItem.quantity < product.stock) {
         setCart(cart.map(item =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * product.price }
+            ? { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.customPrice }
             : item
         ));
       } else {
@@ -97,6 +102,7 @@ export default function POSPage() {
         setCart([...cart, {
           product,
           quantity: 1,
+          customPrice: product.price,
           subtotal: product.price
         }]);
       } else {
@@ -109,7 +115,7 @@ export default function POSPage() {
   const decreaseQuantity = (productId: string) => {
     setCart(cart.map(item =>
       item.product.id === productId && item.quantity > 1
-        ? { ...item, quantity: item.quantity - 1, subtotal: (item.quantity - 1) * item.product.price }
+        ? { ...item, quantity: item.quantity - 1, subtotal: (item.quantity - 1) * item.customPrice }
         : item
     ));
   };
@@ -119,13 +125,23 @@ export default function POSPage() {
     setCart(cart.map(item => {
       if (item.product.id === productId) {
         if (item.quantity < item.product.stock) {
-          return { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.product.price };
+          return { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.customPrice };
         } else {
           alert('الكمية المتوفرة في المخزون غير كافية');
         }
       }
       return item;
     }));
+  };
+
+  // تعديل السعر
+  const updatePrice = (productId: string, newPrice: number) => {
+    if (newPrice < 0) return;
+    setCart(cart.map(item =>
+      item.product.id === productId
+        ? { ...item, customPrice: newPrice, subtotal: item.quantity * newPrice }
+        : item
+    ));
   };
 
   // حذف من السلة
@@ -140,8 +156,10 @@ export default function POSPage() {
     }
   };
 
-  // حساب الإجمالي
+  // حساب الإجمالي والربح
   const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
+  const totalCost = cart.reduce((sum, item) => sum + (item.product.productionCost || 0) * item.quantity, 0);
+  const totalProfit = total - totalCost;
   const itemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // إتمام البيع
@@ -151,7 +169,7 @@ export default function POSPage() {
       return;
     }
 
-    if (confirm(`إتمام عملية البيع بمبلغ ${total.toFixed(2)} جنيه؟`)) {
+    if (confirm(`إتمام عملية البيع؟\n\n💵 الإجمالي: ${total.toFixed(2)} ج\n💰 الربح: ${totalProfit.toFixed(2)} ج`)) {
       try {
         const response = await fetch('/api/vendor/sales', {
           method: 'POST',
@@ -160,7 +178,7 @@ export default function POSPage() {
             items: cart.map(item => ({
               productId: item.product.id,
               quantity: item.quantity,
-              price: item.product.price,
+              price: item.customPrice,
               subtotal: item.subtotal
             })),
             total,
@@ -170,7 +188,8 @@ export default function POSPage() {
 
         if (response.ok) {
           const data = await response.json();
-          alert(`✅ ${data.message}\n\nرقم العملية: ${data.sale.id.slice(0, 8)}`);
+          const saleId = data.sales?.[0]?.id?.slice(0, 8) || 'N/A';
+          alert(`✅ ${data.message}\n\nرقم العملية: ${saleId}`);
           setCart([]);
           fetchData(); // تحديث المخزون
         } else {
@@ -212,13 +231,23 @@ export default function POSPage() {
             </h1>
             <p className="text-purple-300 mt-1">نظام كاشير احترافي</p>
           </div>
-          <Button
-            onClick={() => router.push('/vendor/dashboard')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          >
-            <LayoutDashboard className="w-4 h-4 mr-2" />
-            لوحة تحكم الشريك
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => router.push('/vendor/dashboard')}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              <LayoutDashboard className="w-4 h-4 mr-2" />
+              لوحة تحكم الشريك
+            </Button>
+            <Button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              variant="outline"
+              className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              تسجيل الخروج
+            </Button>
+          </div>
         </div>
 
         {/* الإحصائيات السريعة */}
@@ -263,10 +292,12 @@ export default function POSPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">الأصناف</p>
-                  <p className="text-2xl font-bold text-white">{categories.length}</p>
+                  <p className="text-gray-300 text-sm">💰 الربح المتوقع</p>
+                  <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {totalProfit.toFixed(2)} ج
+                  </p>
                 </div>
-                <Calculator className="w-8 h-8 text-blue-400" />
+                <Calculator className="w-8 h-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
@@ -320,13 +351,25 @@ export default function POSPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto">
-                {filteredProducts.map(product => (
+                {filteredProducts.map(product => {
+                  const imageUrl = product.images?.split(',')[0] || '/placeholder.jpg';
+                  return (
                   <Card
                     key={product.id}
                     className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer transition-all"
                     onClick={() => addToCart(product)}
                   >
                     <CardContent className="p-3">
+                      <div className="aspect-square mb-2 rounded-lg overflow-hidden bg-white/10">
+                        <img 
+                          src={imageUrl} 
+                          alt={product.nameAr}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                          }}
+                        />
+                      </div>
                       <h3 className="font-bold text-white text-sm mb-1">{product.nameAr}</h3>
                       <p className="text-xs text-gray-400 mb-2">{product.category?.nameAr}</p>
                       <div className="flex items-center justify-between">
@@ -337,7 +380,8 @@ export default function POSPage() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  );
+                })}
               </div>
               {filteredProducts.length === 0 && (
                 <div className="text-center py-12 text-gray-400">
@@ -383,7 +427,7 @@ export default function POSPage() {
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
                             <h4 className="font-bold text-white text-sm">{item.product.nameAr}</h4>
-                            <p className="text-xs text-gray-400">{item.product.price} ج × {item.quantity}</p>
+                            <p className="text-xs text-gray-400">السعر الأصلي: {item.product.price} ج</p>
                           </div>
                           <Button
                             variant="ghost"
@@ -394,6 +438,26 @@ export default function POSPage() {
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
+                        
+                        {/* حقل تعديل السعر */}
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs text-gray-400">السعر:</span>
+                          <Input
+                            type="number"
+                            value={item.customPrice}
+                            onChange={(e) => updatePrice(item.product.id, parseFloat(e.target.value) || 0)}
+                            className="h-7 w-24 text-center bg-white/10 border-yellow-500/50 text-yellow-400 font-bold"
+                            min="0"
+                            step="0.5"
+                          />
+                          <span className="text-xs text-gray-400">ج</span>
+                          {item.customPrice !== item.product.price && (
+                            <Badge variant="outline" className="text-yellow-400 border-yellow-400/50 text-xs">
+                              معدّل
+                            </Badge>
+                          )}
+                        </div>
+                        
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Button

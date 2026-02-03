@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Package, Upload, X, Loader2, Calculator } from 'lucide-react';
+import { ArrowLeft, Package, Upload, X, Loader2, Calculator, Store, Wallet, Phone, User } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -34,7 +34,13 @@ export default function NewProductPage() {
     sizes: [] as string[], // المقاسات المختارة
     colors: [] as string[], // الألوان المختارة
     saleType: 'SINGLE', // نوع البيع: SINGLE أو BUNDLE
-    productionCost: '', // تكلفة الإنتاج
+    purchasePrice: '', // سعر الشراء
+    // حقول جديدة لنوع المنتج ومعلومات المورد
+    productSource: 'OWNED' as 'OWNED' | 'CONSIGNMENT', // مملوك أو وسيط
+    supplierName: '', // اسم المورد
+    supplierPhone: '', // رقم المورد
+    supplierCost: '', // تكلفة المورد (السعر اللي هتدفعه للمورد)
+    supplierNotes: '', // ملاحظات
   });
 
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -115,7 +121,8 @@ export default function NewProductPage() {
           price: parseFloat(formData.price),
           originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           stock: parseInt(formData.stock),
-          productionCost: formData.productionCost ? parseFloat(formData.productionCost) : null,
+          productionCost: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null, // سعر الشراء يُرسل كـ productionCost
+          supplierCost: formData.supplierCost ? parseFloat(formData.supplierCost) : null,
           images: images.join(','),
           sizes: formData.sizes.join(','), // تحويل المصفوفة لنص مفصول بفواصل
           colors: formData.colors.join(','), // تحويل المصفوفة لنص مفصول بفواصل
@@ -124,7 +131,11 @@ export default function NewProductPage() {
       });
 
       if (response.ok) {
-        alert('✅ تم إضافة المنتج بنجاح!');
+        const data = await response.json();
+        const message = data.deducted > 0 
+          ? `✅ ${data.message}\n\n💰 تم خصم ${data.deducted.toLocaleString()} ج من رأس المال`
+          : '✅ تم إضافة المنتج بنجاح!';
+        alert(message);
         router.push('/vendor/products');
       } else {
         const error = await response.json();
@@ -139,7 +150,7 @@ export default function NewProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 p-6" suppressHydrationWarning>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-6" suppressHydrationWarning>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -150,7 +161,7 @@ export default function NewProductPage() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Package className="h-8 w-8 text-teal-400" />
+              <Package className="h-8 w-8 text-purple-400" />
               إضافة منتج جديد
             </h1>
             <p className="text-gray-400 mt-1">املأ البيانات لإضافة منتج جديد</p>
@@ -161,7 +172,7 @@ export default function NewProductPage() {
           <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Upload className="h-5 w-5 text-teal-400" />
+                <Upload className="h-5 w-5 text-purple-400" />
                 صور المنتج
               </CardTitle>
             </CardHeader>
@@ -187,7 +198,7 @@ export default function NewProductPage() {
                         <X className="h-4 w-4" />
                       </button>
                       {index === 0 && (
-                        <div className="absolute bottom-2 left-2 bg-teal-500 text-white text-xs px-2 py-1 rounded">
+                        <div className="absolute bottom-2 left-2 bg-purple-500 text-white text-xs px-2 py-1 rounded">
                           الصورة الرئيسية
                         </div>
                       )}
@@ -199,9 +210,9 @@ export default function NewProductPage() {
               {/* زر رفع الصور */}
               <div>
                 <Label htmlFor="images" className="cursor-pointer">
-                  <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-teal-400 transition-colors">
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-purple-400 transition-colors">
                     {uploadingImages ? (
-                      <Loader2 className="h-12 w-12 mx-auto text-teal-400 animate-spin mb-4" />
+                      <Loader2 className="h-12 w-12 mx-auto text-purple-400 animate-spin mb-4" />
                     ) : (
                       <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                     )}
@@ -317,22 +328,6 @@ export default function NewProductPage() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="categoryId" className="text-white">الصنف *</Label>
-                <select
-                  id="categoryId"
-                  required
-                  value={formData.categoryId}
-                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                  className="w-full bg-white/5 border border-white/20 text-white rounded-md p-2"
-                >
-                  <option value="">اختر الصنف</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.nameAr}</option>
-                  ))}
-                </select>
-              </div>
-
               {/* المقاسات */}
               <div>
                 <Label className="text-white mb-2 block">المقاسات المتاحة</Label>
@@ -350,8 +345,8 @@ export default function NewProductPage() {
                       }}
                       className={`px-4 py-2 rounded-lg border-2 transition-all ${
                         formData.sizes.includes(size)
-                          ? 'bg-teal-500 border-teal-500 text-white'
-                          : 'bg-white/5 border-white/20 text-white hover:border-teal-400'
+                          ? 'bg-purple-500 border-purple-500 text-white'
+                          : 'bg-white/5 border-white/20 text-white hover:border-purple-400'
                       }`}
                     >
                       {size}
@@ -377,8 +372,8 @@ export default function NewProductPage() {
                       }}
                       className={`p-3 rounded-lg border-2 transition-all ${
                         formData.colors.includes(color.name)
-                          ? 'border-teal-500 ring-2 ring-teal-500'
-                          : 'border-white/20 hover:border-teal-400'
+                          ? 'border-purple-500 ring-2 ring-purple-500'
+                          : 'border-white/20 hover:border-purple-400'
                       }`}
                       style={{ backgroundColor: color.hex }}
                       title={color.name}
@@ -400,8 +395,8 @@ export default function NewProductPage() {
                     onClick={() => setFormData({ ...formData, saleType: 'SINGLE' })}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       formData.saleType === 'SINGLE'
-                        ? 'bg-teal-500 border-teal-500 text-white'
-                        : 'bg-white/5 border-white/20 text-white hover:border-teal-400'
+                        ? 'bg-purple-500 border-purple-500 text-white'
+                        : 'bg-white/5 border-white/20 text-white hover:border-purple-400'
                     }`}
                   >
                     <div className="text-center">
@@ -415,8 +410,8 @@ export default function NewProductPage() {
                     onClick={() => setFormData({ ...formData, saleType: 'BUNDLE' })}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       formData.saleType === 'BUNDLE'
-                        ? 'bg-teal-500 border-teal-500 text-white'
-                        : 'bg-white/5 border-white/20 text-white hover:border-teal-400'
+                        ? 'bg-purple-500 border-purple-500 text-white'
+                        : 'bg-white/5 border-white/20 text-white hover:border-purple-400'
                     }`}
                   >
                     <div className="text-center">
@@ -428,29 +423,228 @@ export default function NewProductPage() {
                 </div>
               </div>
 
-              {/* تكلفة الإنتاج */}
+              {/* سعر الشراء */}
               <div>
-                <Label htmlFor="productionCost" className="text-white">تكلفة الإنتاج (اختياري)</Label>
+                <Label htmlFor="purchasePrice" className="text-white flex items-center gap-2">
+                  💰 سعر الشراء <span className="text-red-400">*</span>
+                </Label>
                 <Input
-                  id="productionCost"
+                  id="purchasePrice"
                   type="number"
                   step="0.01"
-                  value={formData.productionCost}
-                  onChange={(e) => setFormData({ ...formData, productionCost: e.target.value })}
+                  value={formData.purchasePrice}
+                  onChange={(e) => setFormData({ ...formData, purchasePrice: e.target.value })}
                   className="bg-white/5 border-white/20 text-white"
                   placeholder="50.00"
+                  required
                 />
-                <p className="text-xs text-gray-400 mt-1">تستخدم لحساب الأرباح</p>
+                <p className="text-xs text-gray-400 mt-1">السعر اللي اشتريت بيه المنتج</p>
+                
+                {/* عرض الربح المتوقع */}
+                {formData.price && formData.purchasePrice && (
+                  <div className="mt-3 p-3 rounded-lg bg-white/10 border border-white/20">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">💵 الربح المتوقع:</span>
+                      <span className={`font-bold text-lg ${
+                        parseFloat(formData.price) - parseFloat(formData.purchasePrice) > 0 
+                          ? 'text-green-400' 
+                          : 'text-red-400'
+                      }`}>
+                        {(parseFloat(formData.price) - parseFloat(formData.purchasePrice)).toFixed(2)} ج
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-gray-400 text-sm">نسبة الربح:</span>
+                      <span className="text-purple-400 font-medium">
+                        {formData.purchasePrice && parseFloat(formData.purchasePrice) > 0
+                          ? ((parseFloat(formData.price) - parseFloat(formData.purchasePrice)) / parseFloat(formData.purchasePrice) * 100).toFixed(1)
+                          : 0}%
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* قسم نوع المنتج - جديد */}
+          <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Store className="h-5 w-5 text-yellow-400" />
+                مصدر المنتج
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* اختيار نوع المنتج */}
+              <div>
+                <Label className="text-white mb-3 block">هل هذا المنتج من مخزونك أم من محل آخر؟</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, productSource: 'OWNED', supplierName: '', supplierPhone: '', supplierCost: '', supplierNotes: '' })}
+                    className={`p-5 rounded-xl border-2 transition-all ${
+                      formData.productSource === 'OWNED'
+                        ? 'bg-gradient-to-br from-emerald-500/30 to-purple-500/30 border-emerald-400 ring-2 ring-emerald-400/50'
+                        : 'bg-white/5 border-white/20 text-white hover:border-emerald-400/50'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className={`w-14 h-14 mx-auto mb-3 rounded-xl flex items-center justify-center ${
+                        formData.productSource === 'OWNED' 
+                          ? 'bg-gradient-to-br from-emerald-400 to-purple-500' 
+                          : 'bg-white/10'
+                      }`}>
+                        <Wallet className="h-7 w-7 text-white" />
+                      </div>
+                      <p className={`font-bold text-lg ${formData.productSource === 'OWNED' ? 'text-emerald-300' : 'text-white'}`}>
+                        💰 منتج مملوك
+                      </p>
+                      <p className="text-gray-400 text-sm mt-2">
+                        اشتريته من رأس مالك وموجود في مخزونك
+                      </p>
+                    </div>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, productSource: 'CONSIGNMENT' })}
+                    className={`p-5 rounded-xl border-2 transition-all ${
+                      formData.productSource === 'CONSIGNMENT'
+                        ? 'bg-gradient-to-br from-pink-500/30 to-rose-500/30 border-pink-400 ring-2 ring-pink-400/50'
+                        : 'bg-white/5 border-white/20 text-white hover:border-pink-400/50'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className={`w-14 h-14 mx-auto mb-3 rounded-xl flex items-center justify-center ${
+                        formData.productSource === 'CONSIGNMENT' 
+                          ? 'bg-gradient-to-br from-pink-400 to-rose-500' 
+                          : 'bg-white/10'
+                      }`}>
+                        <Store className="h-7 w-7 text-white" />
+                      </div>
+                      <p className={`font-bold text-lg ${formData.productSource === 'CONSIGNMENT' ? 'text-pink-300' : 'text-white'}`}>
+                        🏪 منتج وسيط (من محل آخر)
+                      </p>
+                      <p className="text-gray-400 text-sm mt-2">
+                        من محل تاني وهتدفع للمورد بعد البيع
+                      </p>
+                    </div>
+                  </button>
+                </div>
               </div>
 
+              {/* معلومات المورد - تظهر فقط للمنتجات الوسيط */}
+              {formData.productSource === 'CONSIGNMENT' && (
+                <div className="mt-6 p-5 bg-gradient-to-br from-pink-500/10 to-rose-500/10 border border-pink-400/30 rounded-xl space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Store className="w-5 h-5 text-pink-400" />
+                    <h4 className="text-pink-300 font-bold">معلومات المورد / المحل</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="supplierName" className="text-white flex items-center gap-2">
+                        <User className="w-4 h-4 text-pink-400" />
+                        اسم المورد / المحل *
+                      </Label>
+                      <Input
+                        id="supplierName"
+                        required={formData.productSource === 'CONSIGNMENT'}
+                        value={formData.supplierName}
+                        onChange={(e) => setFormData({ ...formData, supplierName: e.target.value })}
+                        className="bg-white/10 border-pink-400/30 text-white"
+                        placeholder="مثال: محل الأناقة"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="supplierPhone" className="text-white flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-pink-400" />
+                        رقم الهاتف
+                      </Label>
+                      <Input
+                        id="supplierPhone"
+                        value={formData.supplierPhone}
+                        onChange={(e) => setFormData({ ...formData, supplierPhone: e.target.value })}
+                        className="bg-white/10 border-pink-400/30 text-white"
+                        placeholder="01xxxxxxxxx"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="supplierCost" className="text-white flex items-center gap-2">
+                      <Wallet className="w-4 h-4 text-pink-400" />
+                      سعر المورد (اللي هتدفعه له) *
+                    </Label>
+                    <Input
+                      id="supplierCost"
+                      type="number"
+                      step="0.01"
+                      required={formData.productSource === 'CONSIGNMENT'}
+                      value={formData.supplierCost}
+                      onChange={(e) => setFormData({ ...formData, supplierCost: e.target.value })}
+                      className="bg-white/10 border-pink-400/30 text-white text-lg"
+                      placeholder="100.00"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="supplierNotes" className="text-white">ملاحظات (اختياري)</Label>
+                    <Textarea
+                      id="supplierNotes"
+                      value={formData.supplierNotes}
+                      onChange={(e) => setFormData({ ...formData, supplierNotes: e.target.value })}
+                      className="bg-white/10 border-pink-400/30 text-white"
+                      placeholder="أي ملاحظات عن المورد أو المنتج..."
+                      rows={2}
+                    />
+                  </div>
+
+                  {/* حاسبة الربح */}
+                  {formData.price && formData.supplierCost && (
+                    <div className="p-4 bg-gradient-to-r from-emerald-500/20 to-purple-500/20 border border-emerald-400/30 rounded-lg">
+                      <p className="text-emerald-300 font-bold mb-2">💵 حساب الربح:</p>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-gray-400 text-sm">سعر البيع</p>
+                          <p className="text-white font-bold text-xl">{parseFloat(formData.price).toLocaleString()} ج</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-sm">تكلفة المورد</p>
+                          <p className="text-red-400 font-bold text-xl">-{parseFloat(formData.supplierCost).toLocaleString()} ج</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-sm">ربحك</p>
+                          <p className="text-emerald-400 font-bold text-xl">
+                            {(parseFloat(formData.price) - parseFloat(formData.supplierCost)).toLocaleString()} ج
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-yellow-300 text-sm mt-3 text-center">
+                        ⚠️ عند البيع: سيتم تسجيل {parseFloat(formData.supplierCost).toLocaleString()} ج كمستحق للمورد
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
+            <CardHeader>
+              <CardTitle className="text-white">إعدادات إضافية</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+
               {/* خيار الظهور في المتجر */}
-              <div className="flex items-center gap-3 p-4 bg-teal-500/10 border border-teal-500/30 rounded-lg">
+              <div className="flex items-center gap-3 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
                 <input
                   type="checkbox"
                   id="isVisible"
                   checked={formData.isVisible}
                   onChange={(e) => setFormData({ ...formData, isVisible: e.target.checked })}
-                  className="w-5 h-5 accent-teal-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <Label htmlFor="isVisible" className="text-white cursor-pointer">
                   يظهر في المتجر (العملاء يمكنهم رؤيته وشراؤه)
@@ -485,7 +679,7 @@ export default function NewProductPage() {
             <Button
               type="submit"
               disabled={loading || images.length === 0}
-              className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white"
+              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
             >
               {loading ? (
                 <>

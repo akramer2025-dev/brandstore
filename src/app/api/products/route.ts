@@ -59,7 +59,7 @@ export async function GET(request: Request) {
       orderBy,
     });
 
-    return NextResponse.json(products);
+    return NextResponse.json({ products });
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json(

@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
         hostname: '**',
       },
     ],
+    localPatterns: [
+      {
+        pathname: '/**',
+      },
+    ],
     domains: ['images.unsplash.com'],
   },
 };

@@ -12,7 +12,8 @@ import { ShoppingBag, MapPin, Phone, User, Home, Loader2, CheckCircle2, Package,
 import { toast } from "sonner";
 import InstallmentCalculator from "@/components/InstallmentCalculator";
 
-type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
+type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
+type EWalletType = 'etisalat_cash' | 'vodafone_cash' | 'we_pay';
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
@@ -20,6 +21,7 @@ export default function CheckoutPage() {
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH_ON_DELIVERY');
+  const [eWalletType, setEWalletType] = useState<EWalletType>('vodafone_cash');
   const [selectedInstallmentPlan, setSelectedInstallmentPlan] = useState<any>(null);
   
   const { items, getTotalPrice, clearCart } = useCartStore();
@@ -104,6 +106,7 @@ export default function CheckoutPage() {
         customerNotes: formData.notes,
         deliveryFee: 0,
         paymentMethod,
+        ...(paymentMethod === 'E_WALLET_TRANSFER' && { eWalletType }),
       };
 
       // إضافة بيانات الأقساط إذا كانت الدفع بالتقسيط
@@ -374,6 +377,118 @@ export default function CheckoutPage() {
                         <div className="bg-gray-900/50 rounded p-2 text-xs text-gray-400">
                           سيتم إرسال تفاصيل الحساب البنكي بعد تأكيد الطلب
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* E-Wallet Transfer */}
+                  <div
+                    onClick={() => setPaymentMethod('E_WALLET_TRANSFER')}
+                    className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
+                      paymentMethod === 'E_WALLET_TRANSFER'
+                        ? 'border-green-500 bg-green-900/30'
+                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        paymentMethod === 'E_WALLET_TRANSFER'
+                          ? 'border-green-500 bg-green-500'
+                          : 'border-gray-500'
+                      }`}>
+                        {paymentMethod === 'E_WALLET_TRANSFER' && (
+                          <CheckCircle2 className="w-4 h-4 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CreditCard className="w-5 h-5 text-green-400" />
+                          <h3 className="text-lg font-bold text-white">
+                            تحويل على المحفظة
+                          </h3>
+                        </div>
+                        <p className="text-gray-300 text-sm mb-3">
+                          ادفع بسهولة عبر المحافظ الإلكترونية
+                        </p>
+                        
+                        {paymentMethod === 'E_WALLET_TRANSFER' && (
+                          <div className="space-y-2 mt-3">
+                            <p className="text-sm text-gray-400 mb-2">اختر المحفظة الإلكترونية:</p>
+                            
+                            {/* Vodafone Cash */}
+                            <div
+                              onClick={(e) => { e.stopPropagation(); setEWalletType('vodafone_cash'); }}
+                              className={`cursor-pointer border rounded-lg p-3 transition-all ${
+                                eWalletType === 'vodafone_cash'
+                                  ? 'border-red-500 bg-red-900/30'
+                                  : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                  eWalletType === 'vodafone_cash'
+                                    ? 'border-red-500 bg-red-500'
+                                    : 'border-gray-500'
+                                }`}>
+                                  {eWalletType === 'vodafone_cash' && (
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                  )}
+                                </div>
+                                <span className="text-white font-medium">فودافون كاش</span>
+                              </div>
+                            </div>
+
+                            {/* Etisalat Cash */}
+                            <div
+                              onClick={(e) => { e.stopPropagation(); setEWalletType('etisalat_cash'); }}
+                              className={`cursor-pointer border rounded-lg p-3 transition-all ${
+                                eWalletType === 'etisalat_cash'
+                                  ? 'border-orange-500 bg-orange-900/30'
+                                  : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                  eWalletType === 'etisalat_cash'
+                                    ? 'border-orange-500 bg-orange-500'
+                                    : 'border-gray-500'
+                                }`}>
+                                  {eWalletType === 'etisalat_cash' && (
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                  )}
+                                </div>
+                                <span className="text-white font-medium">اتصالات كاش</span>
+                              </div>
+                            </div>
+
+                            {/* We Pay */}
+                            <div
+                              onClick={(e) => { e.stopPropagation(); setEWalletType('we_pay'); }}
+                              className={`cursor-pointer border rounded-lg p-3 transition-all ${
+                                eWalletType === 'we_pay'
+                                  ? 'border-purple-500 bg-purple-900/30'
+                                  : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                  eWalletType === 'we_pay'
+                                    ? 'border-purple-500 bg-purple-500'
+                                    : 'border-gray-500'
+                                }`}>
+                                  {eWalletType === 'we_pay' && (
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                  )}
+                                </div>
+                                <span className="text-white font-medium">وي باي (WE Pay)</span>
+                              </div>
+                            </div>
+
+                            <div className="bg-gray-900/50 rounded p-2 text-xs text-gray-400 mt-2">
+                              سيتم إرسال رقم المحفظة بعد تأكيد الطلب
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -2,22 +2,42 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
+import {
+  Package,
+  ShoppingCart,
+  DollarSign,
+  Plus,
+  LogOut,
+  Store,
+  Wallet,
+  Users,
+  Zap,
+  Receipt,
+  AlertCircle
+} from 'lucide-react'
 
-interface VendorStats {
+interface CapitalSummary {
+  capital: { current: number; totalDeposits: number; totalWithdrawals: number }
+  products: { owned: number; consignment: number; total: number }
+  suppliers: { pendingPayments: number; pendingCount: number; consignmentProfits: number }
+}
+
+interface Stats {
   totalOrders: number
   totalRevenue: number
-  pendingPayouts: number
   totalProducts: number
+  pendingOrders: number
 }
 
 export default function VendorDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [stats, setStats] = useState<VendorStats | null>(null)
+  const [capitalSummary, setCapitalSummary] = useState<CapitalSummary | null>(null)
+  const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -26,17 +46,25 @@ export default function VendorDashboard() {
     } else if (status === 'authenticated' && session?.user?.role !== 'VENDOR') {
       router.push('/')
     } else if (status === 'authenticated') {
-      fetchStats()
+      fetchData()
     }
   }, [status, session, router])
 
-  const fetchStats = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch('/api/vendor/stats')
-      const data = await response.json()
-      setStats(data)
+      const [capitalRes, statsRes] = await Promise.all([
+        fetch('/api/vendor/capital/summary'),
+        fetch('/api/vendor/stats')
+      ])
+      
+      if (capitalRes.ok) {
+        setCapitalSummary(await capitalRes.json())
+      }
+      if (statsRes.ok) {
+        setStats(await statsRes.json())
+      }
     } catch (error) {
-      console.error('Failed to fetch stats:', error)
+      console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
@@ -44,140 +72,166 @@ export default function VendorDashboard() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">جاري التحميل...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold">لوحة تحكم البائع</h1>
-          <p className="mt-2 text-purple-100">
-            مرحباً، {session?.user?.username || session?.user?.email}
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm mb-1">إجمالي الطلبات</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {stats?.totalOrders || 0}
-                </p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4 md:p-6">
+      <div className="max-w-5xl mx-auto">
+        
+        {/* Header بسيط */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-3 rounded-xl">
+              <Store className="w-6 h-6 text-white" />
             </div>
-          </Card>
-
-          <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm mb-1">إجمالي الإيرادات</p>
-                <p className="text-3xl font-bold text-green-600">
-                  {stats?.totalRevenue?.toFixed(2) || '0.00'} ج.م
-                </p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-white">لوحة الشريك</h1>
+              <p className="text-purple-300 text-sm">{session?.user?.username || session?.user?.email}</p>
             </div>
-          </Card>
-
-          <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm mb-1">مدفوعات معلقة</p>
-                <p className="text-3xl font-bold text-orange-600">
-                  {stats?.pendingPayouts?.toFixed(2) || '0.00'} ج.م
-                </p>
-              </div>
-              <div className="bg-orange-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm mb-1">إجمالي المنتجات</p>
-                <p className="text-3xl font-bold text-purple-600">
-                  {stats?.totalProducts || 0}
-                </p>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-            </div>
-          </Card>
+          </div>
+          <Button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            size="sm"
+            className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">إدارة المنتجات</h3>
-            <p className="text-gray-600 mb-4">أضف وعدل منتجاتك</p>
-            <Link href="/vendor/products">
-              <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                إدارة المنتجات
-              </Button>
-            </Link>
-          </Card>
-
-          <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">الطلبات</h3>
-            <p className="text-gray-600 mb-4">شاهد وإدارة طلبات عملائك</p>
-            <Link href="/vendor/orders">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                عرض الطلبات
-              </Button>
-            </Link>
-          </Card>
-
-          <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">المدفوعات</h3>
-            <p className="text-gray-600 mb-4">تتبع أرباحك ومدفوعاتك</p>
-            <Link href="/vendor/payouts">
-              <Button className="w-full bg-green-600 hover:bg-green-700">
-                عرض المدفوعات
-              </Button>
-            </Link>
-          </Card>
-        </div>
-
-        {/* Store Settings */}
-        <Card className="p-6 bg-white shadow-lg">
-          <h3 className="text-xl font-bold mb-4 text-gray-900">إعدادات المتجر</h3>
-          <p className="text-gray-600 mb-6">
-            قم بتحديث معلومات متجرك والإعدادات
-          </p>
-          <Link href="/vendor/settings">
-            <Button variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50">
-              الذهاب إلى الإعدادات
+        {/* أزرار رئيسية */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Link href="/vendor/pos">
+            <Button className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-lg font-bold">
+              <Zap className="w-5 h-5 ml-2" />
+              نقطة البيع
             </Button>
           </Link>
+          <Link href="/vendor/products/new">
+            <Button className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-lg font-bold">
+              <Plus className="w-5 h-5 ml-2" />
+              إضافة منتج
+            </Button>
+          </Link>
+        </div>
+
+        {/* كارت رأس المال الرئيسي */}
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg mb-6">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-300 text-sm font-bold mb-1">💰 رأس المال المتاح</p>
+                <p className="text-4xl font-black text-yellow-400">
+                  {capitalSummary?.capital.current?.toLocaleString() || 0}
+                  <span className="text-xl text-yellow-300 mr-1">ج</span>
+                </p>
+              </div>
+              <Link href="/vendor/capital">
+                <div className="bg-white/20 backdrop-blur p-4 rounded-2xl shadow-lg hover:scale-105 hover:bg-white/30 transition-all cursor-pointer">
+                  <Wallet className="w-8 h-8 text-yellow-400" />
+                </div>
+              </Link>
+            </div>
+            
+            {/* ملخص سريع */}
+            <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
+              <div className="text-center">
+                <p className="text-green-300 text-xs">الإيداعات</p>
+                <p className="text-white font-bold">{capitalSummary?.capital.totalDeposits?.toLocaleString() || 0} ج</p>
+              </div>
+              <div className="text-center">
+                <p className="text-cyan-300 text-xs">منتجات مملوكة</p>
+                <p className="text-white font-bold">{capitalSummary?.products.owned || 0}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-pink-300 text-xs">منتجات وسيط</p>
+                <p className="text-white font-bold">{capitalSummary?.products.consignment || 0}</p>
+              </div>
+            </div>
+
+            {/* تحذير الموردين */}
+            {(capitalSummary?.suppliers.pendingPayments || 0) > 0 && (
+              <div className="mt-3 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400" />
+                <span className="text-red-200 text-sm">
+                  مستحق للموردين: <strong>{capitalSummary?.suppliers.pendingPayments?.toLocaleString()} ج</strong>
+                </span>
+              </div>
+            )}
+          </CardContent>
         </Card>
+
+        {/* إحصائيات بسيطة */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
+            <CardContent className="p-4 text-center">
+              <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-green-400">{stats?.totalRevenue?.toLocaleString() || 0}</p>
+              <p className="text-gray-400 text-xs">الإيرادات</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
+            <CardContent className="p-4 text-center">
+              <ShoppingCart className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-blue-400">{stats?.totalOrders || 0}</p>
+              <p className="text-gray-400 text-xs">الطلبات</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
+            <CardContent className="p-4 text-center">
+              <Package className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-purple-400">{stats?.totalProducts || 0}</p>
+              <p className="text-gray-400 text-xs">المنتجات</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
+            <CardContent className="p-4 text-center">
+              <Users className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-orange-400">{capitalSummary?.suppliers.pendingCount || 0}</p>
+              <p className="text-gray-400 text-xs">موردين</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* روابط سريعة */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link href="/vendor/pos">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+              <CardContent className="p-4 text-center">
+                <Receipt className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                <p className="text-white font-medium">نقطة البيع</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/vendor/products">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+              <CardContent className="p-4 text-center">
+                <Package className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                <p className="text-white font-medium">المنتجات</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/vendor/orders">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+              <CardContent className="p-4 text-center">
+                <ShoppingCart className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                <p className="text-white font-medium">الطلبات</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/vendor/capital">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+              <CardContent className="p-4 text-center">
+                <Wallet className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+                <p className="text-white font-medium">رأس المال</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
       </div>
     </div>
   )

@@ -20,6 +20,7 @@ export async function POST(request: Request) {
       customerNotes: body.customerNotes,
       deliveryFee: body.deliveryFee,
       paymentMethod: body.paymentMethod || 'CASH_ON_DELIVERY',
+      eWalletType: body.eWalletType,
       installmentPlan: body.installmentPlan,
     });
 

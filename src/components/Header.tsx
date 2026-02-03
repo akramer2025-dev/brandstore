@@ -38,11 +38,6 @@ export function Header() {
   const searchRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
-  // إخفاء الـ Header في صفحات الـ vendor والـ admin والـ delivery-dashboard
-  if (pathname?.startsWith('/vendor') || pathname?.startsWith('/admin') || pathname?.startsWith('/delivery-dashboard')) {
-    return null;
-  }
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
@@ -120,15 +115,20 @@ export function Header() {
     }
   }, [session]);
 
+  // إخفاء الـ Header في صفحات الـ vendor والـ admin والـ delivery-dashboard
+  if (pathname?.startsWith('/vendor') || pathname?.startsWith('/admin') || pathname?.startsWith('/delivery-dashboard')) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-teal-500/20">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-28 h-28 md:w-32 md:h-32 transition-all duration-300 group-hover:scale-110 animate-logo-entrance overflow-visible flex-shrink-0">
+            <div className="relative w-20 h-20 md:w-24 md:h-24 transition-all duration-300 group-hover:scale-110 animate-logo-entrance overflow-visible flex-shrink-0">
               <img 
-                src="/logo.png?v=2026" 
+                src="/logo.png" 
                 alt="BS Brand Store Logo" 
                 className="w-full h-full object-contain drop-shadow-2xl transition-all duration-300 group-hover:rotate-6"
               />

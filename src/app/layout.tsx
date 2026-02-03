@@ -11,8 +11,8 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "Nody Store - متجر نودي للملابس",
-  description: "Nody Store - متجر إلكتروني احترافي للملابس مع نظام إدارة متقدم",
+  title: "Brand Store - متجر براند ستور",
+  description: "Brand Store - متجر إلكتروني احترافي للملابس مع نظام إدارة متقدم",
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',

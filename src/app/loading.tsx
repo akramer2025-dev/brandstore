@@ -19,7 +19,7 @@ export default function Loading() {
           <div className="w-32 h-32 mx-auto flex items-center justify-center">
             <div className="relative w-24 h-24 animate-bounce-scale">
               <img 
-                src="/logo.png?v=2026" 
+                src="/logo.png" 
                 alt="BS Brand Store" 
                 className="w-full h-full rounded-full object-contain animate-glow-pulse"
               />

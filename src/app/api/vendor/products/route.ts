@@ -36,45 +36,120 @@ export async function POST(req: NextRequest) {
       saleType = 'SINGLE',
       productionCost,
       platformCommission = 5,
+      // حقول جديدة لمنتجات الوسيط
+      productSource = 'OWNED',
+      supplierName,
+      supplierPhone,
+      supplierCost,
+      supplierNotes,
     } = data;
 
     // التحقق من البيانات المطلوبة
-    if (!nameAr || !price || stock === undefined || !categoryId || !images) {
+    if (!nameAr || !price || stock === undefined || !images) {
       return NextResponse.json(
         { error: 'الرجاء ملء جميع الحقول المطلوبة' },
         { status: 400 }
       );
     }
 
-    // إنشاء المنتج
-    const product = await prisma.product.create({
-      data: {
-        name: name || nameAr,
-        nameAr,
-        description: description || '',
-        descriptionAr: descriptionAr || '',
-        price: parseFloat(price),
-        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-        stock: parseInt(stock),
-        categoryId,
-        images,
-        vendorId: vendor.id,
-        isVisible,
-        sizes: sizes || null,
-        colors: colors || null,
-        saleType: saleType || 'SINGLE',
-        productionCost: productionCost ? parseFloat(productionCost) : null,
-        platformCommission: platformCommission || 5,
-      },
-      include: {
-        category: true,
-        vendor: true,
+    // إذا لم يتم تحديد صنف، نستخدم صنف افتراضي أو ننشئ واحد
+    let finalCategoryId = categoryId;
+    if (!finalCategoryId) {
+      // البحث عن صنف "عام" أو إنشاءه
+      let defaultCategory = await prisma.category.findFirst({
+        where: { name: 'General' }
+      });
+      
+      if (!defaultCategory) {
+        defaultCategory = await prisma.category.create({
+          data: { name: 'General', nameAr: 'عام' }
+        });
       }
+      finalCategoryId = defaultCategory.id;
+    }
+
+    // حساب تكلفة المنتج الإجمالية (سعر الشراء × الكمية)
+    const purchasePrice = productionCost ? parseFloat(productionCost) : 0;
+    const totalCost = purchasePrice * parseInt(stock);
+    
+    // التحقق من رأس المال إذا كان المنتج مملوك (ليس وسيط)
+    if (productSource === 'OWNED' && totalCost > 0) {
+      if ((vendor.capitalBalance || 0) < totalCost) {
+        return NextResponse.json({
+          error: `رأس المال غير كافٍ! المتاح: ${vendor.capitalBalance?.toLocaleString() || 0} ج، المطلوب: ${totalCost.toLocaleString()} ج`
+        }, { status: 400 });
+      }
+    }
+
+    // إنشاء المنتج وخصم التكلفة من رأس المال
+    const result = await prisma.$transaction(async (tx) => {
+      // إنشاء المنتج
+      const product = await tx.product.create({
+        data: {
+          name: name || nameAr,
+          nameAr,
+          description: description || '',
+          descriptionAr: descriptionAr || '',
+          price: parseFloat(price),
+          originalPrice: originalPrice ? parseFloat(originalPrice) : null,
+          stock: parseInt(stock),
+          categoryId: finalCategoryId,
+          images,
+          vendorId: vendor.id,
+          isVisible,
+          isActive: true, // تفعيل المنتج تلقائياً
+          sizes: sizes || null,
+          colors: colors || null,
+          saleType: saleType || 'SINGLE',
+          productionCost: purchasePrice || null,
+          platformCommission: platformCommission || 5,
+          // حقول منتجات الوسيط
+          productSource: productSource || 'OWNED',
+          supplierName: productSource === 'CONSIGNMENT' ? supplierName : null,
+          supplierPhone: productSource === 'CONSIGNMENT' ? supplierPhone : null,
+          supplierCost: productSource === 'CONSIGNMENT' && supplierCost ? parseFloat(supplierCost) : null,
+          supplierNotes: productSource === 'CONSIGNMENT' ? supplierNotes : null,
+          isSupplierPaid: false,
+        },
+        include: {
+          category: true,
+          vendor: true,
+        }
+      });
+
+      // خصم التكلفة من رأس المال إذا كان المنتج مملوك
+      if (productSource === 'OWNED' && totalCost > 0) {
+        await tx.vendor.update({
+          where: { id: vendor.id },
+          data: {
+            capitalBalance: {
+              decrement: totalCost
+            }
+          }
+        });
+
+        // تسجيل المعاملة
+        await tx.capitalTransaction.create({
+          data: {
+            vendorId: vendor.id,
+            type: 'PURCHASE',
+            amount: totalCost,
+            description: `شراء منتج: ${nameAr}`,
+            descriptionAr: `شراء منتج: ${nameAr} (${stock} قطعة × ${purchasePrice} ج)`,
+            balanceAfter: (vendor.capitalBalance || 0) - totalCost,
+          }
+        });
+      }
+
+      return product;
     });
 
     return NextResponse.json({ 
-      message: 'تم إضافة المنتج بنجاح',
-      product 
+      message: productSource === 'OWNED' && totalCost > 0 
+        ? `تم إضافة المنتج وخصم ${totalCost.toLocaleString()} ج من رأس المال`
+        : 'تم إضافة المنتج بنجاح',
+      product: result,
+      deducted: totalCost
     }, { status: 201 });
 
   } catch (error) {
@@ -103,15 +178,35 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'لم يتم العثور على الشريك' }, { status: 404 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+
+    const orderBy: any = {};
+    if (sortBy === 'soldCount') {
+      orderBy.soldCount = 'desc';
+    } else if (sortBy === 'price') {
+      orderBy.price = 'desc';
+    } else {
+      orderBy.createdAt = 'desc';
+    }
+
     const products = await prisma.product.findMany({
       where: { vendorId: vendor.id },
+      take: limit,
       include: {
         category: true,
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy
     });
 
-    return NextResponse.json({ products });
+    // إضافة حساب الإيرادات لكل منتج
+    const productsWithRevenue = products.map(p => ({
+      ...p,
+      revenue: p.soldCount * p.price
+    }));
+
+    return NextResponse.json({ products: productsWithRevenue });
 
   } catch (error) {
     console.error('Error fetching products:', error);

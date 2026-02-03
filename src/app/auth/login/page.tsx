@@ -41,7 +41,9 @@ export default function LoginPage() {
         if (sessionData?.user?.role === 'ADMIN') {
           router.push('/admin');
         } else if (sessionData?.user?.role === 'VENDOR') {
-          router.push('/vendor');
+          router.push('/vendor/dashboard');
+        } else if (sessionData?.user?.role === 'MANUFACTURER') {
+          router.push('/manufacturer/dashboard');
         } else if (sessionData?.user?.role === 'DELIVERY_STAFF') {
           router.push('/delivery-dashboard');
         } else if (sessionData?.user?.role === 'CUSTOMER') {
@@ -80,7 +82,9 @@ export default function LoginPage() {
         if (sessionData?.user?.role === 'ADMIN') {
           router.push('/admin');
         } else if (sessionData?.user?.role === 'VENDOR') {
-          router.push('/vendor');
+          router.push('/vendor/dashboard');
+        } else if (sessionData?.user?.role === 'MANUFACTURER') {
+          router.push('/manufacturer/dashboard');
         } else if (sessionData?.user?.role === 'DELIVERY_STAFF') {
           router.push('/delivery-dashboard');
         } else {
@@ -113,7 +117,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-flex items-center gap-3 text-white hover:opacity-90 transition-opacity group">
             <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/30 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
               <img 
-                src="/logo.png?v=2026" 
+                src="/logo.png" 
                 alt="BS Brand Store" 
                 className="w-20 h-20 rounded-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]"
               />

@@ -12,7 +12,8 @@ export class OrderService {
     deliveryPhone: string;
     customerNotes?: string;
     deliveryFee?: number;
-    paymentMethod?: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
+    paymentMethod?: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
+    eWalletType?: string;
     installmentPlan?: {
       totalAmount: number;
       downPayment: number;
@@ -74,6 +75,7 @@ export class OrderService {
         deliveryPhone: data.deliveryPhone,
         customerNotes: data.customerNotes,
         paymentMethod,
+        eWalletType: data.eWalletType,
         items: {
           create: orderItems,
         },
@@ -240,6 +242,52 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
       // العميل قبل المنتج
       paymentStatus = 'PAID';
       orderStatus = 'DELIVERED';
+
+      // إنشاء سجلات مستحقات الموردين للمنتجات الوسيط
+      for (const item of order.items) {
+        if (item.product.productSource === 'CONSIGNMENT' && item.product.supplierCost) {
+          // إنشاء سجل مستحقات للمورد
+          const profit = (item.price - item.product.supplierCost) * item.quantity;
+          const amountDue = item.product.supplierCost * item.quantity;
+
+          await prisma.supplierPayment.create({
+            data: {
+              vendorId: item.product.vendorId!,
+              productId: item.product.id,
+              orderId: order.id,
+              supplierName: item.product.supplierName || 'مورد غير محدد',
+              supplierPhone: item.product.supplierPhone,
+              amountDue: amountDue,
+              amountPaid: 0,
+              profit: profit,
+              saleDate: new Date(),
+              status: 'PENDING',
+              notes: `من طلب #${order.orderNumber} - ${item.quantity} قطعة`,
+            },
+          });
+
+          // إنشاء معاملة ربح الوسيط في رأس المال
+          // نحصل أولاً على آخر رصيد
+          const lastTransaction = await prisma.capitalTransaction.findFirst({
+            where: { vendorId: item.product.vendorId! },
+            orderBy: { createdAt: 'desc' },
+          });
+          const currentBalance = lastTransaction?.balanceAfter || 0;
+
+          await prisma.capitalTransaction.create({
+            data: {
+              vendorId: item.product.vendorId!,
+              type: 'CONSIGNMENT_PROFIT',
+              amount: profit,
+              balanceBefore: currentBalance,
+              balanceAfter: currentBalance + profit,
+              description: `Profit from consignment sale - Order #${order.orderNumber}`,
+              descriptionAr: `ربح من بيع وسيط - طلب #${order.orderNumber}`,
+              orderId: order.id,
+            },
+          });
+        }
+      }
 
       // تحديث إحصائيات موظف التوصيل
       if (order.deliveryStaffId) {

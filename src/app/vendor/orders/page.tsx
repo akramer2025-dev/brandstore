@@ -70,7 +70,7 @@ export default async function VendorOrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -82,7 +82,7 @@ export default async function VendorOrdersPage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                <ShoppingBag className="h-8 w-8 text-teal-400" />
+                <ShoppingBag className="h-8 w-8 text-purple-400" />
                 إدارة الطلبات
               </h1>
               <p className="text-gray-400 mt-1">عرض وإدارة طلبات منتجاتك</p>
@@ -142,7 +142,7 @@ export default async function VendorOrdersPage() {
                           </div>
                           {order.deliveryStaff && (
                             <div className="flex items-center gap-2 text-gray-300">
-                              <Truck className="h-4 w-4 text-teal-400" />
+                              <Truck className="h-4 w-4 text-purple-400" />
                               <span className="text-gray-400">مندوب التوصيل:</span>
                               <span className="font-medium">{order.deliveryStaff.name}</span>
                             </div>
@@ -157,7 +157,7 @@ export default async function VendorOrdersPage() {
                                 <p className="text-white font-medium">{item.product.nameAr}</p>
                                 <p className="text-gray-400 text-sm">الكمية: {item.quantity}</p>
                               </div>
-                              <p className="text-teal-400 font-bold">{item.price * item.quantity} ج.م</p>
+                              <p className="text-purple-400 font-bold">{item.price * item.quantity} ج.م</p>
                             </div>
                           ))}
                         </div>
@@ -166,7 +166,7 @@ export default async function VendorOrdersPage() {
                       {/* Total */}
                       <div className="text-left md:text-right">
                         <p className="text-gray-400 text-sm mb-1">إجمالي منتجاتك</p>
-                        <p className="text-3xl font-bold text-teal-400">{vendorTotal.toFixed(2)} ج.م</p>
+                        <p className="text-3xl font-bold text-purple-400">{vendorTotal.toFixed(2)} ج.م</p>
                       </div>
                     </div>
                   </CardContent>

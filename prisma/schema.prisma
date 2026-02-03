@@ -96,6 +96,8 @@ model Vendor {
   subCategory        String?
   yearsOfExperience  Int            @default(0)
   commissionRate     Float          @default(15)
+  // رأس المال
+  capitalBalance     Float          @default(0)  // رصيد رأس المال الحالي
   // البيانات البنكية (اختيارية)
   bankName           String?
   accountNumber      String?
@@ -190,6 +192,16 @@ model Product {
   platformCommission Float       @default(5) // عمولة المتجر (افتراضي 5%)
   isVisible       Boolean        @default(true) // يظهر في المتجر أم لا
   productionCost  Float?         // تكلفة الإنتاج (للأرباح)
+  
+  // ============ نظام المنتجات الوسيط (Consignment/Dropship) ============
+  productSource   ProductSource  @default(OWNED)     // مصدر المنتج: مملوك أو وسيط
+  supplierName    String?        // اسم المورد/المحل الأصلي
+  supplierPhone   String?        // رقم هاتف المورد
+  supplierCost    Float?         // سعر المنتج من المورد (المبلغ المستحق له)
+  isSupplierPaid  Boolean        @default(false)     // هل تم الدفع للمورد
+  supplierPaidAt  DateTime?      // تاريخ الدفع للمورد
+  supplierNotes   String?        // ملاحظات عن المورد
+  
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   fabricPieces    FabricPiece[]
@@ -200,6 +212,7 @@ model Product {
   reviews         Review[]
   wishlistItems   WishlistItem[]
   inventoryItems  InventoryItem[]
+  supplierPayments SupplierPayment[]
 
   @@map("products")
 }
@@ -247,6 +260,7 @@ model Order {
   status           OrderStatus       @default(PENDING)
   paymentStatus    PaymentStatus     @default(PENDING)
   paymentMethod    PaymentMethod     @default(CASH_ON_DELIVERY)
+  eWalletType      String?           // نوع المحفظة: etisalat_cash, vodafone_cash, we_pay
   totalAmount      Float
   deliveryFee      Float             @default(0)
   finalAmount      Float
@@ -636,6 +650,7 @@ enum PayoutStatus {
 enum PaymentMethod {
   CASH_ON_DELIVERY
   BANK_TRANSFER
+  E_WALLET_TRANSFER
   INSTALLMENT_4
   INSTALLMENT_6
   INSTALLMENT_12
@@ -958,5 +973,73 @@ enum ReturnStatus {
   REJECTED       // مرفوض
   REFUNDED       // تم الاسترداد
   CANCELLED      // ملغي
+}
+
+// ============ نظام مصادر المنتجات ============
+enum ProductSource {
+  OWNED          // منتج مملوك - تم شراؤه من رأس المال
+  CONSIGNMENT    // منتج وسيط - من محل آخر (لا يخصم من رأس المال)
+  DROPSHIP       // دروبشيب - شحن مباشر من المورد
+}
+
+// ============ مدفوعات الموردين (Supplier Payments) ============
+model SupplierPayment {
+  id              String        @id @default(cuid())
+  vendorId        String
+  productId       String?       // المنتج المرتبط
+  orderId         String?       // الطلب المرتبط
+  supplierName    String        // اسم المورد
+  supplierPhone   String?       // رقم هاتف المورد
+  amountDue       Float         // المبلغ المستحق
+  amountPaid      Float         @default(0) // المبلغ المدفوع
+  profit          Float         @default(0) // الربح (سعر البيع - سعر المورد)
+  status          PaymentDueStatus @default(PENDING)
+  paidAt          DateTime?     // تاريخ الدفع
+  paymentMethod   String?       // طريقة الدفع
+  paymentNotes    String?       // ملاحظات الدفع
+  saleDate        DateTime      @default(now()) // تاريخ البيع
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  product         Product?      @relation(fields: [productId], references: [id])
+
+  @@map("supplier_payments")
+}
+
+enum PaymentDueStatus {
+  PENDING        // معلق - لم يتم الدفع بعد
+  PARTIAL        // دفع جزئي
+  PAID           // تم الدفع بالكامل
+  CANCELLED      // ملغي
+}
+
+// ============ معاملات رأس المال (Capital Transactions) ============
+model CapitalTransaction {
+  id              String              @id @default(cuid())
+  vendorId        String
+  partnerId       String?             // الشريك (اختياري)
+  type            CapitalTransactionType
+  amount          Float               // المبلغ
+  balanceBefore   Float               // الرصيد قبل المعاملة
+  balanceAfter    Float               // الرصيد بعد المعاملة
+  description     String              // وصف المعاملة
+  descriptionAr   String?             // وصف بالعربي
+  referenceType   String?             // نوع المرجع (order, sale, purchase, etc.)
+  referenceId     String?             // ID المرجع
+  notes           String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@map("capital_transactions")
+}
+
+enum CapitalTransactionType {
+  DEPOSIT        // إيداع رأس مال
+  WITHDRAWAL     // سحب من رأس المال
+  PURCHASE       // شراء بضاعة (خصم)
+  SALE_PROFIT    // ربح من بيع (إضافة)
+  CONSIGNMENT_PROFIT // ربح من منتج وسيط (إضافة)
+  EXPENSE        // مصروف (خصم)
+  REFUND         // استرداد/مرتجع
+  ADJUSTMENT     // تعديل يدوي
 }
 

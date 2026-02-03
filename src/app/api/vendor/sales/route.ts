@@ -18,17 +18,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'لم يتم العثور على الشريك' }, { status: 404 });
     }
 
-    const { items, total, paymentMethod = 'CASH' } = await req.json();
+    const { items, total } = await req.json();
 
     // التحقق من البيانات
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'السلة فارغة' }, { status: 400 });
     }
 
-    // التحقق من المخزون وحساب التكلفة والربح
-    let totalCost = 0;
-    let totalProfit = 0;
-
+    // التحقق من المخزون
     for (const item of items) {
       const product = await prisma.product.findUnique({
         where: { id: item.productId }
@@ -45,89 +42,61 @@ export async function POST(req: NextRequest) {
           error: `الكمية المتوفرة من ${product.nameAr} غير كافية` 
         }, { status: 400 });
       }
-
-      // حساب التكلفة والربح (إذا كان موجود productionCost)
-      const itemCost = (product.productionCost || 0) * item.quantity;
-      const itemRevenue = product.price * item.quantity;
-      
-      totalCost += itemCost;
-      totalProfit += (itemRevenue - itemCost);
     }
 
     // إنشاء عملية البيع في transaction
     const result = await prisma.$transaction(async (tx) => {
-      // تسجيل البيع
-      const sale = await tx.sale.create({
-        data: {
-          vendorId: vendor.id,
-          totalAmount: total,
-          totalCost,
-          profit: totalProfit,
-          paymentMethod,
-          saleDate: new Date(),
-        }
-      });
-
-      // تحديث المخزون وإنشاء سجلات العناصر
-      for (const item of items) {
-        // تحديث المخزون
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity
-            }
-          }
-        });
-
-        // تسجيل تفاصيل العملية (يمكنك إضافة model SaleItem لاحقاً)
-      }
-
-      // تحديث جرد المخزون
+      // إنشاء sales لكل منتج
+      const sales = [];
+      
       for (const item of items) {
         const product = await tx.product.findUnique({
           where: { id: item.productId }
         });
 
         if (product) {
-          // البحث عن سجل المخزون أو إنشاءه
-          const inventory = await tx.inventoryItem.findFirst({
-            where: {
+          // استخدام السعر المخصص إذا تم تعديله، وإلا السعر الأصلي
+          const salePrice = item.price || product.price;
+          const costPrice = product.productionCost || 0;
+          
+          // تسجيل البيع
+          const sale = await tx.sale.create({
+            data: {
               vendorId: vendor.id,
-              productId: item.productId
+              productName: product.name,
+              productNameAr: product.nameAr,
+              quantity: item.quantity,
+              unitPrice: salePrice,
+              totalAmount: salePrice * item.quantity,
+              costPrice: costPrice,
+              profit: (salePrice - costPrice) * item.quantity,
+              saleDate: new Date(),
             }
           });
+          sales.push(sale);
 
-          if (inventory) {
-            await tx.inventoryItem.update({
-              where: { id: inventory.id },
-              data: {
-                currentStock: product.stock,
-                lastUpdated: new Date()
+          // تحديث المخزون
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                decrement: item.quantity
+              },
+              soldCount: {
+                increment: item.quantity
               }
-            });
-          } else {
-            await tx.inventoryItem.create({
-              data: {
-                vendorId: vendor.id,
-                productId: item.productId,
-                productName: product.nameAr,
-                currentStock: product.stock,
-                minStock: 10,
-                lastUpdated: new Date()
-              }
-            });
-          }
+            }
+          });
         }
       }
 
-      return sale;
+      return sales;
     });
 
     return NextResponse.json({
       success: true,
       message: 'تم إتمام البيع بنجاح',
-      sale: result
+      sales: result
     });
 
   } catch (error) {

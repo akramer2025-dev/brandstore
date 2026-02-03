@@ -159,32 +159,45 @@ export default function StarryBackground() {
       }
     }
 
-    // Create stars
+    // Create stars - reduced count for better performance
     const stars: Star[] = [];
-    const starCount = 150;
+    const starCount = 60; // Reduced from 150
     for (let i = 0; i < starCount; i++) {
       stars.push(new Star());
     }
 
     // Create shooting stars
     const shootingStars: ShootingStar[] = [];
-    const shootingStarCount = 3;
+    const shootingStarCount = 2; // Reduced from 3
     for (let i = 0; i < shootingStarCount; i++) {
       shootingStars.push(new ShootingStar());
     }
 
     // Trigger shooting stars randomly
+    let shootingStarTimer: NodeJS.Timeout;
     const triggerShootingStar = () => {
       const inactiveStar = shootingStars.find(s => !s.active);
       if (inactiveStar) {
         inactiveStar.trigger();
       }
-      setTimeout(triggerShootingStar, Math.random() * 8000 + 3000);
+      shootingStarTimer = setTimeout(triggerShootingStar, Math.random() * 12000 + 5000); // Slower
     };
     triggerShootingStar();
 
-    // Animation loop
-    const animate = () => {
+    // Animation loop with frame limiting for performance
+    let animationId: number;
+    let lastTime = 0;
+    const fps = 30; // Limit to 30fps for better performance
+    const frameInterval = 1000 / fps;
+    
+    const animate = (currentTime: number) => {
+      animationId = requestAnimationFrame(animate);
+      
+      const deltaTime = currentTime - lastTime;
+      if (deltaTime < frameInterval) return;
+      
+      lastTime = currentTime - (deltaTime % frameInterval);
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Update and draw stars
@@ -198,14 +211,14 @@ export default function StarryBackground() {
         star.update();
         star.draw();
       });
-
-      requestAnimationFrame(animate);
     };
 
-    animate();
+    animationId = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('resize', setCanvasSize);
+      cancelAnimationFrame(animationId);
+      clearTimeout(shootingStarTimer);
     };
   }, []);
 
