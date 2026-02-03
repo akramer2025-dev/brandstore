@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductCardFlashStyle } from "@/components/ProductCardFlashStyle";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -62,7 +62,8 @@ export default function ProductsPage() {
     try {
       // Fetch products
       const productsRes = await fetch('/api/products');
-      let productsData = await productsRes.json();
+      const productsJson = await productsRes.json();
+      let productsData = productsJson.products || [];
 
       // Apply filters
       if (selectedCategory) {
@@ -280,9 +281,9 @@ export default function ProductsPage() {
                 </Button>
               </Card>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                 {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCardFlashStyle key={product.id} product={product} />
                 ))}
               </div>
             )}

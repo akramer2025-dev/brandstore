@@ -1,8 +1,10 @@
 import { prisma } from '@/lib/prisma';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductCardFlashStyle } from '@/components/ProductCardFlashStyle';
 import { ProductsSlider } from '@/components/ProductsSlider';
 import { HeroSlider } from '@/components/HeroSlider';
 import { CategoriesSection } from '@/components/CategoriesSection';
+import { LogoBanner } from '@/components/LogoBanner';
 import ChatButton from '@/components/ChatButton';
 import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
@@ -58,42 +60,43 @@ export default async function HomePage() {
     <>
       {/* <SplashScreen /> */}
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 animate-fade-in" style={{ animationDelay: '0.5s', animationDuration: '1s' }}>
-      {/* Hero Slider - Full Width */}
+      
+      {/* Hero Slider with Integrated Logo - Full Width */}
       <HeroSlider />
 
       {/* Flash Deals Section */}
       <FlashDeals />
 
       {/* Products Section */}
-      <section className="py-8 md:py-16 bg-gray-900/30">
+      <section className="py-8 md:py-12 bg-gray-900/50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-100 mb-1 md:mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2">
                 أحدث المنتجات
               </h2>
               <p className="text-sm md:text-base text-gray-300">
                 اكتشف تشكيلتنا المميزة من الأزياء والملابس
               </p>
             </div>
-            <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-4 py-2 rounded-full animate-bounce-scale">
-              <Sparkles className="w-5 h-5 animate-spin-slow" />
+            <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-4 py-2 rounded-full">
+              <Sparkles className="w-5 h-5" />
               <span className="font-semibold">عروض حصرية</span>
             </div>
           </div>
 
           {products.length > 0 ? (
             <>
-              {/* Grid View */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+              {/* Grid View - Flash Deal Style */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6 mb-8 md:mb-12">
                 {products.slice(0, 8).map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCardFlashStyle key={product.id} product={product} />
                 ))}
               </div>
 
               {/* Interactive Slider */}
-              <div className="mb-8">
-                <h3 className="text-xl md:text-2xl font-bold text-gray-100 mb-4 md:mb-6 text-center">
+              <div className="mb-6 md:mb-8">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-100 mb-3 sm:mb-4 md:mb-6 text-center">
                   تصفح المزيد من المنتجات
                 </h3>
                 <ProductsSlider products={products} direction="rtl" />

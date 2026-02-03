@@ -56,7 +56,7 @@ async function main() {
         name: 'T-Shirts',
         nameAr: 'تيشيرتات',
         description: 'تيشيرتات عالية الجودة',
-        image: '/images/categories/tshirts.jpg',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
       },
     }),
     prisma.category.create({
@@ -64,7 +64,7 @@ async function main() {
         name: 'Pants',
         nameAr: 'بناطيل',
         description: 'بناطيل مريحة وأنيقة',
-        image: '/images/categories/pants.jpg',
+        image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400',
       },
     }),
     prisma.category.create({
@@ -72,7 +72,7 @@ async function main() {
         name: 'Jackets',
         nameAr: 'جواكت',
         description: 'جواكت للشتاء',
-        image: '/images/categories/jackets.jpg',
+        image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400',
       },
     }),
     prisma.category.create({
@@ -80,7 +80,7 @@ async function main() {
         name: 'Shoes',
         nameAr: 'أحذية',
         description: 'أحذية رياضية وكلاسيكية',
-        image: '/images/categories/shoes.jpg',
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
       },
     }),
   ]);
@@ -89,6 +89,20 @@ async function main() {
 
   // إنشاء المنتجات
   const products = [];
+  
+  // صور مختلفة للمنتجات
+  const productImages = [
+    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600,https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600',
+    'https://images.unsplash.com/photo-1503341960582-b45751874cf0?w=600,https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600',
+    'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600,https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600',
+    'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600,https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600',
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600,https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600',
+    'https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=600,https://images.unsplash.com/photo-1620799140188-3b2a7c2e0e12?w=600',
+    'https://images.unsplash.com/photo-1525450824786-227cbef70703?w=600,https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600',
+    'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=600,https://images.unsplash.com/photo-1582418702059-97ebafb35d09?w=600',
+    'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600,https://images.unsplash.com/photo-1571455786673-9d9d6c194f90?w=600',
+    'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=600,https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600',
+  ];
   
   for (let i = 0; i < 20; i++) {
     const category = categories[i % categories.length];
@@ -100,7 +114,7 @@ async function main() {
         price: 100 + (i * 50),
         stock: 10 + (i * 2),
         categoryId: category.id,
-        images: `/products/product-${(i % 5) + 1}.jpg,/products/product-${(i % 5) + 1}-2.jpg`,
+        images: productImages[i % productImages.length],
         isFlashDeal: i % 4 === 0,
         flashDealEndsAt: i % 4 === 0 ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) : null,
       },

@@ -9,8 +9,6 @@ import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useSession } from "next-auth/react";
-import ProductBadge from "./ProductBadge";
 
 interface ProductCardProps {
   product: {
@@ -31,10 +29,9 @@ interface ProductCardProps {
   };
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCardFlashStyle({ product }: ProductCardProps) {
   const { addItem } = useCartStore();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const { data: session } = useSession();
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   
   const inWishlist = isInWishlist(product.id);
@@ -57,7 +54,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
+    
     if (product.stock === 0) {
       toast.error("المنتج غير متوفر حالياً");
       return;
@@ -66,11 +63,10 @@ export function ProductCard({ product }: ProductCardProps) {
     addItem({
       id: product.id,
       name: product.nameAr,
-      nameAr: product.nameAr,
       price: product.price,
       image: firstImage,
+      quantity: 1,
     });
-
     toast.success("تمت الإضافة إلى السلة");
   };
 
@@ -78,19 +74,14 @@ export function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!session?.user) {
-      toast.error("يجب تسجيل الدخول أولاً");
-      return;
-    }
-
     setIsAddingToWishlist(true);
     try {
       if (inWishlist) {
         await removeFromWishlist(product.id);
-        toast.success("تم الحذف من المفضلة");
+        toast.success("تمت الإزالة من المفضلة");
       } else {
         await addToWishlist(product.id);
-        toast.success("تمت الإضافة للمفضلة");
+        toast.success("تمت الإضافة إلى المفضلة");
       }
     } catch (error) {
       toast.error("حدث خطأ، حاول مرة أخرى");
@@ -106,13 +97,6 @@ export function ProductCard({ product }: ProductCardProps) {
         {discount > 0 && (
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm shadow-lg animate-pulse">
             ‪-{discount}%‬
-          </div>
-        )}
-
-        {/* Product Badge */}
-        {product.badge && (
-          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
-            <ProductBadge badge={product.badge} soldCount={product.soldCount} />
           </div>
         )}
 

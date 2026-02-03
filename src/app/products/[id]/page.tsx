@@ -77,7 +77,7 @@ export default function ProductDetailPage() {
       // Fetch related products from same category
       const relatedRes = await fetch(`/api/products?categoryId=${data.categoryId}`);
       const relatedData = await relatedRes.json();
-      setRelatedProducts(relatedData.filter((p: Product) => p.id !== data.id).slice(0, 4));
+      setRelatedProducts((relatedData.products || []).filter((p: Product) => p.id !== data.id).slice(0, 4));
     } catch (error) {
       console.error("Error fetching product:", error);
       toast.error("فشل تحميل المنتج");

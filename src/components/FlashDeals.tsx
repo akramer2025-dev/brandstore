@@ -53,7 +53,7 @@ export default function FlashDeals() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {flashDeals.map((product) => (
           <FlashDealCard key={product.id} product={product} />
         ))}

@@ -122,38 +122,41 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-teal-500/20">
-      <div className="container mx-auto px-4 py-2">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-20 h-20 md:w-24 md:h-24 transition-all duration-300 group-hover:scale-110 animate-logo-entrance overflow-visible flex-shrink-0">
+      <div className="container mx-auto px-2 sm:px-4 py-2">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
+          {/* Logo/Brand */}
+          <Link href="/" className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 group">
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex-shrink-0 group-hover:scale-110 transition-transform">
               <img 
                 src="/logo.png" 
-                alt="BS Brand Store Logo" 
-                className="w-full h-full object-contain drop-shadow-2xl transition-all duration-300 group-hover:rotate-6"
+                alt="Brand Store Logo" 
+                className="w-full h-full object-contain drop-shadow-lg"
               />
             </div>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent whitespace-nowrap">
+              Brand Store
+            </h1>
           </Link>
 
           {/* Navigation & Search */}
-          <div className="flex items-center gap-4 flex-1 justify-center max-w-2xl">
-            <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1">
+            <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
+              <Link href="/" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap text-sm">
                 الرئيسية
               </Link>
-              <Link href="/products" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap">
+              <Link href="/products" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap text-sm">
                 المنتجات
               </Link>
               <Link 
                 href="/flash-deals" 
-                className="text-yellow-400 hover:text-yellow-300 transition-colors whitespace-nowrap font-bold flex items-center gap-1 animate-pulse"
+                className="text-yellow-400 hover:text-yellow-300 transition-colors whitespace-nowrap font-bold flex items-center gap-1 animate-pulse text-sm"
               >
                 ⚡ عروض خاطفة
               </Link>
             </nav>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="hidden md:flex items-center gap-2 flex-1 max-w-md">
+            <form onSubmit={handleSearch} className="hidden sm:flex items-center gap-2 flex-1 max-w-md">
               <div ref={searchRef} className="relative flex-1">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
@@ -222,34 +225,24 @@ export function Header() {
               <Button 
                 type="submit" 
                 size="sm"
-                className="bg-teal-600 hover:bg-teal-700 text-white px-4"
+                className="bg-teal-600 hover:bg-teal-700 text-white px-3 sm:px-4"
               >
                 بحث
               </Button>
             </form>
           </div>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-gray-300 hover:text-cyan-400 transition-colors">
-              الرئيسية
-            </Link>
-            <Link href="/products" className="text-gray-300 hover:text-cyan-400 transition-colors">
-              المنتجات
-            </Link>
-          </nav>
-
           {/* Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Wishlist */}
             {session && (
               <Link href="/wishlist">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative text-gray-300 hover:text-pink-400 hover:bg-pink-900/30 hover:scale-110 transition-all duration-300"
+                  className="relative text-gray-300 hover:text-pink-400 hover:bg-pink-900/30 hover:scale-110 transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10"
                 >
-                  <Heart className="w-5 h-5 animate-pulse" />
+                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
                   {mounted && wishlistItems.length > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
                       {wishlistItems.length}
@@ -267,9 +260,9 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300"
+                className="relative text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10"
               >
-                <ShoppingCart className="w-5 h-5 animate-bounce-scale" />
+                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce-scale" />
                 {mounted && totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
                     {totalItems}
@@ -285,9 +278,9 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50"
+                    className="text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 w-8 h-8 sm:w-10 sm:h-10"
                   >
-                    <User className="w-5 h-5" />
+                    <User className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-gray-800 border-teal-500/20">
@@ -353,9 +346,10 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <Link href="/auth/login">
-                <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white">
-                  <User className="w-4 h-4 mr-2" />
-                  تسجيل الدخول
+                <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10">
+                  <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">تسجيل الدخول</span>
+                  <span className="sm:hidden">دخول</span>
                 </Button>
               </Link>
             )}

@@ -53,7 +53,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
   }
 
   return (
-    <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden group">
+    <div className="relative w-full h-[300px] md:h-[350px] lg:h-[450px] overflow-hidden group">
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
@@ -77,35 +77,37 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
               priority={index === 0}
             />
             
-            {/* Brand Logo Watermark - Top Left */}
-            <div className="absolute top-4 left-4 md:top-8 md:left-8 z-20">
-              <div className="bg-white/95 backdrop-blur-md px-4 py-2 md:px-6 md:py-3 rounded-xl shadow-2xl border-2 border-teal-500/30 hover:scale-105 transition-transform">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 md:w-14 md:h-14 flex-shrink-0">
+            {/* Main Logo Banner - Top Center */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 md:top-4 z-20">
+              <div className="bg-gradient-to-r from-gray-900/95 via-teal-900/95 to-gray-900/95 backdrop-blur-md px-3 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl shadow-2xl border border-teal-500/40 md:border-2 hover:scale-105 transition-all duration-300">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="relative w-8 h-8 md:w-14 md:h-14 flex-shrink-0 animate-pulse">
                     <Image
                       src="/logo.png"
-                      alt="Brand Store Logo"
+                      alt="BS Brand Store Logo"
                       fill
-                      sizes="(max-width: 768px) 40px, 56px"
-                      className="object-contain"
+                      sizes="(max-width: 768px) 32px, 56px"
+                      className="object-contain drop-shadow-2xl"
                       priority
                     />
                   </div>
-                  <div>
-                    <h3 className="text-lg md:text-2xl font-bold text-gray-900">براند ستور</h3>
-                    <p className="text-xs md:text-sm text-gray-600">Brand Store</p>
+                  <div className="text-center">
+                    <h3 className="text-sm md:text-2xl font-bold bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                      BS Brand Store
+                    </h3>
+                    <p className="text-[10px] md:text-sm text-teal-200/90">أفضل العلامات التجارية بأسعار مميزة</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Quality Badge - Top Right */}
-            <div className="absolute top-4 right-4 md:top-8 md:right-8 z-20">
-              <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-3 md:p-4 rounded-full shadow-2xl animate-pulse">
-                <Award className="w-6 h-6 md:w-8 md:h-8 text-white" />
+            <div className="absolute top-2 right-2 md:top-6 md:right-6 z-20">
+              <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-2 md:p-3 rounded-full shadow-2xl animate-pulse">
+                <Award className="w-4 h-4 md:w-7 md:h-7 text-white" />
               </div>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white px-2 py-1 rounded-full shadow-lg">
-                <p className="text-xs font-bold text-orange-600 whitespace-nowrap">صُنع في مصر</p>
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white px-1.5 py-0.5 md:px-2 md:py-1 rounded-full shadow-lg">
+                <p className="text-[9px] md:text-xs font-bold text-orange-600 whitespace-nowrap">صُنع في مصر</p>
               </div>
             </div>
             
@@ -115,43 +117,43 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
 
           {/* Content */}
           <div className="absolute inset-0 flex items-center">
-            <div className="container mx-auto px-4 md:px-8">
-              <div className="max-w-xl md:max-w-2xl">
+            <div className="container mx-auto px-3 md:px-8">
+              <div className="max-w-xl md:max-w-2xl mt-16 md:mt-0">
                 {/* Category Badge with Logo */}
-                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full mb-4 animate-fade-in-down border border-white/30">
-                  <div className="relative w-5 h-5 flex-shrink-0">
+                <div className="inline-flex items-center gap-1.5 md:gap-2 bg-white/20 backdrop-blur-md text-white px-2.5 py-1.5 md:px-4 md:py-2 rounded-full mb-2 md:mb-3 animate-fade-in-down border border-white/30">
+                  <div className="relative w-4 h-4 md:w-5 md:h-5 flex-shrink-0">
                     <Image
                       src="/logo.png"
                       alt="SP"
                       fill
-                      sizes="20px"
+                      sizes="(max-width: 768px) 16px, 20px"
                       className="object-contain"
                     />
                   </div>
-                  <span className="text-sm md:text-base font-semibold">من مصانع براند ستور</span>
+                  <span className="text-xs md:text-sm font-semibold">من مصانع براند ستور</span>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-fade-in-up leading-tight drop-shadow-2xl">
+                <h1 className="text-xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-3 animate-fade-in-up leading-tight drop-shadow-2xl">
                   {slide.titleAr}
                 </h1>
 
                 {/* Subtitle */}
                 {slide.subtitleAr && (
-                  <p className="text-lg md:text-xl lg:text-2xl text-gray-100 mb-6 animate-fade-in-up animation-delay-200 drop-shadow-lg">
+                  <p className="text-sm md:text-lg lg:text-xl text-gray-100 mb-3 md:mb-5 animate-fade-in-up animation-delay-200 drop-shadow-lg">
                     {slide.subtitleAr}
                   </p>
                 )}
 
                 {/* Made in Egypt Badge */}
-                <div className="flex flex-wrap gap-3 mb-6 animate-fade-in-up animation-delay-300">
-                  <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
-                    <p className="text-sm md:text-base font-semibold text-gray-800">
+                <div className="flex flex-wrap gap-2 mb-3 md:mb-5 animate-fade-in-up animation-delay-300">
+                  <div className="bg-white/95 backdrop-blur-sm px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg shadow-lg">
+                    <p className="text-xs md:text-sm font-semibold text-gray-800">
                       🏭 صناعة محلية بجودة عالمية
                     </p>
                   </div>
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 rounded-lg shadow-lg">
-                    <p className="text-sm md:text-base font-bold text-white">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg shadow-lg">
+                    <p className="text-xs md:text-sm font-bold text-white">
                       ✅ ضمان الجودة
                     </p>
                   </div>
@@ -160,10 +162,10 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
                 {/* CTA Button */}
                 <Link
                   href={slide.link || '/products'}
-                  className="inline-flex items-center gap-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-8 py-4 rounded-xl text-base md:text-lg font-bold shadow-2xl hover:shadow-teal-500/50 transition-all duration-300 hover:scale-105 animate-fade-in-up animation-delay-400"
+                  className="inline-flex items-center gap-2 md:gap-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-4 py-2.5 md:px-7 md:py-3.5 rounded-lg md:rounded-xl text-sm md:text-base font-bold shadow-2xl hover:shadow-teal-500/50 transition-all duration-300 hover:scale-105 animate-fade-in-up animation-delay-400"
                 >
                   <span>{slide.buttonTextAr || 'تسوق الآن'}</span>
-                  <ChevronLeft className="w-5 h-5 animate-bounce-x" />
+                  <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 animate-bounce-x" />
                 </Link>
               </div>
             </div>
@@ -201,16 +203,6 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
-      </div>
-
-      {/* Auto-play indicator */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30">
-        <button
-          onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-          className="bg-white/20 backdrop-blur-md px-3 py-1 md:px-4 md:py-2 rounded-full text-white text-xs md:text-sm hover:bg-white/30 transition-all"
-        >
-          {isAutoPlaying ? '⏸️ إيقاف' : '▶️ تشغيل'}
-        </button>
       </div>
     </div>
   );
