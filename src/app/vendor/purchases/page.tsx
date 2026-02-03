@@ -62,7 +62,7 @@ export default function PurchasesPage() {
 
         {/* الإحصائيات */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 border-blue-500/30 backdrop-blur-sm">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -74,7 +74,7 @@ export default function PurchasesPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 border-purple-500/30 backdrop-blur-sm">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -86,7 +86,7 @@ export default function PurchasesPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/20 to-green-600/20 border-green-500/30 backdrop-blur-sm">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -98,7 +98,7 @@ export default function PurchasesPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-orange-500/20 to-orange-600/20 border-orange-500/30 backdrop-blur-sm">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -113,7 +113,7 @@ export default function PurchasesPage() {
 
         {/* قائمة الفواتير */}
         {purchases.length === 0 ? (
-          <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-12 text-center">
               <ShoppingCart className="w-20 h-20 mx-auto text-gray-500 mb-4" />
               <h3 className="text-xl text-white mb-2">لا توجد فواتير مشتريات</h3>
@@ -129,7 +129,7 @@ export default function PurchasesPage() {
         ) : (
           <div className="space-y-4">
             {purchases.map((purchase: any, index: number) => (
-              <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-all">
+              <Card key={index} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl hover:bg-white/15 transition-all">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-white flex items-center gap-2">

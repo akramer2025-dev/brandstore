@@ -154,37 +154,37 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 py-6 sm:py-12">
       {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 right-20 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 relative z-10">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-blue-400 bg-clip-text text-transparent mb-4">
+        <div className="text-center mb-6 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-blue-400 bg-clip-text text-transparent mb-2 sm:mb-4">
             إتمام الطلب
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-sm sm:text-lg">
             أكمل بياناتك لاستلام طلبك
           </p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
             {/* Delivery Information */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Personal Information */}
               <Card className="bg-gray-800/80 border-teal-500/20">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                    <User className="w-6 h-6 text-teal-400" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
+                    <User className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
                     المعلومات الشخصية
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="fullName" className="text-gray-300 mb-2 block">
@@ -222,13 +222,13 @@ export default function CheckoutPage() {
 
               {/* Delivery Address */}
               <Card className="bg-gray-800/80 border-teal-500/20">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                    <MapPin className="w-6 h-6 text-teal-400" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
                     عنوان التوصيل
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="city" className="text-gray-300 mb-2 block">
@@ -295,17 +295,17 @@ export default function CheckoutPage() {
 
               {/* Payment Method */}
               <Card className="bg-gray-800/80 border-teal-500/20">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                    <CreditCard className="w-6 h-6 text-teal-400" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
                     طريقة الدفع
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                   {/* Cash on Delivery */}
                   <div
                     onClick={() => setPaymentMethod('CASH_ON_DELIVERY')}
-                    className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
+                    className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
                       paymentMethod === 'CASH_ON_DELIVERY'
                         ? 'border-teal-500 bg-teal-900/30'
                         : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
@@ -322,18 +322,18 @@ export default function CheckoutPage() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Banknote className="w-5 h-5 text-teal-400" />
-                          <h3 className="text-lg font-bold text-white">
+                        <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                          <Banknote className="w-4 h-4 sm:w-5 sm:h-5 text-teal-400" />
+                          <h3 className="text-base sm:text-lg font-bold text-white">
                             الدفع عند الاستلام (COD)
                           </h3>
                         </div>
-                        <p className="text-gray-300 text-sm mb-2">
+                        <p className="text-gray-300 text-xs sm:text-sm mb-2">
                           ادفع نقداً عند استلام الطلب بعد فحص المنتجات
                         </p>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-xs text-gray-400">
-                            <CheckCircle2 className="w-3 h-3 text-teal-400" />
+                        <div className="space-y-0.5 sm:space-y-1">
+                          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-400">
+                            <CheckCircle2 className="w-3 h-3 text-teal-400 flex-shrink-0" />
                             افحص المنتجات قبل الدفع
                           </div>
                           <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -544,20 +544,20 @@ export default function CheckoutPage() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <Card className="bg-gray-800/80 border-teal-500/20 sticky top-24">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-white">
+              <Card className="bg-gray-800/80 border-teal-500/20 lg:sticky lg:top-24">
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-white">
                     ملخص الطلب
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                   {/* Products */}
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                  <div className="space-y-2 sm:space-y-3 max-h-48 sm:max-h-64 overflow-y-auto">
                     {items.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-700">
+                      <div key={item.id} className="flex justify-between items-center py-1.5 sm:py-2 border-b border-gray-700">
                         <div className="flex-1">
-                          <p className="text-white font-medium text-sm">{item.name}</p>
-                          <p className="text-gray-400 text-xs">
+                          <p className="text-white font-medium text-xs sm:text-sm">{item.name}</p>
+                          <p className="text-gray-400 text-[10px] sm:text-xs">
                             {item.quantity} × {item.price} جنيه
                           </p>
                         </div>
@@ -580,10 +580,10 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-700 pt-4">
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-xl font-bold text-white">الإجمالي:</span>
-                      <span className="text-3xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                  <div className="border-t border-gray-700 pt-3 sm:pt-4">
+                    <div className="flex justify-between items-center mb-4 sm:mb-6">
+                      <span className="text-base sm:text-xl font-bold text-white">الإجمالي:</span>
+                      <span className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
                         {finalTotal.toFixed(2)} جنيه
                       </span>
                     </div>
@@ -591,7 +591,7 @@ export default function CheckoutPage() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-lg py-6"
+                      className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-sm sm:text-lg py-4 sm:py-6"
                     >
                       {isSubmitting ? (
                         <>
@@ -607,8 +607,8 @@ export default function CheckoutPage() {
                     </Button>
                   </div>
 
-                  <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 text-center">
-                    <p className="text-xs text-gray-400">
+                  <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-3 sm:p-4 text-center">
+                    <p className="text-[10px] sm:text-xs text-gray-400">
                       بالضغط على "تأكيد الطلب"، أنت توافق على شروط وأحكام الشراء
                     </p>
                   </div>

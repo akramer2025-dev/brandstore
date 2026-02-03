@@ -12,6 +12,6 @@ export default async function VendorDashboard() {
     redirect('/');
   }
 
-  // التحويل التلقائي لصفحة POS
-  redirect('/vendor/pos');
+  // التحويل التلقائي لصفحة Dashboard
+  redirect('/vendor/dashboard');
 }

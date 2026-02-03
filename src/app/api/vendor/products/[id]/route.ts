@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-// حذف منتج
+// حذف منتج مع إرجاع القيمة لرأس المال
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -36,17 +36,50 @@ export async function DELETE(
       return NextResponse.json({ error: 'المنتج غير موجود' }, { status: 404 });
     }
 
-    // حذف المنتج (soft delete بتغيير isActive)
-    await prisma.product.update({
-      where: { id },
-      data: { 
-        isActive: false,
-        isVisible: false 
+    // حساب قيمة المنتج (تكلفة الإنتاج × الكمية)
+    const productValue = (product.productionCost || 0) * product.stock;
+
+    // حذف المنتج وإرجاع القيمة لرأس المال
+    await prisma.$transaction(async (tx) => {
+      // حذف المنتج فعلياً
+      await tx.product.delete({
+        where: { id }
+      });
+
+      // إرجاع القيمة لرأس المال إذا كانت أكبر من صفر
+      if (productValue > 0) {
+        const balanceBefore = vendor.capitalBalance || 0;
+        const balanceAfter = balanceBefore + productValue;
+
+        await tx.vendor.update({
+          where: { id: vendor.id },
+          data: {
+            capitalBalance: {
+              increment: productValue
+            }
+          }
+        });
+
+        // تسجيل المعاملة
+        await tx.capitalTransaction.create({
+          data: {
+            vendorId: vendor.id,
+            type: 'REFUND',
+            amount: productValue,
+            description: `حذف منتج: ${product.nameAr}`,
+            descriptionAr: `إرجاع قيمة منتج محذوف: ${product.nameAr} (${product.stock} قطعة × ${product.productionCost} ج)`,
+            balanceBefore: balanceBefore,
+            balanceAfter: balanceAfter,
+          }
+        });
       }
     });
 
     return NextResponse.json({ 
-      message: 'تم حذف المنتج بنجاح'
+      message: productValue > 0
+        ? `تم حذف المنتج بنجاح وإرجاع ${productValue.toFixed(2)} ج إلى رأس المال`
+        : 'تم حذف المنتج بنجاح',
+      refundedAmount: productValue
     });
 
   } catch (error) {

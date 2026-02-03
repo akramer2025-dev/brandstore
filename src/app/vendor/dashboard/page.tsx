@@ -53,14 +53,14 @@ export default function VendorDashboard() {
   const fetchData = async () => {
     try {
       const [capitalRes, statsRes] = await Promise.all([
-        fetch('/api/vendor/capital/summary'),
-        fetch('/api/vendor/stats')
+        fetch('/api/vendor/capital/summary').catch(() => null),
+        fetch('/api/vendor/stats').catch(() => null)
       ])
       
-      if (capitalRes.ok) {
+      if (capitalRes && capitalRes.ok) {
         setCapitalSummary(await capitalRes.json())
       }
-      if (statsRes.ok) {
+      if (statsRes && statsRes.ok) {
         setStats(await statsRes.json())
       }
     } catch (error) {
@@ -102,18 +102,12 @@ export default function VendorDashboard() {
           </Button>
         </div>
 
-        {/* أزرار رئيسية */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        {/* زر نقطة البيع */}
+        <div className="mb-6">
           <Link href="/vendor/pos">
             <Button className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-lg font-bold">
               <Zap className="w-5 h-5 ml-2" />
               نقطة البيع
-            </Button>
-          </Link>
-          <Link href="/vendor/products/new">
-            <Button className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-lg font-bold">
-              <Plus className="w-5 h-5 ml-2" />
-              إضافة منتج
             </Button>
           </Link>
         </div>
@@ -206,11 +200,11 @@ export default function VendorDashboard() {
               </CardContent>
             </Card>
           </Link>
-          <Link href="/vendor/products">
+          <Link href="/vendor/inventory">
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
               <CardContent className="p-4 text-center">
                 <Package className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                <p className="text-white font-medium">المنتجات</p>
+                <p className="text-white font-medium">المخزون</p>
               </CardContent>
             </Card>
           </Link>

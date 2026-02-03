@@ -12,6 +12,15 @@ export async function GET(
       where: { id },
       include: {
         category: true,
+        vendor: {
+          select: {
+            id: true,
+            storeNameAr: true,
+            storeName: true,
+            logo: true,
+            rating: true,
+          },
+        },
         reviews: {
           where: {
             isApproved: true,

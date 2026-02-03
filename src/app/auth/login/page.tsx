@@ -145,7 +145,7 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} suppressHydrationWarning>
             <CardContent className="space-y-4">
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
@@ -157,8 +157,8 @@ export default function LoginPage() {
               <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 border border-purple-200 px-4 py-3 rounded-lg text-sm">
                 <p className="font-semibold text-purple-900 mb-2">بيانات تجريبية:</p>
                 <div className="space-y-1 text-purple-700">
-                  <p>📧 المدير: <code className="bg-white px-2 py-1 rounded">admin@store.com</code></p>
-                  <p>🔑 كلمة المرور: <code className="bg-white px-2 py-1 rounded">admin123</code></p>
+                  <p>📧 المدير: <code className="bg-white px-2 py-1 rounded">admin@bs.com</code></p>
+                  <p>🔑 كلمة المرور: <code className="bg-white px-2 py-1 rounded">123456</code></p>
                 </div>
               </div>
 
@@ -169,7 +169,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@store.com"
+                  placeholder="admin@bs.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -277,7 +277,7 @@ export default function LoginPage() {
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
-                  onClick={() => quickLogin('admin@store.com', 'admin123', 'مدير')}
+                  onClick={() => quickLogin('admin@bs.com', '123456', 'مدير')}
                   className="text-xs bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
                   disabled={loading}
                 >
@@ -285,7 +285,7 @@ export default function LoginPage() {
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => quickLogin('store@partner.com', 'Aazxc', 'متجر')}
+                  onClick={() => quickLogin('vendor@bs.com', '123456', 'متجر')}
                   className="text-xs bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
                   disabled={loading}
                 >
@@ -293,19 +293,11 @@ export default function LoginPage() {
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => quickLogin('factory@partner.com', 'Aazxc', 'مصنع')}
+                  onClick={() => quickLogin('customer@bs.com', '123456', 'عميل')}
                   className="text-xs bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
                   disabled={loading}
                 >
-                  شريك (مصنع)
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => quickLogin('delivery@partner.com', 'Aazxc', 'توصيل')}
-                  className="text-xs bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
-                  disabled={loading}
-                >
-                  مندوب توصيل
+                  عميل
                 </Button>
               </div>
 

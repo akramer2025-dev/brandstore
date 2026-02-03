@@ -1,36 +1,81 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Warehouse, ArrowLeft, Package, AlertTriangle, CheckCircle } from "lucide-react";
+import { Warehouse, ArrowLeft, Package, AlertTriangle, CheckCircle, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 
-export default async function VendorInventoryPage() {
-  const session = await auth();
+export default function VendorInventoryPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<any[]>([]);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
-  if (!session || session.user?.role !== "VENDOR") {
-    redirect("/auth/login");
-  }
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-  const vendor = await prisma.vendor.findUnique({
-    where: { userId: session.user.id }
-  });
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('/api/vendor/inventory');
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data.products || []);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (!vendor) {
-    redirect("/");
-  }
+  const handleDelete = async (product: any) => {
+    const productValue = (product.productionCost || 0) * product.stock;
+    const confirmMessage = `⚠️ هل أنت متأكد من حذف المنتج "${product.nameAr}"؟\n\n` +
+      `📦 الكمية: ${product.stock} قطعة\n` +
+      `💰 قيمة الشراء: ${productValue.toFixed(2)} ج\n\n` +
+      `سيتم إرجاع ${productValue.toFixed(2)} ج إلى رأس المال`;
 
-  const products = await prisma.product.findMany({
-    where: { vendorId: vendor.id },
-    include: { category: true },
-    orderBy: { stock: 'asc' }
-  });
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    setDeleting(product.id);
+    try {
+      const response = await fetch(`/api/vendor/products/${product.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`✅ ${data.message}`);
+        fetchProducts(); // تحديث القائمة
+      } else {
+        const error = await response.json();
+        alert(`❌ خطأ: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('❌ حدث خطأ أثناء الحذف');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
   const totalValue = products.reduce((sum, p) => sum + (p.stock * p.price), 0);
   const outOfStock = products.filter(p => p.stock === 0).length;
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-white animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 p-6">
@@ -51,11 +96,25 @@ export default async function VendorInventoryPage() {
               <p className="text-gray-400 mt-1">متابعة وإدارة مخزون المنتجات</p>
             </div>
           </div>
+          <div className="flex items-center gap-3">
+            <Link href="/vendor/products/new">
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                إضافة منتج
+              </Button>
+            </Link>
+            <Link href="/vendor/purchases/new">
+              <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                فاتورة مشتريات
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 border-blue-500/30 backdrop-blur-sm">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-6">
               <Package className="h-8 w-8 text-blue-400 mb-3" />
               <p className="text-blue-200 text-sm mb-1">إجمالي القطع</p>
@@ -63,7 +122,7 @@ export default async function VendorInventoryPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/20 to-green-600/20 border-green-500/30 backdrop-blur-sm">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-6">
               <CheckCircle className="h-8 w-8 text-green-400 mb-3" />
               <p className="text-green-200 text-sm mb-1">قيمة المخزون</p>
@@ -71,7 +130,7 @@ export default async function VendorInventoryPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-orange-500/20 to-orange-600/20 border-orange-500/30 backdrop-blur-sm">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-6">
               <AlertTriangle className="h-8 w-8 text-orange-400 mb-3" />
               <p className="text-orange-200 text-sm mb-1">مخزون منخفض</p>
@@ -79,7 +138,7 @@ export default async function VendorInventoryPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-red-500/20 to-red-600/20 border-red-500/30 backdrop-blur-sm">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardContent className="p-6">
               <AlertTriangle className="h-8 w-8 text-red-400 mb-3" />
               <p className="text-red-200 text-sm mb-1">نفذ من المخزن</p>
@@ -89,7 +148,7 @@ export default async function VendorInventoryPage() {
         </div>
 
         {/* Inventory Table */}
-        <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
           <CardHeader>
             <CardTitle className="text-white">تفاصيل المخزون</CardTitle>
           </CardHeader>
@@ -97,50 +156,77 @@ export default async function VendorInventoryPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-right py-3 px-4 text-gray-300 font-medium">المنتج</th>
-                    <th className="text-right py-3 px-4 text-gray-300 font-medium">الفئة</th>
-                    <th className="text-center py-3 px-4 text-gray-300 font-medium">الكمية</th>
-                    <th className="text-center py-3 px-4 text-gray-300 font-medium">السعر</th>
-                    <th className="text-center py-3 px-4 text-gray-300 font-medium">القيمة</th>
-                    <th className="text-center py-3 px-4 text-gray-300 font-medium">الحالة</th>
+                  <tr className="border-b border-white/20">
+                    <th className="text-right py-3 px-4 text-white font-medium">المنتج</th>
+                    <th className="text-right py-3 px-4 text-white font-medium">الفئة</th>
+                    <th className="text-center py-3 px-4 text-white font-medium">الكمية</th>
+                    <th className="text-center py-3 px-4 text-white font-medium">السعر</th>
+                    <th className="text-center py-3 px-4 text-white font-medium">القيمة</th>
+                    <th className="text-center py-3 px-4 text-white font-medium">الحالة</th>
+                    <th className="text-center py-3 px-4 text-white font-medium">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
                   {products.map((product) => (
-                    <tr key={product.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <tr key={product.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
                       <td className="py-4 px-4">
                         <p className="text-white font-medium">{product.nameAr}</p>
                       </td>
                       <td className="py-4 px-4">
-                        <p className="text-gray-300">{product.category?.nameAr}</p>
+                        <p className="text-blue-200">{product.category?.nameAr}</p>
                       </td>
                       <td className="py-4 px-4 text-center">
                         <p className="text-white font-bold">{product.stock}</p>
                       </td>
                       <td className="py-4 px-4 text-center">
-                        <p className="text-teal-400">{product.price} ج.م</p>
+                        <p className="text-blue-300">{product.price} ج.م</p>
                       </td>
                       <td className="py-4 px-4 text-center">
                         <p className="text-white font-bold">{(product.stock * product.price).toFixed(0)} ج.م</p>
                       </td>
                       <td className="py-4 px-4 text-center">
                         {product.stock === 0 ? (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-sm">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-sm backdrop-blur-sm border border-red-500/30">
                             <AlertTriangle className="h-3 w-3" />
                             نفذ
                           </span>
                         ) : product.stock <= 10 ? (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm backdrop-blur-sm border border-orange-500/30">
                             <AlertTriangle className="h-3 w-3" />
                             منخفض
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 text-green-300 text-sm">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 text-green-300 text-sm backdrop-blur-sm border border-green-500/30">
                             <CheckCircle className="h-3 w-3" />
                             متوفر
                           </span>
                         )}
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <Link href={`/vendor/products/${product.id}/edit`}>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => handleDelete(product)}
+                            disabled={deleting === product.id}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            {deleting === product.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

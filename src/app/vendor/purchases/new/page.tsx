@@ -13,11 +13,15 @@ interface PurchaseItem {
   id: string;
   productName: string;
   productNameAr: string;
+  categoryId: string;
+  color: string;
+  size: string; // S, M, L, XL, XXL
+  imageUrl: string;
   quantity: number;
   purchasePrice: number; // سعر الشراء
   sellingPrice: number; // سعر البيع
   fromCapital: boolean; // من رأس المال أو بالنيابة
-  commissionFromStore: boolean; // هل يحسب عمولة المتجر 5%
+  commissionFromStore: boolean; // هل يحسب عمولة المتجر 5% (ثابتة)
 }
 
 export default function NewPurchasePage() {
@@ -25,6 +29,7 @@ export default function NewPurchasePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [capital, setCapital] = useState<any>(null);
+  const [categories, setCategories] = useState<any[]>([]);
   
   const [items, setItems] = useState<PurchaseItem[]>([]);
   const [supplier, setSupplier] = useState('');
@@ -34,7 +39,20 @@ export default function NewPurchasePage() {
 
   useEffect(() => {
     checkCapital();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories');
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data.categories || []);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   const checkCapital = async () => {
     try {
@@ -61,11 +79,15 @@ export default function NewPurchasePage() {
       id: Date.now().toString(),
       productName: '',
       productNameAr: '',
+      categoryId: '',
+      color: '',
+      size: 'M',
+      imageUrl: '',
       quantity: 1,
       purchasePrice: 0,
       sellingPrice: 0,
       fromCapital: true,
-      commissionFromStore: true,
+      commissionFromStore: true, // ثابتة 5%
     }]);
   };
 
@@ -96,13 +118,15 @@ export default function NewPurchasePage() {
 
   const expectedProfit = items.reduce((sum, item) => {
     const itemProfit = (item.sellingPrice - item.purchasePrice) * item.quantity;
-    const commission = item.commissionFromStore ? (item.sellingPrice * 0.05 * item.quantity) : 0;
+    const commission = item.sellingPrice * STORE_COMMISSION_RATE * item.quantity;
     return sum + itemProfit - commission;
   }, 0);
 
-  const totalCommission = items
-    .filter(item => item.commissionFromStore)
-    .reduce((sum, item) => sum + (item.sellingPrice * 0.05 * item.quantity), 0);
+  // العمولة ثابتة 5% من المتجر على كل منتج
+  const STORE_COMMISSION_RATE = 0.05;
+  const totalCommission = items.reduce((sum, item) => 
+    sum + (item.sellingPrice * STORE_COMMISSION_RATE * item.quantity), 0
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,7 +219,7 @@ export default function NewPurchasePage() {
 
         {/* معلومات رأس المال */}
         {capital && (
-          <Card className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 border-green-500/30 backdrop-blur-sm mb-6">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl mb-6">
             <CardContent className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
@@ -223,7 +247,7 @@ export default function NewPurchasePage() {
 
         <form onSubmit={handleSubmit}>
           {/* بيانات المورد */}
-          <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl mb-6">
             <CardHeader>
               <CardTitle className="text-white">بيانات المورد</CardTitle>
             </CardHeader>
@@ -268,7 +292,7 @@ export default function NewPurchasePage() {
           </Card>
 
           {/* المنتجات */}
-          <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl mb-6">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex items-center gap-2">
@@ -293,7 +317,7 @@ export default function NewPurchasePage() {
                 </div>
               ) : (
                 items.map((item, index) => (
-                  <Card key={item.id} className="bg-white/5 border-white/10">
+                  <Card key={item.id} className="bg-white/5 backdrop-blur-sm border-white/20">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
                         <div className="flex-1 space-y-4">
@@ -311,16 +335,86 @@ export default function NewPurchasePage() {
                             </Button>
                           </div>
 
-                          {/* الاسم */}
+                          {/* الاسم والفئة */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label className="text-white">اسم المنتج *</Label>
+                              <Input
+                                value={item.productNameAr}
+                                onChange={(e) => updateItem(item.id, 'productNameAr', e.target.value)}
+                                className="bg-white/5 border-white/20 text-white"
+                                placeholder="مثال: بلوزة"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-white">الفئة *</Label>
+                              <select
+                                value={item.categoryId}
+                                onChange={(e) => updateItem(item.id, 'categoryId', e.target.value)}
+                                className="w-full bg-white/5 border border-white/20 text-white rounded-md p-2"
+                                required
+                              >
+                                <option value="" className="bg-gray-800">اختر الفئة</option>
+                                {categories.map((cat) => (
+                                  <option key={cat.id} value={cat.id} className="bg-gray-800">
+                                    {cat.nameAr}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* اللون والحجم */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label className="text-white">اللون *</Label>
+                              <Input
+                                value={item.color}
+                                onChange={(e) => updateItem(item.id, 'color', e.target.value)}
+                                className="bg-white/5 border-white/20 text-white"
+                                placeholder="مثال: أزرق"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-white">الحجم *</Label>
+                              <select
+                                value={item.size}
+                                onChange={(e) => updateItem(item.id, 'size', e.target.value)}
+                                className="w-full bg-white/5 border border-white/20 text-white rounded-md p-2"
+                                required
+                              >
+                                <option value="S" className="bg-gray-800">S - صغير</option>
+                                <option value="M" className="bg-gray-800">M - وسط</option>
+                                <option value="L" className="bg-gray-800">L - كبير</option>
+                                <option value="XL" className="bg-gray-800">XL - كبير جداً</option>
+                                <option value="XXL" className="bg-gray-800">XXL - كبير جداً جداً</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* رابط الصورة */}
                           <div>
-                            <Label className="text-white">اسم المنتج *</Label>
+                            <Label className="text-white">رابط الصورة</Label>
                             <Input
-                              value={item.productNameAr}
-                              onChange={(e) => updateItem(item.id, 'productNameAr', e.target.value)}
+                              value={item.imageUrl}
+                              onChange={(e) => updateItem(item.id, 'imageUrl', e.target.value)}
                               className="bg-white/5 border-white/20 text-white"
-                              placeholder="مثال: روج سائل"
-                              required
+                              placeholder="https://example.com/image.jpg"
                             />
+                            {item.imageUrl && (
+                              <div className="mt-2">
+                                <img 
+                                  src={item.imageUrl} 
+                                  alt="معاينة" 
+                                  className="h-20 w-20 object-cover rounded border border-white/20"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            )}
                           </div>
 
                           {/* الكمية والأسعار */}
@@ -365,7 +459,7 @@ export default function NewPurchasePage() {
                           </div>
 
                           {/* الخيارات */}
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-3">
                             <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                               <input
                                 type="checkbox"
@@ -378,17 +472,20 @@ export default function NewPurchasePage() {
                                 ✅ يُحسب من رأس المال
                               </Label>
                             </div>
-                            <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                              <input
-                                type="checkbox"
-                                id={`commission-${item.id}`}
-                                checked={item.commissionFromStore}
-                                onChange={(e) => updateItem(item.id, 'commissionFromStore', e.target.checked)}
-                                className="w-4 h-4 accent-yellow-500"
-                              />
-                              <Label htmlFor={`commission-${item.id}`} className="text-white text-sm cursor-pointer">
-                                💰 عمولة المتجر 5%
-                              </Label>
+                            
+                            {/* عمولة المتجر ثابتة 5% */}
+                            <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 rounded bg-yellow-500 flex items-center justify-center">
+                                  <span className="text-white text-xs">✓</span>
+                                </div>
+                                <Label className="text-white text-sm">
+                                  💰 عمولة المتجر <span className="font-bold text-yellow-300">5% (ثابتة)</span>
+                                </Label>
+                              </div>
+                              <p className="text-xs text-yellow-200 mt-1 mr-6">
+                                يتم حساب عمولة 5% من سعر البيع للمتجر تلقائياً
+                              </p>
                             </div>
                           </div>
 
@@ -412,7 +509,7 @@ export default function NewPurchasePage() {
                               <p className="text-gray-400">الربح المتوقع</p>
                               <p className="text-green-400 font-bold">
                                 {((item.sellingPrice - item.purchasePrice) * item.quantity - 
-                                  (item.commissionFromStore ? item.sellingPrice * 0.05 * item.quantity : 0)).toFixed(2)} ج
+                                  (item.sellingPrice * STORE_COMMISSION_RATE * item.quantity)).toFixed(2)} ج
                               </p>
                             </div>
                           </div>
@@ -427,7 +524,7 @@ export default function NewPurchasePage() {
 
           {/* الإجماليات */}
           {items.length > 0 && (
-            <Card className="bg-gradient-to-br from-blue-500/20 to-purple-600/20 border-blue-500/30 backdrop-blur-sm mb-6">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl mb-6">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <TrendingUp className="w-5 h-5" />
@@ -440,33 +537,33 @@ export default function NewPurchasePage() {
                     <p className="text-gray-300 text-sm mb-1">إجمالي المشتريات</p>
                     <p className="text-2xl font-bold text-white">{totalPurchasePrice.toFixed(2)} ج</p>
                   </div>
-                  <div className="p-4 bg-blue-500/20 rounded-lg">
+                  <div className="p-4 bg-blue-500/20 rounded-lg backdrop-blur-sm border border-blue-500/30">
                     <p className="text-blue-200 text-sm mb-1">من رأس المال</p>
-                    <p className="text-2xl font-bold text-blue-400">{totalFromCapital.toFixed(2)} ج</p>
+                    <p className="text-2xl font-bold text-blue-300">{totalFromCapital.toFixed(2)} ج</p>
                   </div>
-                  <div className="p-4 bg-orange-500/20 rounded-lg">
+                  <div className="p-4 bg-orange-500/20 rounded-lg backdrop-blur-sm border border-orange-500/30">
                     <p className="text-orange-200 text-sm mb-1">بالنيابة</p>
-                    <p className="text-2xl font-bold text-orange-400">{totalOnBehalf.toFixed(2)} ج</p>
+                    <p className="text-2xl font-bold text-orange-300">{totalOnBehalf.toFixed(2)} ج</p>
                   </div>
-                  <div className="p-4 bg-yellow-500/20 rounded-lg">
+                  <div className="p-4 bg-yellow-500/20 rounded-lg backdrop-blur-sm border border-yellow-500/30">
                     <p className="text-yellow-200 text-sm mb-1">مصاريف المشوار</p>
-                    <p className="text-2xl font-bold text-yellow-400">{parseFloat(tripExpense).toFixed(2)} ج</p>
+                    <p className="text-2xl font-bold text-yellow-300">{parseFloat(tripExpense).toFixed(2)} ج</p>
                   </div>
-                  <div className="p-4 bg-green-500/20 rounded-lg">
+                  <div className="p-4 bg-green-500/20 rounded-lg backdrop-blur-sm border border-green-500/30">
                     <p className="text-green-200 text-sm mb-1">إجمالي البيع المتوقع</p>
-                    <p className="text-2xl font-bold text-green-400">{totalSellingPrice.toFixed(2)} ج</p>
+                    <p className="text-2xl font-bold text-green-300">{totalSellingPrice.toFixed(2)} ج</p>
                   </div>
-                  <div className="p-4 bg-emerald-500/20 rounded-lg">
+                  <div className="p-4 bg-emerald-500/20 rounded-lg backdrop-blur-sm border border-emerald-500/30">
                     <p className="text-emerald-200 text-sm mb-1">الربح المتوقع</p>
-                    <p className="text-2xl font-bold text-emerald-400">{expectedProfit.toFixed(2)} ج</p>
+                    <p className="text-2xl font-bold text-emerald-300">{expectedProfit.toFixed(2)} ج</p>
                   </div>
-                  <div className="p-4 bg-red-500/20 rounded-lg">
-                    <p className="text-red-200 text-sm mb-1">عمولة المتجر 5%</p>
-                    <p className="text-2xl font-bold text-red-400">{totalCommission.toFixed(2)} ج</p>
+                  <div className="p-4 bg-red-500/20 rounded-lg backdrop-blur-sm border border-red-500/30">
+                    <p className="text-red-200 text-sm mb-1">عمولة المتجر <span className="font-bold">5% (ثابتة)</span></p>
+                    <p className="text-2xl font-bold text-red-300">{totalCommission.toFixed(2)} ج</p>
                   </div>
-                  <div className="p-4 bg-purple-500/20 rounded-lg">
+                  <div className="p-4 bg-purple-500/20 rounded-lg backdrop-blur-sm border border-purple-500/30">
                     <p className="text-purple-200 text-sm mb-1">صافي الربح</p>
-                    <p className="text-2xl font-bold text-purple-400">{(expectedProfit - parseFloat(tripExpense)).toFixed(2)} ج</p>
+                    <p className="text-2xl font-bold text-purple-300">{(expectedProfit - parseFloat(tripExpense)).toFixed(2)} ج</p>
                   </div>
                 </div>
               </CardContent>
@@ -474,7 +571,7 @@ export default function NewPurchasePage() {
           )}
 
           {/* ملاحظات */}
-          <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl mb-6">
             <CardContent className="p-4">
               <Label htmlFor="notes" className="text-white">ملاحظات</Label>
               <textarea

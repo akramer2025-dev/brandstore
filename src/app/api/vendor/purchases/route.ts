@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || session.user.role !== 'VENDOR') {
       return NextResponse.json(
@@ -26,9 +25,10 @@ export async function POST(request: NextRequest) {
 
     // التحقق من البيانات
     for (const item of items) {
-      if (!item.productNameAr || item.quantity <= 0 || item.purchasePrice <= 0 || item.sellingPrice <= 0) {
+      if (!item.productNameAr || !item.categoryId || !item.color || !item.size || 
+          item.quantity <= 0 || item.purchasePrice <= 0 || item.sellingPrice <= 0) {
         return NextResponse.json(
-          { error: 'بيانات المنتج غير صحيحة' },
+          { error: 'بيانات المنتج غير صحيحة - تأكد من إدخال جميع الحقول المطلوبة' },
           { status: 400 }
         );
       }
@@ -76,6 +76,8 @@ export async function POST(request: NextRequest) {
     // حفظ البيانات في transaction
     const result = await prisma.$transaction(async (tx) => {
       // 1. إنشاء Purchase لكل منتج
+      const STORE_COMMISSION_RATE = 0.05; // ثابتة 5%
+      
       const purchases = await Promise.all(
         items.map((item: any) =>
           tx.purchase.create({
@@ -90,7 +92,7 @@ export async function POST(request: NextRequest) {
               receiptNumber,
               fromCapital: item.fromCapital,
               sellingPrice: item.sellingPrice,
-              commissionFromStore: item.commissionFromStore,
+              commissionFromStore: true, // دائماً true - العمولة ثابتة 5%
             },
           })
         )
@@ -122,11 +124,12 @@ export async function POST(request: NextRequest) {
 
       // 4. إضافة/تحديث المخزون لكل منتج
       for (const item of items) {
-        // البحث عن منتج موجود بنفس الاسم
+        // البحث عن منتج موجود بنفس الاسم والحجم واللون
         const existingProduct = await tx.product.findFirst({
           where: {
-            name: item.productNameAr,
+            nameAr: item.productNameAr,
             vendorId: session.user.id,
+            categoryId: item.categoryId,
           },
         });
 
@@ -136,6 +139,8 @@ export async function POST(request: NextRequest) {
             where: { id: existingProduct.id },
             data: {
               stock: existingProduct.stock + item.quantity,
+              productionCost: item.purchasePrice,
+              price: item.sellingPrice,
             },
           });
 
@@ -166,6 +171,33 @@ export async function POST(request: NextRequest) {
               },
             });
           }
+        } else {
+          // إنشاء منتج جديد
+          const newProduct = await tx.product.create({
+            data: {
+              name: item.productNameAr,
+              nameAr: item.productNameAr,
+              description: `${item.color} - ${item.size}`,
+              descriptionAr: `${item.color} - مقاس ${item.size}`,
+              price: item.sellingPrice,
+              productionCost: item.purchasePrice,
+              stock: item.quantity,
+              categoryId: item.categoryId,
+              vendorId: session.user.id,
+              images: item.imageUrl ? [item.imageUrl] : [],
+            },
+          });
+
+          // إنشاء InventoryItem
+          await tx.inventoryItem.create({
+            data: {
+              vendorId: session.user.id,
+              productId: newProduct.id,
+              totalPurchased: item.quantity,
+              currentStock: item.quantity,
+              unitCost: item.purchasePrice,
+            },
+          });
         }
       }
 
@@ -189,7 +221,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || session.user.role !== 'VENDOR') {
       return NextResponse.json(

@@ -77,40 +77,6 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
               priority={index === 0}
             />
             
-            {/* Main Logo Banner - Top Center */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 md:top-4 z-20">
-              <div className="bg-gradient-to-r from-gray-900/95 via-teal-900/95 to-gray-900/95 backdrop-blur-md px-3 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl shadow-2xl border border-teal-500/40 md:border-2 hover:scale-105 transition-all duration-300">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <div className="relative w-8 h-8 md:w-14 md:h-14 flex-shrink-0 animate-pulse">
-                    <Image
-                      src="/logo.png"
-                      alt="BS Brand Store Logo"
-                      fill
-                      sizes="(max-width: 768px) 32px, 56px"
-                      className="object-contain drop-shadow-2xl"
-                      priority
-                    />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-sm md:text-2xl font-bold bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                      BS Brand Store
-                    </h3>
-                    <p className="text-[10px] md:text-sm text-teal-200/90">أفضل العلامات التجارية بأسعار مميزة</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quality Badge - Top Right */}
-            <div className="absolute top-2 right-2 md:top-6 md:right-6 z-20">
-              <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-2 md:p-3 rounded-full shadow-2xl animate-pulse">
-                <Award className="w-4 h-4 md:w-7 md:h-7 text-white" />
-              </div>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white px-1.5 py-0.5 md:px-2 md:py-1 rounded-full shadow-lg">
-                <p className="text-[9px] md:text-xs font-bold text-orange-600 whitespace-nowrap">صُنع في مصر</p>
-              </div>
-            </div>
-            
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/50 to-transparent"></div>
           </div>

@@ -36,6 +36,13 @@ interface Product {
     id: string;
     nameAr: string;
   };
+  vendor?: {
+    id: string;
+    storeNameAr: string;
+    storeName: string;
+    logo: string | null;
+    rating: number;
+  } | null;
   createdAt: string;
   reviews?: Review[];
 }
@@ -149,15 +156,15 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      {/* Background Effects - hidden on mobile */}
+      <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 right-20 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 relative z-10">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-8 overflow-x-auto">
           <Link href="/" className="hover:text-teal-400">الرئيسية</Link>
           <ArrowRight className="w-4 h-4 rotate-180" />
           <Link href="/products" className="hover:text-teal-400">المنتجات</Link>
@@ -170,7 +177,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Product Details */}
-        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-12 mb-8 sm:mb-16">
           {/* Image Gallery */}
           <div className="space-y-4">
             <Card className="bg-gray-800/80 border-teal-500/20 overflow-hidden">
@@ -198,7 +205,7 @@ export default function ProductDetailPage() {
             </Card>
 
             {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-4 gap-2 sm:gap-3">
                 {images.map((image, index) => (
                   <button
                     key={index}
@@ -223,23 +230,59 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-600/20 text-teal-400 rounded-full text-sm mb-4">
-                <Package className="w-4 h-4" />
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-teal-600/20 text-teal-400 rounded-full text-xs sm:text-sm mb-3 sm:mb-4">
+                <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 {product.category.nameAr}
               </div>
-              <h1 className="text-4xl font-bold text-white mb-4">{product.nameAr}</h1>
-              <p className="text-gray-400 text-lg leading-relaxed">{product.descriptionAr}</p>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">{product.nameAr}</h1>
+              <p className="text-gray-400 text-sm sm:text-base md:text-lg leading-relaxed">{product.descriptionAr}</p>
             </div>
 
             {/* Price & Stock */}
-            <div className="flex items-baseline gap-4">
-              <span className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
+            <div className="flex items-baseline gap-2 sm:gap-4">
+              <span className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
                 {product.price.toLocaleString()}
               </span>
-              <span className="text-2xl text-gray-400">جنيه</span>
+              <span className="text-lg sm:text-xl md:text-2xl text-gray-400">جنيه</span>
             </div>
+
+            {/* Vendor Info */}
+            {product.vendor && (
+              <Card className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/30">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center gap-3">
+                    {product.vendor.logo && (
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                        <Image
+                          src={product.vendor.logo}
+                          alt={product.vendor.storeNameAr}
+                          width={48}
+                          height={48}
+                          className="rounded-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm text-gray-400 mb-0.5">بائع المنتج</p>
+                      <h3 className="text-white font-bold text-sm sm:text-base truncate">{product.vendor.storeNameAr}</h3>
+                      {product.vendor.rating > 0 && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-yellow-400 text-xs sm:text-sm font-medium">{product.vendor.rating.toFixed(1)}</span>
+                        </div>
+                      )}
+                    </div>
+                    <Link href={`/products?vendorId=${product.vendor.id}`}>
+                      <Button size="sm" variant="outline" className="border-purple-500/50 hover:bg-purple-500/10 text-xs sm:text-sm whitespace-nowrap">
+                        منتجات أخرى
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="flex items-center gap-3">
               {product.stock > 0 ? (
@@ -260,30 +303,30 @@ export default function ProductDetailPage() {
 
             {/* Quantity Selector */}
             {product.stock > 0 && (
-              <div className="space-y-3">
-                <label className="text-gray-300 font-medium">الكمية:</label>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3 bg-gray-800 rounded-lg p-2 border border-gray-700">
+              <div className="space-y-2 sm:space-y-3">
+                <label className="text-gray-300 font-medium text-sm sm:text-base">الكمية:</label>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2 sm:gap-3 bg-gray-800 rounded-lg p-1.5 sm:p-2 border border-gray-700">
                     <button
                       onClick={decrementQuantity}
                       disabled={quantity <= 1}
-                      className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                      <Minus className="w-5 h-5 text-white" />
+                      <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </button>
-                    <span className="text-2xl font-bold text-white min-w-[40px] text-center">
+                    <span className="text-xl sm:text-2xl font-bold text-white min-w-[30px] sm:min-w-[40px] text-center">
                       {quantity}
                     </span>
                     <button
                       onClick={incrementQuantity}
                       disabled={quantity >= product.stock}
-                      className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                      <Plus className="w-5 h-5 text-white" />
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </button>
                   </div>
-                  <span className="text-gray-400">
-                    الإجمالي: <span className="text-teal-400 font-bold text-xl">
+                  <span className="text-sm sm:text-base text-gray-400">
+                    الإجمالي: <span className="text-teal-400 font-bold text-base sm:text-xl">
                       {(product.price * quantity).toLocaleString()} جنيه
                     </span>
                   </span>
@@ -292,25 +335,25 @@ export default function ProductDetailPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <Button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-6 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-4 sm:py-6 text-sm sm:text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ShoppingCart className="w-6 h-6 ml-2" />
+                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-2" />
                 إضافة للسلة
               </Button>
-              <Button variant="outline" className="border-teal-500/50 hover:bg-teal-500/10 p-6">
-                <Heart className="w-6 h-6 text-teal-400" />
+              <Button variant="outline" className="border-teal-500/50 hover:bg-teal-500/10 p-3 sm:p-4 md:p-6">
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-400" />
               </Button>
-              <Button variant="outline" className="border-teal-500/50 hover:bg-teal-500/10 p-6">
-                <Share2 className="w-6 h-6 text-teal-400" />
+              <Button variant="outline" className="border-teal-500/50 hover:bg-teal-500/10 p-3 sm:p-4 md:p-6">
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-400" />
               </Button>
             </div>
 
-            {/* Brand & Quality Features */}
-            <div className="bg-gradient-to-br from-teal-900/40 to-cyan-900/40 rounded-xl p-6 border border-teal-500/30 space-y-4">
+            {/* Brand & Quality Features - Simplified for Mobile */}
+            <div className="hidden md:block bg-gradient-to-br from-teal-900/40 to-cyan-900/40 rounded-xl p-6 border border-teal-500/30 space-y-4">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 flex-shrink-0">
                   <img 
@@ -374,24 +417,24 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Features */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-700">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-700">
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
-                  <Truck className="w-6 h-6 text-teal-400" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
+                  <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
                 </div>
-                <p className="text-sm text-gray-400">شحن سريع</p>
+                <p className="text-xs sm:text-sm text-gray-400">شحن سريع</p>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
-                  <Shield className="w-6 h-6 text-teal-400" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
+                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
                 </div>
-                <p className="text-sm text-gray-400">ضمان الجودة</p>
+                <p className="text-xs sm:text-sm text-gray-400">ضمان الجودة</p>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
-                  <Package className="w-6 h-6 text-teal-400" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
+                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
                 </div>
-                <p className="text-sm text-gray-400">فحص عند الاستلام</p>
+                <p className="text-xs sm:text-sm text-gray-400">فحص عند الاستلام</p>
               </div>
             </div>
           </div>

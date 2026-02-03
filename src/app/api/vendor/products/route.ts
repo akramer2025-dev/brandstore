@@ -119,6 +119,9 @@ export async function POST(req: NextRequest) {
 
       // خصم التكلفة من رأس المال إذا كان المنتج مملوك
       if (productSource === 'OWNED' && totalCost > 0) {
+        const balanceBefore = vendor.capitalBalance || 0;
+        const balanceAfter = balanceBefore - totalCost;
+        
         await tx.vendor.update({
           where: { id: vendor.id },
           data: {
@@ -136,7 +139,8 @@ export async function POST(req: NextRequest) {
             amount: totalCost,
             description: `شراء منتج: ${nameAr}`,
             descriptionAr: `شراء منتج: ${nameAr} (${stock} قطعة × ${purchasePrice} ج)`,
-            balanceAfter: (vendor.capitalBalance || 0) - totalCost,
+            balanceBefore: balanceBefore,
+            balanceAfter: balanceAfter,
           }
         });
       }

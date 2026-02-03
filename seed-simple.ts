@@ -37,6 +37,17 @@ async function main() {
     },
   });
 
+  // إنشاء Vendor record
+  const vendorRecord = await prisma.vendor.create({
+    data: {
+      userId: vendor.id,
+      storeName: 'متجر البائع',
+      storeNameAr: 'متجر البائع',
+      capitalBalance: 50000, // رأس مال ابتدائي
+      commissionRate: 5,
+    },
+  });
+
   const customer = await prisma.user.create({
     data: {
       name: 'العميل',
@@ -114,9 +125,11 @@ async function main() {
         price: 100 + (i * 50),
         stock: 10 + (i * 2),
         categoryId: category.id,
+        vendorId: vendorRecord.id, // ربط المنتج بالتاجر
         images: productImages[i % productImages.length],
         isFlashDeal: i % 4 === 0,
         flashDealEndsAt: i % 4 === 0 ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) : null,
+        productionCost: 50 + (i * 20), // سعر الشراء
       },
     });
     products.push(product);

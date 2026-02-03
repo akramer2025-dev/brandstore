@@ -60,20 +60,20 @@ export default function CartPage() {
   const totalPrice = getTotalPrice();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 py-6 sm:py-12">
       {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 right-20 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 relative z-10">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-blue-400 bg-clip-text text-transparent mb-4">
+        <div className="text-center mb-6 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-blue-400 bg-clip-text text-transparent mb-2 sm:mb-4">
             سلة التسوق
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-sm sm:text-lg">
             مرحباً {session?.user?.name || session?.user?.username || "عزيزي العميل"}
           </p>
         </div>
@@ -81,12 +81,12 @@ export default function CartPage() {
         {items.length === 0 ? (
           /* Empty Cart */
           <Card className="max-w-2xl mx-auto bg-gray-800/80 border-teal-500/20">
-            <CardContent className="p-12 text-center">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-teal-600/20 to-cyan-600/20 rounded-full flex items-center justify-center">
-                <ShoppingBag className="w-12 h-12 text-teal-400" />
+            <CardContent className="p-6 sm:p-12 text-center">
+              <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-r from-teal-600/20 to-cyan-600/20 rounded-full flex items-center justify-center">
+                <ShoppingBag className="w-8 h-8 sm:w-12 sm:h-12 text-teal-400" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-4">السلة فارغة</h2>
-              <p className="text-gray-400 mb-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">السلة فارغة</h2>
+              <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8">
                 لم تقم بإضافة أي منتجات للسلة بعد
               </p>
               <Link href="/">
@@ -99,15 +99,15 @@ export default function CartPage() {
           </Card>
         ) : (
           /* Cart Items */
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
             {/* Items List */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-3 sm:space-y-4">
               {items.map((item) => (
                 <Card key={item.id} className="bg-gray-800/80 border-teal-500/20 hover:border-teal-500/40 transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex gap-6">
+                  <CardContent className="p-3 sm:p-6">
+                    <div className="flex gap-3 sm:gap-6">
                       {/* Product Image */}
-                      <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-700">
+                      <div className="relative w-20 h-20 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-700">
                         {item.image ? (
                           <Image
                             src={item.image}
@@ -125,52 +125,52 @@ export default function CartPage() {
                       {/* Product Info */}
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-start justify-between mb-1 sm:mb-2">
                             <div>
-                              <h3 className="text-xl font-bold text-white mb-1">
+                              <h3 className="text-base sm:text-xl font-bold text-white mb-0.5 sm:mb-1">
                                 {item.name}
                               </h3>
                               {item.categoryName && (
-                                <p className="text-sm text-gray-400">
+                                <p className="text-xs sm:text-sm text-gray-400">
                                   {item.categoryName}
                                 </p>
                               )}
                             </div>
                             <button
                               onClick={() => handleRemoveItem(item.id, item.name)}
-                              className="text-red-400 hover:text-red-300 transition-colors p-2"
+                              className="text-red-400 hover:text-red-300 transition-colors p-1 sm:p-2"
                             >
-                              <Trash2 className="w-5 h-5" />
+                              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                             </button>
                           </div>
                           
-                          <p className="text-2xl font-bold text-teal-400 mb-4">
+                          <p className="text-lg sm:text-2xl font-bold text-teal-400 mb-2 sm:mb-4">
                             {(item.price * item.quantity).toFixed(2)} جنيه
                           </p>
                         </div>
 
                         {/* Quantity Controls */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                           <button
                             onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                             disabled={item.quantity <= 1}
-                            className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white transition-colors"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white transition-colors"
                           >
-                            <Minus className="w-5 h-5" />
+                            <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
                           </button>
                           
-                          <span className="text-xl font-bold text-white w-12 text-center">
+                          <span className="text-base sm:text-xl font-bold text-white w-8 sm:w-12 text-center">
                             {item.quantity}
                           </span>
                           
                           <button
                             onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                            className="w-10 h-10 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 flex items-center justify-center text-white transition-colors"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 flex items-center justify-center text-white transition-colors"
                           >
-                            <Plus className="w-5 h-5" />
+                            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                           </button>
                           
-                          <span className="text-gray-400 mr-4">
+                          <span className="text-xs sm:text-sm text-gray-400 mr-2 sm:mr-4">
                             {item.price} جنيه للقطعة
                           </span>
                         </div>
@@ -195,13 +195,13 @@ export default function CartPage() {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <Card className="bg-gray-800/80 border-teal-500/20 sticky top-24">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-white">
+              <Card className="bg-gray-800/80 border-teal-500/20 lg:sticky lg:top-24">
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-white">
                     ملخص الطلب
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                   <div className="flex justify-between text-gray-400">
                     <span>عدد المنتجات:</span>
                     <span className="font-bold">{items.length}</span>
@@ -227,27 +227,27 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-700 pt-4">
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-xl font-bold text-white">الإجمالي:</span>
-                      <span className="text-3xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                  <div className="border-t border-gray-700 pt-3 sm:pt-4">
+                    <div className="flex justify-between items-center mb-4 sm:mb-6">
+                      <span className="text-base sm:text-xl font-bold text-white">الإجمالي:</span>
+                      <span className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
                         {totalPrice.toFixed(2)} جنيه
                       </span>
                     </div>
 
                     <Link href="/checkout">
-                      <Button className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-lg py-6">
+                      <Button className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-sm sm:text-lg py-4 sm:py-6">
                         <ShoppingBag className="w-5 h-5 ml-2" />
                         إتمام الطلب
                       </Button>
                     </Link>
                   </div>
 
-                  <div className="bg-teal-900/20 border border-teal-500/30 rounded-lg p-4 text-center">
-                    <p className="text-sm text-gray-300">
+                  <div className="bg-teal-900/20 border border-teal-500/30 rounded-lg p-3 sm:p-4 text-center">
+                    <p className="text-xs sm:text-sm text-gray-300">
                       💳 الدفع عند الاستلام
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1">
                       يمكنك فحص المنتج قبل الدفع
                     </p>
                   </div>
