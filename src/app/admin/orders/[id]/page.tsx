@@ -52,6 +52,15 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     orderBy: { name: "asc" },
   });
 
+  // Filter and map to ensure required fields
+  const staffList = deliveryStaffList
+    .filter(staff => staff.name && staff.phone)
+    .map(staff => ({
+      id: staff.id,
+      name: staff.name!,
+      phone: staff.phone!,
+    }));
+
   const statusConfig = {
     PENDING: {
       label: "قيد الانتظار",
@@ -152,7 +161,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <OrderActions 
                   orderId={order.id}
                   currentStatus={order.status}
-                  deliveryStaffList={deliveryStaffList}
+                  deliveryStaffList={staffList}
                   currentDeliveryStaffId={order.deliveryStaffId}
                 />
               </CardContent>
