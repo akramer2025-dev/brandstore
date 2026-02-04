@@ -34,28 +34,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Send notification to all subscribed users
-export async function sendNotificationToAll(title: string, body: string, data?: any) {
-  try {
-    // Get all subscriptions from database
-    // const subscriptions = await prisma.pushSubscription.findMany();
-
-    const notification = JSON.stringify({
-      title,
-      body,
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
-      data: data || {},
-    });
-
-    // Send to all subscriptions
-    // for (const sub of subscriptions) {
-    //   await webpush.sendNotification(sub.subscription, notification);
-    // }
-
-    return true;
-  } catch (error) {
-    console.error('Error sending notifications:', error);
-    return false;
-  }
-}
+// Send notification to all subscribed users (helper function - not exported)
+// To use: import this function from a separate utility file
+// async function sendNotificationToAll(title: string, body: string, data?: any) {
+//   try {
+//     // Get all subscriptions from database
+//     const subscriptions = await prisma.pushSubscription.findMany();
+//
+//     const notification = JSON.stringify({
+//       title,
+//       body,
+//       icon: '/icon-192x192.png',
+//       badge: '/icon-192x192.png',
+//       data: data || {},
+//     });
+//
+//     // Send to all subscriptions
+//     for (const sub of subscriptions) {
+//       await webpush.sendNotification(sub.subscription, notification);
+//     }
+//
+//     return true;
+//   } catch (error) {
+//     console.error('Error sending notifications:', error);
+//     return false;
+//   }
+// }
