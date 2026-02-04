@@ -10,8 +10,6 @@ import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
 import Link from 'next/link';
 import { Sparkles, ShoppingBag, TrendingUp } from 'lucide-react';
-import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,19 +36,9 @@ async function getCategories() {
 
 
 export default async function HomePage() {
-  // التحقق من المستخدم - بس الأدمن يتحول تلقائياً
-  let session = null;
-  try {
-    session = await auth();
-  } catch (error) {
-    console.error('Auth error:', error);
-  }
+  // السماح لجميع المستخدمين برؤية الصفحة الرئيسية
+  // لن يتم redirect تلقائي لأي مستخدم
   
-  // بس الأدمن يتحول تلقائياً لصفحة الإدارة
-  if (session?.user?.role === 'ADMIN') {
-    redirect('/admin');
-  }
-
   const [products, categories] = await Promise.all([
     getProducts(),
     getCategories(),
