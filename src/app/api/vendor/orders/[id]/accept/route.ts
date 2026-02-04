@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 // POST - Accept order
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -28,9 +28,10 @@ export async function POST(
       );
     }
 
+    const { id } = await params;
     const order = await prisma.order.findFirst({
       where: { 
-        id: params.id,
+        id,
         vendorId: vendor.id,
         status: 'PENDING',
         deletedAt: null,
@@ -46,7 +47,7 @@ export async function POST(
 
     // Update order status to CONFIRMED
     const updatedOrder = await prisma.order.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: 'CONFIRMED',
       },

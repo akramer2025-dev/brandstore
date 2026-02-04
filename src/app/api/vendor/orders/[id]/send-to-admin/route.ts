@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 // POST - Send order to admin
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -28,9 +28,10 @@ export async function POST(
       );
     }
 
+    const { id } = await params;
     const order = await prisma.order.findFirst({
       where: { 
-        id: params.id,
+        id,
         vendorId: vendor.id,
         deletedAt: null,
       },
@@ -45,7 +46,7 @@ export async function POST(
 
     // Update order - mark as sent to admin (can add a flag if needed)
     const updatedOrder = await prisma.order.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: 'CONFIRMED',
         customerNotes: order.customerNotes 

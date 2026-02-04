@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 // GET - Get order details for vendor
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -28,9 +28,10 @@ export async function GET(
       );
     }
 
+    const { id } = await params;
     const order = await prisma.order.findFirst({
       where: { 
-        id: params.id,
+        id,
         vendorId: vendor.id,
         deletedAt: null,
       },

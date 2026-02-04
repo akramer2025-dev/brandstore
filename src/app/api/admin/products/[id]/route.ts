@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -16,8 +16,9 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
     const body = await req.json();
-    const productId = params.id;
+    const productId = id;
 
     // التحقق من وجود المنتج
     const existingProduct = await prisma.product.findUnique({
@@ -57,7 +58,7 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -69,7 +70,8 @@ export async function DELETE(
       );
     }
 
-    const productId = params.id;
+    const { id } = await params;
+    const productId = id;
 
     // التحقق من وجود المنتج
     const product = await prisma.product.findUnique({
@@ -155,7 +157,7 @@ export async function DELETE(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -167,8 +169,9 @@ export async function GET(
       );
     }
 
-    const product = await prisma.product.findUnique({
-      where: { id: params.id },
+    const { id } = await params;
+    const product = await prisma.product.findUnique(
+      where: { id },
       include: {
         category: true,
         vendor: {
