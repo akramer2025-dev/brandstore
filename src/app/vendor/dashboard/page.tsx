@@ -53,7 +53,8 @@ export default function VendorDashboard() {
   }, [status, session, router])
 
   const fetchData = async () => {
-    try {, notificationsRes] = await Promise.all([
+    try {
+      const [capitalRes, statsRes, notificationsRes] = await Promise.all([
         fetch('/api/vendor/capital/summary').catch(() => null),
         fetch('/api/vendor/stats').catch(() => null),
         fetch('/api/vendor/notifications').catch(() => null)
