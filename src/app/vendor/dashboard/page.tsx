@@ -95,30 +95,8 @@ export default function VendorDashboard() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex items-center gap-2">
-            {/* زر الإشعارات */}
-            <Link href="/vendor/notifications">
-              <Button
-                size="sm"
-                className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 relative"
-              >
-                <Bell className="w-4 h-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
-            {/* زر تسجيل الخروج */}
-            <Button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              size="sm"
-              className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4 md:p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
       </div>
     )
   }
