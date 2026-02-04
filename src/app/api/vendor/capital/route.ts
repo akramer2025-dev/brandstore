@@ -63,22 +63,53 @@ export async function POST(req: NextRequest) {
     }
 
     // إنشاء سجل رأس المال
-    const capital = await prisma.partnerCapital.create({
-      data: {
-        vendorId: vendor.id,
-        partnerName: session.user.name || 'الشريك',
-        partnerType: 'OWNER',
-        initialAmount: parseFloat(initialAmount),
-        currentAmount: parseFloat(initialAmount),
-        capitalPercentage: 100, // 100% لأنه المالك
-        profitPercentage: 100,
-        notes: notes || null,
-      }
+    const result = await prisma.$transaction(async (tx) => {
+      // إنشاء سجل رأس المال
+      const capital = await tx.partnerCapital.create({
+        data: {
+          vendorId: vendor.id,
+          partnerName: session.user.name || 'الشريك',
+          partnerType: 'OWNER',
+          initialAmount: parseFloat(initialAmount),
+          currentAmount: parseFloat(initialAmount),
+          capitalPercentage: 100, // 100% لأنه المالك
+          profitPercentage: 100,
+          notes: notes || null,
+        }
+      });
+
+      // تحديث رصيد رأس المال في جدول الشريك
+      const balanceBefore = vendor.capitalBalance || 0;
+      const balanceAfter = balanceBefore + parseFloat(initialAmount);
+      
+      await tx.vendor.update({
+        where: { id: vendor.id },
+        data: {
+          capitalBalance: {
+            increment: parseFloat(initialAmount)
+          }
+        }
+      });
+
+      // تسجيل المعاملة
+      await tx.capitalTransaction.create({
+        data: {
+          vendorId: vendor.id,
+          type: 'DEPOSIT',
+          amount: parseFloat(initialAmount),
+          description: 'إيداع رأس المال',
+          descriptionAr: notes || 'إيداع رأس المال الأساسي',
+          balanceBefore: balanceBefore,
+          balanceAfter: balanceAfter,
+        }
+      });
+
+      return capital;
     });
 
     return NextResponse.json({
       message: 'تم تسجيل رأس المال بنجاح',
-      capital
+      capital: result
     }, { status: 201 });
 
   } catch (error) {

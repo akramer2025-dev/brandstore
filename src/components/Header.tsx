@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff } from "lucide-react";
+import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff, LayoutDashboard } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -428,6 +428,17 @@ export function Header() {
                         <Link href="/delivery" className="cursor-pointer text-gray-300 hover:text-cyan-400">
                           <Package className="w-4 h-4 mr-2" />
                           طلبات التوصيل
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {session.user?.role === 'VENDOR' && (
+                    <>
+                      <DropdownMenuSeparator className="bg-teal-500/20" />
+                      <DropdownMenuItem asChild>
+                        <Link href="/vendor/dashboard" className="cursor-pointer text-gray-300 hover:text-purple-400">
+                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          لوحة التحكم
                         </Link>
                       </DropdownMenuItem>
                     </>

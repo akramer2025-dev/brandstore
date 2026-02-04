@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -78,6 +78,8 @@ interface SupplierPayment {
 export default function VendorCapitalPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const activeTab = searchParams.get('tab') || 'overview'
   const [summary, setSummary] = useState<CapitalSummary | null>(null)
   const [supplierPayments, setSupplierPayments] = useState<SupplierPayment[]>([])
   const [paymentTotals, setPaymentTotals] = useState({ totalDue: 0, totalPaid: 0, pendingAmount: 0, totalProfit: 0 })
@@ -378,8 +380,61 @@ export default function VendorCapitalPage() {
           </Card>
         </div>
 
+        {/* Tabs للتنقل */}
+        <div className="flex gap-2 mb-6 flex-wrap bg-white/10 backdrop-blur-xl border border-white/20 p-2 rounded-xl">
+          <Link href="/vendor/capital">
+            <Button 
+              variant={activeTab === 'overview' ? "default" : "ghost"}
+              className={activeTab === 'overview'
+                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white" 
+                : "text-white hover:bg-white/20"
+              }
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              نظرة عامة
+            </Button>
+          </Link>
+          <Link href="/vendor/capital?tab=deposits">
+            <Button 
+              variant={activeTab === 'deposits' ? "default" : "ghost"}
+              className={activeTab === 'deposits'
+                ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white" 
+                : "text-white hover:bg-white/20"
+              }
+            >
+              <ArrowUpRight className="w-4 h-4 mr-2" />
+              الإيداعات
+            </Button>
+          </Link>
+          <Link href="/vendor/capital?tab=withdrawals">
+            <Button 
+              variant={activeTab === 'withdrawals' ? "default" : "ghost"}
+              className={activeTab === 'withdrawals'
+                ? "bg-gradient-to-r from-red-500 to-rose-500 text-white" 
+                : "text-white hover:bg-white/20"
+              }
+            >
+              <ArrowDownRight className="w-4 h-4 mr-2" />
+              السحوبات
+            </Button>
+          </Link>
+          <Link href="/vendor/capital?tab=transactions">
+            <Button 
+              variant={activeTab === 'transactions' ? "default" : "ghost"}
+              className={activeTab === 'transactions'
+                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" 
+                : "text-white hover:bg-white/20"
+              }
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              كل المعاملات
+            </Button>
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:gap-6">
-          {/* المستحقات للموردين - Mobile Optimized */}
+          {/* المستحقات للموردين - فقط في نظرة عامة */}
+          {activeTab === 'overview' && (
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 pb-3 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6">
               <CardTitle className="text-white flex items-center gap-2 font-bold text-sm sm:text-base">
@@ -440,21 +495,31 @@ export default function VendorCapitalPage() {
               )}
             </CardContent>
           </Card>
+          )}
 
           {/* آخر المعاملات - Mobile Optimized */}
+          {(activeTab === 'overview' || activeTab === 'transactions' || activeTab === 'deposits' || activeTab === 'withdrawals') && (
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 pb-3 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6">
               <CardTitle className="text-white flex items-center gap-2 text-sm sm:text-base">
                 <div className="bg-white/20 backdrop-blur p-1.5 sm:p-2 rounded-xl">
                   <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                 </div>
-                آخر المعاملات
+                {activeTab === 'deposits' && 'الإيداعات'}
+                {activeTab === 'withdrawals' && 'السحوبات'}
+                {(activeTab === 'overview' || activeTab === 'transactions') && 'آخر المعاملات'}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-3 sm:pt-4 px-3 sm:px-6 pb-3 sm:pb-6">
               {summary?.recentTransactions && summary.recentTransactions.length > 0 ? (
                 <div className="space-y-2 sm:space-y-3 max-h-96 overflow-y-auto">
-                  {summary.recentTransactions.map((tx: any) => (
+                  {summary.recentTransactions
+                    .filter((tx: any) => {
+                      if (activeTab === 'deposits') return tx.type === 'DEPOSIT';
+                      if (activeTab === 'withdrawals') return tx.type === 'WITHDRAWAL';
+                      return true; // overview and transactions show all
+                    })
+                    .map((tx: any) => (
                     <div
                       key={tx.id}
                       className="flex items-center justify-between p-2 sm:p-3 bg-white/5 rounded-xl border border-white/10 gap-2"
@@ -485,11 +550,16 @@ export default function VendorCapitalPage() {
               ) : (
                 <div className="text-center py-6 sm:py-8">
                   <Clock className="w-10 h-10 sm:w-12 sm:h-12 text-slate-500 mx-auto mb-2" />
-                  <p className="text-slate-400 text-sm sm:text-base">لا توجد معاملات حتى الآن</p>
+                  <p className="text-slate-400 text-sm sm:text-base">
+                    {activeTab === 'deposits' && 'لا توجد إيداعات حتى الآن'}
+                    {activeTab === 'withdrawals' && 'لا توجد سحوبات حتى الآن'}
+                    {(activeTab === 'overview' || activeTab === 'transactions') && 'لا توجد معاملات حتى الآن'}
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
+          )}
         </div>
       </div>
 

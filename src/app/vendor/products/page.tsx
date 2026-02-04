@@ -9,7 +9,11 @@ import Image from "next/image";
 import ProductActions from "./ProductActions";
 import ResetCapitalButton from "./ResetCapitalButton";
 
-export default async function VendorProductsPage() {
+export default async function VendorProductsPage({
+  searchParams,
+}: {
+  searchParams: { type?: string }
+}) {
   const session = await auth();
 
   if (!session || session.user?.role !== "VENDOR") {
@@ -24,11 +28,21 @@ export default async function VendorProductsPage() {
     redirect("/");
   }
 
+  // بناء شروط البحث
+  const whereCondition: any = { 
+    vendorId: vendor.id,
+    isActive: true  // استثناء المنتجات المحذوفة
+  };
+
+  // إضافة فلتر نوع المنتج إذا كان موجود
+  if (searchParams.type === 'owned') {
+    whereCondition.productSource = 'OWNED';
+  } else if (searchParams.type === 'consignment') {
+    whereCondition.productSource = 'CONSIGNMENT';
+  }
+
   const products = await prisma.product.findMany({
-    where: { 
-      vendorId: vendor.id,
-      isActive: true  // استثناء المنتجات المحذوفة
-    },
+    where: whereCondition,
     include: { category: true },
     orderBy: { createdAt: 'desc' }
   });
@@ -64,13 +78,30 @@ export default async function VendorProductsPage() {
     return sum + (purchasePrice * product.stock);
   }, 0);
 
+  // حساب عدد كل نوع من المنتجات
+  const ownedCount = products.filter(p => p.productSource === 'OWNED').length;
+  const consignmentCount = products.filter(p => p.productSource === 'CONSIGNMENT').length;
+
+  // تحديد العنوان بناءً على نوع الفلتر
+  const pageTitle = searchParams.type === 'owned' 
+    ? 'المنتجات المملوكة' 
+    : searchParams.type === 'consignment' 
+    ? 'منتجات الوسيط' 
+    : 'إدارة المنتجات';
+
+  const pageDescription = searchParams.type === 'owned'
+    ? 'المنتجات التي تم شراؤها من رأس المال'
+    : searchParams.type === 'consignment'
+    ? 'المنتجات المعروضة بنظام الوسيط (العمولة)'
+    : 'عرض وإدارة جميع منتجاتك';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-2 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
-            <Link href="/vendor">
+            <Link href="/vendor/dashboard">
               <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white h-8 w-8 sm:h-10 sm:w-10">
                 <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
@@ -78,9 +109,9 @@ export default async function VendorProductsPage() {
             <div className="flex-1">
               <h1 className="text-lg sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
                 <Package className="h-5 w-5 sm:h-8 sm:w-8 text-purple-400" />
-                إدارة المنتجات
+                {pageTitle}
               </h1>
-              <p className="text-gray-400 mt-0.5 text-xs sm:text-sm hidden sm:block">عرض وإدارة جميع منتجاتك</p>
+              <p className="text-gray-400 mt-0.5 text-xs sm:text-sm hidden sm:block">{pageDescription}</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -98,6 +129,46 @@ export default async function VendorProductsPage() {
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* فلتر نوع المنتجات */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          <Link href="/vendor/products">
+            <Button 
+              variant={!searchParams.type ? "default" : "outline"}
+              className={!searchParams.type 
+                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white" 
+                : "bg-white/10 border-white/20 text-white hover:bg-white/20"
+              }
+            >
+              <Package className="w-4 h-4 mr-2" />
+              جميع المنتجات ({ownedCount + consignmentCount})
+            </Button>
+          </Link>
+          <Link href="/vendor/products?type=owned">
+            <Button 
+              variant={searchParams.type === 'owned' ? "default" : "outline"}
+              className={searchParams.type === 'owned'
+                ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white" 
+                : "bg-white/10 border-white/20 text-white hover:bg-white/20"
+              }
+            >
+              <Wallet className="w-4 h-4 mr-2" />
+              منتجات مملوكة ({ownedCount})
+            </Button>
+          </Link>
+          <Link href="/vendor/products?type=consignment">
+            <Button 
+              variant={searchParams.type === 'consignment' ? "default" : "outline"}
+              className={searchParams.type === 'consignment'
+                ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white" 
+                : "bg-white/10 border-white/20 text-white hover:bg-white/20"
+              }
+            >
+              <PiggyBank className="w-4 h-4 mr-2" />
+              منتجات وسيط ({consignmentCount})
+            </Button>
+          </Link>
         </div>
 
         {/* رأس المال والتكاليف */}
