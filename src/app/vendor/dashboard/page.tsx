@@ -91,12 +91,11 @@ export default function VendorDashboard() {
       }
     }, 30000)
     return () => clearInterval(interval)
-  }, []) }
-  }
+  }, [])
 
   if (status === 'loading' || loading) {
     return (
-      <div div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
             {/* زر الإشعارات */}
             <Link href="/vendor/notifications">
               <Button
