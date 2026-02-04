@@ -221,7 +221,7 @@ async function main() {
         price: 899,
         stock: 15,
         categoryId: categories[2].id,
-        vendorId: storeOwner.vendor?.id,
+        vendorId: storeOwnerVendor?.id,
         isActive: true,
       },
     }),
