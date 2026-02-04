@@ -32,8 +32,9 @@ export async function POST(req: NextRequest) {
     }
 
     // استخدام GPT-4 Vision لتحليل الصورة
+    // gpt-4o-mini = أرخص 10 مرات | gpt-4o = أقوى وأدق
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini", // غيّر لـ "gpt-4o" للحصول على دقة أعلى
       messages: [
         {
           role: "user",
