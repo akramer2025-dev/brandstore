@@ -41,71 +41,71 @@ export default function PurchasesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-2 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <ShoppingCart className="h-8 w-8 text-purple-400" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-8">
+          <div className="flex-1">
+            <h1 className="text-lg sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
+              <ShoppingCart className="h-5 w-5 sm:h-8 sm:w-8 text-purple-400" />
               فواتير المشتريات
             </h1>
-            <p className="text-gray-400 mt-1">إدارة وعرض جميع فواتير المشتريات</p>
+            <p className="text-gray-400 mt-0.5 text-xs sm:text-sm hidden sm:block">إدارة وعرض جميع فواتير المشتريات</p>
           </div>
-          <Link href="/vendor/purchases/new">
-            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
+          <Link href="/vendor/purchases/new" className="w-full sm:w-auto">
+            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 h-8 sm:h-10 text-xs sm:text-sm w-full">
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               فاتورة جديدة
             </Button>
           </Link>
         </div>
 
         {/* الإحصائيات */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-6 mb-4 sm:mb-8">
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-200 text-sm mb-1">عدد الفواتير</p>
-                  <p className="text-3xl font-bold text-white">{purchases.length}</p>
+                  <p className="text-blue-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">عدد الفواتير</p>
+                  <p className="text-lg sm:text-3xl font-bold text-white">{purchases.length}</p>
                 </div>
-                <Receipt className="w-12 h-12 text-blue-400" />
+                <Receipt className="w-6 h-6 sm:w-12 sm:h-12 text-blue-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-200 text-sm mb-1">إجمالي المشتريات</p>
-                  <p className="text-3xl font-bold text-white">{totalPurchases.toFixed(2)} ج</p>
+                  <p className="text-purple-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">إجمالي المشتريات</p>
+                  <p className="text-lg sm:text-3xl font-bold text-white">{totalPurchases.toFixed(2)} ج</p>
                 </div>
-                <DollarSign className="w-12 h-12 text-purple-400" />
+                <DollarSign className="w-6 h-6 sm:w-12 sm:h-12 text-purple-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-200 text-sm mb-1">من رأس المال</p>
-                  <p className="text-3xl font-bold text-white">{totalFromCapital.toFixed(2)} ج</p>
+                  <p className="text-green-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">من رأس المال</p>
+                  <p className="text-lg sm:text-3xl font-bold text-white">{totalFromCapital.toFixed(2)} ج</p>
                 </div>
-                <Package className="w-12 h-12 text-green-400" />
+                <Package className="w-6 h-6 sm:w-12 sm:h-12 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-orange-200 text-sm mb-1">بيع بالنيابة</p>
-                  <p className="text-3xl font-bold text-white">{totalOnBehalf.toFixed(2)} ج</p>
+                  <p className="text-orange-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">بيع بالنيابة</p>
+                  <p className="text-lg sm:text-3xl font-bold text-white">{totalOnBehalf.toFixed(2)} ج</p>
                 </div>
-                <ShoppingCart className="w-12 h-12 text-orange-400" />
+                <ShoppingCart className="w-6 h-6 sm:w-12 sm:h-12 text-orange-400" />
               </div>
             </CardContent>
           </Card>
@@ -114,13 +114,13 @@ export default function PurchasesPage() {
         {/* قائمة الفواتير */}
         {purchases.length === 0 ? (
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
-            <CardContent className="p-12 text-center">
-              <ShoppingCart className="w-20 h-20 mx-auto text-gray-500 mb-4" />
-              <h3 className="text-xl text-white mb-2">لا توجد فواتير مشتريات</h3>
-              <p className="text-gray-400 mb-6">ابدأ بإضافة فاتورة مشتريات جديدة</p>
-              <Link href="/vendor/purchases/new">
-                <Button className="bg-purple-600 hover:bg-purple-700">
-                  <Plus className="w-4 h-4 mr-2" />
+            <CardContent className="p-6 sm:p-12 text-center">
+              <ShoppingCart className="w-12 h-12 sm:w-20 sm:h-20 mx-auto text-gray-500 mb-2 sm:mb-4" />
+              <h3 className="text-lg sm:text-xl text-white mb-1 sm:mb-2">لا توجد فواتير مشتريات</h3>
+              <p className="text-gray-400 mb-3 sm:mb-6 text-xs sm:text-sm">ابدأ بإضافة فاتورة مشتريات جديدة</p>
+              <Link href="/vendor/purchases/new" className="inline-block w-full sm:w-auto">
+                <Button className="bg-purple-600 hover:bg-purple-700 h-8 sm:h-10 text-xs sm:text-sm w-full sm:w-auto">
+                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   فاتورة جديدة
                 </Button>
               </Link>

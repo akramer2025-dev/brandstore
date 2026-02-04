@@ -65,35 +65,35 @@ export default async function VendorProductsPage() {
   }, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-2 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
             <Link href="/vendor">
-              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
-                <ArrowLeft className="h-4 w-4" />
+              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white h-8 w-8 sm:h-10 sm:w-10">
+                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                <Package className="h-8 w-8 text-purple-400" />
+            <div className="flex-1">
+              <h1 className="text-lg sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                <Package className="h-5 w-5 sm:h-8 sm:w-8 text-purple-400" />
                 إدارة المنتجات
               </h1>
-              <p className="text-gray-400 mt-1">عرض وإدارة جميع منتجاتك</p>
+              <p className="text-gray-400 mt-0.5 text-xs sm:text-sm hidden sm:block">عرض وإدارة جميع منتجاتك</p>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <ResetCapitalButton currentBalance={currentBalance} />
-            <Link href="/vendor/purchases/new">
-              <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white">
-                <DollarSign className="h-4 w-4 mr-2" />
+            <Link href="/vendor/purchases/new" className="w-full sm:w-auto">
+              <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white h-8 sm:h-10 text-xs sm:text-sm w-full">
+                <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 فاتورة مشتريات
               </Button>
             </Link>
-            <Link href="/vendor/products/new">
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
-                <Plus className="h-4 w-4 mr-2" />
+            <Link href="/vendor/products/new" className="w-full sm:w-auto">
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white h-8 sm:h-10 text-xs sm:text-sm w-full">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 إضافة منتج جديد
               </Button>
             </Link>

@@ -55,9 +55,9 @@ export default function ResetCapitalButton({ currentBalance }: ResetCapitalButto
     <>
       <Button
         onClick={() => setShowModal(true)}
-        className="bg-orange-500/20 border border-orange-500/50 text-orange-300 hover:bg-orange-500/30"
+        className="bg-orange-500/20 border border-orange-500/50 text-orange-300 hover:bg-orange-500/30 h-8 sm:h-10 text-xs sm:text-sm w-full sm:w-auto"
       >
-        <RefreshCw className="h-4 w-4 mr-2" />
+        <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
         تصفية رأس المال
       </Button>
 
