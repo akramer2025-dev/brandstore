@@ -220,91 +220,93 @@ export default function POSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-2 md:p-4">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-              <Receipt className="w-8 h-8" />
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <Receipt className="w-6 h-6 md:w-8 md:h-8" />
               نقطة البيع - POS
             </h1>
-            <p className="text-purple-300 mt-1">نظام كاشير احترافي</p>
+            <p className="text-purple-300 mt-1 text-sm md:text-base">نظام كاشير احترافي</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               onClick={() => router.push('/vendor/dashboard')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              size="sm"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-xs md:text-sm"
             >
-              <LayoutDashboard className="w-4 h-4 mr-2" />
-              لوحة تحكم الشريك
+              <LayoutDashboard className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              لوحة التحكم
             </Button>
             <Button
               onClick={() => signOut({ callbackUrl: '/' })}
               variant="outline"
-              className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+              size="sm"
+              className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:text-red-300 text-xs md:text-sm"
             >
-              <LogOut className="w-4 h-4 mr-2" />
-              تسجيل الخروج
+              <LogOut className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              خروج
             </Button>
           </div>
         </div>
 
         {/* الإحصائيات السريعة */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">عدد المنتجات</p>
-                  <p className="text-2xl font-bold text-white">{products.length}</p>
+                  <p className="text-gray-300 text-xs md:text-sm">المنتجات</p>
+                  <p className="text-xl md:text-2xl font-bold text-white">{products.length}</p>
                 </div>
-                <Package className="w-8 h-8 text-purple-400" />
+                <Package className="w-6 h-6 md:w-8 md:h-8 text-purple-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">السلة</p>
-                  <p className="text-2xl font-bold text-white">{itemsCount} قطعة</p>
+                  <p className="text-gray-300 text-xs md:text-sm">السلة</p>
+                  <p className="text-xl md:text-2xl font-bold text-white">{itemsCount}</p>
                 </div>
-                <ShoppingCart className="w-8 h-8 text-green-400" />
+                <ShoppingCart className="w-6 h-6 md:w-8 md:h-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">الإجمالي</p>
-                  <p className="text-2xl font-bold text-white">{total.toFixed(2)} ج</p>
+                  <p className="text-gray-300 text-xs md:text-sm">الإجمالي</p>
+                  <p className="text-lg md:text-2xl font-bold text-white">{total.toFixed(0)} ج</p>
                 </div>
-                <DollarSign className="w-8 h-8 text-yellow-400" />
+                <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-yellow-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">💰 الربح المتوقع</p>
-                  <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {totalProfit.toFixed(2)} ج
+                  <p className="text-gray-300 text-xs md:text-sm">الربح</p>
+                  <p className={`text-lg md:text-2xl font-bold ${totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {totalProfit.toFixed(0)} ج
                   </p>
                 </div>
-                <Calculator className="w-8 h-8 text-green-400" />
+                <Calculator className="w-6 h-6 md:w-8 md:h-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
         {/* المنتجات */}
         <div className="lg:col-span-2">
           <Card className="bg-white/10 backdrop-blur-lg border-white/20 h-full">
@@ -350,7 +352,7 @@ export default function POSPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 max-h-[400px] md:max-h-[500px] overflow-y-auto">
                 {filteredProducts.map(product => {
                   const imageUrl = product.images?.split(',')[0] || '/placeholder.jpg';
                   return (
@@ -359,7 +361,7 @@ export default function POSPage() {
                     className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer transition-all"
                     onClick={() => addToCart(product)}
                   >
-                    <CardContent className="p-3">
+                    <CardContent className="p-2 md:p-3">
                       <div className="aspect-square mb-2 rounded-lg overflow-hidden bg-white/10">
                         <img 
                           src={imageUrl} 
@@ -370,9 +372,9 @@ export default function POSPage() {
                           }}
                         />
                       </div>
-                      <h3 className="font-bold text-white text-sm mb-1">{product.nameAr}</h3>
-                      <p className="text-xs text-gray-400 mb-2">{product.category?.nameAr}</p>
-                      <div className="flex items-center justify-between">
+                      <h3 className="font-bold text-white text-xs md:text-sm mb-1 line-clamp-1">{product.nameAr}</h3>
+                      <p className="text-xs text-gray-400 mb-2 line-clamp-1">{product.category?.nameAr}</p>
+                      <div className="flex items-center justify-between text-xs md:text-sm">
                         <span className="text-green-400 font-bold">{product.price} ج</span>
                         <Badge variant={product.stock > 10 ? 'default' : 'destructive'} className="text-xs">
                           {product.stock}
