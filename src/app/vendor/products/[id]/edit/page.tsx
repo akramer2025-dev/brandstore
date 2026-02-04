@@ -65,7 +65,21 @@ export default function EditProductPage() {
             categoryId: product.categoryId || '',
             isVisible: product.isVisible ?? true,
           });
-          setImages(product.images || []);
+          
+          // إصلاح: تحويل الصور من string إلى array
+          if (product.images) {
+            if (typeof product.images === 'string') {
+              // إذا كانت string مفصولة بفواصل
+              setImages(product.images.split(',').filter((img: string) => img.trim()));
+            } else if (Array.isArray(product.images)) {
+              // إذا كانت array بالفعل
+              setImages(product.images);
+            } else {
+              setImages([]);
+            }
+          } else {
+            setImages([]);
+          }
         } else {
           alert('المنتج غير موجود');
           router.push('/vendor/inventory');
@@ -168,7 +182,7 @@ export default function EditProductPage() {
           productionCost: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
           stock: parseInt(formData.stock),
           categoryId: formData.categoryId || null,
-          images: images,
+          images: images.join(','), // تحويل array إلى string مفصول بفواصل
           isVisible: formData.isVisible,
         }),
       });
