@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار رفع الصور</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .upload-area {
+            border: 3px dashed rgba(255,255,255,0.5);
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: white;
+            background: rgba(255,255,255,0.1);
+        }
+        input[type="file"] { display: none; }
+        button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:hover { transform: scale(1.05); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .success { background: rgba(76, 175, 80, 0.3); border: 2px solid #4CAF50; }
+        .error { background: rgba(244, 67, 54, 0.3); border: 2px solid #f44336; }
+        .info { background: rgba(33, 150, 243, 0.3); border: 2px solid #2196F3; margin-bottom: 20px; }
+        pre { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .preview { max-width: 100%; margin-top: 10px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ اختبار رفع الصور</h1>
+        
+        <div class="info" id="loginInfo">
+            <strong>⚠️ تحذير:</strong> لازم تكون مسجل دخول كـ VENDOR أو ADMIN
+            <br>
+            <small>لو مش مسجل دخول، هيظهر خطأ "Unauthorized"</small>
+        </div>
+
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <h2>📤 اضغط هنا لاختيار صورة</h2>
+            <p>JPEG, PNG, WebP - أقل من 5MB</p>
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple>
+        </div>
+
+        <button id="uploadBtn" onclick="uploadImage()" disabled>رفع الصورة</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const resultDiv = document.getElementById('result');
+        let selectedFiles = null;
+
+        fileInput.addEventListener('change', (e) => {
+            selectedFiles = e.target.files;
+            if (selectedFiles.length > 0) {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = `رفع ${selectedFiles.length} صورة`;
+            }
+        });
+
+        async function uploadImage() {
+            if (!selectedFiles || selectedFiles.length === 0) {
+                showResult('error', '❌ اختر صورة أولاً!');
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'جاري الرفع...';
+
+            // التحقق من الملفات
+            for (let file of selectedFiles) {
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    showResult('error', `❌ نوع الملف غير مسموح: ${file.name}\n\nيُسمح بـ: JPEG, PNG, WebP فقط`);
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'رفع الصورة';
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                    showResult('error', `❌ حجم الملف كبير جداً: ${file.name}\n\nالحجم: ${sizeMB} MB\nالحد الأقصى: 5 MB`);
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'رفع الصورة';
+                    return;
+                }
+            }
+
+            const formData = new FormData();
+            for (let file of selectedFiles) {
+                formData.append('files', file);
+            }
+
+            try {
+                showResult('info', '⏳ جاري رفع الصور...');
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    let html = `✅ تم رفع ${data.urls.length} صورة بنجاح!\n\n`;
+                    html += `الروابط:\n`;
+                    data.urls.forEach((url, i) => {
+                        html += `${i + 1}. ${url}\n`;
+                        html += `<img src="${url}" class="preview" alt="صورة ${i+1}"><br>`;
+                    });
+                    showResult('success', html);
+                } else {
+                    let errorMsg = `❌ فشل رفع الصور\n\n`;
+                    errorMsg += `الخطأ: ${data.error}\n`;
+                    if (data.suggestion) {
+                        errorMsg += `\nالحل: ${data.suggestion}`;
+                    }
+                    errorMsg += `\n\nStatus Code: ${response.status}`;
+                    
+                    if (response.status === 401) {
+                        errorMsg += `\n\n⚠️ لازم تكون مسجل دخول كـ VENDOR أو ADMIN!`;
+                        errorMsg += `\n\nالحل:`;
+                        errorMsg += `\n1. اذهب إلى: /auth/login`;
+                        errorMsg += `\n2. سجل دخول بحساب شريك`;
+                        errorMsg += `\n3. ارجع هنا وجرب تاني`;
+                    }
+                    
+                    showResult('error', errorMsg);
+                }
+            } catch (error) {
+                showResult('error', `❌ حدث خطأ:\n\n${error.message}\n\nتفاصيل:\n${error.stack}`);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'رفع الصورة';
+            }
+        }
+
+        function showResult(type, message) {
+            resultDiv.className = type;
+            resultDiv.innerHTML = message.replace(/\n/g, '<br>');
+            resultDiv.style.display = 'block';
+        }
+
+        // فحص حالة تسجيل الدخول
+        fetch('/api/auth/session')
+            .then(r => r.json())
+            .then(session => {
+                if (session?.user) {
+                    const role = session.user.role;
+                    const name = session.user.name || session.user.email;
+                    
+                    if (role === 'VENDOR' || role === 'ADMIN') {
+                        document.getElementById('loginInfo').className = 'success';
+                        document.getElementById('loginInfo').innerHTML = `
+                            ✅ مسجل دخول: ${name}<br>
+                            الدور: ${role}<br>
+                            <small>يمكنك رفع الصور الآن!</small>
+                        `;
+                    } else {
+                        document.getElementById('loginInfo').className = 'error';
+                        document.getElementById('loginInfo').innerHTML = `
+                            ❌ دورك: ${role}<br>
+                            لازم تكون VENDOR أو ADMIN لرفع الصور!<br>
+                            <small><a href="/auth/login" style="color: white;">سجل دخول بحساب آخر</a></small>
+                        `;
+                    }
+                } else {
+                    document.getElementById('loginInfo').className = 'error';
+                    document.getElementById('loginInfo').innerHTML = `
+                        ❌ غير مسجل دخول!<br>
+                        <small><a href="/auth/login" style="color: white;">اضغط هنا لتسجيل الدخول</a></small>
+                    `;
+                }
+            });
+    </script>
+</body>
+</html>

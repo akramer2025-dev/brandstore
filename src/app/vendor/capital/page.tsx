@@ -209,60 +209,62 @@ export default function VendorCapitalPage() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
-      {/* Header */}
+      {/* Header - Mobile Optimized */}
       <div className="relative bg-gradient-to-r from-purple-900/50 via-pink-900/30 to-purple-900/50 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Link href="/vendor/dashboard">
-                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-                  <ChevronLeft className="w-6 h-6" />
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 h-8 w-8 sm:h-10 sm:w-10">
+                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </Button>
               </Link>
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-3 rounded-xl">
-                <Wallet className="w-8 h-8 text-white" />
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-2 sm:p-3 rounded-xl">
+                <Wallet className="w-5 h-5 sm:w-8 sm:h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-white">إدارة رأس المال</h1>
-                <p className="text-purple-300 text-sm">تتبع الإيداعات والأرباح والمستحقات</p>
+                <h1 className="text-base sm:text-2xl md:text-3xl font-bold text-white">إدارة رأس المال</h1>
+                <p className="text-purple-300 text-[10px] sm:text-sm hidden sm:block">تتبع الإيداعات والأرباح والمستحقات</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2">
               <Button
                 onClick={() => setShowDepositModal(true)}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-[10px] sm:text-sm px-2 sm:px-4 h-8 sm:h-10"
               >
-                <Plus className="w-4 h-4 ml-2" />
-                إيداع
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+                <span className="hidden sm:inline">إيداع</span>
+                <span className="sm:hidden">+</span>
               </Button>
               <Button
                 onClick={() => setShowWithdrawModal(true)}
-                className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600"
+                className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-[10px] sm:text-sm px-2 sm:px-4 h-8 sm:h-10"
               >
-                <Minus className="w-4 h-4 ml-2" />
-                سحب
+                <Minus className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+                <span className="hidden sm:inline">سحب</span>
+                <span className="sm:hidden">-</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* الكروت الرئيسية */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="relative max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        {/* الكروت الرئيسية - Mobile Optimized */}
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8">
           {/* رصيد رأس المال */}
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/15 transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-300 text-sm font-bold">💰 رصيد رأس المال</p>
-                  <p className="text-4xl font-black text-yellow-400 mt-2">
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-2">
+                <div className="w-full">
+                  <p className="text-gray-300 text-[10px] sm:text-sm font-bold">💰 رصيد رأس المال</p>
+                  <p className="text-xl sm:text-4xl font-black text-yellow-400 mt-1 sm:mt-2">
                     {summary?.capital.current?.toLocaleString() || 0}
-                    <span className="text-xl text-yellow-300 mr-1">ج</span>
+                    <span className="text-sm sm:text-xl text-yellow-300 mr-1">ج</span>
                   </p>
                 </div>
-                <div className="bg-white/20 backdrop-blur p-3 rounded-xl">
-                  <Wallet className="w-7 h-7 text-yellow-400" />
+                <div className="bg-white/20 backdrop-blur p-2 sm:p-3 rounded-xl hidden sm:block">
+                  <Wallet className="w-5 h-5 sm:w-7 sm:h-7 text-yellow-400" />
                 </div>
               </div>
             </CardContent>
@@ -270,17 +272,17 @@ export default function VendorCapitalPage() {
 
           {/* إجمالي الإيداعات */}
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/15 transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-300 text-sm font-bold">📈 إجمالي الإيداعات</p>
-                  <p className="text-4xl font-black text-green-400 mt-2">
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-2">
+                <div className="w-full">
+                  <p className="text-gray-300 text-[10px] sm:text-sm font-bold">📈 إجمالي الإيداعات</p>
+                  <p className="text-xl sm:text-4xl font-black text-green-400 mt-1 sm:mt-2">
                     {summary?.capital.totalDeposits?.toLocaleString() || 0}
-                    <span className="text-lg text-green-300 mr-1">ج</span>
+                    <span className="text-sm sm:text-lg text-green-300 mr-1">ج</span>
                   </p>
                 </div>
-                <div className="bg-white/20 backdrop-blur p-3 rounded-xl">
-                  <ArrowUpRight className="w-7 h-7 text-green-400" />
+                <div className="bg-white/20 backdrop-blur p-2 sm:p-3 rounded-xl hidden sm:block">
+                  <ArrowUpRight className="w-5 h-5 sm:w-7 sm:h-7 text-green-400" />
                 </div>
               </div>
             </CardContent>
@@ -288,20 +290,20 @@ export default function VendorCapitalPage() {
 
           {/* المستحق للموردين */}
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/15 transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-300 text-sm font-bold">⚠️ المستحق للموردين</p>
-                  <p className="text-4xl font-black text-red-400 mt-2">
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-2">
+                <div className="w-full">
+                  <p className="text-gray-300 text-[10px] sm:text-sm font-bold">⚠️ المستحق للموردين</p>
+                  <p className="text-xl sm:text-4xl font-black text-red-400 mt-1 sm:mt-2">
                     {summary?.suppliers.pendingPayments?.toLocaleString() || 0}
-                    <span className="text-lg text-red-300 mr-1">ج</span>
+                    <span className="text-sm sm:text-lg text-red-300 mr-1">ج</span>
                   </p>
-                  <p className="text-gray-400 text-sm mt-1 font-medium">
+                  <p className="text-gray-400 text-[9px] sm:text-sm mt-1 font-medium">
                     {summary?.suppliers.pendingCount || 0} مورد ينتظر
                   </p>
                 </div>
-                <div className="bg-white/20 backdrop-blur p-3 rounded-xl">
-                  <Users className="w-7 h-7 text-red-400" />
+                <div className="bg-white/20 backdrop-blur p-2 sm:p-3 rounded-xl hidden sm:block">
+                  <Users className="w-5 h-5 sm:w-7 sm:h-7 text-red-400" />
                 </div>
               </div>
             </CardContent>
@@ -309,66 +311,66 @@ export default function VendorCapitalPage() {
 
           {/* أرباح الوسيط */}
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/15 transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-300 text-sm font-bold">💎 أرباح الوسيط</p>
-                  <p className="text-4xl font-black text-purple-400 mt-2">
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-2">
+                <div className="w-full">
+                  <p className="text-gray-300 text-[10px] sm:text-sm font-bold">💎 أرباح الوسيط</p>
+                  <p className="text-xl sm:text-4xl font-black text-purple-400 mt-1 sm:mt-2">
                     {summary?.suppliers.consignmentProfits?.toLocaleString() || 0}
-                    <span className="text-lg text-purple-300 mr-1">ج</span>
+                    <span className="text-sm sm:text-lg text-purple-300 mr-1">ج</span>
                   </p>
                 </div>
-                <div className="bg-white/20 backdrop-blur p-3 rounded-xl">
-                  <TrendingUp className="w-7 h-7 text-purple-400" />
+                <div className="bg-white/20 backdrop-blur p-2 sm:p-3 rounded-xl hidden sm:block">
+                  <TrendingUp className="w-5 h-5 sm:w-7 sm:h-7 text-purple-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* إحصائيات المنتجات */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {/* إحصائيات المنتجات - Mobile Optimized */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-8">
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/15 transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 backdrop-blur p-3 rounded-xl">
-                  <Package className="w-7 h-7 text-cyan-400" />
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="bg-white/20 backdrop-blur p-2 sm:p-3 rounded-xl">
+                  <Package className="w-5 h-5 sm:w-7 sm:h-7 text-cyan-400" />
                 </div>
                 <div>
-                  <p className="text-gray-300 text-sm font-bold">📦 منتجات مملوكة</p>
-                  <p className="text-4xl font-black text-cyan-400">{summary?.products.owned || 0}</p>
-                  <p className="text-gray-400 text-xs font-medium">تم شراؤها من رأس المال</p>
+                  <p className="text-gray-300 text-[10px] sm:text-sm font-bold">📦 منتجات مملوكة</p>
+                  <p className="text-2xl sm:text-4xl font-black text-cyan-400">{summary?.products.owned || 0}</p>
+                  <p className="text-gray-400 text-[9px] sm:text-xs font-medium">تم شراؤها من رأس المال</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/15 transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 backdrop-blur p-3 rounded-xl">
-                  <Store className="w-7 h-7 text-pink-400" />
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="bg-white/20 backdrop-blur p-2 sm:p-3 rounded-xl">
+                  <Store className="w-5 h-5 sm:w-7 sm:h-7 text-pink-400" />
                 </div>
                 <div>
-                  <p className="text-gray-300 text-sm font-bold">🏪 منتجات وسيط</p>
-                  <p className="text-4xl font-black text-pink-400">{summary?.products.consignment || 0}</p>
-                  <p className="text-gray-400 text-xs font-medium">من محلات أخرى</p>
+                  <p className="text-gray-300 text-[10px] sm:text-sm font-bold">🏪 منتجات وسيط</p>
+                  <p className="text-2xl sm:text-4xl font-black text-pink-400">{summary?.products.consignment || 0}</p>
+                  <p className="text-gray-400 text-[9px] sm:text-xs font-medium">من محلات أخرى</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/15 transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 backdrop-blur p-3 rounded-xl">
-                  <DollarSign className="w-7 h-7 text-green-400" />
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="bg-white/20 backdrop-blur p-2 sm:p-3 rounded-xl">
+                  <DollarSign className="w-5 h-5 sm:w-7 sm:h-7 text-green-400" />
                 </div>
                 <div>
-                  <p className="text-gray-300 text-sm font-bold">💵 إجمالي الأرباح</p>
-                  <p className="text-4xl font-black text-green-400">
+                  <p className="text-gray-300 text-[10px] sm:text-sm font-bold">💵 إجمالي الأرباح</p>
+                  <p className="text-2xl sm:text-4xl font-black text-green-400">
                     {summary?.financials.totalProfit?.toLocaleString() || 0}
-                    <span className="text-xl text-green-300 mr-1">ج</span>
+                    <span className="text-sm sm:text-xl text-green-300 mr-1">ج</span>
                   </p>
                 </div>
               </div>
@@ -376,103 +378,104 @@ export default function VendorCapitalPage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* المستحقات للموردين */}
+        <div className="grid grid-cols-1 gap-4 sm:gap-6">
+          {/* المستحقات للموردين - Mobile Optimized */}
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 pb-4">
-              <CardTitle className="text-white flex items-center gap-2 font-bold">
-                <div className="bg-white/20 backdrop-blur p-2 rounded-xl">
-                  <AlertCircle className="w-5 h-5 text-orange-400" />
+            <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 pb-3 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-white flex items-center gap-2 font-bold text-sm sm:text-base">
+                <div className="bg-white/20 backdrop-blur p-1.5 sm:p-2 rounded-xl">
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
                 </div>
                 مستحقات الموردين
               </CardTitle>
-              <Badge className="bg-white/20 text-orange-400 border border-white/30 font-bold px-3 py-1">
-                {paymentTotals.pendingAmount?.toLocaleString()} ج معلق
+              <Badge className="bg-white/20 text-orange-400 border border-white/30 font-bold px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs">
+                {paymentTotals.pendingAmount?.toLocaleString()} ج
               </Badge>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-3 sm:pt-4 px-3 sm:px-6 pb-3 sm:pb-6">
               {supplierPayments.length > 0 ? (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-2 sm:space-y-3 max-h-96 overflow-y-auto">
                   {supplierPayments.map((payment) => (
                     <div
                       key={payment.id}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-700/60 to-slate-600/40 rounded-xl border border-slate-500/40 hover:border-orange-400/50 transition-all"
+                      className="flex items-center justify-between p-2 sm:p-4 bg-gradient-to-r from-slate-700/60 to-slate-600/40 rounded-xl border border-slate-500/40 hover:border-orange-400/50 transition-all gap-2"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="bg-amber-500/20 p-2 rounded-lg">
-                          <Store className="w-5 h-5 text-amber-400" />
+                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                        <div className="bg-amber-500/20 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                          <Store className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
                         </div>
-                        <div>
-                          <p className="text-white font-semibold">{payment.supplierName}</p>
-                          <p className="text-slate-400 text-sm">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-white font-semibold text-xs sm:text-base truncate">{payment.supplierName}</p>
+                          <p className="text-slate-400 text-[10px] sm:text-sm truncate">
                             {payment.product?.nameAr || 'منتج'}
                           </p>
                           {payment.supplierPhone && (
-                            <p className="text-slate-500 text-xs">{payment.supplierPhone}</p>
+                            <p className="text-slate-500 text-[9px] sm:text-xs hidden sm:block">{payment.supplierPhone}</p>
                           )}
                         </div>
                       </div>
-                      <div className="text-left">
-                        <p className="text-amber-400 font-bold">{payment.amountDue?.toLocaleString()} ج</p>
-                        <p className="text-emerald-400 text-sm">
+                      <div className="text-left flex-shrink-0">
+                        <p className="text-amber-400 font-bold text-xs sm:text-base whitespace-nowrap">{payment.amountDue?.toLocaleString()} ج</p>
+                        <p className="text-emerald-400 text-[10px] sm:text-sm whitespace-nowrap">
                           ربحك: {payment.profit?.toLocaleString()} ج
                         </p>
                         <Button
                           size="sm"
                           onClick={() => handlePaySupplier(payment.id, payment.amountDue - payment.amountPaid)}
-                          className="mt-2 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-xs"
+                          className="mt-1 sm:mt-2 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-[9px] sm:text-xs h-6 sm:h-8 px-2 sm:px-3"
                         >
                           <CheckCircle className="w-3 h-3 ml-1" />
-                          تم الدفع
+                          <span className="hidden sm:inline">تم الدفع</span>
+                          <span className="sm:hidden">✓</span>
                         </Button>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-                  <p className="text-emerald-400">لا توجد مستحقات معلقة</p>
+                <div className="text-center py-6 sm:py-8">
+                  <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-500 mx-auto mb-2" />
+                  <p className="text-emerald-400 text-sm sm:text-base">لا توجد مستحقات معلقة</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* آخر المعاملات */}
+          {/* آخر المعاملات - Mobile Optimized */}
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 pb-4">
-              <CardTitle className="text-white flex items-center gap-2">
-                <div className="bg-white/20 backdrop-blur p-2 rounded-xl">
-                  <Receipt className="w-5 h-5 text-blue-400" />
+            <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 pb-3 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-white flex items-center gap-2 text-sm sm:text-base">
+                <div className="bg-white/20 backdrop-blur p-1.5 sm:p-2 rounded-xl">
+                  <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                 </div>
                 آخر المعاملات
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-3 sm:pt-4 px-3 sm:px-6 pb-3 sm:pb-6">
               {summary?.recentTransactions && summary.recentTransactions.length > 0 ? (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="space-y-2 sm:space-y-3 max-h-96 overflow-y-auto">
                   {summary.recentTransactions.map((tx: any) => (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10"
+                      className="flex items-center justify-between p-2 sm:p-3 bg-white/5 rounded-xl border border-white/10 gap-2"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="bg-white/10 p-2 rounded-lg">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                        <div className="bg-white/10 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
                           {getTransactionIcon(tx.type)}
                         </div>
-                        <div>
-                          <p className="text-white text-sm">{tx.descriptionAr || tx.description}</p>
-                          <p className="text-slate-500 text-xs">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-white text-[10px] sm:text-sm truncate">{tx.descriptionAr || tx.description}</p>
+                          <p className="text-slate-500 text-[9px] sm:text-xs">
                             {new Date(tx.createdAt).toLocaleDateString('ar-EG')}
                           </p>
                         </div>
                       </div>
-                      <div className="text-left">
-                        <p className={`font-bold ${getTransactionColor(tx.type)}`}>
+                      <div className="text-left flex-shrink-0">
+                        <p className={`font-bold text-xs sm:text-base whitespace-nowrap ${getTransactionColor(tx.type)}`}>
                           {['DEPOSIT', 'SALE_PROFIT', 'CONSIGNMENT_PROFIT', 'REFUND'].includes(tx.type) ? '+' : '-'}
                           {tx.amount?.toLocaleString()} ج
                         </p>
-                        <p className="text-slate-500 text-xs">
+                        <p className="text-slate-500 text-[9px] sm:text-xs whitespace-nowrap">
                           الرصيد: {tx.balanceAfter?.toLocaleString()} ج
                         </p>
                       </div>
@@ -480,9 +483,9 @@ export default function VendorCapitalPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <Clock className="w-12 h-12 text-slate-500 mx-auto mb-2" />
-                  <p className="text-slate-400">لا توجد معاملات حتى الآن</p>
+                <div className="text-center py-6 sm:py-8">
+                  <Clock className="w-10 h-10 sm:w-12 sm:h-12 text-slate-500 mx-auto mb-2" />
+                  <p className="text-slate-400 text-sm sm:text-base">لا توجد معاملات حتى الآن</p>
                 </div>
               )}
             </CardContent>
