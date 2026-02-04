@@ -129,12 +129,12 @@ export function Header() {
             <div className="relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex-shrink-0 group-hover:scale-110 transition-transform">
               <img 
                 src="/logo.png" 
-                alt="Brand Store Logo" 
+                alt="Remostore Logo" 
                 className="w-full h-full object-contain drop-shadow-lg"
               />
             </div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent whitespace-nowrap">
-              Brand Store
+            <h1 className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent whitespace-nowrap">
+              Remostore
             </h1>
           </Link>
 
