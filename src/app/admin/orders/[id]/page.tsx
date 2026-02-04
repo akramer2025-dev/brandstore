@@ -347,7 +347,18 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 </Card>
 
                 {/* Location Tracking */}
-                <DeliveryLocationMap deliveryStaff={order.deliveryStaff} orderId={order.id} />
+                {order.deliveryStaff.name && (
+                  <DeliveryLocationMap 
+                    deliveryStaff={{
+                      id: order.deliveryStaff.id,
+                      name: order.deliveryStaff.name,
+                      currentLat: order.deliveryStaff.currentLat,
+                      currentLng: order.deliveryStaff.currentLng,
+                      lastLocationUpdate: order.deliveryStaff.lastLocationUpdate,
+                    }} 
+                    orderId={order.id} 
+                  />
+                )}
               </>
             )}
 
