@@ -16,7 +16,7 @@ export default async function PurchaseVouchersPage() {
   // جلب سندات الصرف
   const vouchers = await prisma.paymentVoucher.findMany({
     where: {
-      type: "EXPENSE" // صرف فقط
+      type: "PAYMENT" // صرف فقط
     },
     orderBy: {
       createdAt: "desc"
