@@ -51,6 +51,8 @@ export default function AdminPartnersPage() {
   const [partners, setPartners] = useState<Partner[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null)
   const [formData, setFormData] = useState({
     partnerName: '',
     email: '',
@@ -61,6 +63,15 @@ export default function AdminPartnersPage() {
     partnerType: 'PARTNER',
     notes: '',
     createUserAccount: false,
+  })
+
+  const [editFormData, setEditFormData] = useState({
+    partnerName: '',
+    capitalAmount: '',
+    capitalPercent: '',
+    partnerType: 'PARTNER',
+    notes: '',
+    isActive: true,
   })
 
   useEffect(() => {
@@ -88,6 +99,68 @@ export default function AdminPartnersPage() {
       toast.error('حدث خطأ أثناء جلب الشركاء')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const openEditDialog = (partner: Partner) => {
+    setSelectedPartner(partner)
+    setEditFormData({
+      partnerName: partner.partnerName,
+      capitalAmount: partner.capitalAmount.toString(),
+      capitalPercent: partner.capitalPercent.toString(),
+      partnerType: partner.partnerType,
+      notes: partner.notes || '',
+      isActive: partner.isActive,
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const handleUpdatePartner = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!selectedPartner) return
+    
+    try {
+      const response = await fetch(`/api/admin/partners/${selectedPartner.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editFormData),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('تم تحديث بيانات الشريك بنجاح')
+        setIsEditDialogOpen(false)
+        fetchPartners()
+      } else {
+        toast.error(data.error || 'حدث خطأ أثناء تحديث الشريك')
+      }
+    } catch (error) {
+      console.error('Error updating partner:', error)
+      toast.error('حدث خطأ أثناء تحديث الشريك')
+    }
+  }
+
+  const togglePartnerStatus = async (partnerId: string, currentStatus: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/partners/${partnerId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !currentStatus }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(currentStatus ? 'تم إيقاف الشريك' : 'تم تفعيل الشريك')
+        fetchPartners()
+      } else {
+        toast.error(data.error || 'حدث خطأ')
+      }
+    } catch (error) {
+      console.error('Error toggling partner status:', error)
+      toast.error('حدث خطأ')
     }
   }
 
@@ -417,7 +490,8 @@ export default function AdminPartnersPage() {
             partners.map((partner) => (
               <Card
                 key={partner.id}
-                className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 transition-all duration-300"
+                className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 transition-all duration-300 cursor-pointer"
+                onClick={() => openEditDialog(partner)}
               >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -482,12 +556,149 @@ export default function AdminPartnersPage() {
                         </div>
                       )}
                     </div>
+
+                    <div className="flex flex-col gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => togglePartnerStatus(partner.id, partner.isActive)}
+                        className={partner.isActive 
+                          ? "bg-red-500/10 border-red-500/30 text-red-300 hover:bg-red-500/20"
+                          : "bg-green-500/10 border-green-500/30 text-green-300 hover:bg-green-500/20"
+                        }
+                      >
+                        {partner.isActive ? 'إيقاف' : 'تفعيل'}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))
           )}
         </div>
+
+        {/* Edit Partner Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="bg-gray-900 border-purple-500/30 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-white">تعديل بيانات الشريك</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                {selectedPartner?.partnerName}
+              </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleUpdatePartner} className="space-y-6 mt-4">
+              <div className="space-y-4">
+                {/* الاسم */}
+                <div>
+                  <Label htmlFor="edit_partnerName" className="text-white">
+                    اسم الشريك *
+                  </Label>
+                  <Input
+                    id="edit_partnerName"
+                    value={editFormData.partnerName}
+                    onChange={(e) => setEditFormData({ ...editFormData, partnerName: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white"
+                    required
+                  />
+                </div>
+
+                {/* مبلغ رأس المال */}
+                <div>
+                  <Label htmlFor="edit_capitalAmount" className="text-white">
+                    مبلغ رأس المال (جنيه) *
+                  </Label>
+                  <Input
+                    id="edit_capitalAmount"
+                    type="number"
+                    step="0.01"
+                    value={editFormData.capitalAmount}
+                    onChange={(e) => setEditFormData({ ...editFormData, capitalAmount: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white"
+                    required
+                  />
+                </div>
+
+                {/* نسبة المساهمة */}
+                <div>
+                  <Label htmlFor="edit_capitalPercent" className="text-white">
+                    نسبة المساهمة (%) *
+                  </Label>
+                  <Input
+                    id="edit_capitalPercent"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    value={editFormData.capitalPercent}
+                    onChange={(e) => setEditFormData({ ...editFormData, capitalPercent: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white"
+                    required
+                  />
+                </div>
+
+                {/* نوع الشريك */}
+                <div>
+                  <Label htmlFor="edit_partnerType" className="text-white">
+                    نوع الشريك
+                  </Label>
+                  <select
+                    id="edit_partnerType"
+                    value={editFormData.partnerType}
+                    onChange={(e) => setEditFormData({ ...editFormData, partnerType: e.target.value })}
+                    className="w-full bg-white/10 border border-white/20 text-white rounded-md p-2"
+                  >
+                    <option value="PARTNER">شريك</option>
+                    <option value="OWNER">مالك</option>
+                    <option value="INVESTOR">مستثمر</option>
+                  </select>
+                </div>
+
+                {/* ملاحظات */}
+                <div>
+                  <Label htmlFor="edit_notes" className="text-white">
+                    ملاحظات
+                  </Label>
+                  <Textarea
+                    id="edit_notes"
+                    value={editFormData.notes}
+                    onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white"
+                    rows={3}
+                  />
+                </div>
+
+                {/* حالة الشريك */}
+                <div className="flex items-center gap-2 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                  <input
+                    type="checkbox"
+                    id="edit_isActive"
+                    checked={editFormData.isActive}
+                    onChange={(e) => setEditFormData({ ...editFormData, isActive: e.target.checked })}
+                    className="rounded"
+                  />
+                  <Label htmlFor="edit_isActive" className="text-white cursor-pointer">
+                    الحساب نشط
+                  </Label>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">
+                  حفظ التعديلات
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsEditDialogOpen(false)}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  إلغاء
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
