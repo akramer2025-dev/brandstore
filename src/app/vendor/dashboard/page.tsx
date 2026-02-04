@@ -154,7 +154,7 @@ export default function VendorDashboard() {
             </div>
             
             {/* ملخص سريع */}
-            <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
+            <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-white/20">
               <div className="text-center">
                 <p className="text-green-300 text-xs">الإيداعات</p>
                 <p className="text-white font-bold">{capitalSummary?.capital.totalDeposits?.toLocaleString() || 0} ج</p>
@@ -166,6 +166,15 @@ export default function VendorDashboard() {
               <div className="text-center">
                 <p className="text-pink-300 text-xs">منتجات وسيط</p>
                 <p className="text-white font-bold">{capitalSummary?.products.consignment || 0}</p>
+              </div>
+              <div className="text-center">
+                <Link href="/vendor/partners" className="block hover:opacity-80 transition-opacity">
+                  <p className="text-purple-300 text-xs">الشركاء</p>
+                  <p className="text-white font-bold flex items-center justify-center gap-1">
+                    <Users className="w-3 h-3" />
+                    إدارة
+                  </p>
+                </Link>
               </div>
             </div>
 
@@ -305,6 +314,14 @@ export default function VendorDashboard() {
               <CardContent className="p-4 text-center">
                 <Wallet className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
                 <p className="text-white font-medium">رأس المال</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/vendor/partners">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+              <CardContent className="p-4 text-center">
+                <Users className="w-8 h-8 text-pink-400 mx-auto mb-2" />
+                <p className="text-white font-medium">الشركاء</p>
               </CardContent>
             </Card>
           </Link>

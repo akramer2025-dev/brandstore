@@ -1,0 +1,445 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { toast } from 'sonner'
+import Link from 'next/link'
+import {
+  ArrowLeft,
+  Plus,
+  Users,
+  DollarSign,
+  Percent,
+  Phone,
+  Mail,
+  Calendar,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react'
+
+interface Partner {
+  id: string
+  partnerName: string
+  partnerType: string
+  capitalAmount: number
+  initialAmount: number
+  currentAmount: number
+  capitalPercent: number
+  joinDate: string
+  isActive: boolean
+  notes: string | null
+  createdAt: string
+}
+
+export default function PartnersPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [partners, setPartners] = useState<Partner[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [formData, setFormData] = useState({
+    partnerName: '',
+    email: '',
+    phone: '',
+    capitalAmount: '',
+    capitalPercent: '',
+    partnerType: 'PARTNER',
+    notes: '',
+    createUserAccount: false,
+  })
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+    } else if (status === 'authenticated' && session?.user?.role !== 'VENDOR') {
+      router.push('/')
+    } else if (status === 'authenticated') {
+      fetchPartners()
+    }
+  }, [status, session, router])
+
+  const fetchPartners = async () => {
+    try {
+      const response = await fetch('/api/vendor/partners')
+      const data = await response.json()
+      
+      if (response.ok) {
+        setPartners(data.partners)
+      } else {
+        toast.error(data.error || 'حدث خطأ أثناء جلب الشركاء')
+      }
+    } catch (error) {
+      console.error('Error fetching partners:', error)
+      toast.error('حدث خطأ أثناء جلب الشركاء')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch('/api/vendor/partners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('تم إضافة الشريك بنجاح')
+        setIsDialogOpen(false)
+        setFormData({
+          partnerName: '',
+          email: '',
+          phone: '',
+          capitalAmount: '',
+          capitalPercent: '',
+          partnerType: 'PARTNER',
+          notes: '',
+          createUserAccount: false,
+        })
+        fetchPartners()
+      } else {
+        toast.error(data.error || 'حدث خطأ أثناء إضافة الشريك')
+      }
+    } catch (error) {
+      console.error('Error adding partner:', error)
+      toast.error('حدث خطأ أثناء إضافة الشريك')
+    }
+  }
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">جاري التحميل...</div>
+      </div>
+    )
+  }
+
+  const totalCapital = partners.reduce((sum, p) => sum + p.currentAmount, 0)
+  const activePartners = partners.filter(p => p.isActive).length
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link href="/vendor">
+              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <Users className="h-8 w-8 text-purple-400" />
+                إدارة الشركاء
+              </h1>
+              <p className="text-gray-400 mt-1">إضافة وإدارة شركاء المشروع</p>
+            </div>
+          </div>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                إضافة شريك
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-gray-900 border-purple-500/30 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl text-white">إضافة شريك جديد</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  أدخل بيانات الشريك الجديد
+                </DialogDescription>
+              </DialogHeader>
+
+              <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+                <div className="space-y-4">
+                  {/* الاسم */}
+                  <div>
+                    <Label htmlFor="partnerName" className="text-white">
+                      اسم الشريك *
+                    </Label>
+                    <Input
+                      id="partnerName"
+                      value={formData.partnerName}
+                      onChange={(e) => setFormData({ ...formData, partnerName: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white"
+                      required
+                    />
+                  </div>
+
+                  {/* البريد الإلكتروني */}
+                  <div>
+                    <Label htmlFor="email" className="text-white">
+                      البريد الإلكتروني
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white"
+                    />
+                  </div>
+
+                  {/* رقم الهاتف */}
+                  <div>
+                    <Label htmlFor="phone" className="text-white">
+                      رقم الهاتف
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white"
+                    />
+                  </div>
+
+                  {/* مبلغ رأس المال */}
+                  <div>
+                    <Label htmlFor="capitalAmount" className="text-white">
+                      مبلغ رأس المال (جنيه) *
+                    </Label>
+                    <Input
+                      id="capitalAmount"
+                      type="number"
+                      step="0.01"
+                      value={formData.capitalAmount}
+                      onChange={(e) => setFormData({ ...formData, capitalAmount: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white"
+                      required
+                    />
+                  </div>
+
+                  {/* نسبة المساهمة */}
+                  <div>
+                    <Label htmlFor="capitalPercent" className="text-white">
+                      نسبة المساهمة (%) *
+                    </Label>
+                    <Input
+                      id="capitalPercent"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={formData.capitalPercent}
+                      onChange={(e) => setFormData({ ...formData, capitalPercent: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white"
+                      required
+                    />
+                  </div>
+
+                  {/* نوع الشريك */}
+                  <div>
+                    <Label htmlFor="partnerType" className="text-white">
+                      نوع الشريك
+                    </Label>
+                    <select
+                      id="partnerType"
+                      value={formData.partnerType}
+                      onChange={(e) => setFormData({ ...formData, partnerType: e.target.value })}
+                      className="w-full bg-white/10 border border-white/20 text-white rounded-md p-2"
+                    >
+                      <option value="PARTNER">شريك</option>
+                      <option value="OWNER">مالك</option>
+                      <option value="INVESTOR">مستثمر</option>
+                    </select>
+                  </div>
+
+                  {/* ملاحظات */}
+                  <div>
+                    <Label htmlFor="notes" className="text-white">
+                      ملاحظات
+                    </Label>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white"
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* إنشاء حساب */}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="createUserAccount"
+                      checked={formData.createUserAccount}
+                      onChange={(e) => setFormData({ ...formData, createUserAccount: e.target.checked })}
+                      className="rounded"
+                    />
+                    <Label htmlFor="createUserAccount" className="text-white cursor-pointer">
+                      إنشاء حساب مستخدم للشريك
+                    </Label>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">
+                    إضافة الشريك
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">إجمالي الشركاء</p>
+                  <p className="text-3xl font-bold text-white mt-2">{partners.length}</p>
+                </div>
+                <Users className="h-12 w-12 text-purple-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">الشركاء النشطون</p>
+                  <p className="text-3xl font-bold text-white mt-2">{activePartners}</p>
+                </div>
+                <CheckCircle className="h-12 w-12 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">إجمالي رأس المال</p>
+                  <p className="text-3xl font-bold text-white mt-2">
+                    {totalCapital.toLocaleString()} ج
+                  </p>
+                </div>
+                <DollarSign className="h-12 w-12 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Partners List */}
+        <div className="space-y-4">
+          {partners.length === 0 ? (
+            <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+              <CardContent className="py-16 text-center">
+                <Users className="h-16 w-16 mx-auto text-gray-500 mb-4" />
+                <p className="text-gray-400 text-lg">لا يوجد شركاء حتى الآن</p>
+                <p className="text-gray-500 text-sm mt-2">قم بإضافة شريك جديد للبدء</p>
+              </CardContent>
+            </Card>
+          ) : (
+            partners.map((partner) => (
+              <Card
+                key={partner.id}
+                className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 transition-all duration-300"
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="text-xl font-bold text-white">{partner.partnerName}</h3>
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          {partner.partnerType}
+                        </span>
+                        {partner.isActive ? (
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-300 border border-green-500/30 flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            نشط
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-300 border border-red-500/30 flex items-center gap-1">
+                            <XCircle className="h-3 w-3" />
+                            غير نشط
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                        <div className="flex items-center gap-2 text-gray-300">
+                          <DollarSign className="h-4 w-4 text-green-400" />
+                          <div>
+                            <p className="text-xs text-gray-400">رأس المال الأولي</p>
+                            <p className="font-semibold">{partner.initialAmount.toLocaleString()} ج</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-300">
+                          <DollarSign className="h-4 w-4 text-blue-400" />
+                          <div>
+                            <p className="text-xs text-gray-400">رأس المال الحالي</p>
+                            <p className="font-semibold">{partner.currentAmount.toLocaleString()} ج</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-300">
+                          <Percent className="h-4 w-4 text-purple-400" />
+                          <div>
+                            <p className="text-xs text-gray-400">نسبة المساهمة</p>
+                            <p className="font-semibold">{partner.capitalPercent}%</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-300">
+                          <Calendar className="h-4 w-4 text-yellow-400" />
+                          <div>
+                            <p className="text-xs text-gray-400">تاريخ الانضمام</p>
+                            <p className="font-semibold text-sm">
+                              {new Date(partner.joinDate).toLocaleDateString('ar-EG')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {partner.notes && (
+                        <div className="mt-4 p-3 bg-white/5 rounded-lg">
+                          <p className="text-gray-400 text-sm">{partner.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
