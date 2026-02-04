@@ -353,14 +353,17 @@ export default function NewProductPage() {
                   <Upload className="h-5 w-5 text-purple-400" />
                   صور المنتج
                 </div>
-                <Button
-                  type="button"
-                  onClick={() => setShowSmartCamera(!showSmartCamera)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-                >
-                  <Camera className="h-4 w-4 mr-2" />
-                  {showSmartCamera ? 'إخفاء الكاميرا' : '📸 كاميرا ذكية'}
-                </Button>
+                {/* زر الكاميرا الذكية مخفي مؤقتاً */}
+                {false && (
+                  <Button
+                    type="button"
+                    onClick={() => setShowSmartCamera(!showSmartCamera)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    {showSmartCamera ? 'إخفاء الكاميرا' : '📸 كاميرا ذكية'}
+                  </Button>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

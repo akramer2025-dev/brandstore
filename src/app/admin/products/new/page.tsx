@@ -306,14 +306,17 @@ export default function NewProductPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>بيانات المنتج</span>
-                <Button
-                  type="button"
-                  onClick={() => setShowSmartCamera(!showSmartCamera)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500"
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  {showSmartCamera ? 'إخفاء الكاميرا' : '📸 كاميرا ذكية'}
-                </Button>
+                {/* زر الكاميرا الذكية مخفي مؤقتاً */}
+                {false && (
+                  <Button
+                    type="button"
+                    onClick={() => setShowSmartCamera(!showSmartCamera)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    {showSmartCamera ? 'إخفاء الكاميرا' : '📸 كاميرا ذكية'}
+                  </Button>
+                )}
               </CardTitle>
             </CardHeader>
 
