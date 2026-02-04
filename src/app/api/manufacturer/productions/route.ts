@@ -65,10 +65,15 @@ export async function POST(req: NextRequest) {
 
     const production = await prisma.production.create({
       data: {
-        productId,
+        product: {
+          connect: { id: productId }
+        },
         quantity: parseInt(quantity),
         notes: notes || '',
-        status: 'PLANNED'
+        status: 'PLANNED',
+        totalMaterialCost: 0,
+        totalCost: 0,
+        costPerUnit: 0
       }
     });
 
