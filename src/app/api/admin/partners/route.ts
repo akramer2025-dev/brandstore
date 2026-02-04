@@ -93,10 +93,10 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // إنشاء كلمة مرور عشوائية
+      // استخدام كلمة المرور المدخلة
       const bcrypt = require('bcryptjs');
-      const randomPassword = Math.random().toString(36).slice(-8);
-      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      const password = body.password || Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       // إنشاء المستخدم
       const user = await prisma.user.create({
@@ -125,7 +125,9 @@ export async function POST(request: NextRequest) {
       vendorId = vendor.id;
 
       // TODO: إرسال بريد إلكتروني بكلمة المرور
-      console.log(`Password for ${email}: ${randomPassword}`);
+      console.log(`✅ تم إنشاء حساب للشريك:`);
+      console.log(`   البريد: ${email}`);
+      console.log(`   كلمة المرور: ${password}`);
     } else {
       // إنشاء vendor مؤقت بدون user (لحالة الشركاء الذين لا يحتاجون حساب)
       // سنحتاج vendor لربط PartnerCapital
@@ -158,6 +160,26 @@ export async function POST(request: NextRequest) {
       vendorId = adminVendor.id;
     }
 
+    // حساب نسبة المساهمة الفعلية بناءً على رأس المال الكلي
+    const vendor = await prisma.vendor.findUnique({
+      where: { id: vendorId },
+      select: { capitalBalance: true },
+    });
+
+    const currentTotalCapital = vendor?.capitalBalance || 0;
+    const newTotalCapital = currentTotalCapital + parseFloat(capitalAmount);
+    const actualPercent = (parseFloat(capitalAmount) / newTotalCapital) * 100;
+
+    // استخدام النسبة المحسوبة تلقائياً أو المُدخلة (أيهما أدق)
+    const finalPercent = actualPercent;
+
+    console.log('📊 حساب نسبة المساهمة:');
+    console.log(`   رأس المال الحالي: ${currentTotalCapital} جنيه`);
+    console.log(`   مساهمة الشريك: ${parseFloat(capitalAmount)} جنيه`);
+    console.log(`   رأس المال الجديد: ${newTotalCapital} جنيه`);
+    console.log(`   النسبة المُدخلة: ${parseFloat(capitalPercent)}%`);
+    console.log(`   النسبة المحسوبة: ${actualPercent.toFixed(2)}%`);
+
     // إنشاء سجل الشريك
     const partner = await prisma.partnerCapital.create({
       data: {
@@ -167,7 +189,7 @@ export async function POST(request: NextRequest) {
         capitalAmount: parseFloat(capitalAmount),
         initialAmount: parseFloat(capitalAmount),
         currentAmount: parseFloat(capitalAmount),
-        capitalPercent: parseFloat(capitalPercent),
+        capitalPercent: finalPercent,
         notes,
       },
     });

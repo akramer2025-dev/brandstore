@@ -55,6 +55,7 @@ export default function AdminPartnersPage() {
     partnerName: '',
     email: '',
     phone: '',
+    password: '',
     capitalAmount: '',
     capitalPercent: '',
     partnerType: 'PARTNER',
@@ -103,12 +104,28 @@ export default function AdminPartnersPage() {
       const data = await response.json()
 
       if (response.ok) {
-        toast.success('تم إضافة الشريك بنجاح')
+        // عرض رسالة نجاح مع بيانات الدخول إذا تم إنشاء حساب
+        if (formData.createUserAccount && formData.password) {
+          toast.success(
+            `تم إضافة الشريك بنجاح\n\nبيانات الدخول:\nالبريد: ${formData.email}\nكلمة المرور: ${formData.password}`,
+            { duration: 10000 }
+          )
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+          console.log('✅ تم إنشاء حساب شريك جديد:')
+          console.log(`   الاسم: ${formData.partnerName}`)
+          console.log(`   البريد: ${formData.email}`)
+          console.log(`   كلمة المرور: ${formData.password}`)
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+        } else {
+          toast.success('تم إضافة الشريك بنجاح')
+        }
+        
         setIsDialogOpen(false)
         setFormData({
           partnerName: '',
           email: '',
           phone: '',
+          password: '',
           capitalAmount: '',
           capitalPercent: '',
           partnerType: 'PARTNER',
@@ -248,6 +265,12 @@ export default function AdminPartnersPage() {
                       className="bg-white/10 border-white/20 text-white"
                       required
                     />
+                    <div className="flex items-start gap-2 mt-2">
+                      <div className="text-blue-400 mt-0.5">ℹ️</div>
+                      <p className="text-xs text-blue-300">
+                        سيتم حساب النسبة الفعلية تلقائياً بناءً على إجمالي رأس المال
+                      </p>
+                    </div>
                   </div>
 
                   {/* نوع الشريك */}
@@ -282,7 +305,7 @@ export default function AdminPartnersPage() {
                   </div>
 
                   {/* إنشاء حساب */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30">
                     <input
                       type="checkbox"
                       id="createUserAccount"
@@ -294,6 +317,31 @@ export default function AdminPartnersPage() {
                       إنشاء حساب VENDOR للشريك
                     </Label>
                   </div>
+
+                  {/* كلمة المرور - تظهر فقط إذا تم تفعيل إنشاء الحساب */}
+                  {formData.createUserAccount && (
+                    <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/30">
+                      <Label htmlFor="password" className="text-white mb-2 block">
+                        كلمة المرور *
+                      </Label>
+                      <Input
+                        id="password"
+                        type="text"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className="bg-white/10 border-white/20 text-white"
+                        placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
+                        required={formData.createUserAccount}
+                        minLength={6}
+                      />
+                      <div className="flex items-start gap-2 mt-2">
+                        <div className="text-yellow-400 mt-0.5">⚠️</div>
+                        <p className="text-xs text-yellow-300">
+                          احفظ كلمة المرور هذه! ستحتاجها لإعطائها للشريك للدخول إلى حسابه
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3">
