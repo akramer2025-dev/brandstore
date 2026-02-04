@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         productId,
         quantity: parseInt(quantity),
         notes: notes || '',
-        status: 'PENDING'
+        status: 'PLANNED'
       }
     });
 
