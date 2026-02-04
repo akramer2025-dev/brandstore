@@ -86,6 +86,8 @@ export default function VendorCapitalPage() {
   const [loading, setLoading] = useState(true)
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+  const [showLiquidateModal, setShowLiquidateModal] = useState(false)
+  const [liquidatePassword, setLiquidatePassword] = useState('')
   const [amount, setAmount] = useState('')
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -173,6 +175,63 @@ export default function VendorCapitalPage() {
     }
   }
 
+  // تصفية رأس المال - سحب كامل الرصيد مع التحقق من كلمة المرور
+  const handleLiquidate = async () => {
+    if (!liquidatePassword) {
+      alert('يرجى إدخال كلمة المرور')
+      return
+    }
+
+    const currentBalance = summary?.capital?.current || 0
+    if (currentBalance <= 0) {
+      alert('لا يوجد رصيد للتصفية')
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      // التحقق من كلمة المرور أولاً
+      const verifyRes = await fetch('/api/auth/verify-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: liquidatePassword })
+      })
+
+      if (!verifyRes.ok) {
+        const data = await verifyRes.json()
+        alert(data.error || 'كلمة المرور غير صحيحة')
+        setSubmitting(false)
+        return
+      }
+
+      // تنفيذ التصفية (سحب كل الرصيد)
+      const res = await fetch('/api/vendor/capital/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'WITHDRAWAL',
+          amount: currentBalance,
+          notes: '🔒 تصفية رأس المال - سحب كامل الرصيد'
+        })
+      })
+
+      if (res.ok) {
+        alert(`✅ تم تصفية رأس المال بنجاح\nتم سحب: ${currentBalance.toLocaleString()} ج`)
+        setShowLiquidateModal(false)
+        setLiquidatePassword('')
+        fetchData()
+      } else {
+        const data = await res.json()
+        alert(data.error || 'حدث خطأ أثناء التصفية')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('حدث خطأ أثناء التصفية')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'DEPOSIT': return <ArrowUpRight className="w-4 h-4 text-emerald-400" />
@@ -245,6 +304,15 @@ export default function VendorCapitalPage() {
                 <Minus className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
                 <span className="hidden sm:inline">سحب</span>
                 <span className="sm:hidden">-</span>
+              </Button>
+              <Button
+                onClick={() => setShowLiquidateModal(true)}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-[10px] sm:text-sm px-2 sm:px-4 h-8 sm:h-10"
+                title="تصفية رأس المال"
+              >
+                <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+                <span className="hidden sm:inline">تصفية</span>
+                <span className="sm:hidden">⚡</span>
               </Button>
             </div>
           </div>
@@ -654,6 +722,72 @@ export default function VendorCapitalPage() {
               >
                 {submitting ? 'جاري السحب...' : 'سحب'}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal - تصفية رأس المال */}
+      {showLiquidateModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-800 p-6 rounded-2xl w-full max-w-md border border-amber-500/50 mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-amber-400" />
+                🔒 تصفية رأس المال
+              </h3>
+              <Button variant="ghost" size="icon" onClick={() => {
+                setShowLiquidateModal(false)
+                setLiquidatePassword('')
+              }}>
+                <X className="w-5 h-5 text-slate-400" />
+              </Button>
+            </div>
+            
+            {/* تحذير */}
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-4">
+              <p className="text-amber-300 font-semibold mb-2">⚠️ تحذير هام!</p>
+              <p className="text-amber-200 text-sm mb-2">
+                سيتم سحب <strong className="text-amber-100">{summary?.capital.current?.toLocaleString() || 0} جنيه</strong> (كامل رأس المال)
+              </p>
+              <ul className="text-amber-200/80 text-xs space-y-1 list-disc list-inside">
+                <li>هذا الإجراء غير قابل للتراجع</li>
+                <li>يجب إدخال كلمة المرور للتأكيد</li>
+                <li>سيتم تسجيل العملية في سجل المعاملات</li>
+              </ul>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300 mb-2 block">🔐 كلمة المرور للتأكيد</Label>
+                <Input
+                  type="password"
+                  value={liquidatePassword}
+                  onChange={(e) => setLiquidatePassword(e.target.value)}
+                  placeholder="أدخل كلمة المرور"
+                  className="bg-slate-700 border-slate-600 text-white"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleLiquidate}
+                  disabled={submitting || !liquidatePassword || (summary?.capital.current || 0) <= 0}
+                  className="flex-1 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                >
+                  {submitting ? 'جاري التصفية...' : '🔒 تأكيد التصفية'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowLiquidateModal(false)
+                    setLiquidatePassword('')
+                  }}
+                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                >
+                  إلغاء
+                </Button>
+              </div>
             </div>
           </div>
         </div>
