@@ -157,56 +157,75 @@ export default async function VendorAccountingPage() {
           </div>
         </div>
 
+        {/* بطاقة الإيرادات الرئيسية */}
+        <Card className="mb-4 sm:mb-6 bg-gradient-to-r from-emerald-600/35 to-green-600/35 border-emerald-500/50 shadow-xl shadow-emerald-500/30 backdrop-blur-xl">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="bg-emerald-500/30 p-3 sm:p-4 rounded-2xl">
+                  <DollarSign className="w-8 h-8 sm:w-12 sm:h-12 text-emerald-300" />
+                </div>
+                <div>
+                  <p className="text-emerald-200 text-xs sm:text-sm font-semibold mb-1">إجمالي الإيرادات</p>
+                  <p className="text-2xl sm:text-5xl font-bold text-white">{completedRevenue.toLocaleString()}</p>
+                  <p className="text-emerald-300 text-sm sm:text-base mt-1">جنيه مصري</p>
+                </div>
+              </div>
+              <div className="text-left">
+                <div className="bg-blue-500/20 px-3 sm:px-4 py-2 rounded-lg border border-blue-500/30 mb-2">
+                  <p className="text-blue-300 text-[10px] sm:text-xs">معلق</p>
+                  <p className="text-white font-bold text-sm sm:text-lg">{pendingRevenue.toLocaleString()}</p>
+                </div>
+                <div className="bg-green-500/20 px-3 sm:px-4 py-2 rounded-lg border border-green-500/30">
+                  <p className="text-green-300 text-[10px] sm:text-xs">مكتمل</p>
+                  <p className="text-white font-bold text-sm sm:text-lg">{completedRevenue.toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* إحصائيات مالية شاملة */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 sm:gap-4 mb-4 sm:mb-8">
-          <Card className="bg-gradient-to-br from-emerald-500/20 to-green-600/20 border-emerald-500/30 backdrop-blur-sm">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 mb-4 sm:mb-8">
+          <Card className="bg-gradient-to-br from-emerald-600/30 to-green-600/30 border-emerald-500/40 backdrop-blur-sm">
             <CardContent className="p-3 sm:p-6">
-              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-400 mb-1.5 sm:mb-3" />
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-300 mb-1.5 sm:mb-3" />
               <p className="text-emerald-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">صافي الربح</p>
               <p className="text-lg sm:text-3xl font-bold text-white">{netProfit.toFixed(0)}</p>
               <p className="text-emerald-300 text-[10px] sm:text-xs mt-0.5 sm:mt-1">ج.م</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border-blue-500/30 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-purple-600/30 to-pink-600/30 border-purple-500/40 backdrop-blur-sm">
             <CardContent className="p-3 sm:p-6">
-              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 mb-1.5 sm:mb-3" />
-              <p className="text-blue-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">إجمالي المبيعات</p>
-              <p className="text-lg sm:text-3xl font-bold text-white">{completedRevenue.toFixed(0)}</p>
-              <p className="text-blue-300 text-[10px] sm:text-xs mt-0.5 sm:mt-1">ج.م</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-500/20 to-pink-600/20 border-purple-500/30 backdrop-blur-sm">
-            <CardContent className="p-3 sm:p-6">
-              <Receipt className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400 mb-1.5 sm:mb-3" />
+              <Receipt className="h-6 w-6 sm:h-8 sm:w-8 text-purple-300 mb-1.5 sm:mb-3" />
               <p className="text-purple-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">المشتريات</p>
               <p className="text-lg sm:text-3xl font-bold text-white">{totalPurchases.toFixed(0)}</p>
               <p className="text-purple-300 text-[10px] sm:text-xs mt-0.5 sm:mt-1">ج.م</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-red-500/20 to-rose-600/20 border-red-500/30 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-red-600/30 to-rose-600/30 border-red-500/40 backdrop-blur-sm">
             <CardContent className="p-3 sm:p-6">
-              <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-red-400 mb-1.5 sm:mb-3" />
+              <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-red-300 mb-1.5 sm:mb-3" />
               <p className="text-red-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">المصروفات</p>
               <p className="text-lg sm:text-3xl font-bold text-white">{totalExpenses.toFixed(0)}</p>
               <p className="text-red-300 text-[10px] sm:text-xs mt-0.5 sm:mt-1">ج.م</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-500/20 to-amber-600/20 border-yellow-500/30 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-yellow-600/30 to-amber-600/30 border-yellow-500/40 backdrop-blur-sm">
             <CardContent className="p-3 sm:p-6">
-              <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 mb-1.5 sm:mb-3" />
+              <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mb-1.5 sm:mb-3" />
               <p className="text-yellow-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">الإيداعات</p>
               <p className="text-lg sm:text-3xl font-bold text-white">{totalDeposits.toFixed(0)}</p>
               <p className="text-yellow-300 text-[10px] sm:text-xs mt-0.5 sm:mt-1">ج.م</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-orange-500/20 to-amber-600/20 border-orange-500/30 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-orange-600/30 to-amber-600/30 border-orange-500/40 backdrop-blur-sm">
             <CardContent className="p-3 sm:p-6">
-              <CreditCard className="h-6 w-6 sm:h-8 sm:w-8 text-orange-400 mb-1.5 sm:mb-3" />
+              <CreditCard className="h-6 w-6 sm:h-8 sm:w-8 text-orange-300 mb-1.5 sm:mb-3" />
               <p className="text-orange-200 text-[10px] sm:text-sm mb-0.5 sm:mb-1">العمولات</p>
               <p className="text-lg sm:text-3xl font-bold text-white">{totalCommission.toFixed(0)}</p>
               <p className="text-orange-300 text-[10px] sm:text-xs mt-0.5 sm:mt-1">ج.م</p>

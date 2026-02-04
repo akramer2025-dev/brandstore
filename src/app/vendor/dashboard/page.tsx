@@ -162,18 +162,24 @@ export default function VendorDashboard() {
             
             {/* ملخص سريع */}
             <div className="grid grid-cols-3 gap-3 pt-4 border-t border-yellow-500/20">
-              <div className="text-center bg-green-500/10 rounded-lg p-3 border border-green-500/20">
-                <p className="text-green-300 text-xs font-semibold mb-1">الإيداعات</p>
-                <p className="text-white font-bold text-lg">{capitalSummary?.capital.totalDeposits?.toLocaleString() || 0} ج</p>
-              </div>
-              <div className="text-center bg-cyan-500/10 rounded-lg p-3 border border-cyan-500/20">
-                <p className="text-cyan-300 text-xs font-semibold mb-1">منتجات مملوكة</p>
-                <p className="text-white font-bold text-lg">{capitalSummary?.products.owned || 0}</p>
-              </div>
-              <div className="text-center bg-pink-500/10 rounded-lg p-3 border border-pink-500/20">
-                <p className="text-pink-300 text-xs font-semibold mb-1">منتجات وسيط</p>
-                <p className="text-white font-bold text-lg">{capitalSummary?.products.consignment || 0}</p>
-              </div>
+              <Link href="/vendor/capital?tab=deposits" className="block">
+                <div className="text-center bg-green-600/20 rounded-lg p-3 border border-green-500/30 hover:bg-green-600/30 hover:border-green-400/50 transition-all cursor-pointer group">
+                  <p className="text-green-300 text-xs font-semibold mb-1 group-hover:text-green-200">الإيداعات</p>
+                  <p className="text-white font-bold text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.capital.totalDeposits?.toLocaleString() || 0} ج</p>
+                </div>
+              </Link>
+              <Link href="/vendor/products?type=owned" className="block">
+                <div className="text-center bg-cyan-600/20 rounded-lg p-3 border border-cyan-500/30 hover:bg-cyan-600/30 hover:border-cyan-400/50 transition-all cursor-pointer group">
+                  <p className="text-cyan-300 text-xs font-semibold mb-1 group-hover:text-cyan-200">منتجات مملوكة</p>
+                  <p className="text-white font-bold text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.products.owned || 0}</p>
+                </div>
+              </Link>
+              <Link href="/vendor/products?type=consignment" className="block">
+                <div className="text-center bg-pink-600/20 rounded-lg p-3 border border-pink-500/30 hover:bg-pink-600/30 hover:border-pink-400/50 transition-all cursor-pointer group">
+                  <p className="text-pink-300 text-xs font-semibold mb-1 group-hover:text-pink-200">منتجات وسيط</p>
+                  <p className="text-white font-bold text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.products.consignment || 0}</p>
+                </div>
+              </Link>
             </div>
 
             {/* تحذير الموردين */}
@@ -222,20 +228,11 @@ export default function VendorDashboard() {
         )}
 
         {/* إحصائيات بسيطة */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <Card className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-xl border-emerald-500/40 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/30 hover:border-emerald-400/60 transition-all">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+          <Card className="bg-gradient-to-br from-blue-600/35 to-cyan-600/35 backdrop-blur-xl border-blue-500/50 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:border-blue-400/70 transition-all">
             <CardContent className="p-4 text-center">
-              <div className="bg-emerald-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <DollarSign className="w-6 h-6 text-emerald-400" />
-              </div>
-              <p className="text-2xl font-bold text-white">{stats?.totalRevenue?.toLocaleString() || 0}</p>
-              <p className="text-emerald-300 text-xs font-semibold">الإيرادات</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border-blue-500/40 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/30 hover:border-blue-400/60 transition-all">
-            <CardContent className="p-4 text-center">
-              <div className="relative inline-block bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <ShoppingCart className="w-6 h-6 text-blue-400" />
+              <div className="relative inline-block bg-blue-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <ShoppingCart className="w-6 h-6 text-blue-300" />
                 {(stats?.pendingOrders || 0) > 0 && (
                   <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
                     {stats?.pendingOrders}
@@ -246,33 +243,35 @@ export default function VendorDashboard() {
               <p className="text-blue-300 text-xs font-semibold">الطلبات</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/30 hover:border-purple-400/60 transition-all">
+          <Card className="bg-gradient-to-br from-purple-600/35 to-pink-600/35 backdrop-blur-xl border-purple-500/50 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:border-purple-400/70 transition-all">
             <CardContent className="p-4 text-center">
-              <div className="bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <Package className="w-6 h-6 text-purple-400" />
+              <div className="bg-purple-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <Package className="w-6 h-6 text-purple-300" />
               </div>
               <p className="text-2xl font-bold text-white">{stats?.totalProducts || 0}</p>
               <p className="text-purple-300 text-xs font-semibold">المنتجات</p>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 backdrop-blur-xl border-orange-500/40 shadow-lg shadow-orange-500/10 hover:shadow-orange-500/30 hover:border-orange-400/60 transition-all">
-            <CardContent className="p-4 text-center">
-              <div className="bg-orange-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <Users className="w-6 h-6 text-orange-400" />
-              </div>
-              <p className="text-2xl font-bold text-white">{capitalSummary?.suppliers.pendingCount || 0}</p>
-              <p className="text-orange-300 text-xs font-semibold">موردين</p>
-            </CardContent>
-          </Card>
+          <Link href="/vendor/suppliers">
+            <Card className="bg-gradient-to-br from-orange-600/35 to-amber-600/35 backdrop-blur-xl border-orange-500/50 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:border-orange-400/70 transition-all cursor-pointer hover:scale-105 group">
+              <CardContent className="p-4 text-center">
+                <div className="bg-orange-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+                  <Users className="w-6 h-6 text-orange-300" />
+                </div>
+                <p className="text-2xl font-bold text-white">{capitalSummary?.suppliers.pendingCount || 0}</p>
+                <p className="text-orange-300 text-xs font-semibold">موردين</p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         {/* روابط سريعة */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Link href="/vendor/capital">
-            <Card className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 backdrop-blur-xl border-yellow-500/40 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:border-yellow-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
+            <Card className="bg-gradient-to-br from-yellow-600/35 to-amber-600/35 backdrop-blur-xl border-yellow-500/50 shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/50 hover:border-yellow-400/70 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="bg-yellow-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-yellow-500/30 transition-all">
-                  <Wallet className="w-8 h-8 text-yellow-400 group-hover:scale-110 transition-transform" />
+                <div className="bg-yellow-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-yellow-600/40 transition-all">
+                  <Wallet className="w-8 h-8 text-yellow-300 group-hover:scale-110 transition-transform" />
                 </div>
                 <p className="text-white font-bold">الحسابات</p>
                 <p className="text-yellow-300 text-xs mt-1">كل المعاملات</p>
@@ -280,20 +279,20 @@ export default function VendorDashboard() {
             </Card>
           </Link>
           <Link href="/vendor/pos">
-            <Card className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-xl border-emerald-500/40 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:border-emerald-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
+            <Card className="bg-gradient-to-br from-emerald-600/35 to-green-600/35 backdrop-blur-xl border-emerald-500/50 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:border-emerald-400/70 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="bg-emerald-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-emerald-500/30 transition-all">
-                  <Receipt className="w-8 h-8 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <div className="bg-emerald-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-emerald-600/40 transition-all">
+                  <Receipt className="w-8 h-8 text-emerald-300 group-hover:scale-110 transition-transform" />
                 </div>
                 <p className="text-white font-bold">نقطة البيع</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/notifications">
-            <Card className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:border-purple-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
+            <Card className="bg-gradient-to-br from-purple-600/35 to-indigo-600/35 backdrop-blur-xl border-purple-500/50 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:border-purple-400/70 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="relative inline-block bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-purple-500/30 transition-all">
-                  <Bell className="w-8 h-8 text-purple-400 group-hover:scale-110 transition-transform" />
+                <div className="relative inline-block bg-purple-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-purple-600/40 transition-all">
+                  <Bell className="w-8 h-8 text-purple-300 group-hover:scale-110 transition-transform" />
                   {unreadCount > 0 && (
                     <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -308,20 +307,20 @@ export default function VendorDashboard() {
             </Card>
           </Link>
           <Link href="/vendor/inventory">
-            <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border-blue-500/40 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:border-blue-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
+            <Card className="bg-gradient-to-br from-blue-600/35 to-cyan-600/35 backdrop-blur-xl border-blue-500/50 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:border-blue-400/70 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-500/30 transition-all">
-                  <Package className="w-8 h-8 text-blue-400 group-hover:scale-110 transition-transform" />
+                <div className="bg-blue-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-600/40 transition-all">
+                  <Package className="w-8 h-8 text-blue-300 group-hover:scale-110 transition-transform" />
                 </div>
                 <p className="text-white font-bold">المخزون</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/orders">
-            <Card className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl border-orange-500/40 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:border-orange-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
+            <Card className="bg-gradient-to-br from-orange-600/35 to-red-600/35 backdrop-blur-xl border-orange-500/50 shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:border-orange-400/70 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="relative inline-block bg-orange-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-orange-500/30 transition-all">
-                  <ShoppingCart className="w-8 h-8 text-orange-400 group-hover:scale-110 transition-transform" />
+                <div className="relative inline-block bg-orange-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-orange-600/40 transition-all">
+                  <ShoppingCart className="w-8 h-8 text-orange-300 group-hover:scale-110 transition-transform" />
                   {(stats?.pendingOrders || 0) > 0 && (
                     <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {stats?.pendingOrders}
@@ -336,20 +335,20 @@ export default function VendorDashboard() {
             </Card>
           </Link>
           <Link href="/vendor/capital">
-            <Card className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 backdrop-blur-xl border-teal-500/40 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:border-teal-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
+            <Card className="bg-gradient-to-br from-teal-600/35 to-cyan-600/35 backdrop-blur-xl border-teal-500/50 shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 hover:border-teal-400/70 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="bg-teal-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-teal-500/30 transition-all">
-                  <Wallet className="w-8 h-8 text-teal-400 group-hover:scale-110 transition-transform" />
+                <div className="bg-teal-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-teal-600/40 transition-all">
+                  <Wallet className="w-8 h-8 text-teal-300 group-hover:scale-110 transition-transform" />
                 </div>
                 <p className="text-white font-bold">رأس المال</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/partners">
-            <Card className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 backdrop-blur-xl border-pink-500/40 shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:border-pink-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
+            <Card className="bg-gradient-to-br from-pink-600/35 to-rose-600/35 backdrop-blur-xl border-pink-500/50 shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 hover:border-pink-400/70 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="bg-pink-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-pink-500/30 transition-all">
-                  <Users className="w-8 h-8 text-pink-400 group-hover:scale-110 transition-transform" />
+                <div className="bg-pink-600/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-pink-600/40 transition-all">
+                  <Users className="w-8 h-8 text-pink-300 group-hover:scale-110 transition-transform" />
                 </div>
                 <p className="text-white font-bold">الشركاء</p>
               </CardContent>
