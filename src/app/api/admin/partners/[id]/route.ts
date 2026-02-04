@@ -2,6 +2,61 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// GET - جلب بيانات شريك واحد (للمدير فقط)
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth();
+    
+    if (!session || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
+    }
+
+    const { id } = params;
+
+    const partner = await prisma.partnerCapital.findUnique({
+      where: { id },
+      include: {
+        vendor: {
+          select: {
+            id: true,
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!partner) {
+      return NextResponse.json(
+        { error: 'الشريك غير موجود' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      ...partner,
+      email: partner.vendor?.user?.email || '',
+      hasAccount: !!partner.vendor?.user,
+      userId: partner.vendor?.user?.id,
+    });
+  } catch (error) {
+    console.error('Error fetching partner:', error);
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء جلب بيانات الشريك' },
+      { status: 500 }
+    );
+  }
+}
+
 // PATCH - تحديث بيانات شريك (للمدير فقط)
 export async function PATCH(
   request: NextRequest,
@@ -23,11 +78,20 @@ export async function PATCH(
       partnerType,
       notes,
       isActive,
+      changePassword,
+      newPassword,
     } = body;
 
     // التحقق من وجود الشريك
     const existingPartner = await prisma.partnerCapital.findUnique({
       where: { id },
+      include: {
+        vendor: {
+          select: {
+            userId: true,
+          },
+        },
+      },
     });
 
     if (!existingPartner) {
@@ -82,6 +146,19 @@ export async function PATCH(
     // تحديث النسبة إذا تغيرت
     if (capitalPercent !== undefined) {
       updateData.capitalPercent = parseFloat(capitalPercent);
+    }
+
+    // تغيير كلمة المرور إذا طُلِب
+    if (changePassword && newPassword && existingPartner.vendor?.userId) {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      await prisma.user.update({
+        where: { id: existingPartner.vendor.userId },
+        data: { password: hashedPassword },
+      });
+
+      console.log('✅ تم تغيير كلمة المرور للشريك:', partnerName || existingPartner.partnerName);
     }
 
     // تحديث الشريك

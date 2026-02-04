@@ -18,8 +18,10 @@ export async function GET(request: NextRequest) {
         vendor: {
           select: {
             id: true,
+            userId: true,
             user: {
               select: {
+                id: true,
                 name: true,
                 email: true,
               },

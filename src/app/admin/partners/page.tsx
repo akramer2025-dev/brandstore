@@ -72,6 +72,10 @@ export default function AdminPartnersPage() {
     partnerType: 'PARTNER',
     notes: '',
     isActive: true,
+    changePassword: false,
+    newPassword: '',
+    email: '',
+    hasAccount: false,
   })
 
   useEffect(() => {
@@ -102,8 +106,13 @@ export default function AdminPartnersPage() {
     }
   }
 
-  const openEditDialog = (partner: Partner) => {
+  const openEditDialog = async (partner: Partner) => {
     setSelectedPartner(partner)
+    
+    // جلب بيانات الحساب إذا وُجد
+    const response = await fetch(`/api/admin/partners/${partner.id}`)
+    const data = await response.json()
+    
     setEditFormData({
       partnerName: partner.partnerName,
       capitalAmount: partner.capitalAmount.toString(),
@@ -111,6 +120,10 @@ export default function AdminPartnersPage() {
       partnerType: partner.partnerType,
       notes: partner.notes || '',
       isActive: partner.isActive,
+      changePassword: false,
+      newPassword: '',
+      email: data.email || '',
+      hasAccount: data.hasAccount || false,
     })
     setIsEditDialogOpen(true)
   }
@@ -680,6 +693,72 @@ export default function AdminPartnersPage() {
                   <Label htmlFor="edit_isActive" className="text-white cursor-pointer">
                     الحساب نشط
                   </Label>
+                </div>
+
+                {/* بيانات الحساب */}
+                <div className="border-t border-white/10 pt-4 mt-4">
+                  <h4 className="text-lg font-semibold text-white mb-3">بيانات الدخول</h4>
+                  
+                  {editFormData.hasAccount ? (
+                    <div className="space-y-3">
+                      <div className="p-3 bg-green-900/20 rounded-lg border border-green-500/30">
+                        <p className="text-green-300 text-sm flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4" />
+                          الشريك لديه حساب دخول
+                        </p>
+                        {editFormData.email && (
+                          <p className="text-gray-300 text-sm mt-1">
+                            البريد: {editFormData.email}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {/* تغيير كلمة المرور */}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="edit_changePassword"
+                          checked={editFormData.changePassword}
+                          onChange={(e) => setEditFormData({ ...editFormData, changePassword: e.target.checked, newPassword: '' })}
+                          className="rounded"
+                        />
+                        <Label htmlFor="edit_changePassword" className="text-white cursor-pointer">
+                          تغيير كلمة المرور
+                        </Label>
+                      </div>
+
+                      {editFormData.changePassword && (
+                        <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-500/30">
+                          <Label htmlFor="edit_newPassword" className="text-white mb-2 block">
+                            كلمة المرور الجديدة *
+                          </Label>
+                          <Input
+                            id="edit_newPassword"
+                            type="text"
+                            value={editFormData.newPassword}
+                            onChange={(e) => setEditFormData({ ...editFormData, newPassword: e.target.value })}
+                            className="bg-white/10 border-white/20 text-white"
+                            placeholder="أدخل كلمة المرور الجديدة (6+ أحرف)"
+                            required={editFormData.changePassword}
+                            minLength={6}
+                          />
+                          <p className="text-xs text-blue-300 mt-2">
+                            ⚠️ سيتم تغيير كلمة مرور التسجيل للشريك
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-yellow-900/20 rounded-lg border border-yellow-500/30">
+                      <p className="text-yellow-300 text-sm flex items-center gap-2">
+                        <XCircle className="h-4 w-4" />
+                        هذا الشريك ليس لديه حساب دخول
+                      </p>
+                      <p className="text-gray-400 text-xs mt-1">
+                        لإنشاء حساب جديد، قم بحذف الشريك وإضافته مرة أخرى مع تفعيل "إنشاء حساب"
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
