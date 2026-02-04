@@ -29,20 +29,28 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 relative overflow-hidden">
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-teal-300/20 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-1/3 right-0 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl animate-float-delayed"></div>
-        <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-1/3 right-0 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-float-slow"></div>
       </div>
 
-      <div className="relative z-10 bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white py-8 shadow-2xl">
+      <div className="relative z-10 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white py-8 shadow-2xl">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl font-bold drop-shadow-lg">لوحة الإدارة</h1>
-              <p className="text-teal-100 mt-2 text-lg">مرحبًا {session.user?.name || "المدير"}</p>
+          <div className="flex justify-between items-center flex-wrap gap-4">
+            <div className="flex items-center gap-4">
+              {/* Logo */}
+              <img 
+                src="/logo.png" 
+                alt="Remostore" 
+                className="h-16 w-16 object-contain drop-shadow-2xl"
+              />
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold drop-shadow-lg">لوحة الإدارة</h1>
+                <p className="text-purple-100 mt-1 text-base md:text-lg">مرحبًا {session.user?.name || "المدير"}</p>
+              </div>
             </div>
             <form
               action={async () => {
@@ -70,42 +78,42 @@ export default async function AdminDashboard() {
             title="إجمالي المنتجات"
             value={totalProducts.toString()}
             icon={<Package className="w-8 h-8" />}
-            color="bg-blue-500"
+            color="bg-purple-500"
           />
           <StatCard
             title="إجمالي الطلبات"
             value={totalOrders.toString()}
             icon={<ShoppingBag className="w-8 h-8" />}
-            color="bg-green-500"
+            color="bg-pink-500"
           />
           <StatCard
             title="طلبات قيد الانتظار"
             value={pendingOrders.toString()}
             icon={<TrendingUp className="w-8 h-8" />}
-            color="bg-yellow-500"
+            color="bg-orange-500"
           />
           <StatCard
             title="موظفي التوصيل"
             value={totalDeliveryStaff.toString()}
             icon={<Truck className="w-8 h-8" />}
-            color="bg-teal-500"
+            color="bg-gradient-to-r from-purple-500 to-pink-500"
           />
         </div>
 
         {/* Low Stock Alert */}
         {lowStockProducts > 0 && (
-          <Card className="mb-8 border-yellow-500 border-2">
+          <Card className="mb-8 border-orange-500 border-2 bg-gray-800/90 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-yellow-600">
+              <CardTitle className="flex items-center gap-2 text-orange-400">
                 <AlertCircle />
                 تحذير: منتجات على وشك النفاد
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-300 mb-4">
                 يوجد {lowStockProducts} منتج بكمية قليلة في المخزون
               </p>
-              <Button asChild>
+              <Button asChild className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">
                 <Link href="/admin/inventory">عرض المخزون</Link>
               </Button>
             </CardContent>
@@ -216,12 +224,12 @@ function StatCard({
   color: string;
 }) {
   return (
-    <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+    <Card className="backdrop-blur-sm bg-gray-800/80 border-purple-500/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:border-pink-500/50">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500 mb-1">{title}</p>
-            <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">{value}</p>
+            <p className="text-sm text-gray-400 mb-1">{title}</p>
+            <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">{value}</p>
           </div>
           <div className={`${color} text-white p-3 rounded-lg shadow-lg`}>{icon}</div>
         </div>
@@ -245,13 +253,13 @@ function ActionCard({
 }) {
   return (
     <Link href={href}>
-      <Card className="backdrop-blur-sm bg-white/80 border-white/20 hover:shadow-2xl transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-white/90 group">
+      <Card className="backdrop-blur-sm bg-gray-800/80 border-purple-500/30 hover:shadow-2xl transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-gray-800/90 hover:border-pink-500/50 group">
         <CardHeader>
           <div className={`${color} mb-4 transform group-hover:scale-110 transition-transform duration-300`}>{icon}</div>
-          <CardTitle className="text-xl group-hover:text-teal-600 transition-colors">{title}</CardTitle>
+          <CardTitle className="text-xl text-white group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 group-hover:bg-clip-text group-hover:text-transparent transition-all">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-600 group-hover:text-gray-800 transition-colors">{description}</p>
+          <p className="text-gray-300 group-hover:text-gray-200 transition-colors">{description}</p>
         </CardContent>
       </Card>
     </Link>
