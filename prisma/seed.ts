@@ -2212,6 +2212,11 @@ async function main() {
   const product3 = await prisma.product.findUnique({ where: { id: 'prod3' } });
   const product4 = await prisma.product.findUnique({ where: { id: 'prod4' } });
 
+  // Get delivery staff
+  const deliveryStaffRecord = await prisma.deliveryStaff.findFirst({
+    where: { email: 'delivery@partner.com' }
+  });
+
   if (product1 && product2 && product3 && product4 && deliveryStaffRecord) {
     // Order 1 - مكتمل
     const order1 = await prisma.order.create({
