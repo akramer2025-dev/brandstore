@@ -223,39 +223,45 @@ export default function VendorDashboard() {
 
         {/* إحصائيات بسيطة */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
+          <Card className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-xl border-emerald-500/40 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/30 hover:border-emerald-400/60 transition-all">
             <CardContent className="p-4 text-center">
-              <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-green-400">{stats?.totalRevenue?.toLocaleString() || 0}</p>
-              <p className="text-gray-400 text-xs">الإيرادات</p>
+              <div className="bg-emerald-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <DollarSign className="w-6 h-6 text-emerald-400" />
+              </div>
+              <p className="text-2xl font-bold text-white">{stats?.totalRevenue?.toLocaleString() || 0}</p>
+              <p className="text-emerald-300 text-xs font-semibold">الإيرادات</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
+          <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border-blue-500/40 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/30 hover:border-blue-400/60 transition-all">
             <CardContent className="p-4 text-center">
-              <div className="relative inline-block">
-                <ShoppingCart className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+              <div className="relative inline-block bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <ShoppingCart className="w-6 h-6 text-blue-400" />
                 {(stats?.pendingOrders || 0) > 0 && (
                   <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
                     {stats?.pendingOrders}
                   </div>
                 )}
               </div>
-              <p className="text-2xl font-bold text-blue-400">{stats?.totalOrders || 0}</p>
-              <p className="text-gray-400 text-xs">الطلبات</p>
+              <p className="text-2xl font-bold text-white">{stats?.totalOrders || 0}</p>
+              <p className="text-blue-300 text-xs font-semibold">الطلبات</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
+          <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/30 hover:border-purple-400/60 transition-all">
             <CardContent className="p-4 text-center">
-              <Package className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-purple-400">{stats?.totalProducts || 0}</p>
-              <p className="text-gray-400 text-xs">المنتجات</p>
+              <div className="bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <Package className="w-6 h-6 text-purple-400" />
+              </div>
+              <p className="text-2xl font-bold text-white">{stats?.totalProducts || 0}</p>
+              <p className="text-purple-300 text-xs font-semibold">المنتجات</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
+          <Card className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 backdrop-blur-xl border-orange-500/40 shadow-lg shadow-orange-500/10 hover:shadow-orange-500/30 hover:border-orange-400/60 transition-all">
             <CardContent className="p-4 text-center">
-              <Users className="w-6 h-6 text-orange-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-orange-400">{capitalSummary?.suppliers.pendingCount || 0}</p>
-              <p className="text-gray-400 text-xs">موردين</p>
+              <div className="bg-orange-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <Users className="w-6 h-6 text-orange-400" />
+              </div>
+              <p className="text-2xl font-bold text-white">{capitalSummary?.suppliers.pendingCount || 0}</p>
+              <p className="text-orange-300 text-xs font-semibold">موردين</p>
             </CardContent>
           </Card>
         </div>
@@ -263,79 +269,89 @@ export default function VendorDashboard() {
         {/* روابط سريعة */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Link href="/vendor/capital">
-            <Card className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 backdrop-blur-xl border-yellow-500/30 shadow-lg hover:shadow-yellow-500/20 transition-all cursor-pointer hover:scale-[1.05]">
+            <Card className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 backdrop-blur-xl border-yellow-500/40 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 hover:border-yellow-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <Wallet className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-                <p className="text-white font-medium">الحسابات</p>
+                <div className="bg-yellow-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-yellow-500/30 transition-all">
+                  <Wallet className="w-8 h-8 text-yellow-400 group-hover:scale-110 transition-transform" />
+                </div>
+                <p className="text-white font-bold">الحسابات</p>
                 <p className="text-yellow-300 text-xs mt-1">كل المعاملات</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/pos">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+            <Card className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-xl border-emerald-500/40 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:border-emerald-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <Receipt className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                <p className="text-white font-medium">نقطة البيع</p>
+                <div className="bg-emerald-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-emerald-500/30 transition-all">
+                  <Receipt className="w-8 h-8 text-emerald-400 group-hover:scale-110 transition-transform" />
+                </div>
+                <p className="text-white font-bold">نقطة البيع</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/notifications">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+            <Card className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border-purple-500/40 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:border-purple-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="relative inline-block">
-                  <Bell className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                <div className="relative inline-block bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-purple-500/30 transition-all">
+                  <Bell className="w-8 h-8 text-purple-400 group-hover:scale-110 transition-transform" />
                   {unreadCount > 0 && (
-                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </div>
                   )}
                 </div>
-                <p className="text-white font-medium">الإشعارات</p>
+                <p className="text-white font-bold">الإشعارات</p>
                 {unreadCount > 0 && (
-                  <p className="text-red-400 text-xs font-bold mt-1">{unreadCount} جديد</p>
+                  <p className="text-purple-300 text-xs font-semibold mt-1">{unreadCount} جديد</p>
                 )}
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/inventory">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+            <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border-blue-500/40 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:border-blue-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <Package className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                <p className="text-white font-medium">المخزون</p>
+                <div className="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-500/30 transition-all">
+                  <Package className="w-8 h-8 text-blue-400 group-hover:scale-110 transition-transform" />
+                </div>
+                <p className="text-white font-bold">المخزون</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/orders">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+            <Card className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl border-orange-500/40 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:border-orange-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <div className="relative inline-block">
-                  <ShoppingCart className="w-8 h-8 text-orange-400 mx-auto mb-2" />
+                <div className="relative inline-block bg-orange-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-orange-500/30 transition-all">
+                  <ShoppingCart className="w-8 h-8 text-orange-400 group-hover:scale-110 transition-transform" />
                   {(stats?.pendingOrders || 0) > 0 && (
-                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {stats?.pendingOrders}
                     </div>
                   )}
                 </div>
-                <p className="text-white font-medium">الطلبات</p>
+                <p className="text-white font-bold">الطلبات</p>
                 {(stats?.pendingOrders || 0) > 0 && (
-                  <p className="text-orange-400 text-xs font-bold mt-1">{stats?.pendingOrders} جديد</p>
+                  <p className="text-orange-300 text-xs font-semibold mt-1">{stats?.pendingOrders} جديد</p>
                 )}
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/capital">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+            <Card className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 backdrop-blur-xl border-teal-500/40 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:border-teal-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <Wallet className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-                <p className="text-white font-medium">رأس المال</p>
+                <div className="bg-teal-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-teal-500/30 transition-all">
+                  <Wallet className="w-8 h-8 text-teal-400 group-hover:scale-110 transition-transform" />
+                </div>
+                <p className="text-white font-bold">رأس المال</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/partners">
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+            <Card className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 backdrop-blur-xl border-pink-500/40 shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:border-pink-400/60 transition-all cursor-pointer hover:scale-[1.05] group">
               <CardContent className="p-4 text-center">
-                <Users className="w-8 h-8 text-pink-400 mx-auto mb-2" />
-                <p className="text-white font-medium">الشركاء</p>
+                <div className="bg-pink-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:bg-pink-500/30 transition-all">
+                  <Users className="w-8 h-8 text-pink-400 group-hover:scale-110 transition-transform" />
+                </div>
+                <p className="text-white font-bold">الشركاء</p>
               </CardContent>
             </Card>
           </Link>
