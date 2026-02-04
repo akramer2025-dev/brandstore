@@ -17,7 +17,8 @@ import {
   Users,
   Zap,
   Receipt,
-  AlertCircle
+  AlertCircle,
+  Bell
 } from 'lucide-react'
 
 interface CapitalSummary {
@@ -39,6 +40,7 @@ export default function VendorDashboard() {
   const [capitalSummary, setCapitalSummary] = useState<CapitalSummary | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -51,10 +53,10 @@ export default function VendorDashboard() {
   }, [status, session, router])
 
   const fetchData = async () => {
-    try {
-      const [capitalRes, statsRes] = await Promise.all([
+    try {, notificationsRes] = await Promise.all([
         fetch('/api/vendor/capital/summary').catch(() => null),
-        fetch('/api/vendor/stats').catch(() => null)
+        fetch('/api/vendor/stats').catch(() => null),
+        fetch('/api/vendor/notifications').catch(() => null)
       ])
       
       if (capitalRes && capitalRes.ok) {
@@ -63,6 +65,10 @@ export default function VendorDashboard() {
       if (statsRes && statsRes.ok) {
         setStats(await statsRes.json())
       }
+      if (notificationsRes && notificationsRes.ok) {
+        const data = await notificationsRes.json()
+        setUnreadCount(data.unreadCount || 0)
+      }
     } catch (error) {
       console.error('Failed to fetch data:', error)
     } finally {
@@ -70,15 +76,49 @@ export default function VendorDashboard() {
     }
   }
 
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
-      </div>
-    )
+  // تحديث عدد الإشعارات كل 30 ثانية
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/vendor/notifications')
+        if (res.ok) {
+          const data = await res.json()
+          setUnreadCount(data.unreadCount || 0)
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error)
+      }
+    }, 30000)
+    return () => clearInterval(interval)
+  }, []) }
   }
 
-  return (
+  if (status === 'loading' || loading) {
+    return (
+      <div div className="flex items-center gap-2">
+            {/* زر الإشعارات */}
+            <Link href="/vendor/notifications">
+              <Button
+                size="sm"
+                className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 relative"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+            {/* زر تسجيل الخروج */}
+            <Button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              size="sm"
+              className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4 md:p-6">
       <div className="max-w-5xl mx-auto">
         
@@ -233,10 +273,28 @@ export default function VendorDashboard() {
               </CardContent>
             </Card>
           </Link>
+          <Link href="/vendor/notifications">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
+              <CardContent className="p-4 text-center">
+                <div className="relative inline-block">
+                  <Bell className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                  {unreadCount > 0 && (
+                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </div>
+                  )}
+                </div>
+                <p className="text-white font-medium">الإشعارات</p>
+                {unreadCount > 0 && (
+                  <p className="text-red-400 text-xs font-bold mt-1">{unreadCount} جديد</p>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
           <Link href="/vendor/inventory">
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
               <CardContent className="p-4 text-center">
-                <Package className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                <Package className="w-8 h-8 text-blue-400 mx-auto mb-2" />
                 <p className="text-white font-medium">المخزون</p>
               </CardContent>
             </Card>
@@ -245,7 +303,7 @@ export default function VendorDashboard() {
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
               <CardContent className="p-4 text-center">
                 <div className="relative inline-block">
-                  <ShoppingCart className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                  <ShoppingCart className="w-8 h-8 text-orange-400 mx-auto mb-2" />
                   {(stats?.pendingOrders || 0) > 0 && (
                     <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
                       {stats?.pendingOrders}
