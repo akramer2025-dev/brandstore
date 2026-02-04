@@ -96,8 +96,6 @@ export async function POST(req: Request) {
       }
     } else {
       // استخدم التخزين المحلي في Development
-    } else {
-      // استخدم التخزين المحلي في Development
       for (const file of files) {
         // Validate file type
         const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
