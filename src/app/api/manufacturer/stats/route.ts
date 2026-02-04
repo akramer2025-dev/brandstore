@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     ] = await Promise.all([
       prisma.production.count(),
       prisma.production.count({ where: { status: 'COMPLETED' } }),
-      prisma.production.count({ where: { status: 'PENDING' } }),
+      prisma.production.count({ where: { status: 'PLANNED' } }),
       prisma.fabric.count(),
       prisma.rawMaterial.count(),
       prisma.rawMaterial.count({ where: { quantity: { lt: 10 } } }),
