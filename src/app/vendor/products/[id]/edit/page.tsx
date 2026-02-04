@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Package, ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { Package, ArrowLeft, Save, Loader2, Upload, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -18,6 +18,10 @@ export default function EditProductPage() {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  
   const [formData, setFormData] = useState({
     nameAr: '',
     descriptionAr: '',
@@ -25,8 +29,23 @@ export default function EditProductPage() {
     originalPrice: '',
     purchasePrice: '',
     stock: '',
+    categoryId: '',
     isVisible: true,
   });
+
+  // جلب الفئات
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        setCategories(data.categories || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // جلب بيانات المنتج
   useEffect(() => {
@@ -43,11 +62,13 @@ export default function EditProductPage() {
             originalPrice: product.originalPrice?.toString() || '',
             purchasePrice: product.productionCost?.toString() || '',
             stock: product.stock?.toString() || '',
+            categoryId: product.categoryId || '',
             isVisible: product.isVisible ?? true,
           });
+          setImages(product.images || []);
         } else {
           alert('المنتج غير موجود');
-          router.push('/vendor/products');
+          router.push('/vendor/inventory');
         }
       } catch (error) {
         console.error('Error:', error);
@@ -60,9 +81,52 @@ export default function EditProductPage() {
     fetchProduct();
   }, [productId, router]);
 
+  // رفع الصور
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingImages(true);
+    const formDataUpload = new FormData();
+    
+    for (let i = 0; i < files.length; i++) {
+      formDataUpload.append('files', files[i]);
+    }
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setImages([...images, ...data.urls]);
+      } else {
+        alert('فشل رفع الصور');
+      }
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      alert('حدث خطأ أثناء رفع الصور');
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  // حذف صورة
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
   // حفظ التعديلات
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (images.length === 0) {
+      alert('يجب إضافة صورة واحدة على الأقل');
+      return;
+    }
+    
     setSaving(true);
 
     try {
@@ -77,13 +141,15 @@ export default function EditProductPage() {
           originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           productionCost: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
           stock: parseInt(formData.stock),
+          categoryId: formData.categoryId || null,
+          images: images,
           isVisible: formData.isVisible,
         }),
       });
 
       if (response.ok) {
         alert('✅ تم تحديث المنتج بنجاح!');
-        router.push('/vendor/products');
+        router.push('/vendor/inventory');
       } else {
         const error = await response.json();
         alert(`❌ ${error.error || 'فشل تحديث المنتج'}`);
@@ -114,7 +180,7 @@ export default function EditProductPage() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/vendor/products">
+          <Link href="/vendor/inventory">
             <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -128,10 +194,71 @@ export default function EditProductPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* صور المنتج */}
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardHeader>
-              <CardTitle className="text-white">بيانات المنتج</CardTitle>
+              <CardTitle className="text-white">📸 صور المنتج</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* معاينة الصور */}
+              {images.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {images.map((img, index) => (
+                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-white/5 border border-white/20 group">
+                      <Image
+                        src={img}
+                        alt={`صورة ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500/90 hover:bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      {index === 0 && (
+                        <div className="absolute bottom-2 left-2 bg-purple-500/90 text-white text-xs px-2 py-1 rounded">
+                          الصورة الرئيسية
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* زر رفع صور */}
+              <div>
+                <Label htmlFor="images" className="cursor-pointer">
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-white/40 transition-colors bg-white/5 hover:bg-white/10">
+                    {uploadingImages ? (
+                      <Loader2 className="w-8 h-8 mx-auto text-purple-400 animate-spin mb-2" />
+                    ) : (
+                      <Upload className="w-8 h-8 mx-auto text-purple-400 mb-2" />
+                    )}
+                    <p className="text-white mb-1">اضغط لإضافة المزيد من الصور</p>
+                    <p className="text-sm text-gray-400">PNG, JPG حتى 10MB</p>
+                  </div>
+                </Label>
+                <Input
+                  id="images"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={uploadingImages}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* بيانات المنتج */}
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-white">📝 البيانات الأساسية</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* اسم المنتج */}
@@ -158,8 +285,26 @@ export default function EditProductPage() {
                 />
               </div>
 
+              {/* الفئة */}
+              <div>
+                <Label htmlFor="categoryId" className="text-white">الفئة</Label>
+                <select
+                  id="categoryId"
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                  className="w-full bg-white/5 border border-white/20 text-white rounded-md p-2"
+                >
+                  <option value="" className="bg-gray-800">بدون فئة</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id} className="bg-gray-800">
+                      {cat.nameAr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* الأسعار */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="purchasePrice" className="text-white">💰 سعر الشراء *</Label>
                   <Input
@@ -188,10 +333,10 @@ export default function EditProductPage() {
 
               {/* الربح المتوقع */}
               {formData.price && formData.purchasePrice && (
-                <div className="p-4 rounded-lg bg-white/10 border border-white/20">
+                <div className="p-4 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-300">💰 الربح المتوقع:</span>
-                    <span className={`font-bold text-xl ${expectedProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <span className="text-gray-200">💰 الربح المتوقع:</span>
+                    <span className={`font-bold text-xl ${expectedProfit >= 0 ? 'text-green-300' : 'text-red-300'}`}>
                       {expectedProfit.toFixed(2)} ج
                     </span>
                   </div>
@@ -199,7 +344,7 @@ export default function EditProductPage() {
               )}
 
               {/* السعر الأصلي والكمية */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="originalPrice" className="text-white">السعر قبل الخصم (اختياري)</Label>
                   <Input
@@ -212,7 +357,7 @@ export default function EditProductPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="stock" className="text-white">الكمية *</Label>
+                  <Label htmlFor="stock" className="text-white">📦 الكمية *</Label>
                   <Input
                     id="stock"
                     type="number"
@@ -225,7 +370,7 @@ export default function EditProductPage() {
               </div>
 
               {/* الظهور */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-white/5 border border-white/20">
                 <input
                   type="checkbox"
                   id="isVisible"
@@ -234,30 +379,41 @@ export default function EditProductPage() {
                   className="w-5 h-5 rounded"
                 />
                 <Label htmlFor="isVisible" className="text-white cursor-pointer">
-                  إظهار المنتج في المتجر
+                  👁️ إظهار المنتج في المتجر
                 </Label>
               </div>
-
-              {/* زر الحفظ */}
-              <Button
-                type="submit"
-                disabled={saving}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-6 text-lg"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    جاري الحفظ...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 h-5 mr-2" />
-                    حفظ التعديلات
-                  </>
-                )}
-              </Button>
             </CardContent>
           </Card>
+
+          {/* زر الحفظ */}
+          <div className="flex gap-4">
+            <Button
+              type="submit"
+              disabled={saving}
+              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white h-14 text-lg"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-5 h-5 ml-2 animate-spin" />
+                  جاري الحفظ...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5 ml-2" />
+                  حفظ التعديلات
+                </>
+              )}
+            </Button>
+            <Link href="/vendor/inventory" className="flex-1">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 h-14 text-lg"
+              >
+                إلغاء
+              </Button>
+            </Link>
+          </div>
         </form>
       </div>
     </div>

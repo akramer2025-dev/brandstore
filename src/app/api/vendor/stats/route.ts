@@ -51,22 +51,22 @@ export async function GET() {
     ] = await Promise.all([
       // إجمالي الطلبات
       prisma.order.count({
-        where: { vendorId: vendor.id },
+        where: { vendorId: vendor.id, deletedAt: null },
       }),
       
       // الطلبات المعلقة
       prisma.order.count({
-        where: { vendorId: vendor.id, status: 'PENDING' },
+        where: { vendorId: vendor.id, status: 'PENDING', deletedAt: null },
       }),
       
       // الطلبات المكتملة
       prisma.order.count({
-        where: { vendorId: vendor.id, status: 'DELIVERED' },
+        where: { vendorId: vendor.id, status: 'DELIVERED', deletedAt: null },
       }),
       
       // الطلبات الملغية
       prisma.order.count({
-        where: { vendorId: vendor.id, status: 'CANCELLED' },
+        where: { vendorId: vendor.id, status: 'CANCELLED', deletedAt: null },
       }),
       
       // إجمالي المنتجات

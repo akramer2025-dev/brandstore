@@ -158,6 +158,32 @@ export default function VendorDashboard() {
           </CardContent>
         </Card>
 
+        {/* إشعار الطلبات المعلقة */}
+        {(stats?.pendingOrders || 0) > 0 && (
+          <div className="mb-4">
+            <Link href="/vendor/orders">
+              <Card className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/30 shadow-lg hover:scale-[1.02] transition-all cursor-pointer">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-orange-500 p-2 rounded-full animate-pulse">
+                        <ShoppingCart className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-lg">لديك {stats.pendingOrders} طلب جديد!</p>
+                        <p className="text-orange-200 text-sm">انقر لعرض الطلبات المعلقة</p>
+                      </div>
+                    </div>
+                    <div className="bg-orange-500 text-white font-bold text-xl px-4 py-2 rounded-full">
+                      {stats.pendingOrders}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        )}
+
         {/* إحصائيات بسيطة */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
@@ -169,7 +195,14 @@ export default function VendorDashboard() {
           </Card>
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
             <CardContent className="p-4 text-center">
-              <ShoppingCart className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+              <div className="relative inline-block">
+                <ShoppingCart className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+                {(stats?.pendingOrders || 0) > 0 && (
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                    {stats?.pendingOrders}
+                  </div>
+                )}
+              </div>
               <p className="text-2xl font-bold text-blue-400">{stats?.totalOrders || 0}</p>
               <p className="text-gray-400 text-xs">الطلبات</p>
             </CardContent>
@@ -211,8 +244,18 @@ export default function VendorDashboard() {
           <Link href="/vendor/orders">
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
               <CardContent className="p-4 text-center">
-                <ShoppingCart className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                <div className="relative inline-block">
+                  <ShoppingCart className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                  {(stats?.pendingOrders || 0) > 0 && (
+                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                      {stats?.pendingOrders}
+                    </div>
+                  )}
+                </div>
                 <p className="text-white font-medium">الطلبات</p>
+                {(stats?.pendingOrders || 0) > 0 && (
+                  <p className="text-orange-400 text-xs font-bold mt-1">{stats?.pendingOrders} جديد</p>
+                )}
               </CardContent>
             </Card>
           </Link>

@@ -8,12 +8,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShoppingBag, MapPin, Phone, User, Home, Loader2, CheckCircle2, Package, CreditCard, Banknote, Calendar } from "lucide-react";
+import { ShoppingBag, MapPin, Phone, User, Home, Loader2, CheckCircle2, Package, CreditCard, Banknote, Calendar, Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import InstallmentCalculator from "@/components/InstallmentCalculator";
+import AddressSelector from "@/components/AddressSelector";
+import AddressForm from "@/components/AddressForm";
 
 type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
 type EWalletType = 'etisalat_cash' | 'vodafone_cash' | 'we_pay';
+
+interface SavedAddress {
+  id: string;
+  title: string;
+  fullName: string;
+  phone: string;
+  alternativePhone?: string;
+  governorate: string;
+  city: string;
+  district: string;
+  street: string;
+  buildingNumber?: string;
+  floorNumber?: string;
+  apartmentNumber?: string;
+  landmark?: string;
+  postalCode?: string;
+  isDefault: boolean;
+}
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
@@ -23,16 +43,29 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH_ON_DELIVERY');
   const [eWalletType, setEWalletType] = useState<EWalletType>('vodafone_cash');
   const [selectedInstallmentPlan, setSelectedInstallmentPlan] = useState<any>(null);
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
   
   const { items, getTotalPrice, clearCart } = useCartStore();
 
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
-    address: "",
+    alternativePhone: "",
+    governorate: "",
     city: "",
     district: "",
+    street: "",
+    buildingNumber: "",
+    floorNumber: "",
+    apartmentNumber: "",
+    landmark: "",
+    postalCode: "",
     notes: "",
+    saveAddress: false,
+    addressTitle: "",
   });
 
   useEffect(() => {
@@ -41,18 +74,18 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      toast.error("يجب تسجيل الدخول أولاً");
       router.push("/auth/login");
     }
   }, [status, router]);
 
+  // جلب العناوين المحفوظة
   useEffect(() => {
-    if (mounted && items.length === 0) {
-      toast.error("السلة فارغة");
-      router.push("/cart");
+    if (session?.user && mounted) {
+      fetchSavedAddresses();
     }
-  }, [mounted, items, router]);
+  }, [session, mounted]);
 
+  // تحميل بيانات المستخدم
   useEffect(() => {
     if (session?.user) {
       setFormData(prev => ({
@@ -63,6 +96,55 @@ export default function CheckoutPage() {
     }
   }, [session]);
 
+  const fetchSavedAddresses = async () => {
+    setLoadingAddresses(true);
+    try {
+      const response = await fetch('/api/addresses');
+      if (response.ok) {
+        const data = await response.json();
+        setSavedAddresses(data.addresses || []);
+        
+        // اختيار العنوان الافتراضي تلقائياً
+        const defaultAddress = data.addresses?.find((addr: SavedAddress) => addr.isDefault);
+        if (defaultAddress) {
+          selectSavedAddress(defaultAddress.id);
+        } else if (data.addresses?.length > 0) {
+          // إذا لم يوجد عنوان افتراضي، اختر أول عنوان
+          setShowNewAddressForm(true);
+        } else {
+          setShowNewAddressForm(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+    } finally {
+      setLoadingAddresses(false);
+    }
+  };
+
+  const selectSavedAddress = (addressId: string) => {
+    const address = savedAddresses.find(addr => addr.id === addressId);
+    if (address) {
+      setSelectedAddress(addressId);
+      setFormData(prev => ({
+        ...prev,
+        fullName: address.fullName,
+        phone: address.phone,
+        alternativePhone: address.alternativePhone || "",
+        governorate: address.governorate,
+        city: address.city,
+        district: address.district,
+        street: address.street,
+        buildingNumber: address.buildingNumber || "",
+        floorNumber: address.floorNumber || "",
+        apartmentNumber: address.apartmentNumber || "",
+        landmark: address.landmark || "",
+        postalCode: address.postalCode || "",
+      }));
+      setShowNewAddressForm(false);
+    }
+  };
+
   if (!mounted || status === "loading") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 flex items-center justify-center">
@@ -71,7 +153,15 @@ export default function CheckoutPage() {
     );
   }
 
-  if (status === "unauthenticated" || items.length === 0) {
+  if (status === "unauthenticated") {
+    return null;
+  }
+
+  // إذا كانت السلة فارغة، نرجع null بدون toast
+  if (items.length === 0) {
+    if (mounted) {
+      router.replace("/cart");
+    }
     return null;
   }
 
@@ -79,10 +169,52 @@ export default function CheckoutPage() {
   const deliveryFee = 0; // توصيل مجاني
   const finalTotal = totalPrice + deliveryFee;
 
+  const saveNewAddress = async () => {
+    if (!formData.saveAddress || !formData.addressTitle) return null;
+
+    try {
+      const response = await fetch('/api/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.addressTitle,
+          fullName: formData.fullName,
+          phone: formData.phone,
+          alternativePhone: formData.alternativePhone,
+          governorate: formData.governorate,
+          city: formData.city,
+          district: formData.district,
+          street: formData.street,
+          buildingNumber: formData.buildingNumber,
+          floorNumber: formData.floorNumber,
+          apartmentNumber: formData.apartmentNumber,
+          landmark: formData.landmark,
+          postalCode: formData.postalCode,
+          isDefault: savedAddresses.length === 0,
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.address;
+      }
+    } catch (error) {
+      console.error('Error saving address:', error);
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.fullName || !formData.phone || !formData.address || !formData.city) {
+    // التحقق من وجود منتجات في السلة
+    if (items.length === 0) {
+      router.push("/cart");
+      return;
+    }
+    
+    if (!formData.fullName || !formData.phone || !formData.governorate || 
+        !formData.city || !formData.district || !formData.street) {
       toast.error("يرجى ملء جميع الحقول المطلوبة");
       return;
     }
@@ -95,13 +227,29 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
+      // حفظ العنوان إذا طلب المستخدم
+      await saveNewAddress();
+
+      // تجميع العنوان الكامل
+      const fullAddress = [
+        formData.street,
+        formData.buildingNumber && `عمارة ${formData.buildingNumber}`,
+        formData.floorNumber && `طابق ${formData.floorNumber}`,
+        formData.apartmentNumber && `شقة ${formData.apartmentNumber}`,
+        formData.landmark && `بجوار ${formData.landmark}`,
+        formData.district,
+        formData.city,
+        formData.governorate,
+        formData.postalCode && `رمز بريدي: ${formData.postalCode}`
+      ].filter(Boolean).join(', ');
+
       const orderData: any = {
         items: items.map(item => ({
           productId: item.id,
           quantity: item.quantity,
           price: item.price,
         })),
-        deliveryAddress: `${formData.address}, ${formData.district}, ${formData.city}`,
+        deliveryAddress: fullAddress,
         deliveryPhone: formData.phone,
         customerNotes: formData.notes,
         deliveryFee: 0,
@@ -176,122 +324,46 @@ export default function CheckoutPage() {
           <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
             {/* Delivery Information */}
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-              {/* Personal Information */}
-              <Card className="bg-gray-800/80 border-teal-500/20">
-                <CardHeader className="p-4 sm:p-6">
-                  <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
-                    <User className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
-                    المعلومات الشخصية
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="fullName" className="text-gray-300 mb-2 block">
-                        الاسم الكامل <span className="text-red-400">*</span>
-                      </Label>
-                      <Input
-                        id="fullName"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        placeholder="أدخل اسمك الكامل"
-                        required
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                      />
+              {/* العناوين المحفوظة */}
+              {!showNewAddressForm && savedAddresses.length > 0 && (
+                <AddressSelector
+                  savedAddresses={savedAddresses}
+                  selectedAddress={selectedAddress}
+                  onSelectAddress={selectSavedAddress}
+                  onNewAddress={() => setShowNewAddressForm(true)}
+                  loading={loadingAddresses}
+                />
+              )}
+
+              {/* نموذج العنوان الجديد */}
+              {showNewAddressForm && (
+                <>
+                  {savedAddresses.length > 0 && (
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowNewAddressForm(false);
+                          if (savedAddresses.length > 0) {
+                            selectSavedAddress(savedAddresses[0].id);
+                          }
+                        }}
+                        className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+                      >
+                        عرض العناوين المحفوظة
+                      </Button>
                     </div>
-
-                    <div>
-                      <Label htmlFor="phone" className="text-gray-300 mb-2 block">
-                        رقم الهاتف <span className="text-red-400">*</span>
-                      </Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="01xxxxxxxxx"
-                        required
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Delivery Address */}
-              <Card className="bg-gray-800/80 border-teal-500/20">
-                <CardHeader className="p-4 sm:p-6">
-                  <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
-                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
-                    عنوان التوصيل
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="city" className="text-gray-300 mb-2 block">
-                        المدينة <span className="text-red-400">*</span>
-                      </Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        placeholder="مثال: القاهرة"
-                        required
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="district" className="text-gray-300 mb-2 block">
-                        المنطقة <span className="text-red-400">*</span>
-                      </Label>
-                      <Input
-                        id="district"
-                        name="district"
-                        value={formData.district}
-                        onChange={handleInputChange}
-                        placeholder="مثال: مدينة نصر"
-                        required
-                        className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="address" className="text-gray-300 mb-2 block">
-                      العنوان التفصيلي <span className="text-red-400">*</span>
-                    </Label>
-                    <Input
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      placeholder="رقم المبنى، اسم الشارع، أقرب معلم"
-                      required
-                      className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="notes" className="text-gray-300 mb-2 block">
-                      ملاحظات إضافية (اختياري)
-                    </Label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                      placeholder="أي ملاحظات خاصة بالطلب أو التوصيل"
-                      rows={3}
-                      className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-md text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                  )}
+                  <AddressForm
+                    formData={formData}
+                    onChange={handleInputChange}
+                    onCheckboxChange={(checked) => 
+                      setFormData(prev => ({ ...prev, saveAddress: checked }))
+                    }
+                  />
+                </>
+              )}
 
               {/* Payment Method */}
               <Card className="bg-gray-800/80 border-teal-500/20">

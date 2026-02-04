@@ -64,10 +64,17 @@ export class OrderService {
     const finalAmount = totalAmount + deliveryFee;
     const paymentMethod = data.paymentMethod || 'CASH_ON_DELIVERY';
 
+    // الحصول على vendorId من أول منتج (نفترض أن كل المنتجات من نفس الشريك)
+    const firstProduct = await prisma.product.findUnique({
+      where: { id: data.items[0].productId },
+      select: { vendorId: true }
+    });
+
     // إنشاء الطلب
     const order = await prisma.order.create({
       data: {
         customerId: data.customerId,
+        vendorId: firstProduct?.vendorId || null, // ربط الطلب بالشريك
         totalAmount,
         deliveryFee,
         finalAmount,
@@ -382,7 +389,10 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
    */
   static async getCustomerOrders(customerId: string) {
     return prisma.order.findMany({
-      where: { customerId },
+      where: { 
+        customerId,
+        deletedAt: null, // فقط الطلبات الموجودة (غير محذوفة)
+      },
       include: {
         items: {
           include: {

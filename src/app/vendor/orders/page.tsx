@@ -24,16 +24,11 @@ export default async function VendorOrdersPage() {
     redirect("/");
   }
 
-  // جلب الطلبات التي تحتوي على منتجات هذا الشريك فقط
+  // جلب الطلبات الخاصة بهذا الشريك (فقط الطلبات غير المحذوفة)
   const orders = await prisma.order.findMany({
     where: {
-      items: {
-        some: {
-          product: {
-            vendorId: vendor.id
-          }
-        }
-      }
+      vendorId: vendor.id,
+      deletedAt: null, // فقط الطلبات الموجودة (غير محذوفة)
     },
     include: {
       customer: true,
@@ -112,56 +107,57 @@ export default async function VendorOrdersPage() {
               const vendorTotal = vendorItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
               return (
-                <Card key={order.id} className="bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      {/* Order Info */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="text-white font-bold text-lg">طلب #{order.id.slice(0, 8)}</span>
-                          <div className={`px-3 py-1 rounded-full flex items-center gap-2 ${statusColors[order.status as keyof typeof statusColors]?.bg || 'bg-gray-100'} ${statusColors[order.status as keyof typeof statusColors]?.text || 'text-gray-800'}`}>
-                            <StatusIcon className="h-4 w-4" />
-                            <span className="text-sm font-medium">
-                              {statusLabels[order.status as keyof typeof statusLabels] || order.status}
-                            </span>
+                <Link key={order.id} href={`/vendor/orders/${order.id}`}>
+                  <Card className="bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        {/* Order Info */}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-3">
+                            <span className="text-white font-bold text-lg">طلب #{order.id.slice(0, 8)}</span>
+                            <div className={`px-3 py-1 rounded-full flex items-center gap-2 ${statusColors[order.status as keyof typeof statusColors]?.bg || 'bg-gray-100'} ${statusColors[order.status as keyof typeof statusColors]?.text || 'text-gray-800'}`}>
+                              <StatusIcon className="h-4 w-4" />
+                              <span className="text-sm font-medium">
+                                {statusLabels[order.status as keyof typeof statusLabels] || order.status}
+                              </span>
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-gray-300">
-                            <span className="text-gray-400">العميل:</span>
-                            <span className="font-medium">{order.customer?.name || 'غير محدد'}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-300">
-                            <span className="text-gray-400">منتجاتك:</span>
-                            <span className="font-medium">{vendorItems.length} منتج</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-300">
-                            <span className="text-gray-400">التاريخ:</span>
-                            <span>{new Date(order.createdAt).toLocaleDateString('ar-EG')}</span>
-                          </div>
-                          {order.deliveryStaff && (
+                          <div className="space-y-2 text-sm">
                             <div className="flex items-center gap-2 text-gray-300">
-                              <Truck className="h-4 w-4 text-purple-400" />
-                              <span className="text-gray-400">مندوب التوصيل:</span>
-                              <span className="font-medium">{order.deliveryStaff.name}</span>
+                              <span className="text-gray-400">العميل:</span>
+                              <span className="font-medium">{order.customer?.name || 'غير محدد'}</span>
                             </div>
-                          )}
-                        </div>
-
-                        {/* Vendor Items */}
-                        <div className="mt-4 space-y-2">
-                          {vendorItems.map((item) => (
-                            <div key={item.id} className="bg-white/5 rounded-lg p-3 flex items-center justify-between">
-                              <div>
-                                <p className="text-white font-medium">{item.product.nameAr}</p>
-                                <p className="text-gray-400 text-sm">الكمية: {item.quantity}</p>
+                            <div className="flex items-center gap-2 text-gray-300">
+                              <span className="text-gray-400">منتجاتك:</span>
+                              <span className="font-medium">{vendorItems.length} منتج</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-300">
+                              <span className="text-gray-400">التاريخ:</span>
+                              <span>{new Date(order.createdAt).toLocaleDateString('ar-EG')}</span>
+                            </div>
+                            {order.deliveryStaff && (
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <Truck className="h-4 w-4 text-purple-400" />
+                                <span className="text-gray-400">مندوب التوصيل:</span>
+                                <span className="font-medium">{order.deliveryStaff.name}</span>
                               </div>
-                              <p className="text-purple-400 font-bold">{item.price * item.quantity} ج.م</p>
-                            </div>
-                          ))}
+                            )}
+                          </div>
+
+                          {/* Vendor Items */}
+                          <div className="mt-4 space-y-2">
+                            {vendorItems.map((item) => (
+                              <div key={item.id} className="bg-white/5 rounded-lg p-3 flex items-center justify-between">
+                                <div>
+                                  <p className="text-white font-medium">{item.product.nameAr}</p>
+                                  <p className="text-gray-400 text-sm">الكمية: {item.quantity}</p>
+                                </div>
+                                <p className="text-purple-400 font-bold">{item.price * item.quantity} ج.م</p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
 
                       {/* Total */}
                       <div className="text-left md:text-right">
@@ -171,6 +167,7 @@ export default async function VendorOrdersPage() {
                     </div>
                   </CardContent>
                 </Card>
+                </Link>
               );
             })}
           </div>

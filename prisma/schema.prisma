@@ -29,8 +29,34 @@ model User {
   sessions         Session[]
   vendor           Vendor?
   wishlistItems    WishlistItem[]
+  savedAddresses   SavedAddress[] // العناوين المحفوظة
 
   @@map("users")
+}
+
+// العناوين المحفوظة للعملاء
+model SavedAddress {
+  id              String   @id @default(cuid())
+  userId          String
+  title           String   // مثل: المنزل، العمل، الخ
+  fullName        String   // الاسم الكامل
+  phone           String   // رقم الهاتف
+  alternativePhone String? // رقم هاتف بديل
+  governorate     String   // المحافظة
+  city            String   // المدينة/المركز
+  district        String   // الحي/المنطقة
+  street          String   // اسم الشارع
+  buildingNumber  String?  // رقم المبنى/العمارة
+  floorNumber     String?  // رقم الطابق
+  apartmentNumber String?  // رقم الشقة
+  landmark        String?  // أقرب معلم
+  postalCode      String?  // الرمز البريدي
+  isDefault       Boolean  @default(false) // العنوان الافتراضي
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_addresses")
 }
 
 model Account {
@@ -271,6 +297,9 @@ model Order {
   customerNotes    String?
   rejectionReason  String?
   inspectionResult InspectionResult?
+  deletedAt        DateTime?         // Soft Delete - تاريخ الحذف (null = موجود)
+  deletedBy        String?           // من قام بالحذف (userId)
+  deletedReason    String?           // سبب الحذف
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   installmentPlan  InstallmentPlan?
