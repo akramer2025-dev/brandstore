@@ -55,6 +55,11 @@ export default async function HomePage() {
       {/* Flash Deals Section */}
       <FlashDeals />
 
+      {/* Categories Section */}
+      {categories.length > 0 && (
+        <CategoriesSection categories={categories} />
+      )}
+
       {/* Products Section */}
       <section className="py-8 md:py-12 bg-gray-900/50">
         <div className="container mx-auto px-4">

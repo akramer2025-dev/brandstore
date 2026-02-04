@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Plus, Edit, Trash2, ArrowLeft } from "lucide-react";
+import { Package, Plus, Edit, Trash2, ArrowLeft, Tag } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
@@ -60,6 +60,12 @@ export default async function AdminProductsPage() {
               <p className="text-teal-100 mt-2 text-lg">إجمالي المنتجات: {products.length}</p>
             </div>
             <div className="flex items-center gap-3">
+              <Link href="/admin/categories">
+                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-xl">
+                  <Tag className="w-5 h-5 ml-2" />
+                  إدارة الفئات
+                </Button>
+              </Link>
               <DeleteAllCategoriesButton />
               <Link href="/admin/products/new">
                 <Button size="lg" className="bg-white text-teal-600 hover:bg-teal-50 shadow-xl">

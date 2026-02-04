@@ -159,23 +159,31 @@ export default function NewProductPage() {
 
               {/* Category */}
               <div className="space-y-2">
-                <Label htmlFor="category">الفئة *</Label>
+                <Label htmlFor="category" className="text-lg font-semibold flex items-center gap-2">
+                  <span>الفئة *</span>
+                  <span className="text-sm text-gray-500 font-normal">(اختر الفئة المناسبة للمنتج)</span>
+                </Label>
                 <select
                   id="category"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white text-lg font-medium"
                   value={formData.categoryId}
                   onChange={(e) =>
                     setFormData({ ...formData, categoryId: e.target.value })
                   }
                   required
                 >
-                  <option value="">اختر الفئة</option>
+                  <option value="" disabled>اختر الفئة المناسبة...</option>
                   {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
+                    <option key={category.id} value={category.id} className="py-2">
+                      {category.nameAr} ({category.name})
                     </option>
                   ))}
                 </select>
+                {categories.length === 0 && (
+                  <p className="text-sm text-amber-600 mt-2">
+                    ⚠️ لا توجد فئات متاحة. <Link href="/admin/categories" className="underline text-teal-600">أضف فئة جديدة</Link>
+                  </p>
+                )}
               </div>
 
               {/* Price & Stock */}

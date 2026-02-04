@@ -6,6 +6,13 @@ import { auth } from '@/lib/auth';
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
+      include: {
+        _count: {
+          select: {
+            products: true
+          }
+        }
+      },
       orderBy: {
         nameAr: 'asc'
       }
