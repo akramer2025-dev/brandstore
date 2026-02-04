@@ -170,6 +170,15 @@ async function main() {
   });
   console.log('✅ تم إنشاء مندوب توصيل:', deliveryStaff.email);
 
+  // جلب بيانات vendor للشركاء
+  const storeOwnerVendor = await prisma.vendor.findUnique({
+    where: { userId: storeOwner.id }
+  });
+  
+  const factoryOwnerVendor = await prisma.vendor.findUnique({
+    where: { userId: factoryOwner.id }
+  });
+
   // إنشاء بعض المنتجات التجريبية
   const products = await Promise.all([
     prisma.product.create({
@@ -182,7 +191,7 @@ async function main() {
         originalPrice: 399,
         stock: 50,
         categoryId: categories[0].id,
-        vendorId: storeOwner.vendor?.id,
+        vendorId: storeOwnerVendor?.id,
         isActive: true,
       },
     }),
@@ -196,7 +205,7 @@ async function main() {
         originalPrice: 699,
         stock: 30,
         categoryId: categories[1].id,
-        vendorId: factoryOwner.vendor?.id,
+        vendorId: factoryOwnerVendor?.id,
         isActive: true,
         isFlashDeal: true,
         flashDealEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
