@@ -69,6 +69,27 @@ export default function NewProductPage() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    // التحقق من نوع وحجم الملفات قبل الرفع
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // التحقق من النوع
+      if (!allowedTypes.includes(file.type)) {
+        alert(`❌ نوع الملف غير مسموح: ${file.name}\n\nيُسمح فقط بـ: JPEG, PNG, WebP`);
+        return;
+      }
+
+      // التحقق من الحجم
+      if (file.size > maxSize) {
+        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+        alert(`❌ حجم الملف كبير جداً: ${file.name}\n\nالحجم: ${sizeMB} MB\nالحد الأقصى: 5 MB`);
+        return;
+      }
+    }
+
     setUploadingImages(true);
     const formData = new FormData();
     
@@ -82,15 +103,20 @@ export default function NewProductPage() {
         body: formData,
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
         setImages([...images, ...data.urls]);
       } else {
-        alert('فشل رفع الصور');
+        // عرض رسالة خطأ واضحة من الـ API
+        const errorMessage = data.error || 'فشل رفع الصور';
+        const suggestion = data.suggestion || '';
+        alert(`❌ ${errorMessage}\n\n${suggestion}`);
+        console.error('Upload error:', data);
       }
     } catch (error) {
       console.error('Error uploading images:', error);
-      alert('حدث خطأ أثناء رفع الصور');
+      alert('❌ حدث خطأ أثناء رفع الصور\n\nتأكد من الاتصال بالإنترنت وحجم الصور (أقل من 5 ميجابايت)');
     } finally {
       setUploadingImages(false);
     }
@@ -219,7 +245,8 @@ export default function NewProductPage() {
                     <p className="text-white mb-2">
                       {uploadingImages ? 'جاري رفع الصور...' : 'اضغط لرفع الصور'}
                     </p>
-                    <p className="text-gray-400 text-sm">يمكنك رفع عدة صور (PNG, JPG)</p>
+                    <p className="text-gray-400 text-sm mb-1">يمكنك رفع عدة صور (PNG, JPG, WebP)</p>
+                    <p className="text-yellow-400 text-xs">الحد الأقصى: 5 ميجابايت لكل صورة</p>
                   </div>
                 </Label>
                 <Input

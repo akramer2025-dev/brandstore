@@ -220,16 +220,16 @@ export default function POSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-2 md:p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-1.5 md:p-4">
       {/* Header */}
-      <div className="mb-4 md:mb-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+      <div className="mb-3 md:mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-3 mb-3 md:mb-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
-              <Receipt className="w-6 h-6 md:w-8 md:h-8" />
+            <h1 className="text-xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <Receipt className="w-5 h-5 md:w-8 md:h-8" />
               نقطة البيع - POS
             </h1>
-            <p className="text-purple-300 mt-1 text-sm md:text-base">نظام كاشير احترافي</p>
+            <p className="text-purple-300 mt-1 text-xs md:text-base">نظام كاشير احترافي</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button
@@ -253,53 +253,53 @@ export default function POSPage() {
         </div>
 
         {/* الإحصائيات السريعة */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-4">
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-3 md:p-4">
+            <CardContent className="p-2 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-xs md:text-sm">المنتجات</p>
-                  <p className="text-xl md:text-2xl font-bold text-white">{products.length}</p>
+                  <p className="text-gray-300 text-[10px] md:text-sm">المنتجات</p>
+                  <p className="text-lg md:text-2xl font-bold text-white">{products.length}</p>
                 </div>
-                <Package className="w-6 h-6 md:w-8 md:h-8 text-purple-400" />
+                <Package className="w-5 h-5 md:w-8 md:h-8 text-purple-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-3 md:p-4">
+            <CardContent className="p-2 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-xs md:text-sm">السلة</p>
-                  <p className="text-xl md:text-2xl font-bold text-white">{itemsCount}</p>
+                  <p className="text-gray-300 text-[10px] md:text-sm">السلة</p>
+                  <p className="text-lg md:text-2xl font-bold text-white">{itemsCount}</p>
                 </div>
-                <ShoppingCart className="w-6 h-6 md:w-8 md:h-8 text-green-400" />
+                <ShoppingCart className="w-5 h-5 md:w-8 md:h-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-3 md:p-4">
+            <CardContent className="p-2 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-xs md:text-sm">الإجمالي</p>
-                  <p className="text-lg md:text-2xl font-bold text-white">{total.toFixed(0)} ج</p>
+                  <p className="text-gray-300 text-[10px] md:text-sm">الإجمالي</p>
+                  <p className="text-base md:text-2xl font-bold text-white">{total.toFixed(0)} ج</p>
                 </div>
-                <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-yellow-400" />
+                <DollarSign className="w-5 h-5 md:w-8 md:h-8 text-yellow-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-3 md:p-4">
+            <CardContent className="p-2 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-xs md:text-sm">الربح</p>
-                  <p className={`text-lg md:text-2xl font-bold ${totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <p className="text-gray-300 text-[10px] md:text-sm">الربح</p>
+                  <p className={`text-base md:text-2xl font-bold ${totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     {totalProfit.toFixed(0)} ج
                   </p>
                 </div>
-                <Calculator className="w-6 h-6 md:w-8 md:h-8 text-green-400" />
+                <Calculator className="w-5 h-5 md:w-8 md:h-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
@@ -352,17 +352,17 @@ export default function POSPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 max-h-[400px] md:max-h-[500px] overflow-y-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 md:gap-3 max-h-[calc(100vh-400px)] md:max-h-[500px] overflow-y-auto pr-1">
                 {filteredProducts.map(product => {
                   const imageUrl = product.images?.split(',')[0] || '/placeholder.jpg';
                   return (
                   <Card
                     key={product.id}
-                    className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer transition-all"
+                    className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer transition-all hover:scale-105"
                     onClick={() => addToCart(product)}
                   >
-                    <CardContent className="p-2 md:p-3">
-                      <div className="aspect-square mb-2 rounded-lg overflow-hidden bg-white/10">
+                    <CardContent className="p-1.5 md:p-3">
+                      <div className="aspect-square mb-1 md:mb-2 rounded-md overflow-hidden bg-white/10">
                         <img 
                           src={imageUrl} 
                           alt={product.nameAr}
@@ -372,11 +372,11 @@ export default function POSPage() {
                           }}
                         />
                       </div>
-                      <h3 className="font-bold text-white text-xs md:text-sm mb-1 line-clamp-1">{product.nameAr}</h3>
-                      <p className="text-xs text-gray-400 mb-2 line-clamp-1">{product.category?.nameAr}</p>
-                      <div className="flex items-center justify-between text-xs md:text-sm">
+                      <h3 className="font-bold text-white text-[10px] md:text-sm mb-0.5 md:mb-1 line-clamp-1 leading-tight">{product.nameAr}</h3>
+                      <p className="text-[9px] md:text-xs text-gray-400 mb-1 md:mb-2 line-clamp-1">{product.category?.nameAr}</p>
+                      <div className="flex items-center justify-between text-[10px] md:text-sm">
                         <span className="text-green-400 font-bold">{product.price} ج</span>
-                        <Badge variant={product.stock > 10 ? 'default' : 'destructive'} className="text-xs">
+                        <Badge variant={product.stock > 10 ? 'default' : 'destructive'} className="text-[8px] md:text-xs px-1 py-0 h-4">
                           {product.stock}
                         </Badge>
                       </div>
@@ -416,20 +416,20 @@ export default function POSPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 max-h-[400px] overflow-y-auto mb-4">
+              <div className="space-y-2 md:space-y-3 max-h-[calc(100vh-350px)] md:max-h-[400px] overflow-y-auto mb-2 md:mb-4 pr-1">
                 {cart.length === 0 ? (
-                  <div className="text-center py-12 text-gray-400">
-                    <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    السلة فارغة
+                  <div className="text-center py-8 md:py-12 text-gray-400">
+                    <ShoppingCart className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm md:text-base">السلة فارغة</p>
                   </div>
                 ) : (
                   cart.map(item => (
                     <Card key={item.product.id} className="bg-white/5 border-white/10">
-                      <CardContent className="p-3">
-                        <div className="flex items-start justify-between mb-2">
+                      <CardContent className="p-2 md:p-3">
+                        <div className="flex items-start justify-between mb-1.5 md:mb-2">
                           <div className="flex-1">
-                            <h4 className="font-bold text-white text-sm">{item.product.nameAr}</h4>
-                            <p className="text-xs text-gray-400">السعر الأصلي: {item.product.price} ج</p>
+                            <h4 className="font-bold text-white text-xs md:text-sm">{item.product.nameAr}</h4>
+                            <p className="text-[10px] md:text-xs text-gray-400">السعر الأصلي: {item.product.price} ج</p>
                           </div>
                           <Button
                             variant="ghost"
@@ -442,45 +442,45 @@ export default function POSPage() {
                         </div>
                         
                         {/* حقل تعديل السعر */}
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs text-gray-400">السعر:</span>
+                        <div className="flex items-center gap-1 md:gap-2 mb-1.5 md:mb-2">
+                          <span className="text-[10px] md:text-xs text-gray-400">السعر:</span>
                           <Input
                             type="number"
                             value={item.customPrice}
                             onChange={(e) => updatePrice(item.product.id, parseFloat(e.target.value) || 0)}
-                            className="h-7 w-24 text-center bg-white/10 border-yellow-500/50 text-yellow-400 font-bold"
+                            className="h-6 md:h-7 w-16 md:w-24 text-center bg-white/10 border-yellow-500/50 text-yellow-400 font-bold text-xs"
                             min="0"
                             step="0.5"
                           />
-                          <span className="text-xs text-gray-400">ج</span>
+                          <span className="text-[10px] md:text-xs text-gray-400">ج</span>
                           {item.customPrice !== item.product.price && (
-                            <Badge variant="outline" className="text-yellow-400 border-yellow-400/50 text-xs">
+                            <Badge variant="outline" className="text-yellow-400 border-yellow-400/50 text-[8px] md:text-xs px-1 py-0">
                               معدّل
                             </Badge>
                           )}
                         </div>
                         
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 md:gap-2">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => decreaseQuantity(item.product.id)}
-                              className="h-7 w-7 p-0 bg-white/5 border-white/20 text-white"
+                              className="h-6 w-6 md:h-7 md:w-7 p-0 bg-white/5 border-white/20 text-white"
                             >
-                              <Minus className="w-3 h-3" />
+                              <Minus className="w-2.5 h-2.5 md:w-3 md:h-3" />
                             </Button>
-                            <span className="text-white font-bold w-8 text-center">{item.quantity}</span>
+                            <span className="text-white font-bold w-6 md:w-8 text-center text-xs md:text-base">{item.quantity}</span>
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => increaseQuantity(item.product.id)}
-                              className="h-7 w-7 p-0 bg-white/5 border-white/20 text-white"
+                              className="h-6 w-6 md:h-7 md:w-7 p-0 bg-white/5 border-white/20 text-white"
                             >
-                              <Plus className="w-3 h-3" />
+                              <Plus className="w-2.5 h-2.5 md:w-3 md:h-3" />
                             </Button>
                           </div>
-                          <span className="text-green-400 font-bold">{item.subtotal.toFixed(2)} ج</span>
+                          <span className="text-green-400 font-bold text-xs md:text-base">{item.subtotal.toFixed(2)} ج</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -490,12 +490,12 @@ export default function POSPage() {
 
               {cart.length > 0 && (
                 <>
-                  <div className="border-t border-white/20 pt-4 mb-4">
-                    <div className="flex items-center justify-between text-white mb-2">
+                  <div className="border-t border-white/20 pt-2 md:pt-4 mb-2 md:mb-4">
+                    <div className="flex items-center justify-between text-white mb-1 md:mb-2 text-xs md:text-base">
                       <span>عدد القطع:</span>
                       <span className="font-bold">{itemsCount}</span>
                     </div>
-                    <div className="flex items-center justify-between text-white text-xl font-bold">
+                    <div className="flex items-center justify-between text-white text-base md:text-xl font-bold">
                       <span>الإجمالي:</span>
                       <span className="text-green-400">{total.toFixed(2)} ج</span>
                     </div>
@@ -503,9 +503,9 @@ export default function POSPage() {
 
                   <Button
                     onClick={completeSale}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-lg py-6"
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-sm md:text-lg py-4 md:py-6 font-bold"
                   >
-                    <Receipt className="w-5 h-5 mr-2" />
+                    <Receipt className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                     إتمام البيع
                   </Button>
                 </>
