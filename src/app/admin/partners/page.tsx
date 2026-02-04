@@ -29,6 +29,7 @@ import {
   Calendar,
   CheckCircle,
   XCircle,
+  Trash2,
 } from 'lucide-react'
 
 interface Partner {
@@ -52,6 +53,8 @@ export default function AdminPartnersPage() {
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [partnerToDelete, setPartnerToDelete] = useState<Partner | null>(null)
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null)
   const [formData, setFormData] = useState({
     partnerName: '',
@@ -174,6 +177,30 @@ export default function AdminPartnersPage() {
     } catch (error) {
       console.error('Error toggling partner status:', error)
       toast.error('حدث خطأ')
+    }
+  }
+
+  const handleDeletePartner = async () => {
+    if (!partnerToDelete) return
+    
+    try {
+      const response = await fetch(`/api/admin/partners/${partnerToDelete.id}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('تم حذف الشريك بنجاح')
+        setIsDeleteDialogOpen(false)
+        setPartnerToDelete(null)
+        fetchPartners()
+      } else {
+        toast.error(data.error || 'حدث خطأ أثناء حذف الشريك')
+      }
+    } catch (error) {
+      console.error('Error deleting partner:', error)
+      toast.error('حدث خطأ أثناء حذف الشريك')
     }
   }
 
@@ -582,6 +609,17 @@ export default function AdminPartnersPage() {
                       >
                         {partner.isActive ? 'إيقاف' : 'تفعيل'}
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setPartnerToDelete(partner)
+                          setIsDeleteDialogOpen(true)
+                        }}
+                        className="bg-red-500/10 border-red-500/30 text-red-300 hover:bg-red-500/20"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -776,6 +814,49 @@ export default function AdminPartnersPage() {
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="bg-gray-900 border-red-500/30 text-white">
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-red-400 flex items-center gap-2">
+                <Trash2 className="h-6 w-6" />
+                تأكيد حذف الشريك
+              </DialogTitle>
+              <DialogDescription className="text-gray-300 text-base mt-4">
+                هل أنت متأكد من حذف الشريك <strong className="text-white">{partnerToDelete?.partnerName}</strong>؟
+                <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-red-300 font-semibold mb-2">⚠️ تحذير:</p>
+                  <ul className="text-sm text-red-200 space-y-1 list-disc list-inside">
+                    <li>سيتم حذف جميع بيانات الشريك</li>
+                    <li>سيتم حذف حساب تسجيل الدخول (إن وُجد)</li>
+                    <li>لا يمكن التراجع عن هذا الإجراء</li>
+                  </ul>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                onClick={handleDeletePartner}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                نعم، احذف الشريك
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsDeleteDialogOpen(false)
+                  setPartnerToDelete(null)
+                }}
+                className="flex-1 border-white/20 text-white hover:bg-white/10"
+              >
+                إلغاء
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
