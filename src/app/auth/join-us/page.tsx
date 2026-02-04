@@ -27,7 +27,7 @@ export default function JoinUsPage() {
               />
             </div>
             <div className="text-right text-white">
-              <h1 className="text-3xl font-black">براند ستور</h1>
+              <h1 className="text-3xl font-black">ريمو ستور</h1>
               <p className="text-sm opacity-90">انضم كشريك نجاح</p>
             </div>
           </Link>

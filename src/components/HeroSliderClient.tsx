@@ -96,7 +96,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
                       className="object-contain"
                     />
                   </div>
-                  <span className="text-xs md:text-sm font-semibold">من مصانع براند ستور</span>
+                  <span className="text-xs md:text-sm font-semibold">من مصانع ريمو ستور</span>
                 </div>
 
                 {/* Title */}

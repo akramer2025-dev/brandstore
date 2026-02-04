@@ -363,8 +363,8 @@ export default function ProductDetailPage() {
                   />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg">منتج أصلي من براند ستور</h3>
-                  <p className="text-teal-400 text-sm">Original Brand Store Product</p>
+                  <h3 className="text-white font-bold text-lg">منتج أصلي من ريمو ستور</h3>
+                  <p className="text-teal-400 text-sm">Original Remostore Product</p>
                 </div>
               </div>
 

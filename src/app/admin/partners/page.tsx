@@ -45,7 +45,7 @@ interface Partner {
   createdAt: string
 }
 
-export default function PartnersPage() {
+export default function AdminPartnersPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [partners, setPartners] = useState<Partner[]>([])
@@ -65,7 +65,7 @@ export default function PartnersPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/login')
-    } else if (status === 'authenticated' && session?.user?.role !== 'VENDOR') {
+    } else if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
       router.push('/')
     } else if (status === 'authenticated') {
       fetchPartners()
@@ -74,7 +74,7 @@ export default function PartnersPage() {
 
   const fetchPartners = async () => {
     try {
-      const response = await fetch('/api/vendor/partners')
+      const response = await fetch('/api/admin/partners')
       const data = await response.json()
       
       if (response.ok) {
@@ -94,7 +94,7 @@ export default function PartnersPage() {
     e.preventDefault()
     
     try {
-      const response = await fetch('/api/vendor/partners', {
+      const response = await fetch('/api/admin/partners', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -142,7 +142,7 @@ export default function PartnersPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/vendor">
+            <Link href="/admin">
               <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -152,7 +152,7 @@ export default function PartnersPage() {
                 <Users className="h-8 w-8 text-purple-400" />
                 إدارة الشركاء
               </h1>
-              <p className="text-gray-400 mt-1">إضافة وإدارة شركاء المشروع</p>
+              <p className="text-gray-400 mt-1">إضافة وإدارة شركاء النظام</p>
             </div>
           </div>
 
@@ -190,7 +190,7 @@ export default function PartnersPage() {
                   {/* البريد الإلكتروني */}
                   <div>
                     <Label htmlFor="email" className="text-white">
-                      البريد الإلكتروني
+                      البريد الإلكتروني *
                     </Label>
                     <Input
                       id="email"
@@ -198,6 +198,7 @@ export default function PartnersPage() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="bg-white/10 border-white/20 text-white"
+                      required
                     />
                   </div>
 
@@ -290,7 +291,7 @@ export default function PartnersPage() {
                       className="rounded"
                     />
                     <Label htmlFor="createUserAccount" className="text-white cursor-pointer">
-                      إنشاء حساب مستخدم للشريك
+                      إنشاء حساب VENDOR للشريك
                     </Label>
                   </div>
                 </div>

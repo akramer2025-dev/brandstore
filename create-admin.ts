@@ -22,11 +22,11 @@ async function createAdmin() {
         where: { email: 'akram@gmail.com' },
         data: {
           password: hashedPassword,
-          role: 'VENDOR',
+          role: 'ADMIN', // تغيير الدور لمدير
         },
       });
 
-      console.log('✅ تم تحديث كلمة المرور بنجاح');
+      console.log('✅ تم تحديث كلمة المرور والدور بنجاح');
     } else {
       // إنشاء مستخدم جديد
       const hashedPassword = await bcrypt.hash('Aazxc', 10);
@@ -36,19 +36,8 @@ async function createAdmin() {
           name: 'Akram',
           email: 'akram@gmail.com',
           password: hashedPassword,
-          role: 'VENDOR',
+          role: 'ADMIN', // مدير النظام
           phone: '01000000000',
-        },
-      });
-
-      // إنشاء حساب شريك
-      await prisma.vendor.create({
-        data: {
-          userId: admin.id,
-          phone: '01000000000',
-          address: 'القاهرة، مصر',
-          capitalBalance: 0,
-          isApproved: true,
         },
       });
 
@@ -57,7 +46,7 @@ async function createAdmin() {
 
     console.log('\n📧 البريد الإلكتروني: akram@gmail.com');
     console.log('🔑 كلمة المرور: Aazxc');
-    console.log('👤 الدور: VENDOR (مطور/شريك)\n');
+    console.log('👤 الدور: ADMIN (مدير النظام)\n');
 
   } catch (error) {
     console.error('❌ حدث خطأ:', error);

@@ -114,7 +114,7 @@ export default async function HomePage() {
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-3 md:mb-4">
               <Sparkles className="w-5 h-5 md:w-6 md:h-6" />
-              <h3 className="text-xl md:text-2xl font-bold">براند ستور</h3>
+              <h3 className="text-xl md:text-2xl font-bold">ريمو ستور</h3>
             </div>
             <p className="text-gray-400 mb-4 md:mb-6 text-sm md:text-base">
               وجهتك الأولى للتسوق الإلكتروني
@@ -135,7 +135,7 @@ export default async function HomePage() {
             </div>
             <div className="mt-8 pt-6 border-t border-gray-800">
               <p className="text-sm text-gray-500 mb-2">
-                © 2026 براند ستور. جميع الحقوق محفوظة.
+                © 2026 ريمو ستور. جميع الحقوق محفوظة.
               </p>
               <p className="text-xs text-gray-600">
                 Developed by <span className="text-cyan-400 font-semibold">Eng/ Akram Elmasry</span>

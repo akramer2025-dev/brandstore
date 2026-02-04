@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload } from "lucide-react";
+import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,11 @@ export function Header() {
   const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  
+  // Notification states
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
+  const [isNotificationSupported, setIsNotificationSupported] = useState(false);
+  const [isNotificationSubscribed, setIsNotificationSubscribed] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +107,14 @@ export function Header() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Check notification support
+    if ('Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window) {
+      setIsNotificationSupported(true);
+      setNotificationPermission(Notification.permission);
+      checkNotificationSubscription();
+    }
+    
     if (session?.user) {
       fetchWishlist();
       fetchNotifications();
@@ -114,6 +127,78 @@ export function Header() {
       return () => clearInterval(interval);
     }
   }, [session]);
+
+  const checkNotificationSubscription = async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      setIsNotificationSubscribed(!!subscription);
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  };
+
+  const subscribeToNotifications = async () => {
+    try {
+      const perm = await Notification.requestPermission();
+      setNotificationPermission(perm);
+
+      if (perm !== 'granted') {
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
+        ),
+      });
+
+      await fetch('/api/notifications/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ subscription }),
+      });
+
+      setIsNotificationSubscribed(true);
+
+      registration.showNotification('مرحباً في Remostore! 🎉', {
+        body: 'تم تفعيل الإشعارات بنجاح. ستصلك إشعارات بكل جديد!',
+        icon: '/icon-192x192.png',
+        badge: '/icon-192x192.png',
+      });
+    } catch (error) {
+      console.error('Error subscribing to notifications:', error);
+    }
+  };
+
+  const unsubscribeFromNotifications = async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      
+      if (subscription) {
+        await subscription.unsubscribe();
+        setIsNotificationSubscribed(false);
+      }
+    } catch (error) {
+      console.error('Error unsubscribing:', error);
+    }
+  };
 
   // إخفاء الـ Header في صفحات الـ vendor والـ admin والـ delivery-dashboard
   if (pathname?.startsWith('/vendor') || pathname?.startsWith('/admin') || pathname?.startsWith('/delivery-dashboard')) {
@@ -253,6 +338,30 @@ export function Header() {
                   )}
                 </Button>
               </Link>
+            )}
+            
+            {/* Notification Bell */}
+            {mounted && isNotificationSupported && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={isNotificationSubscribed ? unsubscribeFromNotifications : subscribeToNotifications}
+                className={`relative transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10 ${
+                  isNotificationSubscribed
+                    ? 'text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/30 animate-pulse'
+                    : 'text-gray-400 hover:text-purple-400 hover:bg-purple-900/30'
+                } hover:scale-110`}
+                title={isNotificationSubscribed ? 'إيقاف الإشعارات' : 'تفعيل الإشعارات'}
+              >
+                {isNotificationSubscribed ? (
+                  <Bell className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-400" />
+                ) : (
+                  <BellOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                )}
+                {isNotificationSubscribed && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-ping" />
+                )}
+              </Button>
             )}
             
             {/* Cart */}

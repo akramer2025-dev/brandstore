@@ -5,7 +5,6 @@ import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
 import StarryBackground from "@/components/StarryBackground";
 import InstallPWA from "@/components/InstallPWA";
-import NotificationSubscribe from "@/components/NotificationSubscribe";
 
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
@@ -67,7 +66,6 @@ export default function RootLayout({
           <Header />
           {children}
           <InstallPWA />
-          <NotificationSubscribe />
         </Providers>
       </body>
     </html>

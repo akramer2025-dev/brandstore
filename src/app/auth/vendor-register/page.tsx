@@ -69,7 +69,7 @@ export default function VendorRegisterPage() {
             </div>
             <div className="text-right">
               <h1 className="text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                براند ستور
+                ريمو ستور
               </h1>
               <p className="text-sm text-gray-600">منصة البائعين</p>
             </div>

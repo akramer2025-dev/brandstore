@@ -92,7 +92,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="text-right">
-              <h1 className="text-3xl font-black">براند ستور</h1>
+              <h1 className="text-3xl font-black">ريمو ستور</h1>
               <p className="text-sm opacity-90">انضم إلينا</p>
             </div>
           </Link>

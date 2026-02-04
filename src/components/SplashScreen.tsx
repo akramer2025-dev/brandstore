@@ -61,7 +61,7 @@ export default function SplashScreen() {
         {/* Brand Text */}
         <div className="text-center space-y-2 animate-slide-up" style={{ animationDelay: '0.5s' }}>
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-            براند ستور
+            ريمو ستور
           </h1>
           <p className="text-gray-300 text-lg md:text-xl animate-fade-in" style={{ animationDelay: '1s' }}>
             متجرك الإلكتروني الأول

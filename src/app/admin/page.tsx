@@ -200,6 +200,13 @@ export default async function AdminDashboard() {
             color="text-cyan-600"
           />
           <ActionCard
+            title="👥 إدارة الشركاء"
+            description="إضافة وإدارة الشركاء ورأس المال"
+            href="/admin/partners"
+            icon={<Users className="w-12 h-12" />}
+            color="text-emerald-600"
+          />
+          <ActionCard
             title="⚙️ إعدادات الموقع"
             description="إعدادات الموقع والسلايدر وSEO"
             href="/admin/settings"
