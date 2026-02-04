@@ -3,16 +3,17 @@
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Package, Upload, X, Loader2, Calculator, Store, Wallet, Phone, User } from 'lucide-react';
+import { ArrowLeft, Package, Upload, X, Loader2, Calculator, Store, Wallet, Phone, User, Camera, Sparkles, ImagePlus } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { SmartCamera } from '@/components/SmartCamera';
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -20,6 +21,11 @@ export default function NewProductPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showSmartCamera, setShowSmartCamera] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -58,68 +64,169 @@ export default function NewProductPage() {
   ];
 
   // جلب الأصناف
-  useState(() => {
+  useEffect(() => {
     fetch('/api/admin/categories')
       .then(res => res.json())
-      .then(data => setCategories(data || []));
-  });
+      .then(data => setCategories(data || []))
+      .catch(err => console.error('Error fetching categories:', err));
+
+    // استرجاع المسودة من localStorage
+    const savedDraft = localStorage.getItem('newProductDraft');
+    if (savedDraft) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        setFormData(draft.formData);
+        setImages(draft.images || []);
+      } catch (err) {
+        console.error('Error loading draft:', err);
+      }
+    }
+  }, []);
+
+  // Auto-save كمسودة كل 30 ثانية
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      if (formData.nameAr || images.length > 0) {
+        setAutoSaving(true);
+        try {
+          localStorage.setItem('newProductDraft', JSON.stringify({
+            formData,
+            images,
+            savedAt: new Date().toISOString()
+          }));
+          setLastSaved(new Date());
+        } catch (err) {
+          console.error('Error saving draft:', err);
+        } finally {
+          setTimeout(() => setAutoSaving(false), 1000);
+        }
+      }
+    }, 30000); // كل 30 ثانية
+
+    return () => clearInterval(autoSaveInterval);
+  }, [formData, images]);
+
+  // معالجة الكاميرا الذكية
+  const handleSmartCameraScan = useCallback((data: any, imageUrl: string) => {
+    // ملء البيانات تلقائياً
+    setFormData(prev => ({
+      ...prev,
+      nameAr: data.nameAr || prev.nameAr,
+      name: data.name || prev.name,
+      descriptionAr: data.descriptionAr || prev.descriptionAr,
+      description: data.description || prev.description,
+      price: data.suggestedPrice?.toString() || prev.price,
+      sizes: data.sizes || prev.sizes,
+      colors: data.colors || prev.colors,
+    }));
+
+    // إضافة الصورة
+    if (imageUrl && !images.includes(imageUrl)) {
+      setImages(prev => [...prev, imageUrl]);
+    }
+
+    // إخفاء الكاميرا
+    setShowSmartCamera(false);
+  }, [images]);
+
+  // Drag and Drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/')
+    );
+
+    if (files.length > 0) {
+      await uploadImages(files);
+    }
+  }, []);
+
+  // رفع الصور مع شريط التقدم
+  const uploadImages = async (files: File[]) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    const maxSize = 5 * 1024 * 1024;
+
+    for (let file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        alert(`❌ نوع الملف غير مسموح: ${file.name}`);
+        return;
+      }
+      if (file.size > maxSize) {
+        alert(`❌ حجم الملف كبير جداً: ${file.name}`);
+        return;
+      }
+    }
+
+    setUploadingImages(true);
+    setUploadProgress(0);
+
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+
+    try {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = (e.loaded / e.total) * 100;
+          setUploadProgress(percentComplete);
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          setImages(prev => [...prev, ...data.urls]);
+        } else {
+          alert('❌ فشل رفع الصور');
+        }
+        setUploadingImages(false);
+        setUploadProgress(0);
+      });
+
+      xhr.addEventListener('error', () => {
+        alert('❌ حدث خطأ أثناء رفع الصور');
+        setUploadingImages(false);
+        setUploadProgress(0);
+      });
+
+      xhr.open('POST', '/api/upload');
+      xhr.send(formData);
+
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      alert('❌ حدث خطأ أثناء رفع الصور');
+      setUploadingImages(false);
+      setUploadProgress(0);
+    }
+  };
 
   // رفع الصور
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    // التحقق من نوع وحجم الملفات قبل الرفع
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
-      // التحقق من النوع
-      if (!allowedTypes.includes(file.type)) {
-        alert(`❌ نوع الملف غير مسموح: ${file.name}\n\nيُسمح فقط بـ: JPEG, PNG, WebP`);
-        return;
-      }
-
-      // التحقق من الحجم
-      if (file.size > maxSize) {
-        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-        alert(`❌ حجم الملف كبير جداً: ${file.name}\n\nالحجم: ${sizeMB} MB\nالحد الأقصى: 5 MB`);
-        return;
-      }
-    }
-
-    setUploadingImages(true);
-    const formData = new FormData();
-    
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]);
-    }
-
-    try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setImages([...images, ...data.urls]);
-      } else {
-        // عرض رسالة خطأ واضحة من الـ API
-        const errorMessage = data.error || 'فشل رفع الصور';
-        const suggestion = data.suggestion || '';
-        alert(`❌ ${errorMessage}\n\n${suggestion}`);
-        console.error('Upload error:', data);
-      }
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      alert('❌ حدث خطأ أثناء رفع الصور\n\nتأكد من الاتصال بالإنترنت وحجم الصور (أقل من 5 ميجابايت)');
-    } finally {
-      setUploadingImages(false);
-    }
+    await uploadImages(Array.from(files));
   };
 
   // حذف صورة
@@ -147,12 +254,12 @@ export default function NewProductPage() {
           price: parseFloat(formData.price),
           originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           stock: parseInt(formData.stock),
-          productionCost: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null, // سعر الشراء يُرسل كـ productionCost
+          productionCost: formData.purchasePrice ? parseFloat(formData.purchasePrice) : null,
           supplierCost: formData.supplierCost ? parseFloat(formData.supplierCost) : null,
           images: images.join(','),
-          sizes: formData.sizes.join(','), // تحويل المصفوفة لنص مفصول بفواصل
-          colors: formData.colors.join(','), // تحويل المصفوفة لنص مفصول بفواصل
-          platformCommission: 5, // عمولة المتجر 5%
+          sizes: formData.sizes.join(','),
+          colors: formData.colors.join(','),
+          platformCommission: 5,
         }),
       });
 
@@ -161,6 +268,10 @@ export default function NewProductPage() {
         const message = data.deducted > 0 
           ? `✅ ${data.message}\n\n💰 تم خصم ${data.deducted.toLocaleString()} ج من رأس المال`
           : '✅ تم إضافة المنتج بنجاح!';
+        
+        // حذف المسودة
+        localStorage.removeItem('newProductDraft');
+        
         alert(message);
         router.push('/vendor/products');
       } else {
@@ -179,53 +290,103 @@ export default function NewProductPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-6" suppressHydrationWarning>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/vendor/products">
-            <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Package className="h-8 w-8 text-purple-400" />
-              إضافة منتج جديد
-            </h1>
-            <p className="text-gray-400 mt-1">املأ البيانات لإضافة منتج جديد</p>
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <Link href="/vendor/products">
+              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <Package className="h-8 w-8 text-purple-400" />
+                إضافة منتج جديد
+              </h1>
+              <p className="text-gray-400 mt-1">املأ البيانات لإضافة منتج جديد</p>
+            </div>
           </div>
+          {/* Auto-save indicator */}
+          {(autoSaving || lastSaved) && (
+            <div className="text-sm text-gray-400 flex items-center gap-2">
+              {autoSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>جاري الحفظ...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-green-400">✓</span>
+                  <span>تم الحفظ {lastSaved && new Date(lastSaved).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* قسم الكاميرا الذكية */}
+          {showSmartCamera && (
+            <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6 animate-in fade-in slide-in-from-top duration-300">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-purple-400 animate-pulse" />
+                  📸 الكاميرا الذكية - تعرف تلقائي على المنتج
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SmartCamera 
+                  onProductScanned={handleSmartCameraScan}
+                  onImageCaptured={(url) => {
+                    if (!images.includes(url)) {
+                      setImages(prev => [...prev, url]);
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Upload className="h-5 w-5 text-purple-400" />
-                صور المنتج
+              <CardTitle className="text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Upload className="h-5 w-5 text-purple-400" />
+                  صور المنتج
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setShowSmartCamera(!showSmartCamera)}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  {showSmartCamera ? 'إخفاء الكاميرا' : '📸 كاميرا ذكية'}
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* عرض الصور */}
               {images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in duration-300">
                   {images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <div className="relative h-32 bg-gray-800 rounded-lg overflow-hidden">
+                    <div key={index} className="relative group animate-in zoom-in duration-200">
+                      <div className="relative h-32 bg-gray-800 rounded-lg overflow-hidden ring-2 ring-purple-500/30 group-hover:ring-purple-500 transition-all">
                         <Image
                           src={image}
                           alt={`Product ${index + 1}`}
                           fill
-                          className="object-cover"
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                       </div>
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-lg"
                       >
                         <X className="h-4 w-4" />
                       </button>
                       {index === 0 && (
-                        <div className="absolute bottom-2 left-2 bg-purple-500 text-white text-xs px-2 py-1 rounded">
-                          الصورة الرئيسية
+                        <div className="absolute bottom-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded shadow-lg">
+                          ⭐ الرئيسية
                         </div>
                       )}
                     </div>
@@ -233,22 +394,49 @@ export default function NewProductPage() {
                 </div>
               )}
 
-              {/* زر رفع الصور */}
-              <div>
-                <Label htmlFor="images" className="cursor-pointer">
-                  <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-purple-400 transition-colors">
-                    {uploadingImages ? (
-                      <Loader2 className="h-12 w-12 mx-auto text-purple-400 animate-spin mb-4" />
-                    ) : (
-                      <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              {/* منطقة Drag & Drop */}
+              <div
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 ${
+                  isDragging
+                    ? 'border-purple-400 bg-purple-500/20 scale-105'
+                    : 'border-white/20 hover:border-purple-400'
+                }`}
+              >
+                {uploadingImages ? (
+                  <div className="space-y-4">
+                    <Loader2 className="h-12 w-12 mx-auto text-purple-400 animate-spin" />
+                    <p className="text-white font-bold">جاري رفع الصور...</p>
+                    {uploadProgress > 0 && (
+                      <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                        <div 
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-300 rounded-full"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
                     )}
-                    <p className="text-white mb-2">
-                      {uploadingImages ? 'جاري رفع الصور...' : 'اضغط لرفع الصور'}
-                    </p>
-                    <p className="text-gray-400 text-sm mb-1">يمكنك رفع عدة صور (PNG, JPG, WebP)</p>
-                    <p className="text-yellow-400 text-xs">الحد الأقصى: 5 ميجابايت لكل صورة</p>
+                    <p className="text-gray-400 text-sm">{Math.round(uploadProgress)}%</p>
                   </div>
-                </Label>
+                ) : isDragging ? (
+                  <>
+                    <ImagePlus className="h-16 w-16 mx-auto text-purple-400 mb-4 animate-bounce" />
+                    <p className="text-purple-300 font-bold text-lg">أفلت الصور هنا! 🎉</p>
+                  </>
+                ) : (
+                  <>
+                    <Label htmlFor="images" className="cursor-pointer block">
+                      <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4 group-hover:text-purple-400 transition-colors" />
+                      <p className="text-white mb-2 font-bold">
+                        اضغط لرفع الصور أو اسحبها هنا
+                      </p>
+                      <p className="text-gray-400 text-sm mb-1">يمكنك رفع عدة صور (PNG, JPG, WebP)</p>
+                      <p className="text-yellow-400 text-xs">📏 الحد الأقصى: 5 ميجابايت لكل صورة</p>
+                    </Label>
+                  </>
+                )}
                 <Input
                   id="images"
                   type="file"
@@ -257,6 +445,14 @@ export default function NewProductPage() {
                   onChange={handleImageUpload}
                   className="hidden"
                 />
+              </div>
+
+              {/* نصائح */}
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                <p className="text-blue-300 text-sm flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  <strong>نصيحة:</strong> استخدم الكاميرا الذكية للتعرف التلقائي على المنتج واستخراج البيانات من الصورة!
+                </p>
               </div>
             </CardContent>
           </Card>
