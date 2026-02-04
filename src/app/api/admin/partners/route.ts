@@ -19,19 +19,27 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             userId: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
+            user: true,
           },
         },
       },
     });
 
-    return NextResponse.json({ partners });
+    // تنسيق البيانات لتجنب مشاكل null
+    const formattedPartners = partners.map(partner => ({
+      ...partner,
+      vendor: partner.vendor ? {
+        id: partner.vendor.id,
+        userId: partner.vendor.userId,
+        user: partner.vendor.user ? {
+          id: partner.vendor.user.id,
+          name: partner.vendor.user.name,
+          email: partner.vendor.user.email,
+        } : null,
+      } : null,
+    }));
+
+    return NextResponse.json({ partners: formattedPartners });
   } catch (error) {
     console.error('Error fetching partners:', error);
     return NextResponse.json(
