@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       partnerName,
       email,
       phone,
+      password,
       capitalAmount,
       capitalPercent,
       partnerType = 'PARTNER',
@@ -74,6 +75,14 @@ export async function POST(request: NextRequest) {
     if (!partnerName || !email || !capitalAmount || !capitalPercent) {
       return NextResponse.json(
         { error: 'الاسم، البريد، المبلغ والنسبة مطلوبة' },
+        { status: 400 }
+      );
+    }
+
+    // التحقق من كلمة المرور إذا كان سيتم إنشاء حساب
+    if (createUserAccount && !password) {
+      return NextResponse.json(
+        { error: 'كلمة المرور مطلوبة عند إنشاء حساب' },
         { status: 400 }
       );
     }
@@ -103,10 +112,10 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // استخدام كلمة المرور المدخلة
+      // استخدام كلمة المرور المدخلة أو إنشاء واحدة عشوائية
       const bcrypt = require('bcryptjs');
-      const password = body.password || Math.random().toString(36).slice(-8);
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const userPassword = password || Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(userPassword, 10);
 
       // إنشاء المستخدم
       const user = await prisma.user.create({
@@ -137,7 +146,7 @@ export async function POST(request: NextRequest) {
       // TODO: إرسال بريد إلكتروني بكلمة المرور
       console.log(`✅ تم إنشاء حساب للشريك:`);
       console.log(`   البريد: ${email}`);
-      console.log(`   كلمة المرور: ${password}`);
+      console.log(`   كلمة المرور: ${userPassword}`);
     } else {
       // إنشاء vendor مؤقت بدون user (لحالة الشركاء الذين لا يحتاجون حساب)
       // سنحتاج vendor لربط PartnerCapital

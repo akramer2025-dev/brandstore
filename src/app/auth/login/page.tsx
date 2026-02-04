@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ShoppingBag, Sparkles, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,6 +18,18 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      await signIn('google', { callbackUrl: '/' });
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      setError('حدث خطأ في تسجيل الدخول بواسطة Google');
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,7 +188,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-12 text-lg font-bold bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 hover:from-teal-700 hover:via-cyan-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                disabled={loading}
+                disabled={loading || googleLoading}
               >
                 {loading ? (
                   <>
@@ -190,6 +203,35 @@ export default function LoginPage() {
                 )}
               </Button>
 
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t-2 border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-600 font-semibold">أو</span>
+                </div>
+              </div>
+
+              {/* زر تسجيل الدخول بـ Google */}
+              <Button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading || googleLoading}
+                className="w-full h-12 text-base font-semibold bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-300 hover:border-gray-400 transition-all duration-300 hover:scale-105 shadow-md"
+              >
+                {googleLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                    جاري التحميل...
+                  </>
+                ) : (
+                  <>
+                    <FcGoogle className="w-6 h-6 ml-2" />
+                    تسجيل الدخول بواسطة Google
+                  </>
+                )}
+              </Button>
+
               <div className="text-center text-sm text-gray-600">
                 ليس لديك حساب؟{' '}
                 <Link href="/auth/register" className="text-teal-600 hover:text-teal-700 font-bold">
@@ -197,12 +239,12 @@ export default function LoginPage() {
                 </Link>
               </div>
               
-              <div className="relative my-6">
+              <div className="relative my-2">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t-2 border-gray-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-600 font-semibold">أو</span>
+                  <span className="px-4 bg-white text-gray-600 font-semibold">للشركاء</span>
                 </div>
               </div>
 

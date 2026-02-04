@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -10,6 +11,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   debug: process.env.NODE_ENV === 'development',
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -50,12 +62,55 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // إذا كان تسجيل دخول بـ Google
+      if (account?.provider === "google") {
+        try {
+          // البحث عن المستخدم
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+          });
+
+          // إذا كان مستخدم جديد، قم بإنشائه كعميل
+          if (!existingUser) {
+            await prisma.user.create({
+              data: {
+                email: user.email!,
+                name: user.name || "",
+                image: user.image || null,
+                role: "CUSTOMER", // العملاء الجدد من Google يكونون CUSTOMER
+                emailVerified: new Date(),
+              },
+            });
+          }
+        } catch (error) {
+          console.error("Error in Google sign in:", error);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
         token.username = user.username;
         token.phone = user.phone;
+      }
+      
+      // جلب الـ role من قاعدة البيانات للتأكد
+      if (token.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true }
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
       }
       
       // جلب vendor type من قاعدة البيانات

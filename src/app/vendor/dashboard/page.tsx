@@ -18,7 +18,8 @@ import {
   Zap,
   Receipt,
   AlertCircle,
-  Bell
+  Bell,
+  Eye
 } from 'lucide-react'
 
 interface CapitalSummary {
@@ -136,46 +137,59 @@ export default function VendorDashboard() {
         </div>
 
         {/* كارت رأس المال الرئيسي */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg mb-6">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-300 text-sm font-bold mb-1">💰 رأس المال المتاح</p>
-                <p className="text-4xl font-black text-yellow-400">
-                  {capitalSummary?.capital.current?.toLocaleString() || 0}
-                  <span className="text-xl text-yellow-300 mr-1">ج</span>
-                </p>
+        <Card className="bg-gradient-to-br from-yellow-900/30 to-amber-900/30 backdrop-blur-xl border-2 border-yellow-500/30 shadow-2xl mb-6 hover:border-yellow-400/50 transition-all">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-yellow-500/20 backdrop-blur p-3 rounded-2xl">
+                  <Wallet className="w-7 h-7 text-yellow-400" />
+                </div>
+                <div>
+                  <p className="text-gray-300 text-sm font-bold">💰 رأس المال المتاح</p>
+                  <p className="text-4xl font-black text-yellow-400">
+                    {capitalSummary?.capital.current?.toLocaleString() || 0}
+                    <span className="text-xl text-yellow-300 mr-1">ج</span>
+                  </p>
+                </div>
               </div>
               <Link href="/vendor/capital">
-                <div className="bg-white/20 backdrop-blur p-4 rounded-2xl shadow-lg hover:scale-105 hover:bg-white/30 transition-all cursor-pointer">
-                  <Wallet className="w-8 h-8 text-yellow-400" />
-                </div>
+                <Button className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                  <Eye className="w-4 h-4 ml-2" />
+                  عرض الحسابات التفصيلية
+                </Button>
               </Link>
             </div>
             
             {/* ملخص سريع */}
-            <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
-              <div className="text-center">
-                <p className="text-green-300 text-xs">الإيداعات</p>
-                <p className="text-white font-bold">{capitalSummary?.capital.totalDeposits?.toLocaleString() || 0} ج</p>
+            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-yellow-500/20">
+              <div className="text-center bg-green-500/10 rounded-lg p-3 border border-green-500/20">
+                <p className="text-green-300 text-xs font-semibold mb-1">الإيداعات</p>
+                <p className="text-white font-bold text-lg">{capitalSummary?.capital.totalDeposits?.toLocaleString() || 0} ج</p>
               </div>
-              <div className="text-center">
-                <p className="text-cyan-300 text-xs">منتجات مملوكة</p>
-                <p className="text-white font-bold">{capitalSummary?.products.owned || 0}</p>
+              <div className="text-center bg-cyan-500/10 rounded-lg p-3 border border-cyan-500/20">
+                <p className="text-cyan-300 text-xs font-semibold mb-1">منتجات مملوكة</p>
+                <p className="text-white font-bold text-lg">{capitalSummary?.products.owned || 0}</p>
               </div>
-              <div className="text-center">
-                <p className="text-pink-300 text-xs">منتجات وسيط</p>
-                <p className="text-white font-bold">{capitalSummary?.products.consignment || 0}</p>
+              <div className="text-center bg-pink-500/10 rounded-lg p-3 border border-pink-500/20">
+                <p className="text-pink-300 text-xs font-semibold mb-1">منتجات وسيط</p>
+                <p className="text-white font-bold text-lg">{capitalSummary?.products.consignment || 0}</p>
               </div>
             </div>
 
             {/* تحذير الموردين */}
             {(capitalSummary?.suppliers.pendingPayments || 0) > 0 && (
-              <div className="mt-3 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-400" />
-                <span className="text-red-200 text-sm">
-                  مستحق للموردين: <strong>{capitalSummary?.suppliers.pendingPayments?.toLocaleString()} ج</strong>
-                </span>
+              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-400 animate-pulse" />
+                  <span className="text-red-200 text-sm font-semibold">
+                    مستحق للموردين: <strong>{capitalSummary?.suppliers.pendingPayments?.toLocaleString()} ج</strong>
+                  </span>
+                </div>
+                <Link href="/vendor/capital">
+                  <Button size="sm" className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40">
+                    دفع الآن
+                  </Button>
+                </Link>
               </div>
             )}
           </CardContent>
@@ -248,6 +262,15 @@ export default function VendorDashboard() {
 
         {/* روابط سريعة */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link href="/vendor/capital">
+            <Card className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 backdrop-blur-xl border-yellow-500/30 shadow-lg hover:shadow-yellow-500/20 transition-all cursor-pointer hover:scale-[1.05]">
+              <CardContent className="p-4 text-center">
+                <Wallet className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+                <p className="text-white font-medium">الحسابات</p>
+                <p className="text-yellow-300 text-xs mt-1">كل المعاملات</p>
+              </CardContent>
+            </Card>
+          </Link>
           <Link href="/vendor/pos">
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg hover:bg-white/20 transition-all cursor-pointer hover:scale-[1.02]">
               <CardContent className="p-4 text-center">
