@@ -106,31 +106,31 @@ export default function VendorDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4 md:p-6">
       <div className="max-w-5xl mx-auto">
         
-        {/* Header بسيط */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-xl shadow-lg">
-              <Store className="w-6 h-6 text-white" />
+        {/* Header بسيط - responsive */}
+        <div className="flex items-center justify-between mb-4 md:mb-6 gap-2">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 md:p-3 rounded-xl shadow-lg flex-shrink-0">
+              <Store className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-white">لوحة الشريك</h1>
-              <p className="text-purple-100 text-sm">{session?.user?.username || session?.user?.email}</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg md:text-2xl font-bold text-white truncate">لوحة الشريك</h1>
+              <p className="text-purple-100 text-xs md:text-sm truncate">{session?.user?.username || session?.user?.email}</p>
             </div>
           </div>
           <Button
             onClick={() => signOut({ callbackUrl: '/' })}
             size="sm"
-            className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
+            className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 flex-shrink-0"
           >
             <LogOut className="w-4 h-4" />
           </Button>
         </div>
 
-        {/* زر نقطة البيع */}
-        <div className="mb-6">
+        {/* زر نقطة البيع - responsive */}
+        <div className="mb-4 md:mb-6">
           <Link href="/vendor/pos">
-            <Button className="w-full h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-lg font-bold shadow-xl">
-              <Zap className="w-5 h-5 ml-2" />
+            <Button className="w-full h-12 md:h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-base md:text-lg font-bold shadow-xl">
+              <Zap className="w-4 h-4 md:w-5 md:h-5 ml-2" />
               نقطة البيع
             </Button>
           </Link>
@@ -138,61 +138,63 @@ export default function VendorDashboard() {
 
         {/* كارت رأس المال الرئيسي */}
         <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-pink-500/60 mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
+          <CardContent className="p-4 md:p-6">
+            {/* Header - مع تصميم responsive */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <div className="flex items-center gap-3">
                 <div className="bg-yellow-500/30 backdrop-blur p-3 rounded-2xl border border-yellow-500/20">
-                  <Wallet className="w-7 h-7 text-yellow-300" />
+                  <Wallet className="w-6 md:w-7 h-6 md:h-7 text-yellow-300" />
                 </div>
                 <div>
-                  <p className="text-gray-200 text-sm font-bold">💰 رأس المال المتاح</p>
-                  <p className="text-4xl font-black text-yellow-300">
+                  <p className="text-gray-200 text-xs md:text-sm font-bold">💰 رأس المال المتاح</p>
+                  <p className="text-3xl md:text-4xl font-black text-yellow-300">
                     {capitalSummary?.capital.current?.toLocaleString() || 0}
-                    <span className="text-xl text-yellow-300 mr-1">ج</span>
+                    <span className="text-lg md:text-xl text-yellow-300 mr-1">ج</span>
                   </p>
                 </div>
               </div>
-              <Link href="/vendor/capital">
-                <Button className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <Link href="/vendor/capital" className="w-full md:w-auto">
+                <Button className="w-full md:w-auto bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 text-sm md:text-base">
                   <Eye className="w-4 h-4 ml-2" />
-                  عرض الحسابات التفصيلية
+                  <span className="hidden sm:inline">عرض الحسابات التفصيلية</span>
+                  <span className="sm:hidden">الحسابات</span>
                 </Button>
               </Link>
             </div>
             
-            {/* ملخص سريع */}
-            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-yellow-500/30">
+            {/* ملخص سريع - responsive grid */}
+            <div className="grid grid-cols-3 gap-2 md:gap-3 pt-4 border-t border-yellow-500/30">
               <Link href="/vendor/capital?tab=deposits" className="block">
-                <div className="text-center bg-green-600/30 rounded-lg p-3 border border-green-500/50 hover:bg-green-600/40 hover:border-green-400/70 transition-all cursor-pointer group shadow-lg">
-                  <p className="text-green-200 text-xs font-bold mb-1 group-hover:text-green-100">الإيداعات</p>
-                  <p className="text-white font-black text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.capital.totalDeposits?.toLocaleString() || 0} ج</p>
+                <div className="text-center bg-green-600/30 rounded-lg p-2 md:p-3 border border-green-500/50 hover:bg-green-600/40 hover:border-green-400/70 transition-all cursor-pointer group shadow-lg">
+                  <p className="text-green-200 text-[10px] md:text-xs font-bold mb-1 group-hover:text-green-100">الإيداعات</p>
+                  <p className="text-white font-black text-sm md:text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.capital.totalDeposits?.toLocaleString() || 0} <span className="text-xs md:text-base">ج</span></p>
                 </div>
               </Link>
               <Link href="/vendor/products?type=owned" className="block">
-                <div className="text-center bg-cyan-600/30 rounded-lg p-3 border border-cyan-500/50 hover:bg-cyan-600/40 hover:border-cyan-400/70 transition-all cursor-pointer group shadow-lg">
-                  <p className="text-cyan-200 text-xs font-bold mb-1 group-hover:text-cyan-100">منتجات مملوكة</p>
-                  <p className="text-white font-black text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.products.owned || 0}</p>
+                <div className="text-center bg-cyan-600/30 rounded-lg p-2 md:p-3 border border-cyan-500/50 hover:bg-cyan-600/40 hover:border-cyan-400/70 transition-all cursor-pointer group shadow-lg">
+                  <p className="text-cyan-200 text-[10px] md:text-xs font-bold mb-1 group-hover:text-cyan-100">منتجات مملوكة</p>
+                  <p className="text-white font-black text-sm md:text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.products.owned || 0}</p>
                 </div>
               </Link>
               <Link href="/vendor/products?type=consignment" className="block">
-                <div className="text-center bg-pink-600/30 rounded-lg p-3 border border-pink-500/50 hover:bg-pink-600/40 hover:border-pink-400/70 transition-all cursor-pointer group shadow-lg">
-                  <p className="text-pink-200 text-xs font-bold mb-1 group-hover:text-pink-100">منتجات وسيط</p>
-                  <p className="text-white font-black text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.products.consignment || 0}</p>
+                <div className="text-center bg-pink-600/30 rounded-lg p-2 md:p-3 border border-pink-500/50 hover:bg-pink-600/40 hover:border-pink-400/70 transition-all cursor-pointer group shadow-lg">
+                  <p className="text-pink-200 text-[10px] md:text-xs font-bold mb-1 group-hover:text-pink-100">منتجات وسيط</p>
+                  <p className="text-white font-black text-sm md:text-lg group-hover:scale-105 transition-transform inline-block">{capitalSummary?.products.consignment || 0}</p>
                 </div>
               </Link>
             </div>
 
-            {/* تحذير الموردين */}
+            {/* تحذير الموردين - responsive */}
             {(capitalSummary?.suppliers.pendingPayments || 0) > 0 && (
-              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center justify-between">
+              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:justify-between">
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-red-400 animate-pulse" />
-                  <span className="text-red-200 text-sm font-semibold">
+                  <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-red-400 animate-pulse flex-shrink-0" />
+                  <span className="text-red-200 text-xs md:text-sm font-semibold">
                     مستحق للموردين: <strong>{capitalSummary?.suppliers.pendingPayments?.toLocaleString()} ج</strong>
                   </span>
                 </div>
                 <Link href="/vendor/capital">
-                  <Button size="sm" className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40">
+                  <Button size="sm" className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-xs md:text-sm w-full sm:w-auto">
                     دفع الآن
                   </Button>
                 </Link>
@@ -201,23 +203,23 @@ export default function VendorDashboard() {
           </CardContent>
         </Card>
 
-        {/* إشعار الطلبات المعلقة */}
+        {/* إشعار الطلبات المعلقة - responsive */}
         {(stats?.pendingOrders || 0) > 0 && (
           <div className="mb-4">
             <Link href="/vendor/orders">
               <Card className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/30 shadow-lg hover:scale-[1.02] transition-all cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-orange-500 p-2 rounded-full animate-pulse">
-                        <ShoppingCart className="w-5 h-5 text-white" />
+                <CardContent className="p-3 md:p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+                      <div className="bg-orange-500 p-1.5 md:p-2 rounded-full animate-pulse flex-shrink-0">
+                        <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 text-white" />
                       </div>
-                      <div>
-                        <p className="text-white font-bold text-lg">لديك {stats?.pendingOrders || 0} طلب جديد!</p>
-                        <p className="text-orange-200 text-sm">انقر لعرض الطلبات المعلقة</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold text-sm md:text-lg truncate">لديك {stats?.pendingOrders || 0} طلب جديد!</p>
+                        <p className="text-orange-200 text-xs md:text-sm truncate">انقر لعرض الطلبات</p>
                       </div>
                     </div>
-                    <div className="bg-orange-500 text-white font-bold text-xl px-4 py-2 rounded-full">
+                    <div className="bg-orange-500 text-white font-bold text-lg md:text-xl px-3 md:px-4 py-1.5 md:py-2 rounded-full flex-shrink-0">
                       {stats?.pendingOrders || 0}
                     </div>
                   </div>
@@ -227,130 +229,130 @@ export default function VendorDashboard() {
           </div>
         )}
 
-        {/* إحصائيات بسيطة */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+        {/* إحصائيات بسيطة - responsive */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 mb-4 md:mb-6">
           <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-pink-500/60">
-            <CardContent className="p-4 text-center">
-              <div className="relative inline-block bg-purple-500 text-white p-3 rounded-lg shadow-xl w-12 h-12 flex items-center justify-center mx-auto mb-2">
-                <ShoppingCart className="w-6 h-6" />
+            <CardContent className="p-3 md:p-4 text-center">
+              <div className="relative inline-block bg-purple-500 text-white p-2 md:p-3 rounded-lg shadow-xl w-10 h-10 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2">
+                <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
                 {(stats?.pendingOrders || 0) > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] md:text-xs font-bold rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center animate-pulse">
                     {stats?.pendingOrders}
                   </div>
                 )}
               </div>
-              <p className="text-3xl font-black text-white">{stats?.totalOrders || 0}</p>
-              <p className="text-sm text-gray-300 font-semibold">الطلبات</p>
+              <p className="text-2xl md:text-3xl font-black text-white">{stats?.totalOrders || 0}</p>
+              <p className="text-xs md:text-sm text-gray-300 font-semibold">الطلبات</p>
             </CardContent>
           </Card>
           <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 shadow-2xl hover:shadow-pink-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-pink-500/60">
-            <CardContent className="p-4 text-center">
-              <div className="bg-pink-500 text-white p-3 rounded-lg shadow-xl w-12 h-12 flex items-center justify-center mx-auto mb-2">
-                <Package className="w-6 h-6" />
+            <CardContent className="p-3 md:p-4 text-center">
+              <div className="bg-pink-500 text-white p-2 md:p-3 rounded-lg shadow-xl w-10 h-10 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2">
+                <Package className="w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <p className="text-3xl font-black text-white">{stats?.totalProducts || 0}</p>
-              <p className="text-sm text-gray-300 font-semibold">المنتجات</p>
+              <p className="text-2xl md:text-3xl font-black text-white">{stats?.totalProducts || 0}</p>
+              <p className="text-xs md:text-sm text-gray-300 font-semibold">المنتجات</p>
             </CardContent>
           </Card>
-          <Link href="/vendor/suppliers">
-            <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-pink-500/60 cursor-pointer group">
-              <CardContent className="p-4 text-center">
-                <div className="bg-orange-500 text-white p-3 rounded-lg shadow-xl w-12 h-12 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
-                  <Users className="w-6 h-6" />
+          <Link href="/vendor/suppliers" className="col-span-2 md:col-span-1">
+            <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-pink-500/60 cursor-pointer group h-full">
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="bg-orange-500 text-white p-2 md:p-3 rounded-lg shadow-xl w-10 h-10 md:w-12 md:h-12 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+                  <Users className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
-                <p className="text-3xl font-black text-white">{capitalSummary?.suppliers.pendingCount || 0}</p>
-                <p className="text-sm text-gray-300 font-semibold">موردين</p>
+                <p className="text-2xl md:text-3xl font-black text-white">{capitalSummary?.suppliers.pendingCount || 0}</p>
+                <p className="text-xs md:text-sm text-gray-300 font-semibold">موردين</p>
               </CardContent>
             </Card>
           </Link>
         </div>
 
-        {/* روابط سريعة */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* روابط سريعة - responsive */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
           <Link href="/vendor/capital">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-yellow-500/60 group">
-              <CardContent className="p-4 text-center">
-                <div className="text-yellow-400 mb-2 transform group-hover:scale-110 transition-transform duration-300 w-12 h-12 mx-auto flex items-center justify-center">
-                  <Wallet className="w-8 h-8" />
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-yellow-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Wallet className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
-                <p className="text-white font-black group-hover:text-yellow-300 transition-all">الحسابات</p>
-                <p className="text-gray-200 text-xs mt-1 group-hover:text-gray-100 transition-colors font-medium">كل المعاملات</p>
+                <p className="text-white font-black group-hover:text-yellow-300 transition-all text-sm md:text-base">الحسابات</p>
+                <p className="text-gray-200 text-[10px] md:text-xs mt-1 group-hover:text-gray-100 transition-colors font-medium hidden md:block">كل المعاملات</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/pos">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-green-500/60 group">
-              <CardContent className="p-4 text-center">
-                <div className="text-green-400 mb-2 transform group-hover:scale-110 transition-transform duration-300 w-12 h-12 mx-auto flex items-center justify-center">
-                  <Receipt className="w-8 h-8" />
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-green-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Receipt className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
-                <p className="text-white font-black group-hover:text-green-300 transition-all">نقطة البيع</p>
+                <p className="text-white font-black group-hover:text-green-300 transition-all text-sm md:text-base">نقطة البيع</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/notifications">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-purple-500/60 group">
-              <CardContent className="p-4 text-center">
-                <div className="relative inline-block text-purple-400 mb-2 transform group-hover:scale-110 transition-transform duration-300 w-12 h-12 mx-auto flex items-center justify-center">
-                  <Bell className="w-8 h-8" />
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="relative inline-block text-purple-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Bell className="w-6 h-6 md:w-8 md:h-8" />
                   {unreadCount > 0 && (
-                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse shadow-lg">
+                    <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-red-500 text-white text-[10px] md:text-xs font-bold rounded-full w-4 h-4 md:w-6 md:h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </div>
                   )}
                 </div>
-                <p className="text-white font-black group-hover:text-purple-300 transition-all">الإشعارات</p>
+                <p className="text-white font-black group-hover:text-purple-300 transition-all text-sm md:text-base">الإشعارات</p>
                 {unreadCount > 0 && (
-                  <p className="text-gray-200 text-xs mt-1 group-hover:text-gray-100 transition-colors font-medium">{unreadCount} جديد</p>
+                  <p className="text-gray-200 text-[10px] md:text-xs mt-1 group-hover:text-gray-100 transition-colors font-medium hidden md:block">{unreadCount} جديد</p>
                 )}
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/inventory">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-blue-500/60 group">
-              <CardContent className="p-4 text-center">
-                <div className="text-blue-400 mb-2 transform group-hover:scale-110 transition-transform duration-300 w-12 h-12 mx-auto flex items-center justify-center">
-                  <Package className="w-8 h-8" />
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-blue-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Package className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
-                <p className="text-white font-black group-hover:text-blue-300 transition-all">المخزون</p>
+                <p className="text-white font-black group-hover:text-blue-300 transition-all text-sm md:text-base">المخزون</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/orders">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-red-500/60 group">
-              <CardContent className="p-4 text-center">
-                <div className="relative inline-block text-red-400 mb-2 transform group-hover:scale-110 transition-transform duration-300 w-12 h-12 mx-auto flex items-center justify-center">
-                  <ShoppingCart className="w-8 h-8" />
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="relative inline-block text-red-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <ShoppingCart className="w-6 h-6 md:w-8 md:h-8" />
                   {(stats?.pendingOrders || 0) > 0 && (
-                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse shadow-lg">
+                    <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-red-500 text-white text-[10px] md:text-xs font-bold rounded-full w-4 h-4 md:w-6 md:h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {stats?.pendingOrders}
                     </div>
                   )}
                 </div>
-                <p className="text-white font-black group-hover:text-red-300 transition-all">الطلبات</p>
+                <p className="text-white font-black group-hover:text-red-300 transition-all text-sm md:text-base">الطلبات</p>
                 {(stats?.pendingOrders || 0) > 0 && (
-                  <p className="text-gray-200 text-xs mt-1 group-hover:text-gray-100 transition-colors font-medium">{stats?.pendingOrders} جديد</p>
+                  <p className="text-gray-200 text-[10px] md:text-xs mt-1 group-hover:text-gray-100 transition-colors font-medium hidden md:block">{stats?.pendingOrders} جديد</p>
                 )}
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/capital">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-cyan-500/60 group">
-              <CardContent className="p-4 text-center">
-                <div className="text-cyan-400 mb-2 transform group-hover:scale-110 transition-transform duration-300 w-12 h-12 mx-auto flex items-center justify-center">
-                  <Wallet className="w-8 h-8" />
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-cyan-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Wallet className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
-                <p className="text-white font-black group-hover:text-cyan-300 transition-all">رأس المال</p>
+                <p className="text-white font-black group-hover:text-cyan-300 transition-all text-sm md:text-base">رأس المال</p>
               </CardContent>
             </Card>
           </Link>
           <Link href="/vendor/partners">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-pink-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-pink-500/60 group">
-              <CardContent className="p-4 text-center">
-                <div className="text-pink-400 mb-2 transform group-hover:scale-110 transition-transform duration-300 w-12 h-12 mx-auto flex items-center justify-center">
-                  <Users className="w-8 h-8" />
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-pink-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Users className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
-                <p className="text-white font-black group-hover:text-pink-300 transition-all">الشركاء</p>
+                <p className="text-white font-black group-hover:text-pink-300 transition-all text-sm md:text-base">الشركاء</p>
               </CardContent>
             </Card>
           </Link>
