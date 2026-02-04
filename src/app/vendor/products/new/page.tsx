@@ -59,9 +59,9 @@ export default function NewProductPage() {
 
   // جلب الأصناف
   useState(() => {
-    fetch('/api/categories')
+    fetch('/api/admin/categories')
       .then(res => res.json())
-      .then(data => setCategories(data.categories || []));
+      .then(data => setCategories(data || []));
   });
 
   // رفع الصور
@@ -353,6 +353,41 @@ export default function NewProductPage() {
                     placeholder="50"
                   />
                 </div>
+              </div>
+
+              {/* الفئة */}
+              <div>
+                <Label htmlFor="category" className="text-white text-lg font-semibold flex items-center gap-2 mb-3">
+                  <Package className="w-5 h-5 text-purple-400" />
+                  <span>الفئة *</span>
+                  <span className="text-sm text-gray-400 font-normal">(اختر الفئة المناسبة للمنتج)</span>
+                </Label>
+                <select
+                  id="category"
+                  className="w-full px-4 py-3 border-2 border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/5 text-white text-lg font-medium hover:border-purple-400/50 transition-all"
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                  required
+                >
+                  <option value="" disabled className="bg-gray-800">اختر الفئة المناسبة...</option>
+                  {categories.map((category: any) => (
+                    <option key={category.id} value={category.id} className="bg-gray-800 py-2">
+                      {category.nameAr} ({category.name})
+                    </option>
+                  ))}
+                </select>
+                {categories.length === 0 && (
+                  <p className="text-sm text-amber-400 mt-2 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>لا توجد فئات متاحة. يرجى التواصل مع الإدارة لإضافة فئات.</span>
+                  </p>
+                )}
+                {formData.categoryId && (
+                  <p className="text-sm text-green-400 mt-2 flex items-center gap-2">
+                    <span>✓</span>
+                    <span>تم اختيار الفئة بنجاح</span>
+                  </p>
+                )}
               </div>
 
               {/* المقاسات */}
