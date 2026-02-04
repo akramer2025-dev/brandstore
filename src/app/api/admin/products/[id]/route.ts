@@ -170,7 +170,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const product = await prisma.product.findUnique(
+    const product = await prisma.product.findUnique({
       where: { id },
       include: {
         category: true,
