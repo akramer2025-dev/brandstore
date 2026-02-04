@@ -193,12 +193,12 @@ export default function VendorDashboard() {
                         <ShoppingCart className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-white font-bold text-lg">لديك {stats.pendingOrders} طلب جديد!</p>
+                        <p className="text-white font-bold text-lg">لديك {stats?.pendingOrders || 0} طلب جديد!</p>
                         <p className="text-orange-200 text-sm">انقر لعرض الطلبات المعلقة</p>
                       </div>
                     </div>
                     <div className="bg-orange-500 text-white font-bold text-xl px-4 py-2 rounded-full">
-                      {stats.pendingOrders}
+                      {stats?.pendingOrders || 0}
                     </div>
                   </div>
                 </CardContent>

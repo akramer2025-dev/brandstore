@@ -242,7 +242,7 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {order.items.map((item) => (
+                  {order.items.map((item: any) => (
                     <div key={item.id} className="bg-white/5 rounded-lg p-4 flex items-center justify-between">
                       <div className="flex-1">
                         <h4 className="text-white font-medium mb-1">{item.product.nameAr}</h4>

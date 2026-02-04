@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import webpush from 'web-push';
+// import webpush from 'web-push';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -11,11 +11,11 @@ const vapidKeys = {
   privateKey: process.env.VAPID_PRIVATE_KEY || 'YOUR_PRIVATE_KEY',
 };
 
-webpush.setVapidDetails(
-  'mailto:admin@remostore.net',
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-);
+// webpush.setVapidDetails(
+//   'mailto:admin@remostore.net',
+//   vapidKeys.publicKey,
+//   vapidKeys.privateKey
+// );
 
 export async function POST(request: NextRequest) {
   try {

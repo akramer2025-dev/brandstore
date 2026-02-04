@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
           amount: amount,
           description: 'تصفية وإعادة تعيين رأس المال',
           descriptionAr: 'تصفية وإعادة تعيين رأس المال',
+          balanceBefore: 0,
           balanceAfter: amount,
         }
       });

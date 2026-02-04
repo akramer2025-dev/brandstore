@@ -813,7 +813,10 @@ model PartnerCapital {
   id               String              @id @default(cuid())
   vendorId         String
   partnerName      String              // اسم الشريك
+  partnerType      String              @default("OWNER") // نوع الشريك: OWNER, PARTNER, etc
   capitalAmount    Float               // المبلغ المساهم به
+  initialAmount    Float               @default(0) // المبلغ الأولي
+  currentAmount    Float               @default(0) // المبلغ الحالي
   capitalPercent   Float               // نسبة المساهمة من إجمالي رأس المال
   joinDate         DateTime            @default(now())
   isActive         Boolean             @default(true)
@@ -1037,6 +1040,7 @@ model SupplierPayment {
   paidAt          DateTime?     // تاريخ الدفع
   paymentMethod   String?       // طريقة الدفع
   paymentNotes    String?       // ملاحظات الدفع
+  notes           String?       // ملاحظات إضافية
   saleDate        DateTime      @default(now()) // تاريخ البيع
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -1057,6 +1061,7 @@ model CapitalTransaction {
   id              String              @id @default(cuid())
   vendorId        String
   partnerId       String?             // الشريك (اختياري)
+  orderId         String?             // الطلب المرتبط
   type            CapitalTransactionType
   amount          Float               // المبلغ
   balanceBefore   Float               // الرصيد قبل المعاملة

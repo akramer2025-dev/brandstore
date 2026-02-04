@@ -45,13 +45,13 @@ export default async function VendorOrdersPage() {
   });
 
   const statusColors = {
-    PENDING: { bg: "bg-yellow-100", text: "text-yellow-800", icon: Clock },
-    CONFIRMED: { bg: "bg-blue-100", text: "text-blue-800", icon: Package },
-    PREPARING: { bg: "bg-cyan-100", text: "text-cyan-800", icon: Package },
-    OUT_FOR_DELIVERY: { bg: "bg-teal-100", text: "text-teal-800", icon: Truck },
-    DELIVERED: { bg: "bg-green-100", text: "text-green-800", icon: CheckCircle },
-    REJECTED: { bg: "bg-red-100", text: "text-red-800", icon: XCircle },
-    CANCELLED: { bg: "bg-gray-100", text: "text-gray-800", icon: XCircle },
+    PENDING: { bg: "bg-yellow-100", text: "text-yellow-800", icon: Clock, border: "border-yellow-300" },
+    CONFIRMED: { bg: "bg-blue-100", text: "text-blue-800", icon: CheckCircle, border: "border-blue-300" },
+    PREPARING: { bg: "bg-cyan-100", text: "text-cyan-800", icon: Package, border: "border-cyan-300" },
+    OUT_FOR_DELIVERY: { bg: "bg-teal-100", text: "text-teal-800", icon: Truck, border: "border-teal-300" },
+    DELIVERED: { bg: "bg-green-100", text: "text-green-800", icon: CheckCircle, border: "border-green-300" },
+    REJECTED: { bg: "bg-red-100", text: "text-red-800", icon: XCircle, border: "border-red-300" },
+    CANCELLED: { bg: "bg-gray-100", text: "text-gray-800", icon: XCircle, border: "border-gray-300" },
   };
 
   const statusLabels = {

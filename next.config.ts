@@ -1,5 +1,6 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   eslint: {
     // تعطيل ESLint أثناء البناء - سيتم إصلاحها لاحقاً
     ignoreDuringBuilds: true,
@@ -9,15 +10,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    // السماح بجميع النطاقات الخارجية
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
       {
         protocol: 'https',
         hostname: '**',
@@ -30,4 +24,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

@@ -65,7 +65,6 @@ export function ProductCardFlashStyle({ product }: ProductCardProps) {
       name: product.nameAr,
       price: product.price,
       image: firstImage,
-      quantity: 1,
     });
     toast.success("تمت الإضافة إلى السلة");
   };
