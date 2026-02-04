@@ -19,7 +19,10 @@ import {
   Receipt,
   AlertCircle,
   Bell,
-  Eye
+  Eye,
+  Settings,
+  FileText,
+  Truck,
 } from 'lucide-react'
 
 interface CapitalSummary {
@@ -336,16 +339,6 @@ export default function VendorDashboard() {
               </CardContent>
             </Card>
           </Link>
-          <Link href="/vendor/capital">
-            <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-cyan-500/60 group">
-              <CardContent className="p-3 md:p-4 text-center">
-                <div className="text-cyan-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
-                  <Wallet className="w-6 h-6 md:w-8 md:h-8" />
-                </div>
-                <p className="text-white font-black group-hover:text-cyan-300 transition-all text-sm md:text-base">رأس المال</p>
-              </CardContent>
-            </Card>
-          </Link>
           <Link href="/vendor/partners">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-pink-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-pink-500/60 group">
               <CardContent className="p-3 md:p-4 text-center">
@@ -353,6 +346,46 @@ export default function VendorDashboard() {
                   <Users className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
                 <p className="text-white font-black group-hover:text-pink-300 transition-all text-sm md:text-base">الشركاء</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/vendor/products">
+            <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-indigo-500/60 group">
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-indigo-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Package className="w-6 h-6 md:w-8 md:h-8" />
+                </div>
+                <p className="text-white font-black group-hover:text-indigo-300 transition-all text-sm md:text-base">المنتجات</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/vendor/suppliers">
+            <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-orange-500/60 group">
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-orange-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Truck className="w-6 h-6 md:w-8 md:h-8" />
+                </div>
+                <p className="text-white font-black group-hover:text-orange-300 transition-all text-sm md:text-base">الموردين</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/vendor/purchases">
+            <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-teal-500/60 group">
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-teal-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <FileText className="w-6 h-6 md:w-8 md:h-8" />
+                </div>
+                <p className="text-white font-black group-hover:text-teal-300 transition-all text-sm md:text-base">الفواتير</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/vendor/settings">
+            <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-gray-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-gray-500/60 group">
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-gray-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Settings className="w-6 h-6 md:w-8 md:h-8" />
+                </div>
+                <p className="text-white font-black group-hover:text-gray-300 transition-all text-sm md:text-base">الإعدادات</p>
               </CardContent>
             </Card>
           </Link>
