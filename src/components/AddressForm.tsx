@@ -1,10 +1,18 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MapPin, User, Phone, Home, Building2, MapPinned, Mail } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AddressFormData {
   fullName: string;
@@ -31,6 +39,37 @@ interface AddressFormProps {
 }
 
 export default function AddressForm({ formData, onChange, onCheckboxChange }: AddressFormProps) {
+  const [governorates, setGovernorates] = useState<Array<{name: string, fee: number}>>([]);
+
+  useEffect(() => {
+    fetchGovernorates();
+  }, []);
+
+  const fetchGovernorates = async () => {
+    try {
+      const response = await fetch('/api/admin/delivery-zones');
+      if (response.ok) {
+        const zones = await response.json();
+        const activeGovs = zones
+          .filter((z: any) => z.isActive)
+          .map((z: any) => ({ name: z.governorate, fee: z.deliveryFee }));
+        setGovernorates(activeGovs);
+      }
+    } catch (error) {
+      console.error('Error fetching governorates:', error);
+    }
+  };
+
+  const handleGovernorateChange = (value: string) => {
+    const event = {
+      target: {
+        name: 'governorate',
+        value: value
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(event);
+  };
+
   return (
     <>
       {/* Personal Information */}
@@ -106,15 +145,18 @@ export default function AddressForm({ formData, onChange, onCheckboxChange }: Ad
               <Label htmlFor="governorate" className="text-gray-300 mb-2 block">
                 المحافظة <span className="text-red-400">*</span>
               </Label>
-              <Input
-                id="governorate"
-                name="governorate"
-                value={formData.governorate}
-                onChange={onChange}
-                placeholder="مثال: القاهرة"
-                required
-                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500"
-              />
+              <Select value={formData.governorate} onValueChange={handleGovernorateChange}>
+                <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
+                  <SelectValue placeholder="اختر المحافظة" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-600">
+                  {governorates.map((gov) => (
+                    <SelectItem key={gov.name} value={gov.name} className="text-white hover:bg-gray-700">
+                      {gov.name} ({gov.fee} ج.م)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

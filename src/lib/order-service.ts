@@ -14,6 +14,11 @@ export class OrderService {
     deliveryFee?: number;
     paymentMethod?: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
     eWalletType?: string;
+    deliveryMethod?: 'HOME_DELIVERY' | 'STORE_PICKUP';
+    governorate?: string;
+    pickupLocation?: string;
+    downPayment?: number;
+    remainingAmount?: number;
     installmentPlan?: {
       totalAmount: number;
       downPayment: number;
@@ -61,7 +66,14 @@ export class OrderService {
     }
 
     const deliveryFee = data.deliveryFee || 30; // رسوم التوصيل الافتراضية
-    const finalAmount = totalAmount + deliveryFee;
+    const deliveryMethod = data.deliveryMethod || 'HOME_DELIVERY';
+    
+    // حساب المبلغ النهائي بناءً على طريقة التوصيل
+    let finalAmount = totalAmount + deliveryFee;
+    if (deliveryMethod === 'STORE_PICKUP') {
+      finalAmount = data.downPayment || 0; // للاستلام من الفرع، المبلغ النهائي هو الدفعة المقدمة
+    }
+    
     const paymentMethod = data.paymentMethod || 'CASH_ON_DELIVERY';
 
     // الحصول على vendorId من أول منتج (نفترض أن كل المنتجات من نفس الشريك)
@@ -76,13 +88,18 @@ export class OrderService {
         customerId: data.customerId,
         vendorId: firstProduct?.vendorId || null, // ربط الطلب بالشريك
         totalAmount,
-        deliveryFee,
+        deliveryFee: deliveryMethod === 'HOME_DELIVERY' ? deliveryFee : 0,
         finalAmount,
         deliveryAddress: data.deliveryAddress,
         deliveryPhone: data.deliveryPhone,
         customerNotes: data.customerNotes,
         paymentMethod,
         eWalletType: data.eWalletType,
+        deliveryMethod,
+        governorate: data.governorate,
+        pickupLocation: data.pickupLocation,
+        downPayment: data.downPayment,
+        remainingAmount: data.remainingAmount,
         items: {
           create: orderItems,
         },
@@ -119,6 +136,18 @@ export class OrderService {
     // خصم المنتجات من المخزون
     for (const item of data.items) {
       await InventoryService.deductStock(item.productId, item.quantity);
+    }
+
+    // إرسال إشعار للشريك عند إنشاء الطلب
+    if (firstProduct?.vendorId) {
+      await this.sendVendorNotification({
+        vendorId: firstProduct.vendorId,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        customerName: order.customer.name || order.customer.username || 'عميل',
+        totalAmount: order.totalAmount,
+        itemsCount: data.items.length,
+      });
     }
 
     return order;
@@ -441,5 +470,31 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
         status: 'CANCELLED',
       },
     });
+  }
+
+  /**
+   * إرسال إشعار للشريك
+   */
+  private static async sendVendorNotification(data: {
+    vendorId: string;
+    orderId: string;
+    orderNumber: string;
+    customerName: string;
+    totalAmount: number;
+    itemsCount: number;
+  }) {
+    try {
+      await prisma.vendorNotification.create({
+        data: {
+          vendorId: data.vendorId,
+          type: 'NEW_ORDER',
+          title: '🎉 طلب جديد!',
+          message: `لديك طلب جديد من ${data.customerName} بقيمة ${data.totalAmount.toFixed(2)} ج.م (${data.itemsCount} منتج). رقم الطلب: #${data.orderNumber.slice(0, 8).toUpperCase()}`,
+          orderId: data.orderId,
+        },
+      });
+    } catch (error) {
+      console.error('Error sending vendor notification:', error);
+    }
   }
 }

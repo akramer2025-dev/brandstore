@@ -21,6 +21,11 @@ export async function POST(request: Request) {
       deliveryFee: body.deliveryFee,
       paymentMethod: body.paymentMethod || 'CASH_ON_DELIVERY',
       eWalletType: body.eWalletType,
+      deliveryMethod: body.deliveryMethod,
+      governorate: body.governorate,
+      pickupLocation: body.pickupLocation,
+      downPayment: body.downPayment,
+      remainingAmount: body.remainingAmount,
       installmentPlan: body.installmentPlan,
     });
 

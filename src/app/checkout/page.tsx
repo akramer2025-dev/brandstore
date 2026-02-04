@@ -16,6 +16,7 @@ import AddressForm from "@/components/AddressForm";
 
 type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
 type EWalletType = 'etisalat_cash' | 'vodafone_cash' | 'we_pay';
+type DeliveryMethod = 'HOME_DELIVERY' | 'STORE_PICKUP';
 
 interface SavedAddress {
   id: string;
@@ -35,6 +36,18 @@ interface SavedAddress {
   isDefault: boolean;
 }
 
+interface DeliveryZone {
+  id: string;
+  governorate: string;
+  deliveryFee: number;
+  minOrderValue: number;
+  isActive: boolean;
+}
+
+interface PickupLocation {
+  address: string;
+}
+
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -47,6 +60,14 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [loadingAddresses, setLoadingAddresses] = useState(false);
+  
+  // Delivery system states
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('HOME_DELIVERY');
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const [pickupLocations, setPickupLocations] = useState<PickupLocation[]>([]);
+  const [selectedPickupLocation, setSelectedPickupLocation] = useState<string>('');
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [downPaymentPercent, setDownPaymentPercent] = useState(30); // Default 30%
   
   const { items, getTotalPrice, clearCart } = useCartStore();
 
@@ -82,8 +103,25 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (session?.user && mounted) {
       fetchSavedAddresses();
+      fetchDeliveryZones();
+      fetchSystemSettings();
     }
   }, [session, mounted]);
+
+  // تحديث رسوم التوصيل عند تغيير المحافظة أو طريقة التوصيل
+  useEffect(() => {
+    if (deliveryMethod === 'HOME_DELIVERY' && formData.governorate) {
+      const zone = deliveryZones.find(z => z.governorate === formData.governorate && z.isActive);
+      if (zone) {
+        setDeliveryFee(zone.deliveryFee);
+      } else {
+        // استخدام الرسوم الافتراضية إذا لم تُجد المحافظة
+        setDeliveryFee(125);
+      }
+    } else if (deliveryMethod === 'STORE_PICKUP') {
+      setDeliveryFee(0);
+    }
+  }, [deliveryMethod, formData.governorate, deliveryZones]);
 
   // تحميل بيانات المستخدم
   useEffect(() => {
@@ -119,6 +157,48 @@ export default function CheckoutPage() {
       console.error('Error fetching addresses:', error);
     } finally {
       setLoadingAddresses(false);
+    }
+  };
+
+  const fetchDeliveryZones = async () => {
+    try {
+      const response = await fetch('/api/admin/delivery-zones');
+      if (response.ok) {
+        const zones = await response.json();
+        // فقط المناطق النشطة
+        setDeliveryZones(zones.filter((z: DeliveryZone) => z.isActive));
+      }
+    } catch (error) {
+      console.error('Error fetching delivery zones:', error);
+    }
+  };
+
+  const fetchSystemSettings = async () => {
+    try {
+      const response = await fetch('/api/settings?keys=min_down_payment_percent,store_pickup_locations,allow_store_pickup');
+      if (response.ok) {
+        const settings = await response.json();
+        
+        const minDownPayment = settings.find((s: any) => s.key === 'min_down_payment_percent');
+        if (minDownPayment) {
+          setDownPaymentPercent(parseInt(minDownPayment.value));
+        }
+        
+        const pickupLocs = settings.find((s: any) => s.key === 'store_pickup_locations');
+        if (pickupLocs) {
+          try {
+            const locations = JSON.parse(pickupLocs.value);
+            setPickupLocations(locations.map((addr: string) => ({ address: addr })));
+            if (locations.length > 0) {
+              setSelectedPickupLocation(locations[0]);
+            }
+          } catch (e) {
+            console.error('Error parsing pickup locations:', e);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching system settings:', error);
     }
   };
 
@@ -166,8 +246,9 @@ export default function CheckoutPage() {
   }
 
   const totalPrice = getTotalPrice();
-  const deliveryFee = 0; // توصيل مجاني
-  const finalTotal = totalPrice + deliveryFee;
+  const downPayment = deliveryMethod === 'STORE_PICKUP' ? (totalPrice * downPaymentPercent / 100) : 0;
+  const remainingAmount = deliveryMethod === 'STORE_PICKUP' ? (totalPrice - downPayment) : 0;
+  const finalTotal = deliveryMethod === 'HOME_DELIVERY' ? (totalPrice + deliveryFee) : downPayment;
 
   const saveNewAddress = async () => {
     if (!formData.saveAddress || !formData.addressTitle) return null;
@@ -213,10 +294,22 @@ export default function CheckoutPage() {
       return;
     }
     
-    if (!formData.fullName || !formData.phone || !formData.governorate || 
-        !formData.city || !formData.district || !formData.street) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
-      return;
+    // التحقق من طريقة التوصيل
+    if (deliveryMethod === 'HOME_DELIVERY') {
+      if (!formData.fullName || !formData.phone || !formData.governorate || 
+          !formData.city || !formData.district || !formData.street) {
+        toast.error("يرجى ملء جميع بيانات التوصيل");
+        return;
+      }
+    } else if (deliveryMethod === 'STORE_PICKUP') {
+      if (!selectedPickupLocation) {
+        toast.error("يرجى اختيار مكان الاستلام");
+        return;
+      }
+      if (!formData.fullName || !formData.phone) {
+        toast.error("يرجى ملء الاسم ورقم الهاتف");
+        return;
+      }
     }
 
     if (paymentMethod.startsWith('INSTALLMENT_') && !selectedInstallmentPlan) {
@@ -230,8 +323,8 @@ export default function CheckoutPage() {
       // حفظ العنوان إذا طلب المستخدم
       await saveNewAddress();
 
-      // تجميع العنوان الكامل
-      const fullAddress = [
+      // تجميع العنوان الكامل للتوصيل المنزلي
+      const fullAddress = deliveryMethod === 'HOME_DELIVERY' ? [
         formData.street,
         formData.buildingNumber && `عمارة ${formData.buildingNumber}`,
         formData.floorNumber && `طابق ${formData.floorNumber}`,
@@ -241,7 +334,7 @@ export default function CheckoutPage() {
         formData.city,
         formData.governorate,
         formData.postalCode && `رمز بريدي: ${formData.postalCode}`
-      ].filter(Boolean).join(', ');
+      ].filter(Boolean).join(', ') : '';
 
       const orderData: any = {
         items: items.map(item => ({
@@ -252,8 +345,15 @@ export default function CheckoutPage() {
         deliveryAddress: fullAddress,
         deliveryPhone: formData.phone,
         customerNotes: formData.notes,
-        deliveryFee: 0,
+        deliveryFee: deliveryMethod === 'HOME_DELIVERY' ? deliveryFee : 0,
         paymentMethod,
+        deliveryMethod,
+        ...(deliveryMethod === 'HOME_DELIVERY' && { governorate: formData.governorate }),
+        ...(deliveryMethod === 'STORE_PICKUP' && { 
+          pickupLocation: selectedPickupLocation,
+          downPayment: downPayment,
+          remainingAmount: remainingAmount
+        }),
         ...(paymentMethod === 'E_WALLET_TRANSFER' && { eWalletType }),
       };
 
@@ -284,7 +384,13 @@ export default function CheckoutPage() {
       const order = await response.json();
       
       clearCart();
-      toast.success("تم إنشاء الطلب بنجاح! 🎉");
+      
+      if (deliveryMethod === 'STORE_PICKUP') {
+        toast.success(`تم إنشاء الطلب بنجاح! 🎉\nالمبلغ المدفوع مقدماً: ${downPayment.toFixed(2)} ج.م\nالمبلغ المتبقي: ${remainingAmount.toFixed(2)} ج.م`);
+      } else {
+        toast.success("تم إنشاء الطلب بنجاح! 🎉");
+      }
+      
       router.push(`/orders/${order.id}`);
     } catch (error) {
       console.error("Order creation error:", error);
@@ -324,45 +430,225 @@ export default function CheckoutPage() {
           <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
             {/* Delivery Information */}
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-              {/* العناوين المحفوظة */}
-              {!showNewAddressForm && savedAddresses.length > 0 && (
-                <AddressSelector
-                  savedAddresses={savedAddresses}
-                  selectedAddress={selectedAddress}
-                  onSelectAddress={selectSavedAddress}
-                  onNewAddress={() => setShowNewAddressForm(true)}
-                  loading={loadingAddresses}
-                />
+              {/* Delivery Method Selection */}
+              <Card className="bg-gray-800/80 border-teal-500/20">
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
+                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
+                    طريقة الاستلام
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
+                  {/* Home Delivery */}
+                  <div
+                    onClick={() => setDeliveryMethod('HOME_DELIVERY')}
+                    className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
+                      deliveryMethod === 'HOME_DELIVERY'
+                        ? 'border-teal-500 bg-teal-900/30'
+                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        deliveryMethod === 'HOME_DELIVERY'
+                          ? 'border-teal-500 bg-teal-500'
+                          : 'border-gray-500'
+                      }`}>
+                        {deliveryMethod === 'HOME_DELIVERY' && (
+                          <CheckCircle2 className="w-4 h-4 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                          <Home className="w-4 h-4 sm:w-5 sm:h-5 text-teal-400" />
+                          <h3 className="text-base sm:text-lg font-bold text-white">
+                            التوصيل للمنزل
+                          </h3>
+                        </div>
+                        <p className="text-gray-300 text-xs sm:text-sm mb-2">
+                          سيتم توصيل طلبك إلى عنوانك
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-teal-400">
+                          <CheckCircle2 className="w-3 h-3" />
+                          رسوم توصيل حسب المحافظة
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Store Pickup */}
+                  <div
+                    onClick={() => setDeliveryMethod('STORE_PICKUP')}
+                    className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
+                      deliveryMethod === 'STORE_PICKUP'
+                        ? 'border-purple-500 bg-purple-900/30'
+                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        deliveryMethod === 'STORE_PICKUP'
+                          ? 'border-purple-500 bg-purple-500'
+                          : 'border-gray-500'
+                      }`}>
+                        {deliveryMethod === 'STORE_PICKUP' && (
+                          <CheckCircle2 className="w-4 h-4 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                          <Package className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                          <h3 className="text-base sm:text-lg font-bold text-white">
+                            الاستلام من الفرع
+                          </h3>
+                        </div>
+                        <p className="text-gray-300 text-xs sm:text-sm mb-2">
+                          استلم طلبك من أحد فروعنا
+                        </p>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-xs text-purple-400">
+                            <CheckCircle2 className="w-3 h-3" />
+                            لا توجد رسوم توصيل
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-yellow-400">
+                            <CheckCircle2 className="w-3 h-3" />
+                            يتطلب دفعة مقدمة {downPaymentPercent}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Pickup Locations */}
+                    {deliveryMethod === 'STORE_PICKUP' && pickupLocations.length > 0 && (
+                      <div className="mt-4 space-y-2 border-t border-gray-600 pt-4">
+                        <Label className="text-white text-sm">اختر مكان الاستلام:</Label>
+                        {pickupLocations.map((location, index) => (
+                          <div
+                            key={index}
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setSelectedPickupLocation(location.address); 
+                            }}
+                            className={`cursor-pointer border rounded-lg p-3 transition-all ${
+                              selectedPickupLocation === location.address
+                                ? 'border-purple-500 bg-purple-900/30'
+                                : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                selectedPickupLocation === location.address
+                                  ? 'border-purple-500 bg-purple-500'
+                                  : 'border-gray-500'
+                              }`}>
+                                {selectedPickupLocation === location.address && (
+                                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                                )}
+                              </div>
+                              <span className="text-white text-sm">{location.address}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Show address form only for HOME_DELIVERY */}
+              {deliveryMethod === 'HOME_DELIVERY' && (
+                <>
+                  {/* العناوين المحفوظة */}
+                  {!showNewAddressForm && savedAddresses.length > 0 && (
+                    <AddressSelector
+                      savedAddresses={savedAddresses}
+                      selectedAddress={selectedAddress}
+                      onSelectAddress={selectSavedAddress}
+                      onNewAddress={() => setShowNewAddressForm(true)}
+                      loading={loadingAddresses}
+                    />
+                  )}
+
+                  {/* نموذج العنوان الجديد */}
+                  {showNewAddressForm && (
+                    <>
+                      {savedAddresses.length > 0 && (
+                        <div className="flex justify-end">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setShowNewAddressForm(false);
+                              if (savedAddresses.length > 0) {
+                                selectSavedAddress(savedAddresses[0].id);
+                              }
+                            }}
+                            className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+                          >
+                            عرض العناوين المحفوظة
+                          </Button>
+                        </div>
+                      )}
+                      <AddressForm
+                        formData={formData}
+                        onChange={handleInputChange}
+                        onCheckboxChange={(checked) => 
+                          setFormData(prev => ({ ...prev, saveAddress: checked }))
+                        }
+                      />
+                    </>
+                  )}
+                </>
               )}
 
-              {/* نموذج العنوان الجديد */}
-              {showNewAddressForm && (
-                <>
-                  {savedAddresses.length > 0 && (
-                    <div className="flex justify-end">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setShowNewAddressForm(false);
-                          if (savedAddresses.length > 0) {
-                            selectSavedAddress(savedAddresses[0].id);
-                          }
-                        }}
-                        className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
-                      >
-                        عرض العناوين المحفوظة
-                      </Button>
+              {/* Basic Contact Info for STORE_PICKUP */}
+              {deliveryMethod === 'STORE_PICKUP' && (
+                <Card className="bg-gray-800/80 border-purple-500/20">
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
+                      <User className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+                      معلومات الاتصال
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-4 sm:p-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName" className="text-white">
+                        الاسم الكامل <span className="text-red-400">*</span>
+                      </Label>
+                      <Input
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        placeholder="أدخل اسمك الكامل"
+                        required
+                        className="bg-gray-700 border-gray-600 text-white"
+                      />
                     </div>
-                  )}
-                  <AddressForm
-                    formData={formData}
-                    onChange={handleInputChange}
-                    onCheckboxChange={(checked) => 
-                      setFormData(prev => ({ ...prev, saveAddress: checked }))
-                    }
-                  />
-                </>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-white">
+                        رقم الهاتف <span className="text-red-400">*</span>
+                      </Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        placeholder="01xxxxxxxxx"
+                        required
+                        className="bg-gray-700 border-gray-600 text-white"
+                      />
+                    </div>
+
+                    <div className="bg-purple-900/30 border border-purple-500/30 rounded-lg p-4">
+                      <h4 className="text-white font-bold mb-2">ملاحظة هامة:</h4>
+                      <p className="text-white/80 text-sm">
+                        سيتم التواصل معك لتحديد موعد الاستلام المناسب بعد تأكيد الطلب.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Payment Method */}
@@ -646,15 +932,37 @@ export default function CheckoutPage() {
                       <span className="font-bold">{totalPrice.toFixed(2)} جنيه</span>
                     </div>
                     
-                    <div className="flex justify-between text-gray-300">
-                      <span>رسوم التوصيل:</span>
-                      <span className="font-bold text-teal-400">مجاناً</span>
-                    </div>
+                    {deliveryMethod === 'HOME_DELIVERY' && (
+                      <div className="flex justify-between text-gray-300">
+                        <span>رسوم التوصيل:</span>
+                        <span className="font-bold text-teal-400">
+                          {deliveryFee > 0 ? `${deliveryFee.toFixed(2)} جنيه` : 'مجاناً'}
+                        </span>
+                      </div>
+                    )}
+
+                    {deliveryMethod === 'STORE_PICKUP' && (
+                      <>
+                        <div className="flex justify-between text-purple-300">
+                          <span>الدفعة المقدمة ({downPaymentPercent}%):</span>
+                          <span className="font-bold">{downPayment.toFixed(2)} جنيه</span>
+                        </div>
+                        <div className="flex justify-between text-yellow-300">
+                          <span>المبلغ المتبقي:</span>
+                          <span className="font-bold">{remainingAmount.toFixed(2)} جنيه</span>
+                        </div>
+                        <div className="bg-purple-900/30 border border-purple-500/30 rounded p-2 text-xs text-white/80 mt-2">
+                          💡 ادفع المبلغ المتبقي عند الاستلام من الفرع
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="border-t border-gray-700 pt-3 sm:pt-4">
-                    <div className="flex justify-between items-center mb-4 sm:mb-6">
-                      <span className="text-base sm:text-xl font-bold text-white">الإجمالي:</span>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-base sm:text-xl font-bold text-white">
+                        {deliveryMethod === 'STORE_PICKUP' ? 'المبلغ المطلوب الآن:' : 'الإجمالي:'}
+                      </span>
                       <span className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
                         {finalTotal.toFixed(2)} جنيه
                       </span>

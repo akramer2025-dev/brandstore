@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+'use client';
+
+import { useEffect, useState, use } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -15,50 +17,103 @@ import {
   Clock,
   DollarSign,
   TrendingUp,
-  Wallet
+  Wallet,
+  Home,
+  Store,
+  AlertCircle,
+  Send,
+  UserCheck,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { toast } from "sonner";
 
-export default async function VendorOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const session = await auth();
+export default function VendorOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  
+  const { id } = use(params);
 
-  if (!session || session.user?.role !== "VENDOR") {
-    redirect("/auth/login");
+  useEffect(() => {
+    fetchOrder();
+  }, [id]);
+
+  const fetchOrder = async () => {
+    try {
+      const response = await fetch(`/api/vendor/orders/${id}`);
+      if (!response.ok) {
+        throw new Error('فشل في جلب الطلب');
+      }
+      const data = await response.json();
+      setOrder(data);
+    } catch (error) {
+      toast.error('حدث خطأ في جلب الطلب');
+      router.push('/vendor/orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAcceptOrder = async () => {
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/vendor/orders/${id}/accept`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) throw new Error('فشل في قبول الطلب');
+      
+      toast.success('تم قبول الطلب بنجاح');
+      fetchOrder();
+    } catch (error) {
+      toast.error('حدث خطأ في قبول الطلب');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSchedulePickup = async () => {
+    toast.info('سيتم إضافة نظام جدولة المواعيد قريباً');
+  };
+
+  const handleSendToAdmin = async () => {
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/vendor/orders/${id}/send-to-admin`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) throw new Error('فشل في إرسال الطلب للإدارة');
+      
+      toast.success('تم إرسال الطلب للإدارة بنجاح');
+      fetchOrder();
+    } catch (error) {
+      toast.error('حدث خطأ في إرسال الطلب');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleAssignDelivery = async () => {
+    toast.info('سيتم إضافة نظام تعيين مندوبي التوصيل قريباً');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+      </div>
+    );
   }
-
-  const vendor = await prisma.vendor.findUnique({
-    where: { userId: session.user.id }
-  });
-
-  if (!vendor) {
-    redirect("/");
-  }
-
-  const order = await prisma.order.findFirst({
-    where: { 
-      id,
-      vendorId: vendor.id,
-      deletedAt: null, // فقط الطلبات الموجودة (غير محذوفة)
-    },
-    include: {
-      customer: true,
-      items: {
-        include: {
-          product: true,
-        },
-      },
-      deliveryStaff: true,
-    },
-  });
 
   if (!order) {
-    redirect("/vendor/orders");
+    return null;
   }
 
   // حساب التفاصيل المالية
-  const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = order.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
   const storeCommission = subtotal * 0.05; // 5% عمولة المتجر
   const vendorEarnings = subtotal - storeCommission; // صافي ربح الشريك
   
@@ -80,6 +135,11 @@ export default async function VendorOrderDetailPage({ params }: { params: Promis
     INSTALLMENT_6: "تقسيط 6 أشهر",
     INSTALLMENT_12: "تقسيط 12 شهر",
     INSTALLMENT_24: "تقسيط 24 شهر",
+  };
+
+  const deliveryMethodLabels: Record<string, string> = {
+    HOME_DELIVERY: "توصيل للمنزل",
+    STORE_PICKUP: "استلام من الفرع",
   };
 
   return (
@@ -139,6 +199,25 @@ export default async function VendorOrderDetailPage({ params }: { params: Promis
                   <div>
                     <p className="text-gray-400 text-sm">العنوان</p>
                     <p className="text-white">{order.deliveryAddress}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  {order.deliveryMethod === 'STORE_PICKUP' ? (
+                    <Store className="h-5 w-5 text-purple-400 mt-0.5" />
+                  ) : (
+                    <Home className="h-5 w-5 text-green-400 mt-0.5" />
+                  )}
+                  <div>
+                    <p className="text-gray-400 text-sm">طريقة الاستلام</p>
+                    <p className="text-white font-medium">
+                      {deliveryMethodLabels[order.deliveryMethod || 'HOME_DELIVERY']}
+                    </p>
+                    {order.deliveryMethod === 'STORE_PICKUP' && order.pickupLocation && (
+                      <p className="text-purple-300 text-sm mt-1">{order.pickupLocation}</p>
+                    )}
+                    {order.deliveryMethod === 'HOME_DELIVERY' && order.governorate && (
+                      <p className="text-green-300 text-sm mt-1">المحافظة: {order.governorate}</p>
+                    )}
                   </div>
                 </div>
                 {order.customerNotes && (
@@ -245,7 +324,7 @@ export default async function VendorOrderDetailPage({ params }: { params: Promis
             </Card>
 
             {/* الملخص المالي التفصيلي */}
-            <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl border-purple-500/30 shadow-xl">
+            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-yellow-400" />
@@ -258,10 +337,25 @@ export default async function VendorOrderDetailPage({ params }: { params: Promis
                   <span className="text-white font-bold">{subtotal.toFixed(2)} ج.م</span>
                 </div>
                 
-                <div className="flex justify-between items-center pb-3 border-b border-white/20">
-                  <span className="text-gray-300">رسوم التوصيل</span>
-                  <span className="text-white font-bold">{order.deliveryFee.toFixed(2)} ج.م</span>
-                </div>
+                {order.deliveryMethod === 'HOME_DELIVERY' && (
+                  <div className="flex justify-between items-center pb-3 border-b border-white/20">
+                    <span className="text-gray-300">رسوم التوصيل</span>
+                    <span className="text-white font-bold">{order.deliveryFee.toFixed(2)} ج.م</span>
+                  </div>
+                )}
+
+                {order.deliveryMethod === 'STORE_PICKUP' && order.downPayment && (
+                  <>
+                    <div className="flex justify-between items-center pb-3 border-b border-white/20">
+                      <span className="text-purple-300">الدفعة المقدمة (30%)</span>
+                      <span className="text-purple-300 font-bold">{order.downPayment.toFixed(2)} ج.م</span>
+                    </div>
+                    <div className="flex justify-between items-center pb-3 border-b border-white/20">
+                      <span className="text-yellow-300">المبلغ المتبقي</span>
+                      <span className="text-yellow-300 font-bold">{(order.remainingAmount || 0).toFixed(2)} ج.م</span>
+                    </div>
+                  </>
+                )}
 
                 <div className="flex justify-between items-center pb-3 border-b border-white/20">
                   <span className="text-red-300">عمولة المتجر (5%)</span>
@@ -296,6 +390,98 @@ export default async function VendorOrderDetailPage({ params }: { params: Promis
                 </div>
               </CardContent>
             </Card>
+
+            {/* أزرار التحكم */}
+            {order.status === 'PENDING' && (
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-blue-400" />
+                    إجراءات الطلب
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
+                    <p className="text-blue-200 text-sm mb-3">
+                      الطلب في انتظار الموافقة
+                    </p>
+                    <div className="space-y-2">
+                      <Button 
+                        onClick={handleAcceptOrder}
+                        disabled={actionLoading}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        {actionLoading ? (
+                          <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                        ) : (
+                          <CheckCircle className="w-4 h-4 ml-2" />
+                        )}
+                        قبول الطلب
+                      </Button>
+                      {order.deliveryMethod === 'STORE_PICKUP' && (
+                        <Button 
+                          onClick={handleSchedulePickup}
+                          disabled={actionLoading}
+                          className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          <Calendar className="w-4 h-4 ml-2" />
+                          تحديد موعد الاستلام
+                        </Button>
+                      )}
+                      {order.deliveryMethod === 'HOME_DELIVERY' && (
+                        <>
+                          <Button 
+                            onClick={handleSendToAdmin}
+                            disabled={actionLoading}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            {actionLoading ? (
+                              <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4 ml-2" />
+                            )}
+                            إرسال للإدارة
+                          </Button>
+                          <Button 
+                            onClick={handleAssignDelivery}
+                            disabled={actionLoading}
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                          >
+                            <UserCheck className="w-4 h-4 ml-2" />
+                            تعيين مندوب توصيل
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {order.deliveryMethod === 'STORE_PICKUP' && order.status === 'CONFIRMED' && (
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Store className="h-5 w-5 text-purple-400" />
+                    جاهز للاستلام
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4">
+                    <p className="text-purple-200 text-sm mb-3">
+                      الطلب جاهز للاستلام من الفرع
+                    </p>
+                    <div className="space-y-2 text-white text-sm">
+                      <p>💰 تم دفع: {(order.downPayment || 0).toFixed(2)} ج.م</p>
+                      <p>💵 المتبقي: {(order.remainingAmount || 0).toFixed(2)} ج.م</p>
+                      <p className="text-yellow-300 font-medium mt-3">
+                        ⚠️ يتم تحصيل المبلغ المتبقي عند الاستلام
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

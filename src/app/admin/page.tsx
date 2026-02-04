@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { auth, signOut } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings } from "lucide-react";
+import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -39,8 +39,27 @@ export default async function AdminDashboard() {
 
       <div className="relative z-10 bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white py-8 shadow-2xl">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold drop-shadow-lg">لوحة الإدارة</h1>
-          <p className="text-teal-100 mt-2 text-lg">مرحبًا {session.user?.name || "المدير"}</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold drop-shadow-lg">لوحة الإدارة</h1>
+              <p className="text-teal-100 mt-2 text-lg">مرحبًا {session.user?.name || "المدير"}</p>
+            </div>
+            <form
+              action={async () => {
+                "use server";
+                await signOut({ redirectTo: "/auth/login" });
+              }}
+            >
+              <Button
+                type="submit"
+                variant="outline"
+                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                <LogOut className="ml-2 h-5 w-5" />
+                تسجيل الخروج
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
 

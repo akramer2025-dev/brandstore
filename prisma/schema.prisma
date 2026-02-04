@@ -300,6 +300,12 @@ model Order {
   deletedAt        DateTime?         // Soft Delete - تاريخ الحذف (null = موجود)
   deletedBy        String?           // من قام بالحذف (userId)
   deletedReason    String?           // سبب الحذف
+  // ✨ حقول جديدة لنظام التوصيل المتطور
+  deliveryMethod   DeliveryMethod    @default(HOME_DELIVERY)
+  pickupLocation   String?           // عنوان المتجر للاستلام
+  governorate      String?           // المحافظة (للتوصيل المنزلي)
+  downPayment      Float?            // الدفعة المقدمة
+  remainingAmount  Float?            // المبلغ المتبقي
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   installmentPlan  InstallmentPlan?
@@ -710,6 +716,11 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum DeliveryMethod {
+  HOME_DELIVERY    // توصيل للمنزل
+  STORE_PICKUP     // استلام من المتجر
+}
+
 enum PaymentStatus {
   PENDING
   PAID
@@ -1072,3 +1083,50 @@ enum CapitalTransactionType {
   ADJUSTMENT     // تعديل يدوي
 }
 
+// ============ نظام مناطق التوصيل ============
+model DeliveryZone {
+  id            String   @id @default(cuid())
+  governorate   String   @unique // اسم المحافظة
+  deliveryFee   Float    // رسوم التوصيل
+  minOrderValue Float    @default(0) // الحد الأدنى لقيمة الطلب
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("delivery_zones")
+}
+
+// ============ إعدادات النظام ============
+model SystemSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique // مفتاح الإعداد
+  value       String   // القيمة
+  description String?  // وصف الإعداد
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+// ============ نظام الإشعارات ============
+model VendorNotification {
+  id          String   @id @default(cuid())
+  vendorId    String   // معرف الشريك
+  type        NotificationType // نوع الإشعار
+  title       String   // عنوان الإشعار
+  message     String   // نص الإشعار
+  orderId     String?  // معرف الطلب (إن وجد)
+  isRead      Boolean  @default(false) // هل تم قراءته
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("vendor_notifications")
+  @@index([vendorId, isRead])
+}
+
+enum NotificationType {
+  NEW_ORDER      // طلب جديد
+  ORDER_STATUS   // تحديث حالة الطلب
+  LOW_STOCK      // مخزون منخفض
+  NEW_MESSAGE    // رسالة جديدة
+  SYSTEM         // إشعار نظام
+}

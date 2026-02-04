@@ -108,14 +108,14 @@ export default async function VendorOrdersPage() {
 
               return (
                 <Link key={order.id} href={`/vendor/orders/${order.id}`}>
-                  <Card className="bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer">
+                  <Card className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 hover:border-purple-500/40 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer">
                     <CardContent className="p-6">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         {/* Order Info */}
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
                             <span className="text-white font-bold text-lg">طلب #{order.id.slice(0, 8)}</span>
-                            <div className={`px-3 py-1 rounded-full flex items-center gap-2 ${statusColors[order.status as keyof typeof statusColors]?.bg || 'bg-gray-100'} ${statusColors[order.status as keyof typeof statusColors]?.text || 'text-gray-800'}`}>
+                            <div className={`px-3 py-1 rounded-full flex items-center gap-2 backdrop-blur-sm ${statusColors[order.status as keyof typeof statusColors]?.bg || 'bg-gray-100'} ${statusColors[order.status as keyof typeof statusColors]?.text || 'text-gray-800'} border ${statusColors[order.status as keyof typeof statusColors]?.border || 'border-gray-300'}`}>
                               <StatusIcon className="h-4 w-4" />
                               <span className="text-sm font-medium">
                                 {statusLabels[order.status as keyof typeof statusLabels] || order.status}
@@ -148,7 +148,7 @@ export default async function VendorOrdersPage() {
                           {/* Vendor Items */}
                           <div className="mt-4 space-y-2">
                             {vendorItems.map((item) => (
-                              <div key={item.id} className="bg-white/5 rounded-lg p-3 flex items-center justify-between">
+                              <div key={item.id} className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-lg p-3 flex items-center justify-between">
                                 <div>
                                   <p className="text-white font-medium">{item.product.nameAr}</p>
                                   <p className="text-gray-400 text-sm">الكمية: {item.quantity}</p>

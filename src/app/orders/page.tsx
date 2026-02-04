@@ -16,9 +16,12 @@ import {
   Truck,
   MapPin,
   Phone,
-  ArrowRight
+  ArrowRight,
+  Eye,
+  Ban
 } from "lucide-react";
 import { toast } from "sonner";
+import OrderTracking from "@/components/OrderTracking";
 
 interface Order {
   id: string;
@@ -53,6 +56,8 @@ export default function OrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
+  const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -78,6 +83,39 @@ export default function OrdersPage() {
       toast.error("حدث خطأ أثناء تحميل الطلبات");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    const confirmCancel = window.confirm("هل أنت متأكد من إلغاء هذا الطلب؟\nسيتم إرجاع المنتجات للمخزون.");
+    
+    if (!confirmCancel) return;
+
+    setCancellingOrderId(orderId);
+    
+    try {
+      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reason: "طلب الإلغاء من العميل",
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "فشل إلغاء الطلب");
+      }
+
+      toast.success("تم إلغاء الطلب بنجاح");
+      fetchOrders(); // تحديث القائمة
+    } catch (error: any) {
+      console.error("Error cancelling order:", error);
+      toast.error(error.message || "حدث خطأ أثناء إلغاء الطلب");
+    } finally {
+      setCancellingOrderId(null);
     }
   };
 
@@ -366,11 +404,50 @@ export default function OrdersPage() {
                          order.paymentStatus === "REJECTED" ? "مرفوض" : "قيد الانتظار"}
                       </span>
                     </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 flex-wrap">
+                      {/* زر متابعة الطلب */}
+                      <Button
+                        onClick={() => setTrackingOrder(order)}
+                        className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white"
+                      >
+                        <Eye className="w-4 h-4 ml-2" />
+                        متابعة الطلب
+                      </Button>
+
+                      {/* زر إلغاء الطلب - يظهر فقط إذا كان PENDING */}
+                      {order.status === "PENDING" && (
+                        <Button
+                          onClick={() => handleCancelOrder(order.id)}
+                          disabled={cancellingOrderId === order.id}
+                          variant="destructive"
+                          className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          <Ban className="w-4 h-4 ml-2" />
+                          {cancellingOrderId === order.id ? "جاري الإلغاء..." : "إلغاء الطلب"}
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
+        )}
+
+        {/* Order Tracking Modal */}
+        {trackingOrder && (
+          <OrderTracking
+            isOpen={!!trackingOrder}
+            onClose={() => setTrackingOrder(null)}
+            order={{
+              status: trackingOrder.status,
+              orderNumber: trackingOrder.orderNumber,
+              createdAt: trackingOrder.createdAt,
+              updatedAt: trackingOrder.createdAt, // يمكن تحديثه لاحقاً
+            }}
+          />
         )}
       </div>
     </div>
