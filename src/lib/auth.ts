@@ -11,21 +11,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   debug: process.env.NODE_ENV === 'development',
   
-  // إضافة cookies settings للـ Production
-  cookies: {
-    sessionToken: {
-      name: process.env.NODE_ENV === 'production' 
-        ? '__Secure-next-auth.session-token'
-        : 'next-auth.session-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-      },
-    },
-  },
-  
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
