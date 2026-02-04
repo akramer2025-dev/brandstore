@@ -58,7 +58,6 @@ export async function PATCH(
         data: {
           status: "DELIVERED",
           inspectionResult: "ACCEPTED",
-          inspectionNotes,
           paymentStatus: "PAID",
         },
         include: {
