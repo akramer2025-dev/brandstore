@@ -69,6 +69,8 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (productId) {
+      // Scroll to top when page loads
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       fetchProduct();
     }
   }, [productId]);
