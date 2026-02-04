@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth';
 // GET - Get single delivery zone
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,8 +17,9 @@ export async function GET(
       );
     }
 
+    const { id } = await params;
     const zone = await prisma.deliveryZone.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!zone) {
@@ -41,7 +42,7 @@ export async function GET(
 // PATCH - Update delivery zone (ADMIN only)
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -56,9 +57,10 @@ export async function PATCH(
     const body = await req.json();
     const { governorate, deliveryFee, minOrderValue, isActive } = body;
 
+    const { id } = await params;
     // Check if zone exists
     const existing = await prisma.deliveryZone.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existing) {
@@ -84,7 +86,7 @@ export async function PATCH(
 
     // Update zone
     const updated = await prisma.deliveryZone.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(governorate && { governorate }),
         ...(deliveryFee !== undefined && { deliveryFee: parseFloat(deliveryFee) }),
@@ -106,7 +108,7 @@ export async function PATCH(
 // DELETE - Delete delivery zone (ADMIN only)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -118,9 +120,10 @@ export async function DELETE(
       );
     }
 
+    const { id } = await params;
     // Check if zone exists
     const existing = await prisma.deliveryZone.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existing) {
@@ -132,7 +135,7 @@ export async function DELETE(
 
     // Delete zone
     await prisma.deliveryZone.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'تم حذف منطقة التوصيل بنجاح' });

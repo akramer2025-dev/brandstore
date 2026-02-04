@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,8 @@ import { MapPin, Save, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
-export default function EditDeliveryZonePage({ params }: { params: { id: string } }) {
+export default function EditDeliveryZonePage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -24,11 +25,11 @@ export default function EditDeliveryZonePage({ params }: { params: { id: string 
 
   useEffect(() => {
     fetchZone();
-  }, [params.id]);
+  }, [resolvedParams.id]);
 
   const fetchZone = async () => {
     try {
-      const res = await fetch(`/api/admin/delivery-zones/${params.id}`);
+      const res = await fetch(`/api/admin/delivery-zones/${resolvedParams.id}`);
       if (!res.ok) throw new Error('فشل في جلب البيانات');
       
       const zone = await res.json();
@@ -51,7 +52,7 @@ export default function EditDeliveryZonePage({ params }: { params: { id: string 
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/admin/delivery-zones/${params.id}`, {
+      const res = await fetch(`/api/admin/delivery-zones/${resolvedParams.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

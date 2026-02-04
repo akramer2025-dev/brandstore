@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 // POST - Toggle delivery zone active status
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,8 +17,9 @@ export async function POST(
       );
     }
 
+    const { id } = await params;
     const zone = await prisma.deliveryZone.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!zone) {
@@ -30,7 +31,7 @@ export async function POST(
 
     // Toggle isActive
     const updated = await prisma.deliveryZone.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         isActive: !zone.isActive
       }

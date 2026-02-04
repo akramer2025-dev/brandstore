@@ -1,0 +1,51 @@
+{
+  "name": "Remostore - متجر ريموستور",
+  "short_name": "Remostore",
+  "description": "متجر إلكتروني احترافي للملابس مع نظام إدارة متقدم",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#7c3aed",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "fashion"],
+  "dir": "rtl",
+  "lang": "ar",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "المنتجات",
+      "short_name": "المنتجات",
+      "description": "تصفح جميع المنتجات",
+      "url": "/products",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "سلة التسوق",
+      "short_name": "السلة",
+      "description": "عرض سلة التسوق",
+      "url": "/cart",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "طلباتي",
+      "short_name": "الطلبات",
+      "description": "عرض طلباتي",
+      "url": "/orders",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

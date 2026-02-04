@@ -60,45 +60,6 @@ export default function LoginPage() {
     }
   };
 
-  const quickLogin = async (userEmail: string, userPassword: string, label: string) => {
-    setError('');
-    setLoading(true);
-    setEmail(userEmail);
-    setPassword(userPassword);
-
-    try {
-      const result = await signIn('credentials', {
-        email: userEmail,
-        password: userPassword,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError(`فشل تسجيل الدخول كـ ${label}`);
-      } else {
-        const sessionResponse = await fetch('/api/auth/session');
-        const sessionData = await sessionResponse.json();
-        
-        if (sessionData?.user?.role === 'ADMIN') {
-          router.push('/admin');
-        } else if (sessionData?.user?.role === 'VENDOR') {
-          router.push('/vendor/dashboard');
-        } else if (sessionData?.user?.role === 'MANUFACTURER') {
-          router.push('/manufacturer/dashboard');
-        } else if (sessionData?.user?.role === 'DELIVERY_STAFF') {
-          router.push('/delivery-dashboard');
-        } else {
-          router.push('/');
-        }
-        router.refresh();
-      }
-    } catch (error) {
-      setError('حدث خطأ أثناء تسجيل الدخول');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background Elements */}
@@ -152,15 +113,6 @@ export default function LoginPage() {
                   {error}
                 </div>
               )}
-
-              {/* Demo Credentials */}
-              <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 border border-purple-200 px-4 py-3 rounded-lg text-sm">
-                <p className="font-semibold text-purple-900 mb-2">بيانات تجريبية:</p>
-                <div className="space-y-1 text-purple-700">
-                  <p>📧 المدير: <code className="bg-white px-2 py-1 rounded">admin@bs.com</code></p>
-                  <p>🔑 كلمة المرور: <code className="bg-white px-2 py-1 rounded">123456</code></p>
-                </div>
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-base font-semibold">
@@ -262,43 +214,6 @@ export default function LoginPage() {
                   <ShoppingBag className="w-5 h-5" />
                   انضم كشريك (محل • مصنع • مندوب توصيل)
                 </Link>
-              </div>
-
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-white text-gray-500">دخول سريع للتجربة</span>
-                </div>
-              </div>
-
-              {/* Quick Login Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  onClick={() => quickLogin('admin@bs.com', '123456', 'مدير')}
-                  className="text-xs bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-                  disabled={loading}
-                >
-                  مدير النظام
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => quickLogin('vendor@bs.com', '123456', 'متجر')}
-                  className="text-xs bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                  disabled={loading}
-                >
-                  شريك (متجر)
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => quickLogin('customer@bs.com', '123456', 'عميل')}
-                  className="text-xs bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                  disabled={loading}
-                >
-                  عميل
-                </Button>
               </div>
 
               <div className="text-center">
