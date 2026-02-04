@@ -103,18 +103,18 @@ export default function VendorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4 md:p-6">
       <div className="max-w-5xl mx-auto">
         
         {/* Header بسيط */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-3 rounded-xl">
+            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-3 rounded-xl shadow-lg">
               <Store className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-white">لوحة الشريك</h1>
-              <p className="text-purple-300 text-sm">{session?.user?.username || session?.user?.email}</p>
+              <p className="text-blue-300 text-sm">{session?.user?.username || session?.user?.email}</p>
             </div>
           </div>
           <Button
@@ -129,7 +129,7 @@ export default function VendorDashboard() {
         {/* زر نقطة البيع */}
         <div className="mb-6">
           <Link href="/vendor/pos">
-            <Button className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-lg font-bold">
+            <Button className="w-full h-14 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-lg font-bold shadow-xl">
               <Zap className="w-5 h-5 ml-2" />
               نقطة البيع
             </Button>
@@ -137,7 +137,7 @@ export default function VendorDashboard() {
         </div>
 
         {/* كارت رأس المال الرئيسي */}
-        <Card className="bg-gradient-to-br from-yellow-900/30 to-amber-900/30 backdrop-blur-xl border-2 border-yellow-500/30 shadow-2xl mb-6 hover:border-yellow-400/50 transition-all">
+        <Card className="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 backdrop-blur-xl border-2 border-blue-500/40 shadow-2xl mb-6 hover:border-blue-400/60 transition-all">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">

@@ -63,7 +63,7 @@ export default function POSPage() {
   const fetchData = async () => {
     try {
       const [productsRes, categoriesRes] = await Promise.all([
-        fetch('/api/products'),
+        fetch('/api/vendor/inventory'),
         fetch('/api/categories')
       ]);
       
