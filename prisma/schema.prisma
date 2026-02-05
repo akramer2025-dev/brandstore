@@ -1181,3 +1181,19 @@ model SubUserActivityLog {
   @@map("sub_user_activity_logs")
   @@index([subUserId, createdAt])
 }
+
+// ============ سجل نشاط البائع الرئيسي ============
+model ActivityLog {
+  id          String   @id @default(cuid())
+  vendorId    String   // البائع
+  action      String   // نوع العملية
+  details     String?  // تفاصيل إضافية
+  userName    String   // اسم المستخدم الذي قام بالعملية
+  userRole    String   // دور المستخدم
+  ipAddress   String?  // عنوان IP
+  createdAt   DateTime @default(now())
+
+  @@map("activity_logs")
+  @@index([vendorId, createdAt])
+  @@index([action])
+}
