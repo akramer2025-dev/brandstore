@@ -1135,3 +1135,49 @@ enum NotificationType {
   NEW_MESSAGE    // رسالة جديدة
   SYSTEM         // إشعار نظام
 }
+
+// ============ نظام المستخدمين الفرعيين ============
+model SubUser {
+  id          String       @id @default(cuid())
+  vendorId    String       // البائع الرئيسي
+  name        String       // اسم المستخدم الفرعي
+  email       String       @unique // البريد الإلكتروني
+  password    String       // كلمة المرور المشفرة
+  phone       String?      // رقم الهاتف
+  role        SubUserRole  @default(CASHIER) // الدور
+  permissions String[]     // الصلاحيات الإضافية
+  isActive    Boolean      @default(true)  // هل المستخدم نشط
+  lastLogin   DateTime?    // آخر تسجيل دخول
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // سجل النشاط
+  activityLogs SubUserActivityLog[]
+
+  @@map("sub_users")
+  @@index([vendorId])
+}
+
+// أنواع أدوار المستخدمين الفرعيين
+enum SubUserRole {
+  CASHIER       // كاشير نقطة البيع فقط
+  ACCOUNTANT    // محاسب - يرى التقارير المالية
+  INVENTORY     // مسؤول المخزون
+  SALES         // مندوب مبيعات
+  MANAGER       // مدير - صلاحيات كاملة ماعدا الإعدادات الحساسة
+}
+
+// سجل نشاط المستخدمين الفرعيين
+model SubUserActivityLog {
+  id          String   @id @default(cuid())
+  subUserId   String
+  action      String   // نوع العملية (login, sale, refund, etc.)
+  details     String?  // تفاصيل إضافية
+  ipAddress   String?  // عنوان IP
+  createdAt   DateTime @default(now())
+  
+  subUser     SubUser  @relation(fields: [subUserId], references: [id], onDelete: Cascade)
+
+  @@map("sub_user_activity_logs")
+  @@index([subUserId, createdAt])
+}
