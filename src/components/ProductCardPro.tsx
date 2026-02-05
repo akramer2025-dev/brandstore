@@ -171,13 +171,13 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`}>
       <Card 
-        className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-2 border-gray-700/50 hover:border-teal-500/70 transition-all duration-500 cursor-pointer group relative overflow-hidden h-full hover:shadow-2xl hover:shadow-teal-500/20 hover:-translate-y-2"
+        className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-2 border-orange-500/40 hover:border-orange-400 transition-all duration-500 cursor-pointer group relative overflow-hidden h-full hover:shadow-2xl hover:shadow-orange-500/30 hover:-translate-y-2"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Animated Gradient Border Effect */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 via-cyan-500/20 to-teal-500/20 animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 animate-pulse" />
         </div>
 
         {/* Badge - Top Right */}
