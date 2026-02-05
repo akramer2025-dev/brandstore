@@ -23,21 +23,57 @@ import {
   AlertCircle,
   Send,
   UserCheck,
-  Loader2
+  Loader2,
+  Building2,
+  Car,
+  Bike,
+  X,
+  ExternalLink
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface DeliveryAgent {
+  id: string;
+  name: string;
+  phone: string;
+  whatsapp?: string;
+  area: string;
+  vehicleType: string;
+  deliveryFee: number;
+  isActive: boolean;
+  totalDeliveries: number;
+}
+
+interface ShippingCompany {
+  id: string;
+  name: string;
+  phone: string;
+  website?: string;
+  trackingUrl?: string;
+  defaultFee: number;
+  estimatedDays: string;
+  areas: string;
+  isActive: boolean;
+}
 
 export default function VendorOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [deliveryAgents, setDeliveryAgents] = useState<DeliveryAgent[]>([]);
+  const [shippingCompanies, setShippingCompanies] = useState<ShippingCompany[]>([]);
+  const [selectedTab, setSelectedTab] = useState<'agents' | 'companies'>('agents');
+  const [assigningDelivery, setAssigningDelivery] = useState(false);
   
   const { id } = use(params);
 
   useEffect(() => {
     fetchOrder();
+    fetchDeliveryOptions();
   }, [id]);
 
   const fetchOrder = async () => {
@@ -53,6 +89,27 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
       router.push('/vendor/orders');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDeliveryOptions = async () => {
+    try {
+      const [agentsRes, companiesRes] = await Promise.all([
+        fetch('/api/vendor/delivery-agents'),
+        fetch('/api/vendor/shipping-companies')
+      ]);
+      
+      if (agentsRes.ok) {
+        const agents = await agentsRes.json();
+        setDeliveryAgents(agents.filter((a: DeliveryAgent) => a.isActive));
+      }
+      
+      if (companiesRes.ok) {
+        const companies = await companiesRes.json();
+        setShippingCompanies(companies.filter((c: ShippingCompany) => c.isActive));
+      }
+    } catch (error) {
+      console.error('Error fetching delivery options:', error);
     }
   };
 
@@ -97,7 +154,62 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
   };
 
   const handleAssignDelivery = async () => {
-    toast.info('سيتم إضافة نظام تعيين مندوبي التوصيل قريباً');
+    setShowDeliveryModal(true);
+  };
+
+  const handleAssignAgent = async (agent: DeliveryAgent) => {
+    setAssigningDelivery(true);
+    try {
+      const response = await fetch(`/api/vendor/orders/${id}/assign-delivery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deliveryType: 'AGENT',
+          agentId: agent.id,
+          agentName: agent.name,
+          agentPhone: agent.phone,
+          deliveryFee: agent.deliveryFee
+        })
+      });
+      
+      if (!response.ok) throw new Error('فشل في تعيين المندوب');
+      
+      toast.success(`تم تعيين ${agent.name} كمندوب توصيل`);
+      setShowDeliveryModal(false);
+      fetchOrder();
+    } catch (error) {
+      toast.error('حدث خطأ في تعيين المندوب');
+    } finally {
+      setAssigningDelivery(false);
+    }
+  };
+
+  const handleAssignCompany = async (company: ShippingCompany) => {
+    setAssigningDelivery(true);
+    try {
+      const response = await fetch(`/api/vendor/orders/${id}/assign-delivery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deliveryType: 'COMPANY',
+          companyId: company.id,
+          companyName: company.name,
+          companyPhone: company.phone,
+          deliveryFee: company.defaultFee,
+          trackingUrl: company.trackingUrl
+        })
+      });
+      
+      if (!response.ok) throw new Error('فشل في تعيين شركة الشحن');
+      
+      toast.success(`تم تعيين ${company.name} كشركة شحن`);
+      setShowDeliveryModal(false);
+      fetchOrder();
+    } catch (error) {
+      toast.error('حدث خطأ في تعيين شركة الشحن');
+    } finally {
+      setAssigningDelivery(false);
+    }
   };
 
   if (loading) {
@@ -485,6 +597,231 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
           </div>
         </div>
       </div>
+
+      {/* Modal اختيار التوصيل */}
+      <AnimatePresence>
+        {showDeliveryModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowDeliveryModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-gray-900 border border-white/20 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-5 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                  <Truck className="h-6 w-6" />
+                  اختيار طريقة التوصيل
+                </h3>
+                <button
+                  onClick={() => setShowDeliveryModal(false)}
+                  className="text-white/80 hover:text-white p-1"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex border-b border-white/10">
+                <button
+                  onClick={() => setSelectedTab('agents')}
+                  className={`flex-1 py-4 px-6 text-center font-medium transition-all ${
+                    selectedTab === 'agents'
+                      ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/10'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Truck className="h-5 w-5 inline-block ml-2" />
+                  مناديب التوصيل ({deliveryAgents.length})
+                </button>
+                <button
+                  onClick={() => setSelectedTab('companies')}
+                  className={`flex-1 py-4 px-6 text-center font-medium transition-all ${
+                    selectedTab === 'companies'
+                      ? 'text-amber-400 border-b-2 border-amber-400 bg-amber-500/10'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Building2 className="h-5 w-5 inline-block ml-2" />
+                  شركات الشحن ({shippingCompanies.length})
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-5 max-h-[50vh] overflow-y-auto">
+                {selectedTab === 'agents' ? (
+                  deliveryAgents.length === 0 ? (
+                    <div className="text-center py-10">
+                      <Truck className="h-16 w-16 mx-auto text-gray-500 mb-4" />
+                      <p className="text-gray-400 mb-4">لا يوجد مناديب توصيل مسجلين</p>
+                      <Link href="/vendor/delivery-agents">
+                        <Button className="bg-blue-600 hover:bg-blue-700">
+                          إضافة مندوب توصيل
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {deliveryAgents.map((agent) => (
+                        <motion.div
+                          key={agent.id}
+                          whileHover={{ scale: 1.01 }}
+                          className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-blue-500/50 transition-all cursor-pointer"
+                          onClick={() => !assigningDelivery && handleAssignAgent(agent)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="bg-blue-500/20 p-2 rounded-full">
+                                  {agent.vehicleType === 'دراجة نارية' ? (
+                                    <Bike className="h-5 w-5 text-blue-400" />
+                                  ) : (
+                                    <Car className="h-5 w-5 text-blue-400" />
+                                  )}
+                                </div>
+                                <div>
+                                  <h4 className="text-white font-bold">{agent.name}</h4>
+                                  <p className="text-gray-400 text-sm">{agent.phone}</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-xs">
+                                  📍 {agent.area}
+                                </span>
+                                <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-xs">
+                                  🚗 {agent.vehicleType}
+                                </span>
+                                <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-xs">
+                                  📦 {agent.totalDeliveries} توصيلة
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-left">
+                              <p className="text-green-400 font-bold text-lg">{agent.deliveryFee} ج.م</p>
+                              <p className="text-gray-500 text-xs">رسوم التوصيل</p>
+                            </div>
+                          </div>
+                          <Button
+                            className="w-full mt-3 bg-blue-600 hover:bg-blue-700"
+                            disabled={assigningDelivery}
+                          >
+                            {assigningDelivery ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <UserCheck className="h-4 w-4 ml-2" />
+                                اختيار هذا المندوب
+                              </>
+                            )}
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  shippingCompanies.length === 0 ? (
+                    <div className="text-center py-10">
+                      <Building2 className="h-16 w-16 mx-auto text-gray-500 mb-4" />
+                      <p className="text-gray-400 mb-4">لا توجد شركات شحن مسجلة</p>
+                      <Link href="/vendor/shipping-companies">
+                        <Button className="bg-amber-600 hover:bg-amber-700">
+                          إضافة شركة شحن
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {shippingCompanies.map((company) => (
+                        <motion.div
+                          key={company.id}
+                          whileHover={{ scale: 1.01 }}
+                          className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-amber-500/50 transition-all cursor-pointer"
+                          onClick={() => !assigningDelivery && handleAssignCompany(company)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="bg-amber-500/20 p-2 rounded-full">
+                                  <Building2 className="h-5 w-5 text-amber-400" />
+                                </div>
+                                <div>
+                                  <h4 className="text-white font-bold">{company.name}</h4>
+                                  <p className="text-gray-400 text-sm">{company.phone}</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-xs">
+                                  📍 {company.areas || 'جميع المناطق'}
+                                </span>
+                                <span className="bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full text-xs">
+                                  📅 {company.estimatedDays}
+                                </span>
+                                {company.website && (
+                                  <a
+                                    href={company.website}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-blue-700/50 text-blue-300 px-3 py-1 rounded-full text-xs flex items-center gap-1 hover:bg-blue-600/50"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                    الموقع
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-left">
+                              <p className="text-green-400 font-bold text-lg">{company.defaultFee} ج.م</p>
+                              <p className="text-gray-500 text-xs">رسوم الشحن</p>
+                            </div>
+                          </div>
+                          <Button
+                            className="w-full mt-3 bg-amber-600 hover:bg-amber-700"
+                            disabled={assigningDelivery}
+                          >
+                            {assigningDelivery ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Package className="h-4 w-4 ml-2" />
+                                اختيار هذه الشركة
+                              </>
+                            )}
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="bg-white/5 border-t border-white/10 p-4 flex justify-between items-center">
+                <Link href={selectedTab === 'agents' ? '/vendor/delivery-agents' : '/vendor/shipping-companies'}>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    إدارة {selectedTab === 'agents' ? 'المناديب' : 'شركات الشحن'}
+                  </Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setShowDeliveryModal(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  إلغاء
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
