@@ -170,8 +170,8 @@ export default async function HomePage() {
             <div>
               <h4 className="font-semibold mb-3 text-teal-400">تواصل معنا</h4>
               <div className="flex flex-col gap-2 text-sm text-gray-400">
-                <p>📱 01012345678</p>
-                <p>📧 info@remostore.com</p>
+                <p>📱 01555512778</p>
+                <p>📧 akram.er2025@gmail.com</p>
                 <p>📍 مصر - القاهرة</p>
               </div>
             </div>

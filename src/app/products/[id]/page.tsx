@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cart";
+import { useWishlist } from "@/store/wishlist";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,11 @@ import {
   Check,
   Star,
   User,
+  MessageCircle,
+  Facebook,
+  Copy,
+  X,
+  Instagram,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -65,7 +71,75 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const { addItem } = useCartStore();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
+  // Wishlist toggle
+  const handleToggleWishlist = async () => {
+    if (!product) return;
+    
+    if (isInWishlist(product.id)) {
+      await removeFromWishlist(product.id);
+      toast.success('تم إزالة المنتج من المفضلة');
+    } else {
+      await addToWishlist(product.id);
+      toast.success('تم إضافة المنتج للمفضلة ❤️');
+    }
+  };
+
+  // Share functions
+  const getProductUrl = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.href;
+    }
+    return '';
+  };
+
+  const getShareMessage = () => {
+    if (!product) return '';
+    return `🛍️ *${product.nameAr}*\n\n💰 السعر: ${product.price.toLocaleString()} جنيه\n\n📦 ${product.descriptionAr?.slice(0, 100)}...\n\n🔗 شاهد المنتج:\n${getProductUrl()}\n\n✨ تسوق الآن من ريمو ستور`;
+  };
+
+  const shareToWhatsApp = () => {
+    const message = encodeURIComponent(getShareMessage());
+    window.open(`https://wa.me/?text=${message}`, '_blank');
+    setShowShareMenu(false);
+    toast.success('جاري فتح الواتساب...');
+  };
+
+  const shareToFacebook = () => {
+    const url = encodeURIComponent(getProductUrl());
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    setShowShareMenu(false);
+  };
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(getProductUrl());
+      toast.success('تم نسخ الرابط بنجاح!');
+      setShowShareMenu(false);
+    } catch {
+      toast.error('فشل نسخ الرابط');
+    }
+  };
+
+  const shareNative = async () => {
+    if (navigator.share && product) {
+      try {
+        await navigator.share({
+          title: product.nameAr,
+          text: `${product.nameAr} - ${product.price.toLocaleString()} جنيه`,
+          url: getProductUrl(),
+        });
+        setShowShareMenu(false);
+      } catch {
+        // User cancelled or error
+      }
+    } else {
+      setShowShareMenu(true);
+    }
+  };
 
   useEffect(() => {
     if (productId) {
@@ -346,12 +420,72 @@ export default function ProductDetailPage() {
                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-2" />
                 إضافة للسلة
               </Button>
-              <Button variant="outline" className="border-teal-500/50 hover:bg-teal-500/10 p-3 sm:p-4 md:p-6">
-                <Heart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-400" />
+              <Button 
+                variant="outline" 
+                className={`border-teal-500/50 hover:bg-teal-500/10 p-3 sm:p-4 md:p-6 transition-all ${isInWishlist(product.id) ? 'bg-red-500/20 border-red-500/50' : ''}`}
+                onClick={handleToggleWishlist}
+              >
+                <Heart className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-all ${isInWishlist(product.id) ? 'text-red-500 fill-red-500' : 'text-teal-400'}`} />
               </Button>
-              <Button variant="outline" className="border-teal-500/50 hover:bg-teal-500/10 p-3 sm:p-4 md:p-6">
-                <Share2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-400" />
-              </Button>
+              <div className="relative">
+                <Button 
+                  variant="outline" 
+                  className="border-teal-500/50 hover:bg-teal-500/10 p-3 sm:p-4 md:p-6"
+                  onClick={() => setShowShareMenu(!showShareMenu)}
+                >
+                  <Share2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-400" />
+                </Button>
+                
+                {/* Share Menu */}
+                {showShareMenu && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setShowShareMenu(false)}
+                    />
+                    <div className="absolute left-0 sm:right-0 bottom-full mb-2 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[200px]">
+                      <div className="p-3 border-b border-gray-700 flex items-center justify-between">
+                        <span className="text-white font-semibold text-sm">مشاركة المنتج</span>
+                        <button 
+                          onClick={() => setShowShareMenu(false)}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="p-2">
+                        <button
+                          onClick={shareToWhatsApp}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-green-500/20 rounded-lg transition-colors group"
+                        >
+                          <div className="w-9 h-9 bg-green-500 rounded-full flex items-center justify-center">
+                            <MessageCircle className="w-5 h-5 text-white" />
+                          </div>
+                          <span className="text-white group-hover:text-green-400 font-medium">واتساب</span>
+                        </button>
+                        <button
+                          onClick={shareToFacebook}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-500/20 rounded-lg transition-colors group"
+                        >
+                          <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center">
+                            <Facebook className="w-5 h-5 text-white" />
+                          </div>
+                          <span className="text-white group-hover:text-blue-400 font-medium">فيسبوك</span>
+                        </button>
+                        <button
+                          onClick={copyLink}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-600/50 rounded-lg transition-colors group"
+                        >
+                          <div className="w-9 h-9 bg-gray-600 rounded-full flex items-center justify-center">
+                            <Copy className="w-5 h-5 text-white" />
+                          </div>
+                          <span className="text-white group-hover:text-teal-400 font-medium">نسخ الرابط</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Brand & Quality Features - Simplified for Mobile */}

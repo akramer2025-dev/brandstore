@@ -27,6 +27,7 @@ import {
   BarChart3,
   ClipboardList,
 } from 'lucide-react'
+import SmartAssistant from '@/components/smart-assistant'
 
 interface CapitalSummary {
   capital: { current: number; totalDeposits: number; totalWithdrawals: number }
@@ -425,6 +426,9 @@ export default function VendorDashboard() {
         </div>
 
       </div>
+      
+      {/* المساعد الذكي */}
+      <SmartAssistant />
     </div>
   )
 }

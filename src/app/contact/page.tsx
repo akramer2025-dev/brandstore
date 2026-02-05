@@ -32,20 +32,20 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: "الهاتف",
-      value: "01012345678",
-      link: "tel:01012345678",
+      value: "01555512778",
+      link: "tel:01555512778",
     },
     {
       icon: MessageCircle,
       title: "واتساب",
-      value: "01012345678",
-      link: "https://wa.me/201012345678",
+      value: "01555512778",
+      link: "https://wa.me/201555512778",
     },
     {
       icon: Mail,
       title: "البريد الإلكتروني",
-      value: "info@remostore.com",
-      link: "mailto:info@remostore.com",
+      value: "akram.er2025@gmail.com",
+      link: "mailto:akram.er2025@gmail.com",
     },
     {
       icon: MapPin,
