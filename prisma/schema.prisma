@@ -1197,3 +1197,50 @@ model ActivityLog {
   @@index([vendorId, createdAt])
   @@index([action])
 }
+
+// ============ مناديب التوصيل الخاصين بالشريك ============
+model VendorDeliveryAgent {
+  id               String   @id @default(cuid())
+  vendorId         String   // الشريك المالك
+  name             String   // اسم المندوب
+  phone            String   // رقم الهاتف
+  alternativePhone String?  // رقم بديل
+  whatsapp         String?  // واتساب
+  address          String?  // العنوان
+  area             String?  // المنطقة التي يغطيها
+  vehicleType      String?  // نوع المركبة (سيارة/موتوسيكل/الخ)
+  vehicleNumber    String?  // رقم المركبة
+  deliveryFee      Float    @default(0)  // رسوم التوصيل
+  isActive         Boolean  @default(true)
+  totalDeliveries  Int      @default(0)
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("vendor_delivery_agents")
+  @@index([vendorId])
+}
+
+// ============ شركات الشحن الخاصة بالشريك ============
+model VendorShippingCompany {
+  id               String   @id @default(cuid())
+  vendorId         String   // الشريك المالك
+  name             String   // اسم شركة الشحن
+  phone            String?  // رقم الهاتف
+  website          String?  // الموقع الإلكتروني
+  trackingUrl      String?  // رابط تتبع الشحنات (يحتوي على {tracking_number})
+  accountNumber    String?  // رقم الحساب لدى الشركة
+  contactPerson    String?  // اسم الشخص المسؤول
+  contactPhone     String?  // هاتف المسؤول
+  defaultFee       Float    @default(0)  // رسوم الشحن الافتراضية
+  estimatedDays    Int?     // عدد أيام التوصيل المتوقعة
+  areas            String?  // المناطق المغطاة (مفصولة بفواصل)
+  isActive         Boolean  @default(true)
+  totalShipments   Int      @default(0)
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("vendor_shipping_companies")
+  @@index([vendorId])
+}
