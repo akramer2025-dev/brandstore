@@ -55,60 +55,23 @@ export default async function HomePage() {
     <>
       {/* <SplashScreen /> */}
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 animate-fade-in" style={{ animationDelay: '0.5s', animationDuration: '1s' }}>
-      
+
       {/* Hero Slider with Integrated Logo - Full Width */}
       <HeroSlider />
 
       {/* Flash Deals Section */}
       <FlashDeals />
 
-      {/* Categories Section */}
-      {categories.length > 0 && (
-        <CategoriesSection categories={categories} />
-      )}
-
-      {/* Products Section */}
+      {/* Products Section - أحدث المنتجات أولاً */}
       <section className="py-10 md:py-16 bg-gradient-to-b from-gray-900/50 via-gray-900/80 to-gray-900/50">
         <div className="container mx-auto px-4">
           {/* Section Header */}
           <div className="flex flex-col md:flex-row items-center justify-between mb-8 md:mb-12 gap-4">
             <div className="text-center md:text-right">
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                <div className="h-1 w-12 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full" />
-                <span className="text-teal-400 font-medium text-sm">تشكيلة مميزة</span>
-              </div>
+              {/* تم حذف الخط الملون أعلى العنوان */}
               <h2 className="text-2xl md:text-4xl font-black text-white mb-2">
                 أحدث المنتجات
               </h2>
-              <p className="text-sm md:text-base text-gray-400">
-                اكتشف تشكيلتنا الحصرية من أجود الأزياء والملابس
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-5 py-2.5 rounded-full shadow-lg shadow-teal-500/30">
-                <Sparkles className="w-5 h-5" />
-                <span className="font-semibold">عروض حصرية</span>
-              </div>
-              <div className="hidden lg:flex items-center gap-2 bg-gray-800/80 text-gray-300 px-4 py-2 rounded-full border border-gray-700">
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                <span className="text-sm">تقييمات عالية</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Trust Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-8 md:mb-12 py-4 px-4 bg-gray-800/30 rounded-2xl border border-gray-700/50">
-            <div className="flex items-center gap-2 text-gray-300">
-              <Shield className="w-5 h-5 text-teal-400" />
-              <span className="text-xs md:text-sm font-medium">ضمان جودة 100%</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-300">
-              <Truck className="w-5 h-5 text-teal-400" />
-              <span className="text-xs md:text-sm font-medium">شحن سريع لجميع المحافظات</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-300">
-              <Award className="w-5 h-5 text-teal-400" />
-              <span className="text-xs md:text-sm font-medium">منتجات أصلية</span>
             </div>
           </div>
 
@@ -153,6 +116,29 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+
+      {/* Categories Section */}
+      {categories.length > 0 && (
+        <>
+          <CategoriesSection categories={categories} />
+          {/* Trust Badges تحت الفئات */}
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 my-8 py-4 px-4 bg-gray-800/30 rounded-2xl border border-gray-700/50">
+            <div className="flex items-center gap-2 text-gray-300">
+              <Shield className="w-5 h-5 text-teal-400" />
+              <span className="text-xs md:text-sm font-medium">ضمان جودة 100%</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-300">
+              <Truck className="w-5 h-5 text-teal-400" />
+              <span className="text-xs md:text-sm font-medium">شحن سريع لجميع المحافظات</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-300">
+              <Award className="w-5 h-5 text-teal-400" />
+              <span className="text-xs md:text-sm font-medium">منتجات أصلية</span>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 md:py-12 mt-8 md:mt-16">
