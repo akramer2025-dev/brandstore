@@ -313,6 +313,28 @@ export default function ProductDetailPage() {
                 {product.category.nameAr}
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">{product.nameAr}</h1>
+              
+              {/* Product Rating */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-5 h-5 ${
+                        product.reviews && product.reviews.length > 0 && star <= Math.round(product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length)
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-600'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-gray-400 text-sm">
+                  {product.reviews && product.reviews.length > 0 
+                    ? `(${product.reviews.length} ${product.reviews.length === 1 ? 'تقييم' : 'تقييمات'})`
+                    : 'لا توجد تقييمات بعد'}
+                </span>
+              </div>
+              
               <p className="text-gray-400 text-sm sm:text-base md:text-lg leading-relaxed">{product.descriptionAr}</p>
             </div>
 
@@ -488,19 +510,31 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Brand & Quality Features - Simplified for Mobile */}
+            {/* Brand & Quality Features - Dynamic based on Product & Vendor */}
             <div className="hidden md:block bg-gradient-to-br from-teal-900/40 to-cyan-900/40 rounded-xl p-6 border border-teal-500/30 space-y-4">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 flex-shrink-0">
-                  <img 
-                    src="/logo.png?v=2026" 
-                    alt="Brand Store" 
-                    className="w-full h-full object-contain drop-shadow-2xl"
-                  />
+                  {product.vendor?.logo ? (
+                    <img 
+                      src={product.vendor.logo} 
+                      alt={product.vendor.storeNameAr || 'المتجر'} 
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  ) : (
+                    <img 
+                      src="/logo.png?v=2026" 
+                      alt="ريمو ستور" 
+                      className="w-full h-full object-contain drop-shadow-2xl"
+                    />
+                  )}
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg">منتج أصلي من ريمو ستور</h3>
-                  <p className="text-teal-400 text-sm">Original Remostore Product</p>
+                  <h3 className="text-white font-bold text-lg">
+                    {product.vendor ? `منتج من ${product.vendor.storeNameAr || product.vendor.storeName}` : 'منتج أصلي من ريمو ستور'}
+                  </h3>
+                  <p className="text-teal-400 text-sm">
+                    {product.category?.nameAr || 'منتج مميز'}
+                  </p>
                 </div>
               </div>
 
@@ -510,8 +544,8 @@ export default function ProductDetailPage() {
                     <Check className="w-5 h-5 text-teal-400" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-1">تطريز الشعار الأصلي</h4>
-                    <p className="text-gray-400 text-sm">محفور بالتطريز الاحترافي على صدر القطعة - دليل الجودة والأصالة</p>
+                    <h4 className="text-white font-semibold mb-1">جودة مضمونة</h4>
+                    <p className="text-gray-400 text-sm">منتج أصلي من بائع موثوق - نضمن لك الجودة والأصالة</p>
                   </div>
                 </div>
 
@@ -520,36 +554,46 @@ export default function ProductDetailPage() {
                     <Check className="w-5 h-5 text-teal-400" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-1">خامات فاخرة 100%</h4>
-                    <p className="text-gray-400 text-sm">أقمشة مستوردة عالية الجودة - قطن طبيعي ناعم ومريح</p>
+                    <h4 className="text-white font-semibold mb-1">خامات عالية الجودة</h4>
+                    <p className="text-gray-400 text-sm">
+                      {product.category?.nameAr?.includes('ملابس') || product.category?.nameAr?.includes('قميص') || product.category?.nameAr?.includes('بنطلون')
+                        ? 'أقمشة مختارة بعناية - راحة ومتانة طوال اليوم'
+                        : 'مواد ممتازة تضمن أداء عالي وعمر أطول'}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
                   <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-teal-600/20 rounded-full">
-                    <Check className="w-5 h-5 text-teal-400" />
+                    <Truck className="w-5 h-5 text-teal-400" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-1">ألوان ثابتة لا تبهت</h4>
-                    <p className="text-gray-400 text-sm">صبغات عالمية - تحافظ على لونها بعد الغسيل</p>
+                    <h4 className="text-white font-semibold mb-1">شحن سريع وآمن</h4>
+                    <p className="text-gray-400 text-sm">توصيل لجميع المحافظات مع إمكانية الفحص قبل الاستلام</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
                   <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-teal-600/20 rounded-full">
-                    <Check className="w-5 h-5 text-teal-400" />
+                    <Shield className="w-5 h-5 text-teal-400" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-1">تصميم عصري أنيق</h4>
-                    <p className="text-gray-400 text-sm">قصات حديثة تناسب جميع المناسبات</p>
+                    <h4 className="text-white font-semibold mb-1">ضمان الاسترجاع</h4>
+                    <p className="text-gray-400 text-sm">استرجع أو استبدل المنتج إذا لم يناسبك</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-teal-500/20">
-                <Shield className="w-5 h-5 text-teal-400" />
-                <span className="text-gray-300 text-sm">كل منتج يحمل شعار الجودة المطرز</span>
-              </div>
+              {product.vendor && (
+                <div className="flex items-center gap-2 pt-3 border-t border-teal-500/20">
+                  <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                  <span className="text-gray-300 text-sm">
+                    {product.vendor.rating > 0 
+                      ? `تقييم البائع: ${product.vendor.rating.toFixed(1)} من 5`
+                      : 'بائع موثوق على ريمو ستور'}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Features */}
@@ -612,10 +656,10 @@ export default function ProductDetailPage() {
         )}
 
         {/* Reviews Section */}
-        {product.reviews && product.reviews.length > 0 && (
-          <div className="mt-16 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-white">آراء العملاء</h2>
+        <div className="mt-16 space-y-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <h2 className="text-3xl font-bold text-white">آراء العملاء</h2>
+            {product.reviews && product.reviews.length > 0 ? (
               <div className="flex items-center gap-2">
                 <div className="flex items-center">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -633,8 +677,12 @@ export default function ProductDetailPage() {
                   ({product.reviews.length} {product.reviews.length === 1 ? 'تقييم' : 'تقييمات'})
                 </span>
               </div>
-            </div>
+            ) : (
+              <span className="text-gray-400">لا توجد تقييمات بعد</span>
+            )}
+          </div>
 
+          {product.reviews && product.reviews.length > 0 ? (
             <div className="grid gap-6">
               {product.reviews.map((review) => (
                 <Card key={review.id} className="bg-gray-800/80 border-teal-500/20">
@@ -644,7 +692,7 @@ export default function ProductDetailPage() {
                         <User className="w-6 h-6 text-white" />
                       </div>
                       <div className="flex-1 space-y-3">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
                           <h3 className="text-white font-bold text-lg">{review.user.name}</h3>
                           <span className="text-gray-400 text-sm">
                             {new Date(review.createdAt).toLocaleDateString('ar-EG', {
@@ -673,8 +721,25 @@ export default function ProductDetailPage() {
                 </Card>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <Card className="bg-gray-800/80 border-teal-500/20">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-teal-600/20 flex items-center justify-center">
+                  <MessageCircle className="w-8 h-8 text-teal-400" />
+                </div>
+                <h3 className="text-white font-bold text-xl mb-2">كن أول من يقيّم هذا المنتج!</h3>
+                <p className="text-gray-400 mb-4">
+                  شاركنا رأيك بعد الشراء لمساعدة الآخرين في اتخاذ قرارهم
+                </p>
+                <div className="flex items-center justify-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star key={star} className="w-8 h-8 text-gray-600" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
