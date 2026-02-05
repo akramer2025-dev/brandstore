@@ -116,36 +116,74 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 md:py-12 mt-8 md:mt-16">
         <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-3 md:mb-4">
-              <Sparkles className="w-5 h-5 md:w-6 md:h-6" />
-              <h3 className="text-xl md:text-2xl font-bold">ريمو ستور</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-8">
+            {/* About Store */}
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-teal-400" />
+                <h3 className="text-lg md:text-xl font-bold">ريمو ستور</h3>
+              </div>
+              <p className="text-gray-400 text-sm">
+                وجهتك الأولى للتسوق الإلكتروني - نوفر لك أفضل المنتجات بأفضل الأسعار مع خدمة توصيل سريعة.
+              </p>
             </div>
-            <p className="text-gray-400 mb-4 md:mb-6 text-sm md:text-base">
-              وجهتك الأولى للتسوق الإلكتروني
+            
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-semibold mb-3 text-teal-400">روابط سريعة</h4>
+              <div className="flex flex-col gap-2 text-sm text-gray-400">
+                <Link href="/products" className="hover:text-white transition">
+                  جميع المنتجات
+                </Link>
+                <Link href="/cart" className="hover:text-white transition">
+                  سلة التسوق
+                </Link>
+                <Link href="/wishlist" className="hover:text-white transition">
+                  المفضلة
+                </Link>
+                <Link href="/profile" className="hover:text-white transition">
+                  حسابي
+                </Link>
+              </div>
+            </div>
+            
+            {/* Customer Service */}
+            <div>
+              <h4 className="font-semibold mb-3 text-teal-400">خدمة العملاء</h4>
+              <div className="flex flex-col gap-2 text-sm text-gray-400">
+                <Link href="/about" className="hover:text-white transition">
+                  من نحن
+                </Link>
+                <Link href="/contact" className="hover:text-white transition">
+                  اتصل بنا
+                </Link>
+                <Link href="/faq" className="hover:text-white transition">
+                  الأسئلة الشائعة
+                </Link>
+                <Link href="/privacy" className="hover:text-white transition">
+                  سياسة الخصوصية
+                </Link>
+              </div>
+            </div>
+            
+            {/* Contact Info */}
+            <div>
+              <h4 className="font-semibold mb-3 text-teal-400">تواصل معنا</h4>
+              <div className="flex flex-col gap-2 text-sm text-gray-400">
+                <p>📱 01012345678</p>
+                <p>📧 info@remostore.com</p>
+                <p>📍 مصر - القاهرة</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-6 border-t border-gray-800 text-center">
+            <p className="text-sm text-gray-500 mb-2">
+              © 2026 ريمو ستور. جميع الحقوق محفوظة.
             </p>
-            <div className="flex flex-wrap gap-4 md:gap-6 justify-center text-xs md:text-sm text-gray-400">
-              <Link href="/products" className="hover:text-white transition">
-                المنتجات
-              </Link>
-              <Link href="/cart" className="hover:text-white transition">
-                السلة
-              </Link>
-              <Link href="/profile" className="hover:text-white transition">
-                حسابي
-              </Link>
-              <Link href="/admin" className="hover:text-white transition">
-                لوحة التحكم
-              </Link>
-            </div>
-            <div className="mt-8 pt-6 border-t border-gray-800">
-              <p className="text-sm text-gray-500 mb-2">
-                © 2026 ريمو ستور. جميع الحقوق محفوظة.
-              </p>
-              <p className="text-xs text-gray-600">
-                Developed by <span className="text-cyan-400 font-semibold">Eng/ Akram Elmasry</span>
-              </p>
-            </div>
+            <p className="text-xs text-gray-600">
+              Developed by <span className="text-cyan-400 font-semibold">Eng/ Akram Elmasry</span>
+            </p>
           </div>
         </div>
       </footer>
