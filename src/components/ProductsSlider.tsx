@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Star } from 'lucide-react';
+import { ShoppingBag, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -53,37 +54,48 @@ export function ProductsSlider({ products, direction = 'rtl' }: ProductsSliderPr
     }
   };
 
-  // Handle mouse move
+  // Handle mouse move - optimized
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !sliderRef.current) return;
     e.preventDefault();
     const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed multiplier
-    sliderRef.current.scrollLeft = scrollLeft - walk;
+    const walk = (x - startX) * 1.5;
+    requestAnimationFrame(() => {
+      if (sliderRef.current) {
+        sliderRef.current.scrollLeft = scrollLeft - walk;
+      }
+    });
   };
 
-  // Auto scroll effect (optional - can be enabled/disabled)
-  useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider || isDragging) return;
-
-    const autoScroll = () => {
-      if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth) {
-        slider.scrollLeft = 0;
-      } else {
-        slider.scrollLeft += 1;
-      }
-    };
-
-    const interval = setInterval(autoScroll, 30);
-    return () => clearInterval(interval);
-  }, [isDragging]);
+  // Scroll buttons
+  const scrollTo = (direction: 'left' | 'right') => {
+    if (!sliderRef.current) return;
+    const scrollAmount = 340;
+    sliderRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+  };
 
   return (
-    <div className="relative">
+    <div className="relative group/slider">
+      {/* Navigation Buttons */}
+      <button 
+        onClick={() => scrollTo('right')}
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-orange-500/90 hover:bg-orange-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      <button 
+        onClick={() => scrollTo('left')}
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-orange-500/90 hover:bg-orange-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+
       <div
         ref={sliderRef}
-        className="flex gap-6 overflow-x-auto scrollbar-hide cursor-grab select-none"
+        className="flex gap-6 overflow-x-auto scrollbar-hide cursor-grab select-none pb-4"
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}
@@ -98,9 +110,9 @@ export function ProductsSlider({ products, direction = 'rtl' }: ProductsSliderPr
             : 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=500';
           
           return (
-          <div key={`${direction}-${product.id}-${index}`} className="flex-shrink-0 w-80">
-            <Card className="border-2 animate-border-glow shadow-xl hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-500 overflow-hidden group hover:-translate-y-2 bg-white">
-              <div className="relative h-72 overflow-hidden bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-6">
+          <Link href={`/products/${product.id}`} key={`${direction}-${product.id}-${index}`} className="flex-shrink-0 w-72 sm:w-80">
+            <Card className="border-2 border-orange-500/50 shadow-xl hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 overflow-hidden group hover:-translate-y-2 bg-white">
+              <div className="relative h-64 sm:h-72 overflow-hidden bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4 sm:p-6">
                 <div className="relative w-56 h-56 rounded-full overflow-hidden border-4 border-white shadow-2xl">
                   <Image
                     src={firstImage}
@@ -131,37 +143,38 @@ export function ProductsSlider({ products, direction = 'rtl' }: ProductsSliderPr
                     متوفر
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
-              <CardContent className="p-5">
-                <h3 className="font-bold text-lg mb-2 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-fuchsia-600 group-hover:bg-clip-text group-hover:text-transparent transition-all line-clamp-1">
+              <CardContent className="p-4 sm:p-5">
+                <h3 className="font-bold text-base sm:text-lg mb-2 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-fuchsia-600 group-hover:bg-clip-text group-hover:text-transparent transition-colors line-clamp-1">
                   {product.nameAr}
                 </h3>
                 <div className="flex items-center gap-1 mb-3">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
                     />
                   ))}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+                  <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
                     {product.price.toFixed(0)} ج.م
                   </span>
-                  <Button size="sm" className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 shadow-lg pointer-events-auto">
+                  <Button size="sm" className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 shadow-lg pointer-events-auto text-xs sm:text-sm">
                     <ShoppingBag className="w-4 h-4" />
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </Link>
         )})}
       </div>
 
       {/* Scroll Hint */}
-      <div className="text-center mt-4 text-sm text-gray-500">
-        اسحب للتصفح أو استخدم عجلة الماوس ← →
+      <div className="text-center mt-4 text-xs sm:text-sm text-gray-500">
+        <span className="hidden sm:inline">اسحب للتصفح أو استخدم الأسهم</span>
+        <span className="sm:hidden">اسحب للتصفح ←→</span>
       </div>
     </div>
   );

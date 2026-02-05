@@ -26,12 +26,19 @@ async function getProducts() {
 }
 
 async function getCategories() {
-  return await prisma.category.findMany({
-    take: 8,
-    orderBy: {
-      nameAr: 'asc',
-    },
+  // جلب الفئات مع عدد المنتجات وترتيبها حسب الأكثر منتجات
+  const categories = await prisma.category.findMany({
+    include: {
+      _count: {
+        select: { products: true }
+      }
+    }
   });
+  
+  // ترتيب حسب عدد المنتجات (الأكثر أولاً)
+  return categories
+    .sort((a, b) => b._count.products - a._count.products)
+    .slice(0, 8);
 }
 
 

@@ -2,12 +2,15 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Package } from 'lucide-react';
 
 interface Category {
   id: string;
   nameAr: string;
   image: string | null;
+  _count?: {
+    products: number;
+  };
 }
 
 interface CategoriesSectionProps {
@@ -28,14 +31,21 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-          {categories.map((category) => {
+          {categories.map((category, index) => {
+            const productCount = category._count?.products || 0;
             return (
               <Link 
                 key={category.id} 
                 href={`/products?category=${category.id}`}
                 className="group"
               >
-                <div className="bg-gradient-to-br from-gray-800/50 to-orange-900/20 rounded-xl md:rounded-2xl p-3 md:p-4 text-center hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:-translate-y-2 border-2 animate-border-glow backdrop-blur-sm overflow-hidden animate-card-float">
+                <div className="bg-gradient-to-br from-gray-800/50 to-orange-900/20 rounded-xl md:rounded-2xl p-3 md:p-4 text-center hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:-translate-y-2 border-2 border-orange-500/50 animate-border-glow backdrop-blur-sm overflow-hidden relative">
+                  {/* Badge للفئات الأكثر منتجات */}
+                  {index === 0 && productCount > 0 && (
+                    <div className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold z-10">
+                      الأكثر
+                    </div>
+                  )}
                   <div className="relative w-full aspect-square mb-3 rounded-xl overflow-hidden group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg">
                     <Image
                       src={category.image || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400'}
@@ -48,6 +58,13 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
+                    {/* عدد المنتجات */}
+                    {productCount > 0 && (
+                      <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1">
+                        <Package className="w-3 h-3" />
+                        {productCount}
+                      </div>
+                    )}
                   </div>
                   <h3 className="font-bold text-sm md:text-base text-gray-200 group-hover:text-cyan-400 transition-colors">
                     {category.nameAr}

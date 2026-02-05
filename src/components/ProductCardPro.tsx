@@ -171,7 +171,7 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`}>
       <Card 
-        className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-2 animate-border-glow transition-all duration-500 cursor-pointer group relative overflow-hidden h-full hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-2"
+        className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-2 border-orange-500/50 animate-border-glow transition-all duration-500 cursor-pointer group relative overflow-hidden h-full hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-2"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
