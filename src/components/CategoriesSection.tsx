@@ -35,7 +35,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                 href={`/products?category=${category.id}`}
                 className="group"
               >
-                <div className="bg-gradient-to-br from-gray-800/50 to-orange-900/20 rounded-xl md:rounded-2xl p-3 md:p-4 text-center hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-2 border-2 border-orange-500/40 hover:border-orange-400 backdrop-blur-sm overflow-hidden animate-card-float">
+                <div className="bg-gradient-to-br from-gray-800/50 to-orange-900/20 rounded-xl md:rounded-2xl p-3 md:p-4 text-center hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:-translate-y-2 border-2 animate-border-glow backdrop-blur-sm overflow-hidden animate-card-float">
                   <div className="relative w-full aspect-square mb-3 rounded-xl overflow-hidden group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg">
                     <Image
                       src={category.image || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400'}

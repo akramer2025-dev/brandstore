@@ -27,6 +27,7 @@ import {
   Copy,
   X,
   Instagram,
+  Store,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -617,6 +618,19 @@ export default function ProductDetailPage() {
                 <p className="text-xs sm:text-sm text-gray-400">فحص عند الاستلام</p>
               </div>
             </div>
+
+            {/* Browse All Vendor Products Button */}
+            {product.vendor && (
+              <div className="pt-4 sm:pt-6">
+                <Link href={`/products?vendorId=${product.vendor.id}`}>
+                  <Button className="w-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-600 hover:via-amber-600 hover:to-orange-600 text-white font-bold py-4 sm:py-5 text-base sm:text-lg rounded-xl shadow-lg hover:shadow-orange-500/40 transition-all duration-300 group">
+                    <Store className="w-5 h-5 sm:w-6 sm:h-6 ml-2 group-hover:scale-110 transition-transform" />
+                    تصفح جميع منتجات {product.vendor.storeNameAr || 'التاجر'}
+                    <ArrowRight className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 

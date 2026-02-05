@@ -266,6 +266,59 @@
   animation: fade-in 0.3s ease-out;
 }
 
+/* Animated Glowing Border */
+@keyframes border-glow {
+  0%, 100% {
+    border-color: rgba(249, 115, 22, 0.4);
+    box-shadow: 0 0 5px rgba(249, 115, 22, 0.2), 0 0 10px rgba(249, 115, 22, 0.1);
+  }
+  25% {
+    border-color: rgba(251, 146, 60, 0.6);
+    box-shadow: 0 0 10px rgba(251, 146, 60, 0.3), 0 0 20px rgba(251, 146, 60, 0.2);
+  }
+  50% {
+    border-color: rgba(245, 158, 11, 0.7);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), 0 0 30px rgba(245, 158, 11, 0.2);
+  }
+  75% {
+    border-color: rgba(251, 146, 60, 0.6);
+    box-shadow: 0 0 10px rgba(251, 146, 60, 0.3), 0 0 20px rgba(251, 146, 60, 0.2);
+  }
+}
+
+@keyframes border-shine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+.animate-border-glow {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+.card-glow-border {
+  position: relative;
+  border: 2px solid transparent;
+  background: linear-gradient(#1f2937, #1f2937) padding-box,
+              linear-gradient(90deg, 
+                rgba(249, 115, 22, 0.3), 
+                rgba(251, 146, 60, 0.8), 
+                rgba(245, 158, 11, 1),
+                rgba(251, 146, 60, 0.8),
+                rgba(249, 115, 22, 0.3)
+              ) border-box;
+  background-size: 100% 100%, 200% 100%;
+  animation: border-shine 3s linear infinite;
+}
+
+.card-glow-border:hover {
+  animation: border-shine 1.5s linear infinite;
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4), 0 0 40px rgba(249, 115, 22, 0.2);
+}
+
 /* Smooth transitions */
 * {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
