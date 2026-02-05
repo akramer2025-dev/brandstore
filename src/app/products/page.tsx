@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ProductCardFlashStyle } from "@/components/ProductCardFlashStyle";
+import { ProductCardPro } from "@/components/ProductCardPro";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -281,9 +281,9 @@ export default function ProductsPage() {
                 </Button>
               </Card>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                {filteredProducts.map((product) => (
-                  <ProductCardFlashStyle key={product.id} product={product} />
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+                {filteredProducts.map((product, index) => (
+                  <ProductCardPro key={product.id} product={product} index={index} />
                 ))}
               </div>
             )}
