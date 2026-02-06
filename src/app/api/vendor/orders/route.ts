@@ -39,17 +39,24 @@ export async function GET(req: NextRequest) {
             email: true
           }
         },
-        items: true
+        items: {
+          select: {
+            quantity: true
+          }
+        }
       }
     });
 
     const formattedOrders = orders.map(order => ({
       id: order.id,
-      customerName: order.customer?.name || order.customer?.username || 'عميل',
-      total: order.finalAmount,
+      orderNumber: order.orderNumber,
+      customer: {
+        name: order.customer?.name || order.customer?.username || 'عميل'
+      },
+      totalAmount: order.finalAmount,
       status: order.status,
       createdAt: order.createdAt.toISOString(),
-      itemsCount: order.items.length
+      items: order.items
     }));
 
     return NextResponse.json({ orders: formattedOrders });

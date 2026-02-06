@@ -22,6 +22,11 @@ self.addEventListener('activate', (event) => {
             .filter((name) => name !== CACHE_NAME)
             .map((name) => caches.delete(name))
         );
+      }),
+      // حذف جميع الإشعارات القديمة عند التفعيل
+      self.registration.getNotifications().then(notifications => {
+        console.log(`Clearing ${notifications.length} old notifications`);
+        notifications.forEach(notification => notification.close());
       })
     ])
   );
@@ -37,7 +42,7 @@ self.addEventListener('push', (event) => {
     body: 'لديك إشعار جديد',
     icon: '/icon-192x192.png',
     badge: '/badge-72x72.png',
-    tag: 'notification-' + Date.now(), // tag فريد لكل إشعار
+    tag: 'default', // سيتم تحديثه حسب نوع الإشعار
     requireInteraction: true, // يبقى الإشعار حتى يتفاعل المستخدم
     vibrate: [200, 100, 200, 100, 200, 100, 400], // اهتزاز أطول
     renotify: true, // إعادة إظهار الإشعار إذا كان هناك إشعار بنفس الـ tag
@@ -54,6 +59,11 @@ self.addEventListener('push', (event) => {
       const pushData = event.data.json();
       console.log('✅ Parsed push data:', pushData);
       data = { ...data, ...pushData };
+      
+      // إنشاء tag فريد حسب نوع الإشعار والطلب
+      if (pushData.data && pushData.data.orderId) {
+        data.tag = `order-${pushData.data.orderId}`;
+      }
     } catch (e) {
       console.log('⚠️  Could not parse push data as JSON, using text');
       data.body = event.data.text();
@@ -93,9 +103,21 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   console.log('Notification clicked:', event);
   
+  // إغلاق الإشعار الحالي
   event.notification.close();
+  
+  // حذف جميع الإشعارات القديمة من نفس الطلب
+  if (event.notification.tag) {
+    event.waitUntil(
+      self.registration.getNotifications({ tag: event.notification.tag })
+        .then(notifications => {
+          notifications.forEach(notification => notification.close());
+        })
+    );
+  }
 
   if (event.action === 'close') {
+    // مجرد إغلاق الإشعار - تم بالفعل
     return;
   }
 

@@ -42,6 +42,25 @@ interface Stats {
   pendingOrders: number
 }
 
+interface RecentOrder {
+  id: string
+  orderNumber: string
+  status: string
+  totalAmount: number
+  createdAt: string
+  customer: { name: string | null }
+  items: Array<{ quantity: number }>
+}
+
+interface RecentNotification {
+  id: string
+  type: string
+  title: string
+  message: string
+  createdAt: string
+  isRead: boolean
+}
+
 export default function VendorDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -53,6 +72,9 @@ export default function VendorDashboard() {
   const [notificationAudio, setNotificationAudio] = useState<HTMLAudioElement | null>(null)
   const [isAlertPlaying, setIsAlertPlaying] = useState(false)
   const audioContextRef = useRef<AudioContext | null>(null)
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
+  const [recentNotifications, setRecentNotifications] = useState<RecentNotification[]>([])
+
 
   // تهيئة AudioContext عند أول تفاعل
   const initAudioContext = () => {
@@ -325,10 +347,11 @@ export default function VendorDashboard() {
     try {
       console.log('📥 جلب بيانات Dashboard...')
       
-      const [capitalRes, statsRes, notificationsRes] = await Promise.all([
+      const [capitalRes, statsRes, notificationsRes, ordersRes] = await Promise.all([
         fetch('/api/vendor/capital/summary').catch(() => null),
         fetch('/api/vendor/stats').catch(() => null),
-        fetch('/api/vendor/notifications').catch(() => null)
+        fetch('/api/vendor/notifications').catch(() => null),
+        fetch('/api/vendor/orders?limit=5').catch(() => null)
       ])
       
       if (capitalRes && capitalRes.ok) {
@@ -344,6 +367,12 @@ export default function VendorDashboard() {
         setUnreadCount(initialCount)
         prevUnreadCountRef.current = initialCount // تهيئة العداد السابق
         console.log('💾 تم حفظ prevUnreadCountRef.current =', prevUnreadCountRef.current)
+        // حفظ آخر 5 إشعارات
+        setRecentNotifications(data.notifications?.slice(0, 5) || [])
+      }
+      if (ordersRes && ordersRes.ok) {
+        const data = await ordersRes.json()
+        setRecentOrders(data.orders || [])
       }
     } catch (error) {
       console.error('Failed to fetch data:', error)
@@ -573,6 +602,109 @@ export default function VendorDashboard() {
               </Card>
             </Link>
           </div>
+        )}
+        
+        {/* الطلبات الأخيرة - قسم جديد مدمج */}
+        { recentOrders.length > 0 && (
+          <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 shadow-2xl mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-bold text-white">الطلبات الأخيرة</h3>
+                </div>
+                <Link href="/vendor/orders">
+                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white text-xs">
+                    عرض الكل
+                  </Button>
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {recentOrders.map((order) => {
+                  const statusColors: Record<string, { bg: string; text: string }> = {
+                    PENDING: { bg: 'bg-yellow-500/20', text: 'text-yellow-400' },
+                    CONFIRMED: { bg: 'bg-blue-500/20', text: 'text-blue-400' },
+                    PREPARING: { bg: 'bg-cyan-500/20', text: 'text-cyan-400' },
+                    DELIVERING: { bg: 'bg-purple-500/20', text: 'text-purple-400' },
+                    DELIVERED: { bg: 'bg-green-500/20', text: 'text-green-400' },
+                    CANCELLED: { bg: 'bg-red-500/20', text: 'text-red-400' },
+                    REJECTED: { bg: 'bg-gray-500/20', text: 'text-gray-400' },
+                  }
+                  const statusLabels: Record<string, string> = {
+                    PENDING: 'قيد الانتظار',
+                    CONFIRMED: 'مؤكد',
+                    PREPARING: 'قيد التحضير',
+                    DELIVERING: 'قيد التوصيل',
+                    DELIVERED: 'تم التوصيل',
+                    CANCELLED: 'ملغي',
+                    REJECTED: 'مرفوض',
+                  }
+                  const status = statusColors[order.status] || { bg: 'bg-gray-500/20', text: 'text-gray-400' }
+                  return (
+                    <Link key={order.id} href={`/vendor/orders/${order.id}`}>
+                      <div className="bg-slate-900/50 rounded-lg p-3 hover:bg-slate-900/70 transition-colors cursor-pointer border border-slate-700/50">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-white font-semibold text-sm">#{order.orderNumber.slice(0, 8).toUpperCase()}</p>
+                              <span className={`${status.bg} ${status.text} text-[10px] px-2 py-0.5 rounded-full font-bold`}>
+                                {statusLabels[order.status]}
+                              </span>
+                            </div>
+                            <p className="text-gray-400 text-xs truncate">{order.customer.name} • {order.items.length} منتج</p>
+                          </div>
+                          <div className="text-left">
+                            <p className="text-white font-bold text-sm">{order.totalAmount.toFixed(2)} ج</p>
+                            <p className="text-gray-500 text-[10px]">{new Date(order.createdAt).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' })}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* الإشعارات الأخيرة - قسم جديد مدمج */}
+        {recentNotifications.length > 0 && (
+          <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 shadow-2xl mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-bold text-white">الإشعارات الأخيرة</h3>
+                  {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+                <Link href="/vendor/notifications">
+                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white text-xs">
+                    عرض الكل
+                  </Button>
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {recentNotifications.map((notification) => (
+                  <Link key={notification.id} href="/vendor/notifications">
+                    <div className={`rounded-lg p-3 hover:bg-slate-900/70 transition-colors cursor-pointer border ${notification.isRead ? 'bg-slate-900/30 border-slate-700/50' : 'bg-purple-900/30 border-purple-500/50'}`}>
+                      <div className="flex items-start gap-2">
+                        <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${notification.isRead ? 'bg-gray-500' : 'bg-purple-500 animate-pulse'}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold mb-0.5 ${notification.isRead ? 'text-gray-300' : 'text-white'}`}>{notification.title}</p>
+                          <p className="text-gray-400 text-xs line-clamp-2">{notification.message}</p>
+                          <p className="text-gray-500 text-[10px] mt-1">{new Date(notification.createdAt).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* إحصائيات بسيطة - responsive */}
