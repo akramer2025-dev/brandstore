@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
@@ -49,15 +49,31 @@ export default function VendorDashboard() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
   const [unreadCount, setUnreadCount] = useState(0)
-  const [prevUnreadCount, setPrevUnreadCount] = useState(0)
+  const prevUnreadCountRef = useRef(0)
   const [notificationAudio, setNotificationAudio] = useState<HTMLAudioElement | null>(null)
   const [isAlertPlaying, setIsAlertPlaying] = useState(false)
+  const audioContextRef = useRef<AudioContext | null>(null)
+
+  // تهيئة AudioContext عند أول تفاعل
+  const initAudioContext = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      console.log('🎵 Audio Context تم تهيئته')
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume()
+    }
+  }
 
   // تشغيل صوت مستمر للإشعار (يتكرر حتى يتم إيقافه)
   const playNotificationSound = () => {
     try {
-      // إنشاء صوت طويل مستمر
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      // تهيئة AudioContext إذا لم يكن موجود
+      if (!audioContextRef.current) {
+        initAudioContext()
+      }
+      
+      const audioContext = audioContextRef.current!
       let isPlaying = true
       setIsAlertPlaying(true)
 
@@ -127,6 +143,28 @@ export default function VendorDashboard() {
     }
   }, [])
 
+  // تهيئة AudioContext عند أول تفاعل مع الصفحة
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      initAudioContext()
+      console.log('✅ AudioContext جاهز للعمل')
+      // إزالة المستمع بعد أول تفاعل
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+      document.removeEventListener('keydown', handleFirstInteraction)
+    }
+
+    document.addEventListener('click', handleFirstInteraction, { once: true })
+    document.addEventListener('touchstart', handleFirstInteraction, { once: true })
+    document.addEventListener('keydown', handleFirstInteraction, { once: true })
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+      document.removeEventListener('keydown', handleFirstInteraction)
+    }
+  }, [])
+
   // طلب إذن الإشعارات
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
@@ -166,7 +204,7 @@ export default function VendorDashboard() {
         const data = await notificationsRes.json()
         const initialCount = data.unreadCount || 0
         setUnreadCount(initialCount)
-        setPrevUnreadCount(initialCount) // تهيئة العداد السابق
+        prevUnreadCountRef.current = initialCount // تهيئة العداد السابق
       }
     } catch (error) {
       console.error('Failed to fetch data:', error)
@@ -184,21 +222,23 @@ export default function VendorDashboard() {
           const data = await res.json()
           const newUnreadCount = data.unreadCount || 0
           
-          // إذا زاد عدد الإشعارات، شغل الصوت
-          if (newUnreadCount > prevUnreadCount && prevUnreadCount > 0) {
+          // إذا زاد عدد الإشعارات، شغل الصوت أوتوماتيك
+          if (newUnreadCount > prevUnreadCountRef.current) {
+            console.log(`🔔 طلب جديد! العدد: ${prevUnreadCountRef.current} → ${newUnreadCount}`)
             playNotificationSound()
             
             // إظهار إشعار desktop أيضاً
             if ('Notification' in window && Notification.permission === 'granted') {
               new Notification('🎉 طلب جديد!', {
-                body: 'لديك طلب جديد في المتجر',
+                body: `لديك ${newUnreadCount} طلب جديد في المتجر`,
                 icon: '/icon-192x192.png',
                 tag: 'new-order',
+                requireInteraction: true,
               })
             }
           }
           
-          setPrevUnreadCount(newUnreadCount)
+          prevUnreadCountRef.current = newUnreadCount
           setUnreadCount(newUnreadCount)
         }
       } catch (error) {
