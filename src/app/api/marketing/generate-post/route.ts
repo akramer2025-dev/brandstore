@@ -8,6 +8,34 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// دالة توليد محتوى تسويقي مجاني (Fallback)
+function generateFreeMarketingContent(product: any, productUrl: string) {
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercent = hasDiscount 
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
+  const mainContent = `✨ ${product.nameAr} ✨
+
+${product.descriptionAr || '🌟 منتج رائع وعالي الجودة يجمع بين الأناقة والراحة!'}
+
+${hasDiscount ? `🔥 عرض خاص! خصم ${discountPercent}% 💥
+💰 السعر: ${product.price.toFixed(2)} جنيه بدلاً من ${product.originalPrice.toFixed(2)} جنيه
+` : `💰 السعر: ${product.price.toFixed(2)} جنيه فقط!`}
+
+${product.stock > 0 ? `📦 متوفر الآن - الكمية محدودة!` : '⚡ كمية محدودة جداً!'}
+
+🎁 مميزات المنتج:
+✅ جودة عالية مضمونة
+✅ توصيل سريع لجميع المحافظات
+✅ الدفع عند الاستلام
+✅ إمكانية الاستبدال والاسترجاع
+
+⏰ اطلب الآن قبل نفاذ الكمية!`;
+
+  return mainContent;
+}
+
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -43,18 +71,22 @@ export async function POST(request: Request) {
     // إنشاء لينك المنتج
     const productUrl = `https://www.remostore.net/products/${product.id}`;
 
-    // توليد محتوى تسويقي باستخدام GPT-4 (فصلة واحدة فقط)
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: `أنت خبير تسويق محترف متخصص في كتابة محتوى تسويقي جذاب باللغة العربية للسوشيال ميديا. 
+    let marketingContent = "";
+
+    // محاولة توليد محتوى باستخدام GPT-4 (فصلة واحدة فقط)
+    try {
+      console.log("🤖 Trying GPT-4...");
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: `أنت خبير تسويق محترف متخصص في كتابة محتوى تسويقي جذاب باللغة العربية للسوشيال ميديا. 
 اكتب بأسلوب مشوق وجذاب مع استخدام الإيموجي المناسبة.`
-        },
-        {
-          role: "user",
-          content: `اكتب بوست تسويقي احترافي باللغة العربية لهذا المنتج:
+          },
+          {
+            role: "user",
+            content: `اكتب بوست تسويقي احترافي باللغة العربية لهذا المنتج:
 
 المنتج: ${product.nameAr}
 الوصف: ${product.descriptionAr || 'منتج عالي الجودة'}
@@ -64,13 +96,26 @@ ${product.originalPrice && product.originalPrice > product.price ? `السعر �
 القسم: ${product.category?.nameAr || 'منتجات عامة'}
 
 اجعل البوست جذاباً ومشجعاً على الشراء مع استخدام إيموجي مناسبة وعبارات تسويقية قوية.`
-        }
-      ],
-      temperature: 0.8,
-      max_tokens: 800,
-    });
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 800,
+      });
 
-    const marketingContent = completion.choices[0].message.content || "لم يتم توليد محتوى";
+      marketingContent = completion.choices[0].message.content || "";
+      console.log("✅ GPT-4 نجح!");
+
+    } catch (gptError: any) {
+      console.log("❌ GPT-4 فشل، استخدام Template مجاني:", gptError.message);
+      // Fallback للمحتوى المجاني
+      marketingContent = "";
+    }
+
+    // إذا فشل GPT-4 أو لم يعطي محتوى، استخدم Template مجاني
+    if (!marketingContent) {
+      console.log("📝 استخدام Free Template...");
+      marketingContent = generateFreeMarketingContent(product, productUrl);
+    }
 
     // إضافة رابط المنتج في النهاية
     const fullContent = `${marketingContent}
