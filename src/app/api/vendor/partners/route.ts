@@ -73,10 +73,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // التحقق من صحة النسبة
-    if (capitalPercent < 0 || capitalPercent > 100) {
+    // التحقق من أن المبلغ والنسبة أرقام صحيحة
+    const parsedCapitalAmount = parseFloat(capitalAmount);
+    const parsedCapitalPercent = parseFloat(capitalPercent);
+
+    if (isNaN(parsedCapitalAmount) || parsedCapitalAmount <= 0) {
       return NextResponse.json(
-        { error: 'النسبة يجب أن تكون بين 0 و 100' },
+        { error: 'المبلغ يجب أن يكون رقم أكبر من صفر' },
+        { status: 400 }
+      );
+    }
+
+    if (isNaN(parsedCapitalPercent) || parsedCapitalPercent < 0 || parsedCapitalPercent > 100) {
+      return NextResponse.json(
+        { error: 'النسبة يجب أن تكون رقم بين 0 و 100' },
         { status: 400 }
       );
     }
@@ -125,10 +135,10 @@ export async function POST(request: NextRequest) {
         vendorId: vendor.id,
         partnerName,
         partnerType,
-        capitalAmount: parseFloat(capitalAmount),
-        initialAmount: parseFloat(capitalAmount),
-        currentAmount: parseFloat(capitalAmount),
-        capitalPercent: parseFloat(capitalPercent),
+        capitalAmount: parsedCapitalAmount,
+        initialAmount: parsedCapitalAmount,
+        currentAmount: parsedCapitalAmount,
+        capitalPercent: parsedCapitalPercent,
         notes,
       },
     });
@@ -138,7 +148,7 @@ export async function POST(request: NextRequest) {
       where: { id: vendor.id },
       data: {
         capitalBalance: {
-          increment: parseFloat(capitalAmount),
+          increment: parsedCapitalAmount,
         },
       },
     });
@@ -149,9 +159,9 @@ export async function POST(request: NextRequest) {
         vendorId: vendor.id,
         partnerId: partner.id,
         type: 'DEPOSIT',
-        amount: parseFloat(capitalAmount),
+        amount: parsedCapitalAmount,
         balanceBefore: vendor.capitalBalance,
-        balanceAfter: vendor.capitalBalance + parseFloat(capitalAmount),
+        balanceAfter: vendor.capitalBalance + parsedCapitalAmount,
         description: `إيداع رأس مال من الشريك: ${partnerName}`,
         descriptionAr: `إيداع رأس مال من الشريك: ${partnerName}`,
       },

@@ -11,6 +11,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
     }
 
+    console.log('📊 جلب جميع الشركاء للمدير...');
+
     // جلب جميع الشركاء من جميع الـ vendors
     const partners = await prisma.partnerCapital.findMany({
       orderBy: { createdAt: 'desc' },
@@ -24,6 +26,8 @@ export async function GET(request: NextRequest) {
         },
       },
     });
+
+    console.log(`✅ تم جلب ${partners.length} شريك من قاعدة البيانات`);
 
     // تنسيق البيانات لتجنب مشاكل null
     const formattedPartners = partners.map(partner => ({
@@ -41,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ partners: formattedPartners });
   } catch (error) {
-    console.error('Error fetching partners:', error);
+    console.error('❌ Error fetching partners:', error);
     return NextResponse.json(
       { error: 'حدث خطأ أثناء جلب الشركاء' },
       { status: 500 }
@@ -72,10 +76,13 @@ export async function POST(request: NextRequest) {
       canDeleteOrders = false,
     } = body;
 
-    // التحقق من البيانات المطلوبة
+    console.log('📝 محاولة إضافة شريك جديد:', { partnerName, email, createUserAccount });
+
+    // التحقق من البيانات المطلوبة (البريد إجباري دائماً)
     if (!partnerName || !email || !capitalAmount || !capitalPercent) {
+      console.log('❌ بيانات ناقصة');
       return NextResponse.json(
-        { error: 'الاسم، البريد، المبلغ والنسبة مطلوبة' },
+        { error: 'الاسم، البريد الإلكتروني، المبلغ والنسبة مطلوبة' },
         { status: 400 }
       );
     }
@@ -88,35 +95,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // التحقق من صحة النسبة
-    if (capitalPercent < 0 || capitalPercent > 100) {
+    // التحقق من أن المبلغ والنسبة أرقام صحيحة
+    const parsedCapitalAmount = parseFloat(capitalAmount);
+    const parsedCapitalPercent = parseFloat(capitalPercent);
+
+    if (isNaN(parsedCapitalAmount) || parsedCapitalAmount <= 0) {
       return NextResponse.json(
-        { error: 'النسبة يجب أن تكون بين 0 و 100' },
+        { error: 'المبلغ يجب أن يكون رقم أكبر من صفر' },
+        { status: 400 }
+      );
+    }
+
+    if (isNaN(parsedCapitalPercent) || parsedCapitalPercent < 0 || parsedCapitalPercent > 100) {
+      return NextResponse.json(
+        { error: 'النسبة يجب أن تكون رقم بين 0 و 100' },
         { status: 400 }
       );
     }
 
     let vendorId = null;
     let userId = null;
-
-    // إنشاء حساب مستخدم وvendor للشريك إذا كان مطلوباً
-    if (createUserAccount) {
+console.log('🔍 التحقق من البريد:', email);
+      
       // التحقق من عدم وجود المستخدم
       const existingUser = await prisma.user.findUnique({
         where: { email },
       });
 
       if (existingUser) {
+        console.log('❌ البريد مستخدم بالفعل:', email);
         return NextResponse.json(
           { error: 'البريد الإلكتروني مستخدم بالفعل' },
           { status: 400 }
         );
       }
 
+      console.log('✅ البريد متاح');
+
       // استخدام كلمة المرور المدخلة أو إنشاء واحدة عشوائية
       const bcrypt = require('bcryptjs');
       const userPassword = password || Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+      console.log('👤 إنشاء حساب مستخدم...');
 
       // إنشاء المستخدم
       const user = await prisma.user.create({
@@ -130,26 +151,24 @@ export async function POST(request: NextRequest) {
       });
 
       userId = user.id;
+      console.log('✅ تم إنشاء المستخدم:', user.id)
+      });
+
+      userId = user.id;
 
       // إنشاء حساب vendor
       const vendor = await prisma.vendor.create({
         data: {
           userId: user.id,
           phone: phone || '',
+      console.log('✅ تم إنشاء Vendor:', vendor.id);
           address: '',
-          capitalBalance: parseFloat(capitalAmount),
+          capitalBalance: 0, // سيتم تحديثه بعد إنشاء PartnerCapital
           isApproved: true,
           canDeleteOrders: canDeleteOrders, // صلاحية حذف الطلبات
         },
-      });
-
-      vendorId = vendor.id;
-
-      // TODO: إرسال بريد إلكتروني بكلمة المرور
-      console.log(`✅ تم إنشاء حساب للشريك:`);
-      console.log(`   البريد: ${email}`);
-      console.log(`   كلمة المرور: ${userPassword}`);
-    } else {
+      console.log('📌 إنشاء شريك بدون حساب مستخدم');
+      
       // إنشاء vendor مؤقت بدون user (لحالة الشركاء الذين لا يحتاجون حساب)
       // سنحتاج vendor لربط PartnerCapital
       // يمكن إنشاء vendor مرتبط بالمدير نفسه أو vendor خاص
@@ -158,8 +177,11 @@ export async function POST(request: NextRequest) {
       });
 
       if (!adminUser) {
+        console.log('❌ المدير غير موجود');
         return NextResponse.json({ error: 'المدير غير موجود' }, { status: 404 });
       }
+
+      console.log('🔍 البحث عن vendor المدير...');
 
       // البحث عن vendor المدير أو إنشاء واحد
       let adminVendor = await prisma.vendor.findUnique({
@@ -167,9 +189,25 @@ export async function POST(request: NextRequest) {
       });
 
       if (!adminVendor) {
+        console.log('⚠️ vendor المدير غير موجود، جاري إنشاء واحد...');
         adminVendor = await prisma.vendor.create({
           data: {
             userId: adminUser.id,
+            phone: adminUser.phone || '',
+            address: '',
+            capitalBalance: 0,
+            isApproved: true,
+          },
+        });
+        console.log('✅ تم إنشاء vendor للمدير:', adminVendor.id);
+      console.log('❌ فشل في تعيين vendorId');
+      return NextResponse.json(
+        { error: 'فشل في إنشاء حساب الشريك' },
+        { status: 500 }
+      );
+    }
+
+    console.log('💰 حساب نسبة المساهمة...');       userId: adminUser.id,
             phone: adminUser.phone || '',
             address: '',
             capitalBalance: 0,
@@ -181,6 +219,14 @@ export async function POST(request: NextRequest) {
       vendorId = adminVendor.id;
     }
 
+    // التحقق من أن vendorId تم تعيينه بنجاح
+    if (!vendorId) {
+      return NextResponse.json(
+        { error: 'فشل في إنشاء حساب الشريك' },
+        { status: 500 }
+      );
+    }
+
     // حساب نسبة المساهمة الفعلية بناءً على رأس المال الكلي
     const vendor = await prisma.vendor.findUnique({
       where: { id: vendorId },
@@ -188,28 +234,36 @@ export async function POST(request: NextRequest) {
     });
 
     const currentTotalCapital = vendor?.capitalBalance || 0;
-    const newTotalCapital = currentTotalCapital + parseFloat(capitalAmount);
-    const actualPercent = (parseFloat(capitalAmount) / newTotalCapital) * 100;
+    console.log('📝 إنشاء سجل الشريك...');
+
+    const newTotalCapital = currentTotalCapital + parsedCapitalAmount;
+    const actualPercent = (parsedCapitalAmount / newTotalCapital) * 100;
 
     // استخدام النسبة المحسوبة تلقائياً أو المُدخلة (أيهما أدق)
     const finalPercent = actualPercent;
 
     console.log('📊 حساب نسبة المساهمة:');
     console.log(`   رأس المال الحالي: ${currentTotalCapital} جنيه`);
-    console.log(`   مساهمة الشريك: ${parseFloat(capitalAmount)} جنيه`);
+    console.log(`   مساهمة الشريك: ${parsedCapitalAmount} جنيه`);
     console.log(`   رأس المال الجديد: ${newTotalCapital} جنيه`);
-    console.log(`   النسبة المُدخلة: ${parseFloat(capitalPercent)}%`);
+    console.log(`   النسبة المُدخلة: ${parsedCapitalPercent}%`);
     console.log(`   النسبة المحسوبة: ${actualPercent.toFixed(2)}%`);
+console.log('✅ تم إنشاء الشريك:', partner.id);
+    console.log('💵 تحديث رأس مال الـ vendor...');
 
+    
     // إنشاء سجل الشريك
     const partner = await prisma.partnerCapital.create({
       data: {
         vendorId,
         partnerName,
         partnerType,
-        capitalAmount: parseFloat(capitalAmount),
-        initialAmount: parseFloat(capitalAmount),
-        currentAmount: parseFloat(capitalAmount),
+        capitalAmount: parsedCapitalAmount,
+    console.log('✅ تم تحديث رأس المال');
+    console.log('📊 إنشاء معاملة إيداع...');
+
+        initialAmount: parsedCapitalAmount,
+        currentAmount: parsedCapitalAmount,
         capitalPercent: finalPercent,
         notes,
       },
@@ -219,21 +273,24 @@ export async function POST(request: NextRequest) {
     await prisma.vendor.update({
       where: { id: vendorId },
       data: {
-        capitalBalance: {
-          increment: parseFloat(capitalAmount),
-        },
-      },
-    });
+    console.log('✅ تمت إضافة الشريك بنجاح!');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    // إنشاء معاملة إيداع
+    return NextResponse.json({
+      success: true,
+      message: 'تم إضافة الشريك بنجاح',
+      partner,
+    });
+  } catch (error) {
+    console.error('❌  إيداع
     await prisma.capitalTransaction.create({
       data: {
         vendorId,
         partnerId: partner.id,
         type: 'DEPOSIT',
-        amount: parseFloat(capitalAmount),
+        amount: parsedCapitalAmount,
         balanceBefore: 0,
-        balanceAfter: parseFloat(capitalAmount),
+        balanceAfter: parsedCapitalAmount,
         description: `إيداع رأس مال من الشريك: ${partnerName}`,
         descriptionAr: `إيداع رأس مال من الشريك: ${partnerName}`,
       },

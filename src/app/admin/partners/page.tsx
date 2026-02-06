@@ -94,16 +94,20 @@ export default function AdminPartnersPage() {
 
   const fetchPartners = async () => {
     try {
+      console.log('🔄 جاري جلب الشركاء...')
       const response = await fetch('/api/admin/partners')
       const data = await response.json()
       
       if (response.ok) {
+        console.log('✅ تم جلب الشركاء بنجاح:', data.partners.length)
+        console.log('📋 الشركاء:', data.partners)
         setPartners(data.partners)
       } else {
+        console.error('❌ خطأ في جلب الشركاء:', data.error)
         toast.error(data.error || 'حدث خطأ أثناء جلب الشركاء')
       }
     } catch (error) {
-      console.error('Error fetching partners:', error)
+      console.error('❌ Error fetching partners:', error)
       toast.error('حدث خطأ أثناء جلب الشركاء')
     } finally {
       setLoading(false)
