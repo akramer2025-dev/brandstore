@@ -421,17 +421,27 @@ export default function AdminPartnersPage() {
                   </div>
 
                   {/* إنشاء حساب */}
-                  <div className="flex items-center gap-2 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30">
-                    <input
-                      type="checkbox"
-                      id="createUserAccount"
-                      checked={formData.createUserAccount}
-                      onChange={(e) => setFormData({ ...formData, createUserAccount: e.target.checked })}
-                      className="rounded"
-                    />
-                    <Label htmlFor="createUserAccount" className="text-white cursor-pointer">
-                      إنشاء حساب VENDOR للشريك
-                    </Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                      <input
+                        type="checkbox"
+                        id="createUserAccount"
+                        checked={formData.createUserAccount}
+                        onChange={(e) => setFormData({ ...formData, createUserAccount: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="createUserAccount" className="text-white cursor-pointer">
+                        إنشاء حساب VENDOR للشريك
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-start gap-2 px-3">
+                      <div className="text-yellow-400 mt-0.5">⚠️</div>
+                      <div className="text-xs text-yellow-300 space-y-1">
+                        <p><strong>مع إنشاء حساب:</strong> البريد يجب أن يكون غير مستخدم في النظام</p>
+                        <p><strong>بدون إنشاء حساب:</strong> البريد للتواصل فقط (يمكن استخدام بريد موجود)</p>
+                      </div>
+                    </div>
                   </div>
 
                   {/* صلاحية حذف الطلبات */}

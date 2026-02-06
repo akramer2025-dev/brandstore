@@ -123,12 +123,42 @@ export async function POST(request: NextRequest) {
       // التحقق من عدم وجود المستخدم
       const existingUser = await prisma.user.findUnique({
         where: { email },
+        include: {
+          vendor: {
+            include: {
+              partners: true,
+            },
+          },
+        },
       });
 
       if (existingUser) {
         console.log('❌ البريد مستخدم بالفعل:', email);
+        console.log('   المستخدم:', existingUser.name);
+        console.log('   الدور:', existingUser.role);
+        
+        // رسالة خطأ تفصيلية للمدير
+        let errorMessage = `البريد الإلكتروني "${email}" مستخدم بالفعل في النظام`;
+        
+        if (existingUser.role === 'CUSTOMER') {
+          errorMessage += ' كحساب عميل';
+        } else if (existingUser.role === 'VENDOR') {
+          errorMessage += ' كحساب بائع/شريك';
+        } else if (existingUser.role === 'ADMIN') {
+          errorMessage += ' كحساب مدير';
+        }
+        
+        errorMessage += ` (الاسم: ${existingUser.name})`;
+        
         return NextResponse.json(
-          { error: 'البريد الإلكتروني مستخدم بالفعل' },
+          { 
+            error: errorMessage,
+            existingUser: {
+              name: existingUser.name,
+              email: existingUser.email,
+              role: existingUser.role,
+            }
+          },
           { status: 400 }
         );
       }
@@ -176,6 +206,7 @@ export async function POST(request: NextRequest) {
       console.log(`   كلمة المرور: ${userPassword}`);
     } else {
       console.log('📌 إنشاء شريك بدون حساب مستخدم');
+      console.log('ℹ️ البريد سيُستخدم للتواصل فقط ولن يتم إنشاء حساب');
       
       const adminUser = await prisma.user.findUnique({
         where: { id: session.user.id },
