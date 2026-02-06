@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
+import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -348,7 +349,12 @@ export function Header() {
               </Link>
             )}
             
-            {/* Notification Bell */}
+            {/* Notifications */}
+            {session && (
+              <NotificationsDropdown role={session.user?.role} />
+            )}
+            
+            {/* Notification Bell - Push Notifications */}
             {mounted && isNotificationSupported && (
               <Button
                 variant="ghost"
@@ -356,18 +362,18 @@ export function Header() {
                 onClick={isNotificationSubscribed ? unsubscribeFromNotifications : subscribeToNotifications}
                 className={`relative transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10 ${
                   isNotificationSubscribed
-                    ? 'text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/30 animate-pulse'
-                    : 'text-gray-400 hover:text-purple-400 hover:bg-purple-900/30'
-                } hover:scale-110`}
-                title={isNotificationSubscribed ? 'إيقاف الإشعارات' : 'تفعيل الإشعارات'}
+                    ? 'text-green-400 hover:text-green-300 hover:bg-green-900/30'
+                    : 'text-gray-500 hover:text-gray-400 hover:bg-gray-700/30'
+                }`}
+                title={isNotificationSubscribed ? 'إيقاف الإشعارات الفورية' : 'تفعيل الإشعارات الفورية'}
               >
                 {isNotificationSubscribed ? (
-                  <Bell className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-400" />
+                  <Bell className="w-3 h-3 sm:w-4 sm:h-4 fill-green-400" />
                 ) : (
-                  <BellOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <BellOff className="w-3 h-3 sm:w-4 sm:h-4" />
                 )}
                 {isNotificationSubscribed && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-ping" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full" />
                 )}
               </Button>
             )}

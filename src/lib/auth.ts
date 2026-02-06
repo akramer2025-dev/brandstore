@@ -11,6 +11,42 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   debug: process.env.NODE_ENV === 'development',
   
+  events: {
+    async createUser({ user }) {
+      try {
+        console.log('🆕 Event: createUser -', user.email);
+        
+        // إذا المستخدم جديد، اجعله CUSTOMER افتراضياً
+        if (user.id && !user.role) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: 'CUSTOMER' }
+          });
+          console.log('✅ Assigned CUSTOMER role to new user:', user.email);
+        }
+        
+        // إنشاء customer record تلقائياً للمستخدمين الجدد
+        if (user.id) {
+          const hasCustomer = await prisma.customer.findUnique({
+            where: { userId: user.id }
+          });
+          
+          if (!hasCustomer) {
+            await prisma.customer.create({
+              data: {
+                userId: user.id,
+                name: user.name || user.email?.split('@')[0] || 'مستخدم',
+              }
+            });
+            console.log('✅ Created customer record for new user:', user.email);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error in createUser event:', error);
+      }
+    },
+  },
+  
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -67,7 +103,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       try {
         console.log('🔐 SignIn callback - Provider:', account?.provider, 'Email:', user.email);
         
-        // للمستخدمين الجدد من Google، تأكد من وجود role
+        // للمستخدمين الجدد من Google
         if (account?.provider === "google" && user.email) {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
@@ -77,7 +113,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (existingUser) {
             console.log('👤 Existing user found:', existingUser.name, 'Role:', existingUser.role);
             
-            // إذا المستخدم موجود لكن ليس لديه role
+            // إذا المستخدم موجود لكن ليس لديه role، اجعله CUSTOMER
             if (!existingUser.role) {
               await prisma.user.update({
                 where: { id: existingUser.id },
@@ -85,8 +121,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               });
               console.log('✅ تم تعيين role CUSTOMER للمستخدم:', user.email);
             }
+            
+            // تأكد من وجود customer record
+            const hasCustomer = await prisma.customer.findUnique({
+              where: { userId: existingUser.id }
+            });
+            
+            if (!hasCustomer) {
+              await prisma.customer.create({
+                data: {
+                  userId: existingUser.id,
+                  name: existingUser.name || user.name || 'مستخدم',
+                }
+              });
+              console.log('✅ تم إنشاء customer record للمستخدم:', user.email);
+            }
           } else {
-            console.log('🆕 New user from Google, will be created as CUSTOMER');
+            console.log('🆕 New user from Google, will be created as CUSTOMER by adapter');
           }
         }
         return true;
@@ -162,11 +213,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // إذا المستخدم جاي من Google OAuth callback
-      if (url.includes('/auth/google-callback')) {
-        return url;
-      }
-      
       // إذا كان URL يبدأ بـ baseUrl، استخدمه كما هو
       if (url.startsWith(baseUrl)) {
         return url;
@@ -177,8 +223,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return `${baseUrl}${url}`;
       }
       
-      // التوجيه الافتراضي إلى صفحة Google callback ليتم التوجيه منها حسب الـrole
-      return `${baseUrl}/auth/google-callback`;
+      // التوجيه الافتراضي إلى الصفحة الرئيسية
+      return baseUrl;
     },
   },
   pages: {
