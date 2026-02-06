@@ -64,8 +64,21 @@ export async function POST(request: Request) {
     }
 
     // التحقق من أن الشريك يملك المنتج
-    if (session.user?.role === "VENDOR" && product.vendorId !== session.user.id) {
-      return NextResponse.json({ error: "غير مصرح لك بالوصول لهذا المنتج" }, { status: 403 });
+    if (session.user?.role === "VENDOR") {
+      // جلب الـ Vendor record للمستخدم الحالي
+      const vendor = await prisma.vendor.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true }
+      });
+
+      if (!vendor) {
+        return NextResponse.json({ error: "حساب الشريك غير موجود" }, { status: 403 });
+      }
+
+      // التحقق من ملكية المنتج
+      if (product.vendorId !== vendor.id) {
+        return NextResponse.json({ error: "غير مصرح لك بالوصول لهذا المنتج" }, { status: 403 });
+      }
     }
 
     // إنشاء لينك المنتج
