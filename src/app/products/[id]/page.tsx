@@ -147,7 +147,7 @@ export default function ProductDetailPage() {
   };
 
   useEffect(() => {
-    if (productId) {
+    if (productId && typeof window !== 'undefined') {
       // Scroll to top when page loads
       window.scrollTo({ top: 0, behavior: 'smooth' });
       fetchProduct();
@@ -156,6 +156,9 @@ export default function ProductDetailPage() {
 
   // Check if PWA is installed
   useEffect(() => {
+    // Guard: Only run on client side
+    if (typeof window === 'undefined') return;
+    
     const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
     setIsStandalone(isStandaloneMode);
     
@@ -163,7 +166,15 @@ export default function ProductDetailPage() {
     if (!isStandaloneMode) {
       const dismissed = localStorage.getItem('product-page-install-banner-dismissed');
       if (!dismissed) {
-        setShowInstallBanner(true);
+        // Check if coming from social media
+        const referrer = typeof document !== 'undefined' ? document.referrer : '';
+        const isFromSocial = /facebook|instagram|fb\.com|t\.co|twitter|tiktok/i.test(referrer);
+        
+        if (isFromSocial) {
+          setShowInstallBanner(true);
+          // Auto dismiss after 10 seconds
+          setTimeout(() => setShowInstallBanner(false), 10000);
+        }
       }
     }
   }, []);
@@ -274,7 +285,9 @@ export default function ProductDetailPage() {
               <Button
                 onClick={() => {
                   setShowInstallBanner(false);
-                  localStorage.setItem('product-page-install-banner-dismissed', 'true');
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('product-page-install-banner-dismissed', 'true');
+                  }
                 }}
                 variant="ghost"
                 size="sm"

@@ -17,6 +17,9 @@ export default function InstallPWA() {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Guard: Only run on client side
+    if (typeof window === 'undefined') return;
+    
     // Check if already installed (standalone mode)
     const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
     setIsStandalone(isStandaloneMode);
@@ -26,7 +29,7 @@ export default function InstallPWA() {
     setIsIOS(iOS);
 
     // Detect if coming from social media (Facebook, Instagram, etc.)
-    const referrer = document.referrer;
+    const referrer = typeof document !== 'undefined' ? document.referrer : '';
     const isFromSocial = /facebook|instagram|fb\.com|t\.co|twitter|tiktok/i.test(referrer);
     const urlParams = new URLSearchParams(window.location.search);
     const hasFbclid = urlParams.has('fbclid') || urlParams.has('utm_source');
@@ -71,7 +74,7 @@ export default function InstallPWA() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [isIOS, isStandalone]);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleInstallClick = async () => {
     if (!installPrompt) return;
