@@ -18,17 +18,29 @@ export default function JoinUsPage() {
       <div className="relative z-10 w-full max-w-6xl">
         {/* Header */}
         <div className="text-center mb-12">
-          <Link href="/" className="inline-flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity group">
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/30 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-              <img 
-                src="/logo.png" 
-                alt="ريمو ستور - Remo Store" 
-                className="w-24 h-24 rounded-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]"
-              />
-            </div>
-            <div className="text-right text-white">
-              <h1 className="text-3xl font-black">ريمو ستور</h1>
-              <p className="text-sm opacity-90">انضم كشريك نجاح</p>
+          <Link href="/" className="inline-block mb-8 group">
+            <div className="relative">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 scale-110"></div>
+              
+              {/* Main Logo Card */}
+              <div className="relative bg-white/15 backdrop-blur-xl p-6 rounded-3xl border-2 border-white/40 shadow-2xl transition-all duration-500 group-hover:bg-white/25 group-hover:scale-105">
+                <div className="flex items-center justify-center gap-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-white rounded-2xl blur-md opacity-50"></div>
+                    <img 
+                      src="/logo.png" 
+                      alt="براند ستور - BS Brand Store" 
+                      className="relative w-28 h-28 rounded-2xl object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] transform transition-transform duration-500 group-hover:rotate-3 group-hover:scale-110"
+                    />
+                  </div>
+                  <div className="text-right text-white">
+                    <h1 className="text-4xl font-black drop-shadow-lg mb-1">براند ستور</h1>
+                    <p className="text-sm font-semibold text-white/90 drop-shadow">انضم كشريك نجاح</p>
+                    <p className="text-xs text-white/70 mt-1">BS Brand Store</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </Link>
 

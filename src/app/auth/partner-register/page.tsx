@@ -152,21 +152,33 @@ function PartnerRegisterForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-pink-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
+        {/* Header - Enhanced Logo */}
         <div className="text-center mb-8">
-          <Link href="/auth/join-us" className="inline-flex items-center gap-3 mb-6 hover:opacity-80 transition-opacity group">
-            <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-4 rounded-2xl border-2 border-purple-200 transition-all duration-300 group-hover:scale-110">
-              <img 
-                src="/logo.png" 
-                alt="ريمو ستور - Remo Store" 
-                className="w-24 h-24 rounded-full object-contain drop-shadow-lg"
-              />
-            </div>
-            <div className="text-right">
-              <h1 className="text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                ريمو ستور
-              </h1>
-              <p className="text-sm text-gray-600">نموذج انضمام الشركاء</p>
+          <Link href="/auth/join-us" className="inline-block mb-6 group">
+            <div className="relative">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-300 via-pink-300 to-blue-300 rounded-3xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 scale-110"></div>
+              
+              {/* Main Logo Card */}
+              <div className="relative bg-gradient-to-br from-white to-purple-50 p-6 rounded-3xl border-2 border-purple-200 shadow-xl transition-all duration-500 group-hover:border-purple-400 group-hover:scale-105 group-hover:shadow-2xl">
+                <div className="flex items-center justify-center gap-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl blur-sm opacity-70"></div>
+                    <img 
+                      src="/logo.png" 
+                      alt="براند ستور - BS Brand Store" 
+                      className="relative w-24 h-24 rounded-2xl object-contain drop-shadow-lg transform transition-transform duration-500 group-hover:rotate-3 group-hover:scale-110"
+                    />
+                  </div>
+                  <div className="text-right">
+                    <h1 className="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-1">
+                      براند ستور
+                    </h1>
+                    <p className="text-sm font-semibold text-gray-600">نموذج انضمام الشركاء</p>
+                    <p className="text-xs text-gray-500 mt-1">BS Brand Store</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </Link>
           

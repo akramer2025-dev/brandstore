@@ -89,19 +89,40 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 text-white hover:opacity-90 transition-opacity group">
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/30 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-              <img 
-                src="/logo.png" 
-                alt="BS Brand Store" 
-                className="w-20 h-20 rounded-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]"
-              />
-            </div>
-            <div className="text-right">
-              <h1 className="text-3xl font-black">براند ستور</h1>
-              <p className="text-sm opacity-90">تسوق بذكاء</p>
+        {/* Logo/Brand - Enhanced Design */}
+        <div className="text-center mb-10">
+          <Link href="/" className="inline-block group">
+            {/* Logo Container with Enhanced Effects */}
+            <div className="relative">
+              {/* Glow Effect Background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-400 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 scale-110"></div>
+              
+              {/* Main Logo Card */}
+              <div className="relative bg-white/15 backdrop-blur-xl p-6 rounded-3xl border-2 border-white/40 shadow-2xl transition-all duration-500 group-hover:bg-white/25 group-hover:scale-105 group-hover:border-white/60">
+                <div className="flex items-center justify-center gap-4">
+                  {/* Logo Image with Animation */}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-white rounded-2xl blur-md opacity-50"></div>
+                    <img 
+                      src="/logo.png" 
+                      alt="BS Brand Store" 
+                      className="relative w-24 h-24 rounded-2xl object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] transform transition-transform duration-500 group-hover:rotate-3 group-hover:scale-110"
+                    />
+                  </div>
+                  
+                  {/* Brand Text */}
+                  <div className="text-right">
+                    <h1 className="text-4xl font-black text-white drop-shadow-lg mb-1 tracking-tight">
+                      براند ستور
+                    </h1>
+                    <div className="flex items-center gap-2 justify-end">
+                      <span className="text-sm font-semibold text-white/90 drop-shadow">تسوق بذكاء</span>
+                      <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+                    </div>
+                    <p className="text-xs text-white/70 mt-1 font-medium">BS Brand Store</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </Link>
         </div>
