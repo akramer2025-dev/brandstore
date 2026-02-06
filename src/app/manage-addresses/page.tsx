@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { Trash2, MapPin, Phone, Home, Edit } from 'lucide-react';
 
 interface SavedAddress {
