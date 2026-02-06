@@ -77,9 +77,9 @@ export async function POST(request: NextRequest) {
     const parsedCapitalAmount = parseFloat(capitalAmount);
     const parsedCapitalPercent = parseFloat(capitalPercent);
 
-    if (isNaN(parsedCapitalAmount) || parsedCapitalAmount <= 0) {
+    if (isNaN(parsedCapitalAmount) || parsedCapitalAmount < 0) {
       return NextResponse.json(
-        { error: 'المبلغ يجب أن يكون رقم أكبر من صفر' },
+        { error: 'المبلغ يجب أن يكون رقم موجب أو صفر' },
         { status: 400 }
       );
     }
