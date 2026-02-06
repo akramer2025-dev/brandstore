@@ -30,10 +30,24 @@ export default function FlashDeals() {
   const fetchFlashDeals = async () => {
     try {
       const res = await fetch("/api/products/flash-deals");
+      if (!res.ok) {
+        console.error("Failed to fetch flash deals:", res.status);
+        setFlashDeals([]);
+        return;
+      }
+      
       const data = await res.json();
-      setFlashDeals(data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setFlashDeals(data);
+      } else {
+        console.error("Flash deals response is not an array:", data);
+        setFlashDeals([]);
+      }
     } catch (error) {
       console.error("Error fetching flash deals:", error);
+      setFlashDeals([]);
     } finally {
       setLoading(false);
     }

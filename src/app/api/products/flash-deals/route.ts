@@ -7,9 +7,6 @@ export async function GET() {
       where: {
         isFlashDeal: true,
         isActive: true,
-        flashDealEndsAt: {
-          gt: new Date(), // العروض التي لم تنته بعد
-        },
       },
       include: {
         reviews: {
@@ -20,19 +17,36 @@ export async function GET() {
             rating: true,
           },
         },
+        category: {
+          select: {
+            id: true,
+            nameAr: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         soldCount: 'desc',
       },
-      take: 8, // أول 8 عروض
+      take: 8,
     });
 
-    return NextResponse.json(flashDeals);
+    // Filter by end date if the field exists
+    const now = new Date();
+    const activeDeals = flashDeals.filter(product => {
+      // If flashDealEndsAt exists and is a date, check if it's still valid
+      if (product.flashDealEndsAt) {
+        return new Date(product.flashDealEndsAt) > now;
+      }
+      // If no end date, include it anyway
+      return true;
+    });
+
+    return NextResponse.json(activeDeals);
   } catch (error: any) {
     console.error("Error fetching flash deals:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to fetch flash deals" },
-      { status: 500 }
-    );
+    
+    // Return empty array instead of error to prevent UI crash
+    return NextResponse.json([]);
   }
 }
