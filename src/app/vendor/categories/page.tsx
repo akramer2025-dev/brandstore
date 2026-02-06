@@ -7,8 +7,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Package, Plus, Trash2, Edit } from 'lucide-react';
+import { Package, Plus, Trash2, Edit } from 'lucide-react';
 import Image from 'next/image';
+import { BackButton } from '@/components/BackButton';
 
 interface Category {
   id: string;
@@ -78,11 +79,7 @@ export default function CategoriesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/vendor/dashboard">
-              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
+            <BackButton fallbackUrl="/vendor/dashboard" />
             <div className="flex items-center gap-3">
               <Package className="h-8 w-8 text-cyan-400" />
               <div>

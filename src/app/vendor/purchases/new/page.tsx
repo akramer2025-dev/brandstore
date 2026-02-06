@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Plus, Trash2, ShoppingCart, DollarSign, Loader2, Package, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/BackButton';
 
 interface PurchaseItem {
   id: string;
@@ -203,11 +204,7 @@ export default function NewPurchasePage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/vendor/purchases">
-            <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
+          <BackButton fallbackUrl="/vendor/purchases" />
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
               <ShoppingCart className="h-8 w-8 text-purple-400" />

@@ -14,6 +14,7 @@ import { ArrowLeft, Package, Upload, X, Loader2, Calculator, Store, Wallet, Phon
 import Link from 'next/link';
 import Image from 'next/image';
 import { SmartCamera } from '@/components/SmartCamera';
+import { BackButton } from '@/components/BackButton';
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -292,11 +293,7 @@ export default function NewProductPage() {
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/vendor/products">
-              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
+            <BackButton fallbackUrl="/vendor/products" />
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                 <Package className="h-8 w-8 text-purple-400" />

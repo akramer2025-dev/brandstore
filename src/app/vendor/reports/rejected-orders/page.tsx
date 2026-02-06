@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { XCircle, Calendar, DollarSign, TrendingDown, FileText } from 'lucide-react';
+import { BackButton } from '@/components/BackButton';
 
 interface RejectedOrder {
   id: string;
@@ -89,6 +90,9 @@ export default function RejectedOrdersReport() {
       <div className="max-w-7xl mx-auto">
         {/* العنوان */}
         <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <BackButton fallbackUrl="/vendor/reports" className="bg-white border-gray-300 text-gray-700 hover:bg-gray-100" />
+          </div>
           <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-3">
             <XCircle className="w-10 h-10 text-red-600" />
             تقرير الطلبات المرفوضة

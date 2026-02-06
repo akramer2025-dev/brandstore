@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Store, Package, DollarSign, Calendar, ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react'
+import { Store, Package, DollarSign, Calendar, TrendingUp, TrendingDown } from 'lucide-react'
 import Link from 'next/link'
+import { BackButton } from '@/components/BackButton'
 
 interface Supplier {
   id: string
@@ -60,11 +61,7 @@ export default function SuppliersPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Link href="/vendor/dashboard">
-              <Button size="sm" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            </Link>
+            <BackButton fallbackUrl="/vendor/dashboard" />
             <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-3 rounded-xl shadow-lg">
               <Store className="w-6 h-6 text-white" />
             </div>

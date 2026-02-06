@@ -15,6 +15,7 @@ import {
   Crown,
   UserPlus,
 } from 'lucide-react'
+import { BackButton } from '@/components/BackButton'
 
 interface Partner {
   id: string
@@ -76,11 +77,7 @@ export default function VendorPartnersPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Link href="/vendor/dashboard">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+            <BackButton fallbackUrl="/vendor/dashboard" />
             <div className="bg-gradient-to-r from-pink-500 to-purple-500 p-3 rounded-xl">
               <Users className="w-6 h-6 text-white" />
             </div>

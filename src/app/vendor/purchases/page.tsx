@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, ShoppingCart, Package, DollarSign, Calendar, User, Loader2, Receipt } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/BackButton';
 
 export default function PurchasesPage() {
   const [purchases, setPurchases] = useState<any[]>([]);
@@ -45,12 +46,15 @@ export default function PurchasesPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-8">
-          <div className="flex-1">
-            <h1 className="text-lg sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
-              <ShoppingCart className="h-5 w-5 sm:h-8 sm:w-8 text-purple-400" />
-              فواتير المشتريات
-            </h1>
-            <p className="text-gray-400 mt-0.5 text-xs sm:text-sm hidden sm:block">إدارة وعرض جميع فواتير المشتريات</p>
+          <div className="flex items-center gap-2 sm:gap-4 flex-1">
+            <BackButton fallbackUrl="/vendor/dashboard" className="h-8 w-8 sm:h-10 sm:w-10" />
+            <div>
+              <h1 className="text-lg sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                <ShoppingCart className="h-5 w-5 sm:h-8 sm:w-8 text-purple-400" />
+                فواتير المشتريات
+              </h1>
+              <p className="text-gray-400 mt-0.5 text-xs sm:text-sm hidden sm:block">إدارة وعرض جميع فواتير المشتريات</p>
+            </div>
           </div>
           <Link href="/vendor/purchases/new" className="w-full sm:w-auto">
             <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 h-8 sm:h-10 text-xs sm:text-sm w-full">

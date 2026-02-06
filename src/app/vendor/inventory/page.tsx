@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Warehouse, ArrowLeft, Package, AlertTriangle, CheckCircle, Plus, Edit, Trash2, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Warehouse, Package, AlertTriangle, CheckCircle, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { BackButton } from '@/components/BackButton';
 
 export default function VendorInventoryPage() {
   const router = useRouter();
@@ -83,11 +83,7 @@ export default function VendorInventoryPage() {
         {/* Header - Mobile Optimized */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
-            <Link href="/vendor">
-              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white h-8 w-8 sm:h-10 sm:w-10">
-                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-            </Link>
+            <BackButton fallbackUrl="/vendor" className="h-8 w-8 sm:h-10 sm:w-10" />
             <div className="flex-1">
               <h1 className="text-lg sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
                 <Warehouse className="h-5 w-5 sm:h-8 sm:w-8 text-blue-400" />

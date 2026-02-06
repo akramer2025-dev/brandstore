@@ -19,6 +19,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '@/components/BackButton';
 
 export default function FinancialReportsPage() {
   const [loading, setLoading] = useState(true);
@@ -91,12 +92,15 @@ export default function FinancialReportsPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <FileText className="h-8 w-8 text-purple-400" />
-              التقارير المالية
-            </h1>
-            <p className="text-gray-400 mt-1">نظرة شاملة على الوضع المالي والأرباح</p>
+          <div className="flex items-center gap-4">
+            <BackButton fallbackUrl="/vendor/reports" />
+            <div>
+              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <FileText className="h-8 w-8 text-purple-400" />
+                التقارير المالية
+              </h1>
+              <p className="text-gray-400 mt-1">نظرة شاملة على الوضع المالي والأرباح</p>
+            </div>
           </div>
           <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
             <Download className="w-4 h-4 mr-2" />

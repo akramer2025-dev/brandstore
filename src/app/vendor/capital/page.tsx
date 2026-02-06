@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import Link from 'next/link'
 import {
   Wallet,
   TrendingUp,
@@ -25,7 +24,6 @@ import {
   Package,
   ShoppingCart,
   RefreshCw,
-  ArrowRight,
   ChevronLeft,
   Store,
   Users,
@@ -33,6 +31,7 @@ import {
   Eye,
   X
 } from 'lucide-react'
+import { BackButton } from '@/components/BackButton'
 
 interface CapitalSummary {
   capital: {
@@ -275,11 +274,7 @@ export default function VendorCapitalPage() {
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-4">
-              <Link href="/vendor/dashboard">
-                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 h-8 w-8 sm:h-10 sm:w-10">
-                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-                </Button>
-              </Link>
+              <BackButton fallbackUrl="/vendor/dashboard" className="h-8 w-8 sm:h-10 sm:w-10" />
               <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-2 sm:p-3 rounded-xl">
                 <Wallet className="w-5 h-5 sm:w-8 sm:h-8 text-white" />
               </div>
