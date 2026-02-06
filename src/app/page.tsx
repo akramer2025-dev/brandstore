@@ -14,31 +14,41 @@ import { Sparkles, ShoppingBag, TrendingUp, Award, Shield, Truck, Star } from 'l
 export const dynamic = 'force-dynamic';
 
 async function getProducts() {
-  return await prisma.product.findMany({
-    take: 12,
-    include: {
-      category: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  try {
+    return await prisma.product.findMany({
+      take: 12,
+      include: {
+        category: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
 }
 
 async function getCategories() {
-  // جلب الفئات مع عدد المنتجات وترتيبها حسب الأكثر منتجات
-  const categories = await prisma.category.findMany({
-    include: {
-      _count: {
-        select: { products: true }
+  try {
+    // جلب الفئات مع عدد المنتجات وترتيبها حسب الأكثر منتجات
+    const categories = await prisma.category.findMany({
+      include: {
+        _count: {
+          select: { products: true }
+        }
       }
-    }
-  });
-  
-  // ترتيب حسب عدد المنتجات (الأكثر أولاً)
-  return categories
-    .sort((a, b) => b._count.products - a._count.products)
-    .slice(0, 8);
+    });
+    
+    // ترتيب حسب عدد المنتجات (الأكثر أولاً)
+    return categories
+      .sort((a, b) => b._count.products - a._count.products)
+      .slice(0, 8);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return [];
+  }
 }
 
 
@@ -46,15 +56,16 @@ export default async function HomePage() {
   // السماح لجميع المستخدمين برؤية الصفحة الرئيسية
   // لن يتم redirect تلقائي لأي مستخدم
   
-  const [products, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
-  ]);
+  try {
+    const [products, categories] = await Promise.all([
+      getProducts(),
+      getCategories(),
+    ]);
 
-  return (
-    <>
-      {/* <SplashScreen /> */}
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 animate-fade-in" style={{ animationDelay: '0.5s', animationDuration: '1s' }}>
+    return (
+      <>
+        {/* <SplashScreen /> */}
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 animate-fade-in" style={{ animationDelay: '0.5s', animationDuration: '1s' }}>
 
       {/* Hero Slider with Integrated Logo - Full Width */}
       <HeroSlider />
@@ -220,4 +231,27 @@ export default async function HomePage() {
     </div>
     </>
   );
+  } catch (error) {
+    console.error('Error rendering home page:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 flex items-center justify-center">
+        <div className="text-center p-8 bg-gray-800/50 rounded-lg backdrop-blur-sm max-w-md">
+          <h1 className="text-2xl font-bold text-white mb-4">⚠️ حدث خطأ</h1>
+          <p className="text-gray-300 mb-6">
+            عذراً، حدث خطأ أثناء تحميل الصفحة. نحن نعمل على حل المشكلة.
+          </p>
+          <a 
+            href="/api/health" 
+            target="_blank"
+            className="inline-block px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition mb-3"
+          >
+            🔍 فحص حالة الخادم
+          </a>
+          <p className="text-xs text-gray-400">
+            إذا استمرت المشكلة، يرجى مراجعة سجلات Vercel
+          </p>
+        </div>
+      </div>
+    );
+  }
 }
