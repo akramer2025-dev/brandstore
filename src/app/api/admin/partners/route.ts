@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       partnerType = 'PARTNER',
       notes,
       createUserAccount = false,
+      canDeleteOrders = false,
     } = body;
 
     // التحقق من البيانات المطلوبة
@@ -138,6 +139,7 @@ export async function POST(request: NextRequest) {
           address: '',
           capitalBalance: parseFloat(capitalAmount),
           isApproved: true,
+          canDeleteOrders: canDeleteOrders, // صلاحية حذف الطلبات
         },
       });
 

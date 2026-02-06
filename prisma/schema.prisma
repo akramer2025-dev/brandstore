@@ -145,6 +145,8 @@ model Vendor {
   isActive           Boolean        @default(true)
   rating             Float          @default(0)
   totalSales         Int            @default(0)
+  // صلاحيات الشريك
+  canDeleteOrders    Boolean        @default(false) // صلاحية حذف الطلبات
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
   orders             Order[]

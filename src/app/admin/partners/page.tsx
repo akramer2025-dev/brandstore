@@ -66,6 +66,7 @@ export default function AdminPartnersPage() {
     partnerType: 'PARTNER',
     notes: '',
     createUserAccount: false,
+    canDeleteOrders: true,
   })
 
   const [editFormData, setEditFormData] = useState({
@@ -244,6 +245,7 @@ export default function AdminPartnersPage() {
           partnerType: 'PARTNER',
           notes: '',
           createUserAccount: false,
+          canDeleteOrders: true,
         })
         fetchPartners()
       } else {
@@ -430,6 +432,22 @@ export default function AdminPartnersPage() {
                       إنشاء حساب VENDOR للشريك
                     </Label>
                   </div>
+
+                  {/* صلاحية حذف الطلبات */}
+                  {formData.createUserAccount && (
+                    <div className="flex items-center gap-2 p-3 bg-red-900/30 rounded-lg border border-red-500/30">
+                      <input
+                        type="checkbox"
+                        id="canDeleteOrders"
+                        checked={formData.canDeleteOrders}
+                        onChange={(e) => setFormData({ ...formData, canDeleteOrders: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="canDeleteOrders" className="text-white cursor-pointer">
+                        🗑️ السماح بحذف الطلبات
+                      </Label>
+                    </div>
+                  )}
 
                   {/* كلمة المرور - تظهر فقط إذا تم تفعيل إنشاء الحساب */}
                   {formData.createUserAccount && (

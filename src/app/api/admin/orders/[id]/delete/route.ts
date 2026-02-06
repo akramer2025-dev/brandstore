@@ -18,8 +18,26 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // فقط المدير أو المطور يستطيع حذف الطلبات
-    if (session.user.role !== "ADMIN") {
+    // التحقق من صلاحيات الحذف
+    let canDelete = false;
+    let vendorId: string | null = null;
+
+    if (session.user.role === "ADMIN" || session.user.role === "DEVELOPER") {
+      canDelete = true;
+    } else if (session.user.role === "VENDOR") {
+      // التحقق من أن الشريك لديه صلاحية حذف الطلبات
+      const vendor = await prisma.vendor.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true, canDeleteOrders: true },
+      });
+
+      if (vendor && vendor.canDeleteOrders) {
+        canDelete = true;
+        vendorId = vendor.id;
+      }
+    }
+
+    if (!canDelete) {
       return NextResponse.json(
         { error: "ليس لديك صلاحية حذف الطلبات" },
         { status: 403 }
@@ -46,6 +64,14 @@ export async function DELETE(
       return NextResponse.json(
         { error: "الطلب محذوف بالفعل" },
         { status: 400 }
+      );
+    }
+
+    // إذا كان الطالب شريك (VENDOR)، التحقق من أن الطلب يخصه
+    if (vendorId && order.vendorId !== vendorId) {
+      return NextResponse.json(
+        { error: "ليس لديك صلاحية حذف هذا الطلب" },
+        { status: 403 }
       );
     }
 
