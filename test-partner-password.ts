@@ -20,7 +20,7 @@ async function testPartnerPassword() {
       include: {
         vendor: {
           include: {
-            partnerCapitals: true,
+            partners: true,
           },
         },
       },
@@ -36,8 +36,8 @@ async function testPartnerPassword() {
       console.log()
       console.log('📋 معلومات الشراكة:')
       
-      if (testPartner.vendor?.partnerCapitals.length) {
-        testPartner.vendor.partnerCapitals.forEach((capital, index) => {
+      if (testPartner.vendor?.partners && testPartner.vendor.partners.length) {
+        testPartner.vendor.partners.forEach((capital: any, index: number) => {
           console.log(`   ${index + 1}. ${capital.partnerName}`)
           console.log(`      - المبلغ: ${capital.capitalAmount} جنيه`)
           console.log(`      - النسبة: ${capital.capitalPercent}%`)

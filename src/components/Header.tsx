@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff, LayoutDashboard } from "lucide-react";
+import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff, LayoutDashboard, MapPin } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,10 +151,12 @@ export function Header() {
 
   const subscribeToNotifications = async () => {
     try {
+      // طلب الإذن أولاً
       const perm = await Notification.requestPermission();
       setNotificationPermission(perm);
 
       if (perm !== 'granted') {
+        alert('⚠️ يجب السماح بالإشعارات من إعدادات المتصفح لتفعيل هذه الميزة');
         return;
       }
 
@@ -176,13 +178,17 @@ export function Header() {
 
       setIsNotificationSubscribed(true);
 
+      // إظهار إشعار تجريبي
       registration.showNotification('مرحباً في Remostore! 🎉', {
         body: 'تم تفعيل الإشعارات بنجاح. ستصلك إشعارات بكل جديد!',
         icon: '/icon-192x192.png',
         badge: '/icon-192x192.png',
       });
+      
+      alert('✅ تم تفعيل الإشعارات بنجاح!');
     } catch (error) {
       console.error('Error subscribing to notifications:', error);
+      alert('❌ حدث خطأ في تفعيل الإشعارات. تأكد من دعم المتصفح للإشعارات.');
     }
   };
 
@@ -194,9 +200,11 @@ export function Header() {
       if (subscription) {
         await subscription.unsubscribe();
         setIsNotificationSubscribed(false);
+        alert('✅ تم إيقاف الإشعارات بنجاح');
       }
     } catch (error) {
       console.error('Error unsubscribing:', error);
+      alert('❌ حدث خطأ في إيقاف الإشعارات');
     }
   };
 
@@ -419,6 +427,12 @@ export function Header() {
                     <Link href="/profile" className="cursor-pointer text-gray-300 hover:text-cyan-400">
                       <User className="w-4 h-4 mr-2" />
                       الملف الشخصي
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile/addresses" className="cursor-pointer text-gray-300 hover:text-cyan-400">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      عناويني
                     </Link>
                   </DropdownMenuItem>
                   {session.user?.role === 'DELIVERY_STAFF' && (

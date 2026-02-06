@@ -37,13 +37,13 @@ async function main() {
 
     await prisma.partnerCapital.create({
       data: {
-        userId: radwaUser.id,
         vendorId: vendor.id,
         partnerName: 'Radwa',
+        partnerType: 'OWNER',
         capitalAmount: 0,
         capitalPercent: 100,
-        initialCapital: 0,
-        currentBalance: 0,
+        initialAmount: 0,
+        currentAmount: 0,
       }
     });
 
@@ -85,13 +85,13 @@ async function main() {
 
     await prisma.partnerCapital.create({
       data: {
-        userId: nadaUser.id,
         vendorId: vendor2.id,
         partnerName: 'Nada',
+        partnerType: 'OWNER',
         capitalAmount: 0,
         capitalPercent: 100,
-        initialCapital: 0,
-        currentBalance: 0,
+        initialAmount: 0,
+        currentAmount: 0,
       }
     });
 

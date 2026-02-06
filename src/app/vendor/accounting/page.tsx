@@ -60,11 +60,6 @@ export default async function VendorAccountingPage() {
   // جلب المشتريات
   const purchases = await prisma.purchase.findMany({
     where: { vendorId: vendor.id },
-    include: {
-      items: {
-        include: { product: true }
-      }
-    },
     orderBy: { purchaseDate: 'desc' }
   });
 

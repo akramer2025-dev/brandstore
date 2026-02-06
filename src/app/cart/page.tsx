@@ -243,12 +243,12 @@ export default function CartPage() {
                     </Link>
                   </div>
 
-                  <div className="bg-teal-900/20 border border-teal-500/30 rounded-lg p-3 sm:p-4 text-center">
-                    <p className="text-xs sm:text-sm text-gray-300">
-                      💳 الدفع عند الاستلام
+                  <div className="bg-gradient-to-r from-teal-900/20 to-cyan-900/20 border border-teal-500/30 rounded-lg p-3 sm:p-4 text-center">
+                    <p className="text-xs sm:text-sm text-teal-300 font-medium">
+                      💳 طرق دفع متعددة متاحة
                     </p>
                     <p className="text-[10px] sm:text-xs text-gray-400 mt-1">
-                      يمكنك فحص المنتج قبل الدفع
+                      دفع عند الاستلام • تحويل بنكي • محفظة إلكترونية • تقسيط
                     </p>
                   </div>
                 </CardContent>

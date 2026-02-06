@@ -10,21 +10,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // جلب جميع فواتير الشراء للشريك
-    const purchases = await prisma.purchaseInvoice.findMany({
+    // جلب جميع المشتريات للشريك
+    const purchases = await prisma.purchase.findMany({
       where: {
         vendorId: session.user.id,
       },
       select: {
-        supplierName: true,
-        totalAmount: true,
-        paidAmount: true,
+        supplier: true,
+        totalCost: true,
         createdAt: true,
-        items: {
-          select: {
-            productId: true,
-          },
-        },
+        productName: true,
+        receiptNumber: true,
       },
     })
 
@@ -32,7 +28,7 @@ export async function GET(req: NextRequest) {
     const suppliersMap = new Map()
 
     purchases.forEach((purchase) => {
-      const supplierName = purchase.supplierName
+      const supplierName = purchase.supplier || 'غير محدد'
       
       if (!suppliersMap.has(supplierName)) {
         suppliersMap.set(supplierName, {
@@ -46,19 +42,18 @@ export async function GET(req: NextRequest) {
       }
 
       const supplier = suppliersMap.get(supplierName)
-      supplier.totalPurchases += purchase.totalAmount
-      supplier.paidAmount += purchase.paidAmount
-      supplier.pendingPayment += (purchase.totalAmount - purchase.paidAmount)
+      supplier.totalPurchases += purchase.totalCost
+      // في هذا النظام، Purchase لا يتتبع المدفوعات - كل شيء محسوب من رأس المال
+      supplier.paidAmount += purchase.totalCost
+      supplier.pendingPayment += 0
       
       // تحديث آخر تاريخ شراء
       if (new Date(purchase.createdAt) > new Date(supplier.lastPurchaseDate)) {
         supplier.lastPurchaseDate = purchase.createdAt
       }
 
-      // إضافة المنتجات إلى Set لتجنب التكرار
-      purchase.items.forEach((item) => {
-        supplier.productsCount.add(item.productId)
-      })
+      // إضافة المنتجات
+      supplier.productsCount.add(purchase.productName)
     })
 
     // تحويل Map إلى Array

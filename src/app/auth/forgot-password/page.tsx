@@ -16,16 +16,38 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!email) {
+      toast.error("يرجى إدخال البريد الإلكتروني");
+      return;
+    }
+
+    // التحقق من صحة البريد الإلكتروني
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("يرجى إدخال بريد إلكتروني صحيح");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // محاكاة إرسال البريد الإلكتروني
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "فشل في إرسال البريد");
+      }
       
       setSubmitted(true);
       toast.success("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني");
-    } catch (error) {
-      toast.error("حدث خطأ. الرجاء المحاولة مرة أخرى");
+    } catch (error: any) {
+      toast.error(error.message || "حدث خطأ. يرجى المحاولة لاحقاً");
     } finally {
       setLoading(false);
     }

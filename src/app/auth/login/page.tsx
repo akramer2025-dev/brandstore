@@ -178,6 +178,13 @@ export default function LoginPage() {
                   <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
                   <span>تذكرني</span>
                 </label>
+                <Link 
+                  href="/auth/forgot-password" 
+                  className="text-purple-600 hover:text-purple-700 font-semibold hover:underline"
+                >
+                  نسيت كلمة المرور؟
+                </Link>
+              </div>
                 <Link href="/auth/forgot-password" className="text-purple-600 hover:text-purple-700 font-medium">
                   نسيت كلمة المرور؟
                 </Link>

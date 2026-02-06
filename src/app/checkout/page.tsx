@@ -391,7 +391,10 @@ export default function CheckoutPage() {
         toast.success("تم إنشاء الطلب بنجاح! 🎉");
       }
       
-      router.push(`/orders/${order.id}`);
+      // تأخير التوجيه قليلاً لتجنب خطأ Router أثناء الـ render
+      setTimeout(() => {
+        router.push(`/orders/${order.id}`);
+      }, 100);
     } catch (error) {
       console.error("Order creation error:", error);
       toast.error(error instanceof Error ? error.message : "حدث خطأ أثناء إنشاء الطلب");

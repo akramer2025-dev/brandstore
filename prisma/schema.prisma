@@ -219,6 +219,9 @@ model Product {
   isVisible       Boolean        @default(true) // يظهر في المتجر أم لا
   productionCost  Float?         // تكلفة الإنتاج (للأرباح)
   
+  // ============ إعدادات الدفع ============
+  allowCashOnDelivery Boolean    @default(true) // هل يسمح بالدفع عند الاستلام
+  
   // ============ نظام المنتجات الوسيط (Consignment/Dropship) ============
   productSource   ProductSource  @default(OWNED)     // مصدر المنتج: مملوك أو وسيط
   supplierName    String?        // اسم المورد/المحل الأصلي
@@ -1243,4 +1246,29 @@ model VendorShippingCompany {
 
   @@map("vendor_shipping_companies")
   @@index([vendorId])
+}
+
+// ============ اشتراكات الإشعارات Push ============
+model PushSubscription {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  subscription String   // JSON string of subscription object
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("push_subscriptions")
+  @@index([userId])
+}
+
+// ============ استعادة كلمة المرور ============
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+  @@index([email])
+  @@index([token])
 }

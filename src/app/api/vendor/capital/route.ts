@@ -70,10 +70,10 @@ export async function POST(req: NextRequest) {
           vendorId: vendor.id,
           partnerName: session.user.name || 'الشريك',
           partnerType: 'OWNER',
+          capitalAmount: parseFloat(initialAmount),
           initialAmount: parseFloat(initialAmount),
           currentAmount: parseFloat(initialAmount),
-          capitalPercentage: 100, // 100% لأنه المالك
-          profitPercentage: 100,
+          capitalPercent: 100, // 100% لأنه المالك
           notes: notes || null,
         }
       });

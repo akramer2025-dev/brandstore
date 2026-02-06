@@ -165,6 +165,8 @@ export async function POST(request: NextRequest) {
               data: {
                 vendorId: session.user.id,
                 productId: existingProduct.id,
+                productName: item.productNameAr,
+                productNameAr: item.productNameAr,
                 totalPurchased: item.quantity,
                 currentStock: item.quantity,
                 unitCost: item.purchasePrice,
@@ -184,7 +186,7 @@ export async function POST(request: NextRequest) {
               stock: item.quantity,
               categoryId: item.categoryId,
               vendorId: session.user.id,
-              images: item.imageUrl ? [item.imageUrl] : [],
+              images: item.imageUrl || '',
             },
           });
 
@@ -193,6 +195,8 @@ export async function POST(request: NextRequest) {
             data: {
               vendorId: session.user.id,
               productId: newProduct.id,
+              productName: item.productNameAr,
+              productNameAr: item.productNameAr,
               totalPurchased: item.quantity,
               currentStock: item.quantity,
               unitCost: item.purchasePrice,

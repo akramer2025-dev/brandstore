@@ -22,17 +22,18 @@ export default function StarryBackground() {
 
     // Star class
     class Star {
-      x: number;
-      y: number;
-      size: number;
-      speed: number;
-      opacity: number;
-      twinkleSpeed: number;
-      twinkleDirection: number;
+      x: number = 0;
+      y: number = 0;
+      size: number = 0;
+      speed: number = 0;
+      opacity: number = 0;
+      twinkleSpeed: number = 0;
+      twinkleDirection: number = 0;
 
       constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
+        if (!canvas) return;
+        this.x = Math.random() * canvas!.width;
+        this.y = Math.random() * canvas!.height;
         this.size = Math.random() * 2 + 0.5;
         this.speed = Math.random() * 0.05 + 0.01;
         this.opacity = Math.random();
@@ -41,6 +42,7 @@ export default function StarryBackground() {
       }
 
       update() {
+        if (!canvas) return;
         // Twinkle effect
         this.opacity += this.twinkleSpeed * this.twinkleDirection;
         if (this.opacity >= 1 || this.opacity <= 0.2) {
@@ -50,8 +52,8 @@ export default function StarryBackground() {
         // Slow floating movement
         this.y -= this.speed;
         if (this.y < 0) {
-          this.y = canvas.height;
-          this.x = Math.random() * canvas.width;
+          this.y = canvas!.height;
+          this.x = Math.random() * canvas!.width;
         }
       }
 
@@ -87,13 +89,13 @@ export default function StarryBackground() {
 
     // Shooting star class
     class ShootingStar {
-      x: number;
-      y: number;
-      length: number;
-      speed: number;
-      opacity: number;
-      angle: number;
-      active: boolean;
+      x: number = 0;
+      y: number = 0;
+      length: number = 0;
+      speed: number = 0;
+      opacity: number = 0;
+      angle: number = 0;
+      active: boolean = false;
 
       constructor() {
         this.reset();
@@ -101,8 +103,9 @@ export default function StarryBackground() {
       }
 
       reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height * 0.3;
+        if (!canvas) return;
+        this.x = Math.random() * canvas!.width;
+        this.y = Math.random() * canvas!.height * 0.3;
         this.length = Math.random() * 80 + 40;
         this.speed = Math.random() * 10 + 10;
         this.opacity = 1;
@@ -111,13 +114,13 @@ export default function StarryBackground() {
       }
 
       update() {
-        if (!this.active) return;
+        if (!this.active || !canvas) return;
 
         this.x += Math.cos(this.angle) * this.speed;
         this.y += Math.sin(this.angle) * this.speed;
         this.opacity -= 0.015;
 
-        if (this.opacity <= 0 || this.x > canvas.width || this.y > canvas.height) {
+        if (this.opacity <= 0 || this.x > canvas!.width || this.y > canvas!.height) {
           this.reset();
         }
       }

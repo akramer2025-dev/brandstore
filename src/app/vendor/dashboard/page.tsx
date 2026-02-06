@@ -49,6 +49,94 @@ export default function VendorDashboard() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [prevUnreadCount, setPrevUnreadCount] = useState(0)
+  const [notificationAudio, setNotificationAudio] = useState<HTMLAudioElement | null>(null)
+  const [isAlertPlaying, setIsAlertPlaying] = useState(false)
+
+  // تشغيل صوت مستمر للإشعار (يتكرر حتى يتم إيقافه)
+  const playNotificationSound = () => {
+    try {
+      // إنشاء صوت طويل مستمر
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      let isPlaying = true
+      setIsAlertPlaying(true)
+
+      const playBeep = () => {
+        if (!isPlaying) return
+
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+        
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+        
+        // صوت أطول وأوضح
+        oscillator.frequency.value = 1200
+        oscillator.type = 'sine'
+        
+        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+        
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 0.5)
+        
+        // تكرار الصوت كل ثانية
+        setTimeout(() => playBeep(), 1000)
+      }
+
+      playBeep()
+      
+      // حفظ دالة إيقاف الصوت
+      ;(window as any).stopNotificationSound = () => {
+        isPlaying = false
+        setIsAlertPlaying(false)
+        console.log('🔕 تم إيقاف صوت الإشعار')
+      }
+      
+      console.log('🔔 صوت الإشعار المستمر يعمل! اضغط على أي مكان لإيقافه')
+    } catch (error) {
+      console.error('Error playing notification sound:', error)
+    }
+  }
+
+  // إيقاف الصوت عند الضغط على الشاشة
+  const stopAlert = () => {
+    if (isAlertPlaying && (window as any).stopNotificationSound) {
+      ;(window as any).stopNotificationSound()
+    }
+  }
+
+  // تسجيل Service Worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('✅ Service Worker registered:', registration)
+        })
+        .catch(error => {
+          console.error('❌ Service Worker registration failed:', error)
+        })
+
+      // الاستماع للرسائل من Service Worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'NEW_NOTIFICATION') {
+          console.log('📩 رسالة جديدة من Service Worker:', event.data)
+          playNotificationSound()
+        }
+      })
+    }
+  }, [])
+
+  // طلب إذن الإشعارات
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          console.log('✅ تم منح إذن الإشعارات')
+        }
+      })
+    }
+  }, [])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -76,7 +164,9 @@ export default function VendorDashboard() {
       }
       if (notificationsRes && notificationsRes.ok) {
         const data = await notificationsRes.json()
-        setUnreadCount(data.unreadCount || 0)
+        const initialCount = data.unreadCount || 0
+        setUnreadCount(initialCount)
+        setPrevUnreadCount(initialCount) // تهيئة العداد السابق
       }
     } catch (error) {
       console.error('Failed to fetch data:', error)
@@ -85,19 +175,36 @@ export default function VendorDashboard() {
     }
   }
 
-  // تحديث عدد الإشعارات كل 30 ثانية
+  // تحديث عدد الإشعارات كل 10 ثواني (للاختبار السريع)
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
         const res = await fetch('/api/vendor/notifications')
         if (res.ok) {
           const data = await res.json()
-          setUnreadCount(data.unreadCount || 0)
+          const newUnreadCount = data.unreadCount || 0
+          
+          // إذا زاد عدد الإشعارات، شغل الصوت
+          if (newUnreadCount > prevUnreadCount && prevUnreadCount > 0) {
+            playNotificationSound()
+            
+            // إظهار إشعار desktop أيضاً
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('🎉 طلب جديد!', {
+                body: 'لديك طلب جديد في المتجر',
+                icon: '/icon-192x192.png',
+                tag: 'new-order',
+              })
+            }
+          }
+          
+          setPrevUnreadCount(newUnreadCount)
+          setUnreadCount(newUnreadCount)
         }
       } catch (error) {
         console.error('Failed to fetch notifications:', error)
       }
-    }, 30000)
+    }, 10000) // كل 10 ثواني
     return () => clearInterval(interval)
   }, [])
 
@@ -110,7 +217,27 @@ export default function VendorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4 md:p-6">
+    <div 
+      className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4 md:p-6"
+      onClick={stopAlert}
+    >
+      {/* تنبيه صوتي مستمر */}
+      {isAlertPlaying && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="bg-gradient-to-r from-red-600 to-orange-600 p-8 rounded-2xl shadow-2xl text-center animate-pulse">
+            <Bell className="w-16 h-16 text-white mx-auto mb-4 animate-bounce" />
+            <h2 className="text-2xl font-bold text-white mb-2">🎉 طلب جديد!</h2>
+            <p className="text-white/90 mb-4">لديك طلب جديد في المتجر</p>
+            <button
+              onClick={stopAlert}
+              className="bg-white text-red-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors"
+            >
+              استقبال الطلب
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto">
         
         {/* Header بسيط - responsive */}
