@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   try {
     const session = await auth();
 
-    if (!session || (session.user?.role !== "PARTNER" && session.user?.role !== "ADMIN")) {
+    if (!session || (session.user?.role !== "VENDOR" && session.user?.role !== "ADMIN")) {
       return NextResponse.json({ error: "غير مصرح لك" }, { status: 401 });
     }
 
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     }
 
     // التحقق من أن الشريك يملك المنتج
-    if (session.user?.role === "PARTNER" && product.vendorId !== session.user.id) {
+    if (session.user?.role === "VENDOR" && product.vendorId !== session.user.id) {
       return NextResponse.json({ error: "غير مصرح لك بالوصول لهذا المنتج" }, { status: 403 });
     }
 
