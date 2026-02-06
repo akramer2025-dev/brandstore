@@ -336,7 +336,11 @@ export default async function VendorProductsPage({
                   </div>
 
                   <div className="flex gap-2">
-                    <ProductActions productId={product.id} productName={product.nameAr} />
+                    <ProductActions 
+                      productId={product.id} 
+                      productName={product.nameAr}
+                      productImage={product.images ? product.images.split(',')[0] : undefined}
+                    />
                   </div>
                 </CardContent>
               </Card>
