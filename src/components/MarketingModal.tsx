@@ -198,7 +198,7 @@ export default function MarketingModal({
               <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
                 <Button
                   onClick={() => copyToClipboard(content.facebook, "فيسبوك")}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-8 sm:h-10">
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-8 sm:h-10"
                 >
                   {copiedTab === "فيسبوك" ? (
                     <Check className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
@@ -209,7 +209,7 @@ export default function MarketingModal({
                 </Button>
                 <Button
                   onClick={() => shareToFacebook()}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-8 sm:h-10">
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm h-8 sm:h-10"
                 >
                   <Share2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
                   <span className="mr-1 sm:mr-0">مشاركة على فيسبوك</span>
@@ -227,7 +227,7 @@ export default function MarketingModal({
               <div className="flex gap-1.5 sm:gap-2">
                 <Button
                   onClick={() => copyToClipboard(content.instagram, "إنستجرام")}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs sm:text-sm h-8 sm:h-10">
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs sm:text-sm h-8 sm:h-10"
                 >
                   {copiedTab === "إنستجرام" ? (
                     <Check className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
@@ -255,7 +255,7 @@ export default function MarketingModal({
               <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
                 <Button
                   onClick={() => copyToClipboard(content.twitter, "تويتر")}
-                  className="flex-1 bg-sky-500 hover:bg-sky-600 text-xs sm:text-sm h-8 sm:h-10">
+                  className="flex-1 bg-sky-500 hover:bg-sky-600 text-xs sm:text-sm h-8 sm:h-10"
                 >
                   {copiedTab === "تويتر" ? (
                     <Check className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
@@ -266,7 +266,7 @@ export default function MarketingModal({
                 </Button>
                 <Button
                   onClick={() => shareToTwitter(content.twitter)}
-                  className="flex-1 bg-sky-500 hover:bg-sky-600 text-xs sm:text-sm h-8 sm:h-10">
+                  className="flex-1 bg-sky-500 hover:bg-sky-600 text-xs sm:text-sm h-8 sm:h-10"
                 >
                   <Share2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
                   <span className="mr-1 sm:mr-0">مشاركة على تويتر</span>
@@ -284,7 +284,7 @@ export default function MarketingModal({
               <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
                 <Button
                   onClick={() => copyToClipboard(content.whatsapp, "واتساب")}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-xs sm:text-sm h-8 sm:h-10">
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-xs sm:text-sm h-8 sm:h-10"
                 >
                   {copiedTab === "واتساب" ? (
                     <Check className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
@@ -295,7 +295,7 @@ export default function MarketingModal({
                 </Button>
                 <Button
                   onClick={() => shareToWhatsApp(content.whatsapp)}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-xs sm:text-sm h-8 sm:h-10">
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-xs sm:text-sm h-8 sm:h-10"
                 >
                   <Share2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
                   <span className="mr-1 sm:mr-0">مشاركة على واتساب</span>
@@ -308,7 +308,7 @@ export default function MarketingModal({
             <p className="text-gray-400 text-sm sm:text-base">لم يتم توليد المحتوى بعد</p>
             <Button
               onClick={generateContent}
-              className="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 text-xs sm:text-sm h-8 sm:h-10">
+              className="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 text-xs sm:text-sm h-8 sm:h-10"
             >
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
               <span className="mr-1 sm:mr-0">توليد المحتوى</span>
