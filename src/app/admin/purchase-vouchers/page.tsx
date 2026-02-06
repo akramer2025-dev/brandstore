@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus, FileText, DollarSign, Package, TrendingUp, ArrowLeft } from "lucide-react";
+import { Plus, FileText, DollarSign, Package, TrendingUp } from "lucide-react";
+import { BackButton } from "@/components/BackButton";
 
 export default async function PurchaseVouchersPage() {
   const session = await auth();
@@ -54,11 +55,7 @@ export default async function PurchaseVouchersPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/admin/accounting">
-              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
+            <BackButton fallbackUrl="/admin/accounting" />
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                 <FileText className="h-8 w-8 text-teal-400" />

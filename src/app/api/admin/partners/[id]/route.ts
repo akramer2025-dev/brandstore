@@ -20,9 +20,7 @@ export async function GET(
       where: { id },
       include: {
         vendor: {
-          select: {
-            id: true,
-            userId: true,
+          include: {
             user: {
               select: {
                 id: true,
@@ -47,6 +45,7 @@ export async function GET(
       email: partner.vendor?.user?.email || '',
       hasAccount: !!partner.vendor?.user,
       userId: partner.vendor?.user?.id,
+      canDeleteOrders: partner.vendor?.canDeleteOrders || false,
     });
   } catch (error) {
     console.error('Error fetching partner:', error);
@@ -80,6 +79,7 @@ export async function PATCH(
       isActive,
       changePassword,
       newPassword,
+      canDeleteOrders,
     } = body;
 
     // التحقق من وجود الشريك
@@ -159,6 +159,15 @@ export async function PATCH(
       });
 
       console.log('✅ تم تغيير كلمة المرور للشريك:', partnerName || existingPartner.partnerName);
+    }
+
+    // تحديث صلاحية حذف الطلبات للـ Vendor إذا كان موجوداً
+    if (existingPartner.vendorId && canDeleteOrders !== undefined) {
+      await prisma.vendor.update({
+        where: { id: existingPartner.vendorId },
+        data: { canDeleteOrders },
+      });
+      console.log('✅ تم تحديث صلاحية حذف الطلبات:', canDeleteOrders);
     }
 
     // تحديث الشريك

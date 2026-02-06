@@ -2,12 +2,13 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Plus, Edit, Trash2, ArrowLeft, Tag } from "lucide-react";
+import { Package, Plus, Edit, Trash2, Tag } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import { ProductActions } from "@/components/ProductActions";
 import { DeleteAllCategoriesButton } from "@/components/DeleteAllCategoriesButton";
+import { BackButton } from "@/components/BackButton";
 
 export default async function AdminProductsPage() {
   const session = await auth();
@@ -49,10 +50,7 @@ export default async function AdminProductsPage() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <Link href="/admin" className="inline-flex items-center gap-2 text-teal-100 hover:text-white mb-2 transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-                العودة للوحة الإدارة
-              </Link>
+              <BackButton fallbackUrl="/admin" label="العودة للوحة الإدارة" className="mb-2" />
               <h1 className="text-4xl font-bold drop-shadow-lg flex items-center gap-3">
                 <Package className="w-10 h-10" />
                 إدارة المنتجات

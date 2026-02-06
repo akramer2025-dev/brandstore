@@ -12,6 +12,7 @@ import Link from "next/link";
 import { SmartCamera } from "@/components/SmartCamera";
 import { toast } from "sonner";
 import Image from "next/image";
+import { BackButton } from "@/components/BackButton";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -246,13 +247,7 @@ export default function NewProductPage() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <Link
-                href="/admin/products"
-                className="inline-flex items-center gap-2 text-teal-100 hover:text-white mb-2 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                العودة للمنتجات
-              </Link>
+              <BackButton fallbackUrl="/admin/products" label="العودة للمنتجات" className="mb-2" />
               <h1 className="text-4xl font-bold drop-shadow-lg">إضافة منتج جديد</h1>
               <p className="text-teal-100 mt-2">املأ البيانات لإضافة منتج جديد للمتجر</p>
             </div>

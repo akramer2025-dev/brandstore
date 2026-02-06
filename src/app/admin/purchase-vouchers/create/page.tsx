@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus, Trash2, ArrowLeft, Package } from "lucide-react";
 import Link from "next/link";
+import { BackButton } from "@/components/BackButton";
 
 interface MaterialItem {
   materialId: string;
@@ -155,11 +156,7 @@ export default function CreatePurchaseVoucherPage() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/admin/purchase-vouchers">
-            <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
+          <BackButton fallbackUrl="/admin/purchase-vouchers" />
           <div>
             <h1 className="text-3xl font-bold text-white">إنشاء سند صرف جديد</h1>
             <p className="text-gray-400 mt-1">سند صرف لشراء المواد الخام والأصناف</p>

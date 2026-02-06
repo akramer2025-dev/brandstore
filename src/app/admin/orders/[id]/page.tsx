@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  ArrowLeft, 
   Package, 
   User, 
   MapPin, 
@@ -20,6 +19,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { OrderActions } from "./OrderActions";
 import { DeliveryLocationMap } from "./DeliveryLocationMap";
+import { BackButton } from "@/components/BackButton";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -121,10 +121,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       {/* Header */}
       <div className="relative z-10 bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white py-8 shadow-2xl">
         <div className="container mx-auto px-4">
-          <Link href="/admin/orders" className="inline-flex items-center gap-2 text-teal-100 hover:text-white mb-4 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            العودة للطلبات
-          </Link>
+          <BackButton fallbackUrl="/admin/orders" label="العودة للطلبات" className="mb-4" />
           <h1 className="text-4xl font-bold drop-shadow-lg flex items-center gap-3">
             <Package className="w-10 h-10" />
             تفاصيل الطلب #{order.orderNumber.slice(0, 8).toUpperCase()}

@@ -17,9 +17,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import Link from 'next/link'
+import { BackButton } from '@/components/BackButton'
 import {
-  ArrowLeft,
   Plus,
   Users,
   DollarSign,
@@ -80,6 +79,7 @@ export default function AdminPartnersPage() {
     newPassword: '',
     email: '',
     hasAccount: false,
+    canDeleteOrders: false,
   })
 
   useEffect(() => {
@@ -128,6 +128,7 @@ export default function AdminPartnersPage() {
       newPassword: '',
       email: data.email || '',
       hasAccount: data.hasAccount || false,
+      canDeleteOrders: data.canDeleteOrders || false,
     })
     setIsEditDialogOpen(true)
   }
@@ -274,11 +275,7 @@ export default function AdminPartnersPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/admin">
-              <Button variant="outline" size="icon" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
+            <BackButton fallbackUrl="/admin" />
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                 <Users className="h-8 w-8 text-purple-400" />
@@ -803,6 +800,21 @@ export default function AdminPartnersPage() {
                           </p>
                         </div>
                       )}
+
+                      {/* صلاحية حذف الطلبات */}
+                      <div className="flex items-center gap-2 p-3 bg-red-900/20 rounded-lg border border-red-500/30">
+                        <input
+                          type="checkbox"
+                          id="edit_canDeleteOrders"
+                          checked={editFormData.canDeleteOrders}
+                          onChange={(e) => setEditFormData({ ...editFormData, canDeleteOrders: e.target.checked })}
+                          className="rounded"
+                        />
+                        <Label htmlFor="edit_canDeleteOrders" className="text-white cursor-pointer flex items-center gap-2">
+                          <Trash2 className="h-4 w-4" />
+                          السماح بحذف الطلبات
+                        </Label>
+                      </div>
                     </div>
                   ) : (
                     <div className="p-3 bg-yellow-900/20 rounded-lg border border-yellow-500/30">

@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Check, X, Trash2 } from "lucide-react";
+import { Star, Check, X, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { BackButton } from "@/components/BackButton";
 
 interface Review {
   id: string;
@@ -101,13 +102,7 @@ export default function AdminReviewsPage() {
       {/* Header */}
       <div className="relative z-10 bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white py-8 shadow-2xl">
         <div className="container mx-auto px-4">
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-2 text-teal-100 hover:text-white mb-2 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            العودة للوحة الإدارة
-          </Link>
+          <BackButton fallbackUrl="/admin" label="العودة للوحة الإدارة" className="mb-2" />
           <h1 className="text-4xl font-bold drop-shadow-lg flex items-center gap-3">
             <Star className="w-10 h-10" />
             إدارة التقييمات

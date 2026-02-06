@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { WarehouseTabs } from "./WarehouseTabs";
 import { prisma } from "@/lib/prisma";
+import { BackButton } from "@/components/BackButton";
 
 export default async function WarehousePage() {
   const session = await auth();
@@ -60,10 +60,7 @@ export default async function WarehousePage() {
       {/* Header */}
       <div className="relative z-10 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-8 shadow-2xl">
         <div className="container mx-auto px-4">
-          <Link href="/admin" className="inline-flex items-center gap-2 text-blue-100 hover:text-white mb-2 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            العودة للوحة الإدارة
-          </Link>
+          <BackButton fallbackUrl="/admin" label="العودة للوحة الإدارة" className="mb-2" />
           <h1 className="text-4xl font-bold drop-shadow-lg">
             🏭 إدارة المخزون والإنتاج الشاملة
           </h1>
