@@ -74,7 +74,7 @@ export default function VendorDashboard() {
   const audioContextRef = useRef<AudioContext | null>(null)
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [recentNotifications, setRecentNotifications] = useState<RecentNotification[]>([])
-  const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const isInitialLoadRef = useRef(true)
 
 
   // تهيئة AudioContext عند أول تفاعل
@@ -371,7 +371,8 @@ export default function VendorDashboard() {
         // حفظ آخر 5 إشعارات
         setRecentNotifications(data.notifications?.slice(0, 5) || [])
         // انتهى التحميل الأولي
-        setIsInitialLoad(false)
+        isInitialLoadRef.current = false
+        console.log('🔓 تم تعطيل isInitialLoadRef - الآن يمكن تشغيل الأصوات')
       }
       if (ordersRes && ordersRes.ok) {
         const data = await ordersRes.json()
@@ -404,10 +405,10 @@ export default function VendorDashboard() {
           const data = await res.json()
           const newUnreadCount = data.unreadCount || 0
           
-          console.log(`📨 الإشعارات: سابق=${prevUnreadCountRef.current}, جديد=${newUnreadCount}`)
+          console.log(`📨 الإشعارات: سابق=${prevUnreadCountRef.current}, جديد=${newUnreadCount}, isInitialLoad=${isInitialLoadRef.current}`)
           
           // إذا زاد عدد الإشعارات، شغل الصوت أوتوماتيك (بعد التحميل الأولي فقط)
-          if (!isInitialLoad && newUnreadCount > prevUnreadCountRef.current) {
+          if (!isInitialLoadRef.current && newUnreadCount > prevUnreadCountRef.current) {
             console.log(`🔔🔔🔔 طلب جديد! العدد: ${prevUnreadCountRef.current} → ${newUnreadCount}`)
             console.log('🔊 محاولة تشغيل الصوت...')
             
