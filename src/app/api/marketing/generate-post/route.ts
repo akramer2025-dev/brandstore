@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import OpenAI from "openai";
 
 // دالة توليد محتوى تسويقي مجاني (بدون OpenAI)
 function generateFreeMarketingContent(product: any, productUrl: string) {
@@ -31,10 +30,6 @@ ${product.stock > 0 ? `📦 متوفر الآن - الكمية محدودة!` : 
 
   return mainContent;
 }
-
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-}) : null;
 
 export async function POST(request: Request) {
   try {
@@ -71,63 +66,8 @@ export async function POST(request: Request) {
     // إنشاء لينك المنتج
     const productUrl = `https://www.remostore.net/products/${product.id}`;
 
-    let marketingContent = "";
-
-    // محاولة استخدام OpenAI إذا كان متاحاً (اختياري)
-    if (openai && process.env.OPENAI_API_KEY) {
-      try {
-        const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: `أنت خبير تسويق محترف متخصص في كتابة منشورات جذابة لوسائل التواصل الاجتماعي (فيسبوك وإنستجرام). 
-          
-مهمتك: كتابة منشور تسويقي احترافي ومبهر باللغة العربية يحتوي على:
-1. عنوان جذاب مع إيموجيز مناسبة
-2. وصف المنتج بشكل مثير ومقنع
-3. ذكر المميزات الرئيسية بطريقة مبدعة
-4. سعر المنتج بطريقة جذابة
-5. Call-to-Action قوي
-6. هاشتاجات مناسبة (5-7 هاشتاجات)
-7. استخدام إيموجيز بشكل احترافي ومتناسق
-8. أسلوب يناسب الجمهور المصري والعربي
-
-ملاحظات:
-- استخدم لغة عربية فصحى بسيطة ومفهومة
-- اجعل المنشور مثير للاهتمام ويدفع للشراء
-- استخدم تقنيات FOMO (الخوف من فوات الفرصة)
-- اجعل النص متوسط الطول (ليس قصير جداً ولا طويل جداً)
-- ركز على فوائد المنتج وليس فقط المواصفات`,
-        },
-        {
-          role: "user",
-          content: `اكتب منشور تسويقي احترافي لهذا المنتج:
-
-اسم المنتج: ${product.nameAr}
-الوصف: ${product.descriptionAr || "منتج رائع وعالي الجودة"}
-السعر: ${product.price.toFixed(2)} جنيه
-${product.originalPrice ? `السعر الأصلي: ${product.originalPrice.toFixed(2)} جنيه` : ''}
-الفئة: ${product.category?.nameAr || 'منتجات'}
-${product.stock > 0 ? `الكمية المتوفرة: ${product.stock}` : 'كمية محدودة'}
-
-المنشور يجب أن يتضمن في النهاية رابط المنتج للطلب المباشر.`,
-        },
-      ],
-          temperature: 0.8,
-          max_tokens: 800,
-        });
-        marketingContent = completion.choices[0].message.content || "";
-      } catch (aiError) {
-        console.log("OpenAI not available, using free template");
-        marketingContent = "";
-      }
-    }
-
-    // إذا فشل OpenAI أو لم يكن متاحاً، استخدم المحتوى المجاني
-    if (!marketingContent) {
-      marketingContent = generateFreeMarketingContent(product, productUrl);
-    }
+    // توليد المحتوى مباشرة باستخدام Template مجاني (استجابة فورية ⚡)
+    const marketingContent = generateFreeMarketingContent(product, productUrl);
 
     // إضافة رابط المنتج في النهاية
     const fullContent = `${marketingContent}
