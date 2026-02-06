@@ -13,6 +13,11 @@ export default function TestPushPage() {
   }, []);
 
   const checkPushStatus = async () => {
+    // التحقق من وجود browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     if (!('serviceWorker' in navigator)) {
       setStatus('❌ Service Worker غير مدعوم');
       return;
@@ -43,6 +48,8 @@ export default function TestPushPage() {
   };
 
   const requestPermission = async () => {
+    if (typeof window === 'undefined') return;
+    
     const permission = await Notification.requestPermission();
     setStatus(`📋 تم ${permission === 'granted' ? 'منح' : 'رفض'} الإذن`);
     if (permission === 'granted') {
@@ -51,6 +58,8 @@ export default function TestPushPage() {
   };
 
   const subscribeToPush = async () => {
+    if (typeof window === 'undefined') return;
+    
     try {
       const registration = await navigator.serviceWorker.ready;
       
