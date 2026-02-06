@@ -11,7 +11,7 @@ export function LogoBanner() {
           <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 transition-all duration-300 group-hover:scale-110 animate-logo-entrance overflow-visible">
             <img 
               src="/logo.png" 
-              alt="BS Brand Store Logo" 
+              alt="ريمو ستور - Remo Store Logo" 
               className="w-full h-full object-contain drop-shadow-2xl transition-all duration-300 group-hover:rotate-6"
             />
             <div className="absolute -top-2 -right-2 animate-bounce">
@@ -20,7 +20,7 @@ export function LogoBanner() {
           </div>
           <div className="text-center sm:text-right">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent mb-1 sm:mb-2">
-              BS Brand Store
+              ريمو ستور
             </h1>
             <p className="text-xs sm:text-sm md:text-base text-gray-400">
               أفضل العلامات التجارية بأسعار مميزة

@@ -222,7 +222,7 @@ export function Header() {
             <div className="relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex-shrink-0 group-hover:scale-110 transition-transform">
               <img 
                 src="/logo.png" 
-                alt="Remostore Logo" 
+                alt="ريمو ستور - Remo Store" 
                 className="w-full h-full object-contain drop-shadow-lg"
               />
             </div>

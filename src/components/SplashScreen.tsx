@@ -45,7 +45,7 @@ export default function SplashScreen() {
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 via-transparent to-purple-400/20 animate-pulse"></div>
             <img 
               src="/logo.png" 
-              alt="BS Brand Store" 
+              alt="ريمو ستور - Remo Store" 
               className="w-full h-full scale-150 -translate-y-3 object-contain mix-blend-multiply"
               style={{ filter: 'drop-shadow(0 0 10px rgba(6, 182, 212, 0.3))' }}
             />

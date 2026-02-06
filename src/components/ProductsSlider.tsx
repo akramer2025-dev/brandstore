@@ -129,7 +129,7 @@ export function ProductsSlider({ products, direction = 'rtl' }: ProductsSliderPr
                 <div className="absolute bottom-3 left-3 w-14 h-14 bg-white/98 backdrop-blur-md shadow-2xl animate-glow-rotate overflow-hidden" style={{ clipPath: 'polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)' }}>
                   <img 
                     src="/logo.png" 
-                    alt="BS Brand Store" 
+                    alt="ريمو ستور - Remo Store" 
                     className="w-full h-full scale-150 -translate-y-1.5 object-contain"
                   />
                 </div>

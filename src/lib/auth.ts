@@ -64,34 +64,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      // إذا كان تسجيل دخول بـ Google
-      if (account?.provider === "google") {
-        try {
-          // البحث عن المستخدم
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
-          });
-
-          // إذا كان مستخدم جديد، قم بإنشائه كعميل
-          if (!existingUser) {
-            await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name || "",
-                image: user.image || null,
-                role: "CUSTOMER", // العملاء الجدد من Google يكونون CUSTOMER
-                emailVerified: new Date(),
-              },
-            });
-          }
-        } catch (error) {
-          console.error("Error in Google sign in:", error);
-          return false;
-        }
-      }
+      // السماح بتسجيل الدخول - PrismaAdapter يتعامل مع إنشاء المستخدمين تلقائياً
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
@@ -108,6 +84,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
           if (dbUser) {
             token.role = dbUser.role;
+            
+            // إذا المستخدم جديد من Google وليس لديه role، اجعله CUSTOMER
+            if (!dbUser.role && account?.provider === "google") {
+              await prisma.user.update({
+                where: { id: token.id as string },
+                data: { role: "CUSTOMER" }
+              });
+              token.role = "CUSTOMER";
+            }
           }
         } catch (error) {
           console.error('Error fetching user role:', error);

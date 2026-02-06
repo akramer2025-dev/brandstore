@@ -23,7 +23,7 @@ export default function VendorLayout({
             <div className="relative w-10 h-10">
               <Image
                 src="/logo.png"
-                alt="Brand Store"
+                alt="ريمو ستور - Remo Store"
                 width={40}
                 height={40}
                 className="object-contain"
@@ -31,7 +31,7 @@ export default function VendorLayout({
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Brand Store</h1>
+              <h1 className="text-xl font-bold text-white">ريمو ستور</h1>
               <p className="text-xs text-gray-400">نظام الشركاء</p>
             </div>
           </div>

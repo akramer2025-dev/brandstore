@@ -20,7 +20,7 @@ export default function Loading() {
             <div className="relative w-24 h-24 animate-bounce-scale">
               <img 
                 src="/logo.png" 
-                alt="BS Brand Store" 
+                alt="ريمو ستور - Remo Store" 
                 className="w-full h-full rounded-full object-contain animate-glow-pulse"
               />
             </div>
