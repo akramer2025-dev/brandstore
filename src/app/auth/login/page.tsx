@@ -24,11 +24,9 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError('');
     try {
-      // استخدام الطريقة العادية - NextAuth هيتعامل مع الـredirect
-      await signIn('google', { 
-        callbackUrl: '/auth/google-callback'
-      });
-      // مش محتاجين كود هنا لأن الصفحة هتعمل redirect لـGoogle
+      // السماح لـ NextAuth بالتعامل مع redirect بشكل تلقائي
+      await signIn('google');
+      // الصفحة هتعمل redirect لـGoogle تلقائياً
     } catch (error) {
       console.error('Google sign-in error:', error);
       setError('حدث خطأ في تسجيل الدخول بواسطة Google');

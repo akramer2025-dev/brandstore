@@ -328,6 +328,23 @@ model Order {
   @@map("orders")
 }
 
+// سجل الطلبات المرفوضة للتقارير
+model OrderRejectionLog {
+  id               String   @id @default(cuid())
+  orderId          String   
+  rejectedBy       String   // userId من رفض الطلب
+  rejectedByRole   String   // VENDOR, ADMIN, or DEVELOPER
+  rejectionReason  String   // سبب الرفض
+  orderValue       Float    // قيمة الطلب المرفوض
+  vendorId         String?  // الشريك المرتبط بالطلب (إن وجد)
+  createdAt        DateTime @default(now())
+
+  @@index([vendorId])
+  @@index([rejectedBy])
+  @@index([createdAt])
+  @@map("order_rejection_logs")
+}
+
 model InstallmentPlan {
   id             String               @id @default(cuid())
   orderId        String               @unique

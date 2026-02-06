@@ -112,3 +112,58 @@ export async function DELETE(
     );
   }
 }
+
+// تحديث جزئي لعنوان (PATCH)
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'يجب تسجيل الدخول أولاً' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const data = await req.json();
+
+    // التحقق من أن العنوان يخص المستخدم
+    const address = await prisma.savedAddress.findFirst({
+      where: { 
+        id,
+        userId: session.user.id 
+      }
+    });
+
+    if (!address) {
+      return NextResponse.json({ error: 'العنوان غير موجود' }, { status: 404 });
+    }
+
+    // إذا كان العنوان المحدث افتراضي، إلغاء الافتراضي من العناوين الأخرى
+    if (data.isDefault === true) {
+      await prisma.savedAddress.updateMany({
+        where: { 
+          userId: session.user.id,
+          isDefault: true,
+          NOT: { id }
+        },
+        data: { isDefault: false }
+      });
+    }
+
+    // تحديث العنوان (فقط الحقول المرسلة)
+    const updatedAddress = await prisma.savedAddress.update({
+      where: { id },
+      data,
+    });
+
+    return NextResponse.json({ address: updatedAddress });
+  } catch (error) {
+    console.error('Error updating address:', error);
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء تحديث العنوان' },
+      { status: 500 }
+    );
+  }
+}

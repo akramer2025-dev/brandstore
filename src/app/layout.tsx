@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
 import StarryBackground from "@/components/StarryBackground";
 import InstallPWA from "@/components/InstallPWA";
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
@@ -63,6 +64,7 @@ export default function RootLayout({
       <body className={`${cairo.variable} font-sans antialiased`}>
         <StarryBackground />
         <Providers>
+          <ServiceWorkerRegistration />
           <Header />
           {children}
           <InstallPWA />

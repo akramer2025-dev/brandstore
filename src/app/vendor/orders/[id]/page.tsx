@@ -68,6 +68,9 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
   const [shippingCompanies, setShippingCompanies] = useState<ShippingCompany[]>([]);
   const [selectedTab, setSelectedTab] = useState<'agents' | 'companies'>('agents');
   const [assigningDelivery, setAssigningDelivery] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectingOrder, setRejectingOrder] = useState(false);
   
   const { id } = use(params);
 
@@ -134,7 +137,37 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
   const handleSchedulePickup = async () => {
     toast.info('سيتم إضافة نظام جدولة المواعيد قريباً');
   };
+  const handleRejectOrder = async () => {
+    if (!rejectionReason.trim()) {
+      toast.error('يرجى إدخال سبب الرفض');
+      return;
+    }
 
+    setRejectingOrder(true);
+    try {
+      const response = await fetch(`/api/orders/${id}/reject`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rejectionReason: rejectionReason.trim() }),
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'فشل في رفض الطلب');
+      }
+      
+      toast.success('تم رفض الطلب بنجاح');
+      setShowRejectModal(false);
+      setRejectionReason('');
+      fetchOrder();
+    } catch (error: any) {
+      toast.error(error.message || 'حدث خطأ في رفض الطلب');
+    } finally {
+      setRejectingOrder(false);
+    }
+  };
   const handleSendToAdmin = async () => {
     setActionLoading(true);
     try {
@@ -591,6 +624,14 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
                           </Button>
                         </>
                       )}
+                      <Button 
+                        onClick={() => setShowRejectModal(true)}
+                        disabled={actionLoading}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        <X className="w-4 h-4 ml-2" />
+                        رفض الطلب
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -844,6 +885,82 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
                 >
                   إلغاء
                 </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal رفض الطلب */}
+      <AnimatePresence>
+        {showRejectModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => !rejectingOrder && setShowRejectModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-gray-900 border border-red-500/30 rounded-2xl w-full max-w-md overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-red-600 to-orange-600 p-5">
+                <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                  <X className="h-6 w-6" />
+                  رفض الطلب
+                </h3>
+                <p className="text-red-100 text-sm mt-1">
+                  يرجى إدخال سبب رفض الطلب
+                </p>
+              </div>
+
+              {/* Body */}
+              <div className="p-6">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
+                  <p className="text-red-200 text-sm">
+                    ⚠️ سيتم إعادة المخزون وإشعار العميل بسبب الرفض
+                  </p>
+                </div>
+
+                <label className="block text-white text-sm font-medium mb-2">
+                  سبب الرفض *
+                </label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="اكتب سبب رفض الطلب..."
+                  rows={4}
+                  disabled={rejectingOrder}
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50"
+                />
+
+                <div className="flex gap-3 mt-6">
+                  <Button
+                    onClick={handleRejectOrder}
+                    disabled={rejectingOrder || !rejectionReason.trim()}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {rejectingOrder ? (
+                      <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4 ml-2" />
+                    )}
+                    تأكيد الرفض
+                  </Button>
+                  <Button
+                    onClick={() => setShowRejectModal(false)}
+                    disabled={rejectingOrder}
+                    variant="outline"
+                    className="flex-1 border-white/20 text-white hover:bg-white/10"
+                  >
+                    إلغاء
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

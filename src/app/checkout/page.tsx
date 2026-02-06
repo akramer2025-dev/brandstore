@@ -259,6 +259,23 @@ export default function CheckoutPage() {
     if (!formData.saveAddress) return null;
 
     try {
+      // التحقق من وجود عنوان مطابق أولاً
+      const existingAddress = savedAddresses.find(addr => 
+        addr.governorate === formData.governorate &&
+        addr.city === formData.city &&
+        addr.district === formData.district &&
+        addr.street === formData.street &&
+        addr.buildingNumber === formData.buildingNumber &&
+        addr.floorNumber === formData.floorNumber &&
+        addr.apartmentNumber === formData.apartmentNumber
+      );
+
+      // إذا كان العنوان موجود فعلاً، لا نضيف عنوان جديد
+      if (existingAddress) {
+        console.log('العنوان موجود بالفعل، لن يتم التكرار:', existingAddress.title);
+        return existingAddress;
+      }
+
       // توليد عنوان تلقائي إذا لم يتم توفيره
       const autoTitle = formData.addressTitle || 
         `${formData.governorate || ''} - ${formData.city || ''} - ${formData.district || ''}`;
@@ -286,6 +303,9 @@ export default function CheckoutPage() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ تم حفظ عنوان جديد:', data.address.title);
+        // تحديث قائمة العناوين المحفوظة
+        setSavedAddresses(prev => [...prev, data.address]);
         return data.address;
       }
     } catch (error) {

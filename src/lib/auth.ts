@@ -162,12 +162,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // إذا المستخدم جاي من callback، وجهه حسب role
+      // إذا المستخدم جاي من Google OAuth callback
+      if (url.includes('/auth/google-callback')) {
+        return url;
+      }
+      
+      // إذا كان URL يبدأ بـ baseUrl، استخدمه كما هو
       if (url.startsWith(baseUrl)) {
         return url;
       }
-      // التوجيه الافتراضي للصفحة الرئيسية
-      return baseUrl;
+      
+      // إذا كان callbackUrl محدد، استخدمه
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+      
+      // التوجيه الافتراضي إلى صفحة Google callback ليتم التوجيه منها حسب الـrole
+      return `${baseUrl}/auth/google-callback`;
     },
   },
   pages: {

@@ -4,32 +4,49 @@ const CACHE_NAME = 'remostore-v1';
 // تثبيت Service Worker
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
+  // تفعيل Service Worker الجديد فوراً
   self.skipWaiting();
 });
 
 // تفعيل Service Worker
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activated');
-  event.waitUntil(clients.claim());
+  // السيطرة على جميع الصفحات فوراً
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      // حذف caches القديمة
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((name) => name !== CACHE_NAME)
+            .map((name) => caches.delete(name))
+        );
+      })
+    ])
+  );
 });
 
-// استقبال Push Notifications
+// استقبال Push Notifications (يعمل حتى مع التطبيق المغلق)
 self.addEventListener('push', (event) => {
-  console.log('📩 Push received in Service Worker:', event);
+  console.log('📩 Push received in Service Worker (Background Mode):', event);
   console.log('📩 Push data:', event.data ? event.data.text() : 'No data');
   
   let data = {
-    title: '🎉 إشعار جديد',
+    title: '🎉 إشعار جديد من Remostore',
     body: 'لديك إشعار جديد',
     icon: '/icon-192x192.png',
     badge: '/badge-72x72.png',
-    tag: 'notification',
-    requireInteraction: true, // يجبر المستخدم على التفاعل
-    vibrate: [200, 100, 200, 100, 200], // اهتزاز
+    tag: 'notification-' + Date.now(), // tag فريد لكل إشعار
+    requireInteraction: true, // يبقى الإشعار حتى يتفاعل المستخدم
+    vibrate: [200, 100, 200, 100, 200, 100, 400], // اهتزاز أطول
+    renotify: true, // إعادة إظهار الإشعار إذا كان هناك إشعار بنفس الـ tag
+    silent: false, // تشغيل صوت النظام
     actions: [
-      { action: 'open', title: 'فتح' },
-      { action: 'close', title: 'إغلاق' }
-    ]
+      { action: 'open', title: '📱 فتح', icon: '/icon-192x192.png' },
+      { action: 'close', title: '❌ إغلاق' }
+    ],
+    timestamp: Date.now()
   };
 
   if (event.data) {
@@ -45,10 +62,9 @@ self.addEventListener('push', (event) => {
 
   console.log('🔔 Showing notification with data:', data);
 
-  // تشغيل الصوت (سيتم تشغيله في الصفحة المفتوحة)
   event.waitUntil(
     Promise.all([
-      // إظهار الإشعار
+      // إظهار الإشعار (يعمل حتى مع التطبيق المغلق)
       self.registration.showNotification(data.title, {
         body: data.body,
         icon: data.icon,
@@ -58,11 +74,13 @@ self.addEventListener('push', (event) => {
         vibrate: data.vibrate,
         data: data.data,
         actions: data.actions,
-        silent: false, // تشغيل صوت النظام
+        silent: data.silent,
+        renotify: data.renotify,
+        timestamp: data.timestamp,
       }).then(() => {
-        console.log('✅ Notification displayed successfully');
+        console.log('✅ Notification displayed successfully (Background Mode)');
       }),
-      // إرسال رسالة لجميع النوافذ المفتوحة
+      // إرسال رسالة لجميع النوافذ المفتوحة (إن وجدت)
       sendMessageToAllClients({
         type: 'NEW_NOTIFICATION',
         data: data
