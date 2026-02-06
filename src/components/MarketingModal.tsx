@@ -54,14 +54,28 @@ export default function MarketingModal({
         body: JSON.stringify({ productId }),
       });
 
-      if (!res.ok) throw new Error("فشل توليد المحتوى");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'خطأ غير معروف' }));
+        
+        if (res.status === 401) {
+          toast.error("⚠️ يجب تسجيل الدخول أولاً للوصول لهذه الميزة");
+          setTimeout(() => {
+            window.location.href = '/auth/login';
+          }, 2000);
+        } else {
+          toast.error(errorData.error || "فشل توليد المحتوى التسويقي");
+        }
+        throw new Error(errorData.error || "فشل توليد المحتوى");
+      }
 
       const data = await res.json();
       setContent(data.content);
       toast.success("✨ تم توليد المحتوى التسويقي بنجاح!");
     } catch (error) {
       console.error("Error generating content:", error);
-      toast.error("فشل توليد المحتوى التسويقي");
+      if (error instanceof Error && !error.message.includes('401')) {
+        toast.error("⚠️ حدث خطأ في توليد المحتوى. يرجى المحاولة مرة أخرى");
+      }
     } finally {
       setLoading(false);
     }

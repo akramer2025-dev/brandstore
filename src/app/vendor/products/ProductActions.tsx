@@ -53,7 +53,7 @@ export default function ProductActions({ productId, productName, productImage }:
         {/* زر التسويق - الأولوية الأولى - خلفية شفافة زجاجية */}
         <Button 
           variant="outline" 
-          className="w-full backdrop-blur-md bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-400/50 hover:from-purple-500/20 hover:to-pink-500/20 hover:border-purple-400/70 text-purple-200 hover:text-purple-100 shadow-lg hover:shadow-purple-500/20 transition-all duration-300"
+          className="w-full backdrop-blur-md bg-gradient-to-r from-purple-600/30 to-pink-600/30 border-2 border-purple-400/70 hover:from-purple-600/40 hover:to-pink-600/40 hover:border-purple-300 text-purple-100 hover:text-white shadow-xl hover:shadow-purple-500/50 transition-all duration-300 font-bold"
           onClick={() => setMarketingOpen(true)}
         >
           <Sparkles className="h-4 w-4 mr-2" />
