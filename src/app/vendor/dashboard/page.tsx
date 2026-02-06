@@ -57,25 +57,48 @@ export default function VendorDashboard() {
   // تهيئة AudioContext عند أول تفاعل
   const initAudioContext = () => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
-      console.log('🎵 Audio Context تم تهيئته')
+      try {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+        console.log('🎵 Audio Context تم تهيئته - State:', audioContextRef.current.state)
+      } catch (error) {
+        console.error('❌ فشل إنشاء AudioContext:', error)
+      }
     }
-    if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume()
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume().then(() => {
+        console.log('▶️ AudioContext resumed from suspended state')
+      })
     }
   }
 
   // تشغيل صوت مستمر للإشعار (يتكرر حتى يتم إيقافه)
   const playNotificationSound = () => {
     try {
+      console.log('🎵 بدء playNotificationSound...')
+      
       // تهيئة AudioContext إذا لم يكن موجود
       if (!audioContextRef.current) {
+        console.log('⚠️ AudioContext مفقود، جاري الإنشاء...')
         initAudioContext()
       }
       
       const audioContext = audioContextRef.current!
+      
+      // التحقق من حالة AudioContext
+      console.log('🎛️ AudioContext state:', audioContext.state)
+      
+      if (audioContext.state === 'suspended') {
+        console.log('▶️ AudioContext suspended، جاري Resume...')
+        audioContext.resume().then(() => {
+          console.log('✅ AudioContext resumed!')
+        }).catch(err => {
+          console.error('❌ فشل resume AudioContext:', err)
+        })
+      }
+      
       let isPlaying = true
       setIsAlertPlaying(true)
+      console.log('🔊 بدء تشغيل الصوت المتكرر...')
 
       const playBeep = () => {
         if (!isPlaying) return
@@ -145,23 +168,29 @@ export default function VendorDashboard() {
 
   // تهيئة AudioContext عند أول تفاعل مع الصفحة
   useEffect(() => {
+    console.log('🎯 تسجيل مستمعي التفاعل لتهيئة AudioContext...')
+    
     const handleFirstInteraction = () => {
+      console.log('👆 تفاعل مستخدم تم رصده!')
       initAudioContext()
       console.log('✅ AudioContext جاهز للعمل')
-      // إزالة المستمع بعد أول تفاعل
+      // إزالة جميع المستمعين بعد أول تفاعل
       document.removeEventListener('click', handleFirstInteraction)
       document.removeEventListener('touchstart', handleFirstInteraction)
       document.removeEventListener('keydown', handleFirstInteraction)
+      document.removeEventListener('scroll', handleFirstInteraction)
     }
 
     document.addEventListener('click', handleFirstInteraction, { once: true })
     document.addEventListener('touchstart', handleFirstInteraction, { once: true })
     document.addEventListener('keydown', handleFirstInteraction, { once: true })
+    document.addEventListener('scroll', handleFirstInteraction, { once: true, passive: true })
 
     return () => {
       document.removeEventListener('click', handleFirstInteraction)
       document.removeEventListener('touchstart', handleFirstInteraction)
       document.removeEventListener('keydown', handleFirstInteraction)
+      document.removeEventListener('scroll', handleFirstInteraction)
     }
   }, [])
 
@@ -188,6 +217,8 @@ export default function VendorDashboard() {
 
   const fetchData = async () => {
     try {
+      console.log('📥 جلب بيانات Dashboard...')
+      
       const [capitalRes, statsRes, notificationsRes] = await Promise.all([
         fetch('/api/vendor/capital/summary').catch(() => null),
         fetch('/api/vendor/stats').catch(() => null),
@@ -203,50 +234,85 @@ export default function VendorDashboard() {
       if (notificationsRes && notificationsRes.ok) {
         const data = await notificationsRes.json()
         const initialCount = data.unreadCount || 0
+        console.log('📊 العدد الأولي للإشعارات:', initialCount)
         setUnreadCount(initialCount)
         prevUnreadCountRef.current = initialCount // تهيئة العداد السابق
+        console.log('💾 تم حفظ prevUnreadCountRef.current =', prevUnreadCountRef.current)
       }
     } catch (error) {
       console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
+      console.log('✅ انتهى تحميل البيانات')
     }
   }
 
   // تحديث عدد الإشعارات كل 10 ثواني (للاختبار السريع)
   useEffect(() => {
+    // لا تبدأ polling إلا لو المستخدم authenticated و vendor
+    if (status !== 'authenticated' || session?.user?.role !== 'VENDOR') {
+      console.log('⏸️ Polling not started - Status:', status, 'Role:', session?.user?.role)
+      return
+    }
+
+    console.log('▶️ بدء polling للإشعارات كل 10 ثواني...')
+    console.log('📊 العدد الحالي:', prevUnreadCountRef.current)
+
     const interval = setInterval(async () => {
       try {
+        console.log('🔄 جلب إشعارات جديدة...')
         const res = await fetch('/api/vendor/notifications')
         if (res.ok) {
           const data = await res.json()
           const newUnreadCount = data.unreadCount || 0
           
+          console.log(`📨 الإشعارات: سابق=${prevUnreadCountRef.current}, جديد=${newUnreadCount}`)
+          
           // إذا زاد عدد الإشعارات، شغل الصوت أوتوماتيك
           if (newUnreadCount > prevUnreadCountRef.current) {
-            console.log(`🔔 طلب جديد! العدد: ${prevUnreadCountRef.current} → ${newUnreadCount}`)
+            console.log(`🔔🔔🔔 طلب جديد! العدد: ${prevUnreadCountRef.current} → ${newUnreadCount}`)
+            console.log('🔊 محاولة تشغيل الصوت...')
+            
+            // تهيئة AudioContext قبل التشغيل
+            if (!audioContextRef.current) {
+              console.log('⚠️ AudioContext غير موجود، جاري التهيئة...')
+              initAudioContext()
+            }
+            
             playNotificationSound()
+            console.log('✅ تم استدعاء playNotificationSound()')
             
             // إظهار إشعار desktop أيضاً
             if ('Notification' in window && Notification.permission === 'granted') {
+              console.log('🔔 إرسال Desktop Notification...')
               new Notification('🎉 طلب جديد!', {
                 body: `لديك ${newUnreadCount} طلب جديد في المتجر`,
                 icon: '/icon-192x192.png',
                 tag: 'new-order',
                 requireInteraction: true,
               })
+            } else {
+              console.log('⚠️ Desktop Notification غير متاح -', 
+                'Notification' in window ? 'Permission: ' + Notification.permission : 'Not supported')
             }
           }
           
           prevUnreadCountRef.current = newUnreadCount
           setUnreadCount(newUnreadCount)
+        } else {
+          console.error('❌ فشل جلب الإشعارات:', res.status)
         }
       } catch (error) {
-        console.error('Failed to fetch notifications:', error)
+        console.error('❌ Failed to fetch notifications:', error)
       }
     }, 10000) // كل 10 ثواني
-    return () => clearInterval(interval)
-  }, [])
+    
+    console.log('✅ Polling interval تم تشغيله')
+    return () => {
+      console.log('🛑 إيقاف polling interval')
+      clearInterval(interval)
+    }
+  }, [status, session])
 
   if (status === 'loading' || loading) {
     return (

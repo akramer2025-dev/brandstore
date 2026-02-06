@@ -65,20 +65,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
+        console.log('🔐 SignIn callback - Provider:', account?.provider, 'Email:', user.email);
+        
         // للمستخدمين الجدد من Google، تأكد من وجود role
         if (account?.provider === "google" && user.email) {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
-            select: { id: true, role: true }
+            select: { id: true, role: true, name: true }
           });
           
-          // إذا المستخدم موجود لكن ليس لديه role
-          if (existingUser && !existingUser.role) {
-            await prisma.user.update({
-              where: { id: existingUser.id },
-              data: { role: "CUSTOMER" }
-            });
-            console.log('✅ تم تعيين role CUSTOMER للمستخدم:', user.email);
+          if (existingUser) {
+            console.log('👤 Existing user found:', existingUser.name, 'Role:', existingUser.role);
+            
+            // إذا المستخدم موجود لكن ليس لديه role
+            if (!existingUser.role) {
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: { role: "CUSTOMER" }
+              });
+              console.log('✅ تم تعيين role CUSTOMER للمستخدم:', user.email);
+            }
+          } else {
+            console.log('🆕 New user from Google, will be created as CUSTOMER');
           }
         }
         return true;
@@ -87,23 +95,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return true; // السماح بالدخول حتى لو حصل خطأ
       }
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       if (user) {
-        token.role = user.role;
+        token.role = user.role || "CUSTOMER";
         token.id = user.id;
         token.username = user.username;
         token.phone = user.phone;
+        console.log('🎫 JWT created for user:', user.email, 'Role:', token.role);
       }
       
-      // جلب الـ role من قاعدة البيانات للتأكد
+      // جلب الـ role من قاعدة البيانات للتأكد (خاصة للمستخدمين من Google)
       if (token.id) {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { role: true }
+            select: { role: true, name: true }
           });
+          
           if (dbUser) {
+            // تحديث الـrole في token
             token.role = dbUser.role;
+            console.log('✅ JWT updated from DB - User:', dbUser.name, 'Role:', dbUser.role);
             
             // إذا المستخدم جديد من Google وليس لديه role، اجعله CUSTOMER
             if (!dbUser.role && account?.provider === "google") {
@@ -112,10 +124,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 data: { role: "CUSTOMER" }
               });
               token.role = "CUSTOMER";
+              console.log('🆕 New Google user assigned CUSTOMER role');
             }
           }
         } catch (error) {
-          console.error('Error fetching user role:', error);
+          console.error('❌ Error fetching user role:', error);
         }
       }
       
@@ -147,6 +160,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // إذا المستخدم جاي من callback، وجهه حسب role
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      // التوجيه الافتراضي للصفحة الرئيسية
+      return baseUrl;
     },
   },
   pages: {
