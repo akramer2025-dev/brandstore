@@ -201,15 +201,22 @@ export default function VendorDashboard() {
   // طلب إذن الإشعارات وتسجيل Push Subscription
   useEffect(() => {
     const setupPushNotifications = async () => {
+      console.log('🔔 بدء إعداد Push Notifications...')
+      
       // التحقق من دعم المتصفح للإشعارات وService Worker
       if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
         console.log('❌ المتصفح لا يدعم Push Notifications')
         return
       }
 
+      console.log('✅ المتصفح يدعم Push Notifications')
+      console.log('📋 Notification permission:', Notification.permission)
+
       // طلب إذن الإشعارات
       if (Notification.permission === 'default') {
+        console.log('⏳ طلب إذن الإشعارات من المستخدم...')
         const permission = await Notification.requestPermission()
+        console.log('📋 نتيجة الإذن:', permission)
         if (permission !== 'granted') {
           console.log('⚠️  تم رفض إذن الإشعارات')
           return
@@ -220,19 +227,26 @@ export default function VendorDashboard() {
         console.log('✅ تم منح إذن الإشعارات')
         
         try {
+          console.log('⏳ انتظار تسجيل Service Worker...')
           // انتظار تسجيل Service Worker
           const registration = await navigator.serviceWorker.ready
+          console.log('✅ Service Worker جاهز:', registration.active?.state)
           
           // التحقق من وجود subscription سابق
           let subscription = await registration.pushManager.getSubscription()
           
+          if (subscription) {
+            console.log('ℹ️  يوجد Push Subscription سابق:', subscription.endpoint.substring(0, 50) + '...')
+          } else {
+            console.log('ℹ️  لا يوجد Push Subscription سابق، سيتم إنشاء واحد جديد...')
+          }
+          
           if (!subscription) {
             // إنشاء subscription جديد
-            const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-            if (!vapidPublicKey) {
-              console.error('❌ VAPID Public Key غير موجود')
-              return
-            }
+            // VAPID Public Key (safe to expose - it's public)
+            const vapidPublicKey = 'BGwdJnBs2lTWLJQqk6O0vLdIhtGIKYzEMdcDeo1XEBfDSNAQDmCZkIQV8a0u-BxxhFpR6Vik_3KT3NLdVYlpTIE'
+            
+            console.log('🔑 VAPID Public Key:', vapidPublicKey.substring(0, 20) + '...')
 
             // تحويل VAPID key من base64 إلى Uint8Array
             const urlBase64ToUint8Array = (base64String: string) => {
@@ -250,12 +264,13 @@ export default function VendorDashboard() {
               return outputArray
             }
 
+            console.log('📝 جاري الاشتراك في Push Notifications...')
             subscription = await registration.pushManager.subscribe({
               userVisibleOnly: true,
               applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
             })
 
-            console.log('✅ تم إنشاء Push Subscription بنجاح')
+            console.log('✅ تم إنشاء Push Subscription بنجاح:', subscription.endpoint.substring(0, 50) + '...')
           }
 
           // حفظ الـ subscription في قاعدة البيانات
@@ -272,18 +287,27 @@ export default function VendorDashboard() {
 
           if (response.ok) {
             console.log('✅ تم حفظ Push Subscription في قاعدة البيانات')
+            const result = await response.json()
+            console.log('📊 Response:', result)
           } else {
-            console.error('❌ فشل حفظ Push Subscription')
+            const error = await response.text()
+            console.error('❌ فشل حفظ Push Subscription:', error)
           }
         } catch (error) {
           console.error('❌ خطأ في تسجيل Push Subscription:', error)
+          console.error('❌ تفاصيل الخطأ:', JSON.stringify(error, null, 2))
         }
+      } else {
+        console.log('⚠️  إذن الإشعارات غير ممنوح:', Notification.permission)
       }
     }
 
     // تشغيل الدالة بعد التحقق من تسجيل الدخول
     if (status === 'authenticated') {
+      console.log('✅ المستخدم مسجل الدخول، بدء إعداد Push Notifications...')
       setupPushNotifications()
+    } else {
+      console.log('⏳ المستخدم لم يسجل الدخول بعد:', status)
     }
   }, [status])
 

@@ -15,7 +15,8 @@ self.addEventListener('activate', (event) => {
 
 // استقبال Push Notifications
 self.addEventListener('push', (event) => {
-  console.log('Push received:', event);
+  console.log('📩 Push received in Service Worker:', event);
+  console.log('📩 Push data:', event.data ? event.data.text() : 'No data');
   
   let data = {
     title: '🎉 إشعار جديد',
@@ -34,11 +35,15 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const pushData = event.data.json();
+      console.log('✅ Parsed push data:', pushData);
       data = { ...data, ...pushData };
     } catch (e) {
+      console.log('⚠️  Could not parse push data as JSON, using text');
       data.body = event.data.text();
     }
   }
+
+  console.log('🔔 Showing notification with data:', data);
 
   // تشغيل الصوت (سيتم تشغيله في الصفحة المفتوحة)
   event.waitUntil(
@@ -54,6 +59,8 @@ self.addEventListener('push', (event) => {
         data: data.data,
         actions: data.actions,
         silent: false, // تشغيل صوت النظام
+      }).then(() => {
+        console.log('✅ Notification displayed successfully');
       }),
       // إرسال رسالة لجميع النوافذ المفتوحة
       sendMessageToAllClients({

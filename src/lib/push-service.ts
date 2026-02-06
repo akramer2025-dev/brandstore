@@ -38,6 +38,9 @@ export async function sendPushToUser(
   payload: PushNotificationPayload
 ): Promise<{ successful: number; failed: number }> {
   try {
+    console.log(`🔔 [Push Service] Sending push to user: ${userId}`);
+    console.log(`📋 [Push Service] Payload:`, JSON.stringify(payload, null, 2));
+    
     // جلب جميع subscriptions النشطة للمستخدم
     const subscriptions = await prisma.pushSubscription.findMany({
       where: {
@@ -45,6 +48,8 @@ export async function sendPushToUser(
         isActive: true,
       },
     });
+
+    console.log(`📊 [Push Service] Found ${subscriptions.length} active subscription(s)`);
 
     if (subscriptions.length === 0) {
       console.log(`⚠️  No active push subscriptions for user ${userId}`);

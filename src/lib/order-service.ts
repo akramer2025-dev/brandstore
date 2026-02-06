@@ -510,6 +510,14 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
     itemsCount: number;
   }) {
     try {
+      console.log(`🔔 [Order Service] إرسال إشعار للتاجر: ${data.vendorId}`);
+      console.log(`📋 [Order Service] بيانات الطلب:`, {
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+        customerName: data.customerName,
+        totalAmount: data.totalAmount,
+      });
+      
       // إنشاء إشعار في قاعدة البيانات
       await prisma.vendorNotification.create({
         data: {
@@ -520,10 +528,13 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
           orderId: data.orderId,
         },
       });
+      
+      console.log(`✅ [Order Service] تم حفظ الإشعار في Database`);
 
       // إرسال Push Notification للتاجر (حتى لو التطبيق مقفول)
+      console.log(`🚀 [Order Service] جاري إرسال Push Notification...`);
       const { sendPushToVendor } = await import('./push-service');
-      await sendPushToVendor(data.vendorId, {
+      const result = await sendPushToVendor(data.vendorId, {
         title: '🎉 طلب جديد!',
         body: `طلب من ${data.customerName} بقيمة ${data.totalAmount.toFixed(2)} ج.م`,
         data: {
@@ -538,8 +549,10 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
           },
         ],
       });
+      
+      console.log(`📊 [Order Service] نتيجة إرسال Push:`, result);
     } catch (error) {
-      console.error('Error sending vendor notification:', error);
+      console.error('❌ [Order Service] Error sending vendor notification:', error);
     }
   }
 
