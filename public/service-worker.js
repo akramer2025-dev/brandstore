@@ -99,8 +99,3 @@ async function sendMessageToAllClients(message) {
     client.postMessage(message);
   });
 }
-
-// Fetch handler (optional - for offline support)
-self.addEventListener('fetch', (event) => {
-  // يمكن إضافة caching strategy هنا إذا لزم الأمر
-});
