@@ -183,7 +183,13 @@ export default function VendorDashboard() {
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'NEW_NOTIFICATION') {
           console.log('📩 رسالة جديدة من Service Worker:', event.data)
-          playNotificationSound()
+          // تشغيل الصوت فقط بعد التحميل الأولي
+          if (!isInitialLoadRef.current) {
+            console.log('🔊 تشغيل الصوت من Service Worker...')
+            playNotificationSound()
+          } else {
+            console.log('⏸️ تجاهل الصوت - لا يزال في التحميل الأولي')
+          }
         } else if (event.data && event.data.type === 'NAVIGATE') {
           // الانتقال للصفحة المطلوبة عند النقر على الإشعار
           console.log('🔗 الانتقال إلى:', event.data.url)
