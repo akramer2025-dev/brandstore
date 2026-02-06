@@ -50,10 +50,10 @@ export default function ProductActions({ productId, productName, productImage }:
   return (
     <>
       <div className="flex flex-col gap-2 w-full">
-        {/* زر التسويق - الأولوية الأولى - خلفية شفافة زجاجية */}
+        {/* زر التسويق - الأولوية الأولى */}
         <Button 
           variant="outline" 
-          className="w-full backdrop-blur-md bg-gradient-to-r from-purple-600/30 to-pink-600/30 border-2 border-purple-400/70 hover:from-purple-600/40 hover:to-pink-600/40 hover:border-purple-300 text-purple-100 hover:text-white shadow-xl hover:shadow-purple-500/50 transition-all duration-300 font-bold"
+          className="w-full bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 border-0 text-white shadow-lg hover:shadow-xl transition-all duration-300 font-bold"
           onClick={() => setMarketingOpen(true)}
         >
           <Sparkles className="h-4 w-4 mr-2" />
