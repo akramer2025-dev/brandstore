@@ -3,9 +3,38 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
+// دالة توليد محتوى تسويقي مجاني (بدون OpenAI)
+function generateFreeMarketingContent(product: any, productUrl: string) {
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercent = hasDiscount 
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
+  // محتوى رئيسي
+  const mainContent = `✨ ${product.nameAr} ✨
+
+${product.descriptionAr || '🌟 منتج رائع وعالي الجودة يجمع بين الأناقة والراحة!'}
+
+${hasDiscount ? `🔥 عرض خاص! خصم ${discountPercent}% 💥
+💰 السعر: ${product.price.toFixed(2)} جنيه بدلاً من ${product.originalPrice.toFixed(2)} جنيه
+` : `💰 السعر: ${product.price.toFixed(2)} جنيه فقط!`}
+
+${product.stock > 0 ? `📦 متوفر الآن - الكمية محدودة!` : '⚡ كمية محدودة جداً!'}
+
+🎁 مميزات المنتج:
+✅ جودة عالية مضمونة
+✅ توصيل سريع لجميع المحافظات
+✅ الدفع عند الاستلام
+✅ إمكانية الاستبدال والاسترجاع
+
+⏰ اطلب الآن قبل نفاذ الكمية!`;
+
+  return mainContent;
+}
+
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
+}) : null;
 
 export async function POST(request: Request) {
   try {
@@ -42,8 +71,12 @@ export async function POST(request: Request) {
     // إنشاء لينك المنتج
     const productUrl = `https://www.remostore.net/products/${product.id}`;
 
-    // توليد محتوى تسويقي باستخدام OpenAI
-    const completion = await openai.chat.completions.create({
+    let marketingContent = "";
+
+    // محاولة استخدام OpenAI إذا كان متاحاً (اختياري)
+    if (openai && process.env.OPENAI_API_KEY) {
+      try {
+        const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
@@ -81,11 +114,20 @@ ${product.stock > 0 ? `الكمية المتوفرة: ${product.stock}` : 'كم�
 المنشور يجب أن يتضمن في النهاية رابط المنتج للطلب المباشر.`,
         },
       ],
-      temperature: 0.8,
-      max_tokens: 800,
-    });
+          temperature: 0.8,
+          max_tokens: 800,
+        });
+        marketingContent = completion.choices[0].message.content || "";
+      } catch (aiError) {
+        console.log("OpenAI not available, using free template");
+        marketingContent = "";
+      }
+    }
 
-    const marketingContent = completion.choices[0].message.content || "";
+    // إذا فشل OpenAI أو لم يكن متاحاً، استخدم المحتوى المجاني
+    if (!marketingContent) {
+      marketingContent = generateFreeMarketingContent(product, productUrl);
+    }
 
     // إضافة رابط المنتج في النهاية
     const fullContent = `${marketingContent}
