@@ -4,7 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
 
 function getResend() {
-  return new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY is not set. Email functionality will be disabled.');
+    return null;
+  }
+  try {
+    return new Resend(process.env.RESEND_API_KEY);
+  } catch (error) {
+    console.error('Error initializing Resend:', error);
+    return null;
+  }
 }
 
 export async function POST(request: Request) {
@@ -73,7 +82,28 @@ export async function POST(request: Request) {
     // إرسال الإيميل لشركة بوسطة
     const bustaEmail = process.env.BUSTA_EMAIL || 'shipping@busta-egypt.com';
 
-    const emailResult = await getResend().emails.send({
+    const resend = getResend();
+    if (!resend) {
+      console.warn('Resend is not configured. Skipping Busta email.');
+      // Update order status but skip email
+      await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          bustaStatus: "SENT_TO_BUSTA",
+          bustaSentAt: new Date(),
+          shippingCompany: "BOSTA",
+          shippingNotes: "تم تحديث الحالة محلياً - خدمة البريد غير متاحة",
+        },
+      });
+      
+      return NextResponse.json({
+        success: true,
+        message: "تم تحديث حالة الطلب (خدمة البريد غير متاحة حالياً)",
+        warning: "لم يتم إرسال الإيميل لشركة بوسطة",
+      });
+    }
+
+    const emailResult = await resend.emails.send({
       from: "Remostore <orders@remostore.net>",
       to: [bustaEmail], // إيميل شركة بوسطة
       subject: `طلب شحن جديد - رقم الطلب: ${order.orderNumber}`,

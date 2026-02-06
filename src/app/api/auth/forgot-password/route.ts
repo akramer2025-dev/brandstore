@@ -4,7 +4,16 @@ import crypto from 'crypto';
 import { Resend } from 'resend';
 
 function getResend() {
-  return new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY is not set. Email functionality will be disabled.');
+    return null;
+  }
+  try {
+    return new Resend(process.env.RESEND_API_KEY);
+  } catch (error) {
+    console.error('Error initializing Resend:', error);
+    return null;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -53,7 +62,16 @@ export async function POST(req: NextRequest) {
 
     // إرسال Email
     try {
-      await getResend().emails.send({
+      const resend = getResend();
+      if (!resend) {
+        console.warn('Resend is not configured. Skipping email send.');
+        return NextResponse.json(
+          { error: 'خدمة البريد الإلكتروني غير متاحة حالياً. يرجى المحاولة لاحقاً.' },
+          { status: 503 }
+        );
+      }
+      
+      await resend.emails.send({
         from: 'Remostore <noreply@remostore.net>',
         to: email,
         subject: 'إعادة تعيين كلمة المرور - Remostore',

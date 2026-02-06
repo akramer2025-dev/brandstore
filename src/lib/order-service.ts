@@ -3,7 +3,16 @@ import { InventoryService } from './inventory-service';
 import { Resend } from 'resend';
 
 function getResend() {
-  return new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY is not set. Email functionality will be disabled.');
+    return null;
+  }
+  try {
+    return new Resend(process.env.RESEND_API_KEY);
+  } catch (error) {
+    console.error('Error initializing Resend:', error);
+    return null;
+  }
 }
 
 export class OrderService {
@@ -549,7 +558,21 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
 
       const bustaEmail = process.env.BUSTA_EMAIL || 'shipping@busta-egypt.com';
 
-      await getResend().emails.send({
+      const resend = getResend();
+      if (!resend) {
+        console.warn('Resend not configured. Skipping Busta shipping email for order:', orderId);
+        // Update order with note that email wasn't sent
+        await prisma.order.update({
+          where: { id: orderId },
+          data: {
+            bustaStatus: 'PENDING',
+            shippingNotes: 'في انتظار الإرسال - خدمة البريد غير متاحة',
+          },
+        });
+        return;
+      }
+
+      await resend.emails.send({
         from: 'Remostore <orders@remostore.net>',
         to: [bustaEmail],
         subject: `طلب شحن جديد - رقم الطلب: ${order.orderNumber}`,
