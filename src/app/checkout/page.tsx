@@ -69,6 +69,11 @@ export default function CheckoutPage() {
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [downPaymentPercent, setDownPaymentPercent] = useState(30); // Default 30%
   
+  // Bank Transfer Receipt states
+  const [bankTransferReceipt, setBankTransferReceipt] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
+  
   const { items, getTotalPrice, clearCart } = useCartStore();
 
   const [formData, setFormData] = useState({
@@ -289,6 +294,60 @@ export default function CheckoutPage() {
     return null;
   };
 
+  // معالج تحديد صورة إيصال التحويل
+  const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB max
+        toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        toast.error("يرجى اختيار صورة فقط");
+        return;
+      }
+
+      setBankTransferReceipt(file);
+      
+      // إنشاء معاينة للصورة
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReceiptPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      toast.success("تم اختيار الصورة بنجاح");
+    }
+  };
+
+  // رفع صورة الإيصال إلى Cloudinary
+  const uploadReceiptToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'ml_default'); // تأكد من إنشاء upload preset في Cloudinary
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('فشل رفع الصورة');
+      }
+
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error('خطأ في رفع الصورة:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -321,11 +380,34 @@ export default function CheckoutPage() {
       return;
     }
 
+    // التحقق من رفع صورة إيصال التحويل للتحويل البنكي
+    if (paymentMethod === 'BANK_TRANSFER' && !bankTransferReceipt) {
+      toast.error("يرجى رفع صورة إيصال التحويل البنكي");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       // حفظ العنوان إذا طلب المستخدم
       await saveNewAddress();
+
+      // رفع صورة إيصال التحويل البنكي إلى Cloudinary
+      let receiptUrl: string | undefined;
+      if (paymentMethod === 'BANK_TRANSFER' && bankTransferReceipt) {
+        setUploadingReceipt(true);
+        toast.loading("جاري رفع صورة الإيصال...", { id: 'uploading-receipt' });
+        try {
+          receiptUrl = await uploadReceiptToCloudinary(bankTransferReceipt);
+          toast.success("تم رفع صورة الإيصال بنجاح", { id: 'uploading-receipt' });
+        } catch (error) {
+          toast.error("فشل رفع صورة الإيصال. يرجى المحاولة مرة أخرى", { id: 'uploading-receipt' });
+          setIsSubmitting(false);
+          setUploadingReceipt(false);
+          return;
+        }
+        setUploadingReceipt(false);
+      }
 
       // تجميع العنوان الكامل للتوصيل المنزلي
       const fullAddress = deliveryMethod === 'HOME_DELIVERY' ? [
@@ -359,6 +441,7 @@ export default function CheckoutPage() {
           remainingAmount: remainingAmount
         }),
         ...(paymentMethod === 'E_WALLET_TRANSFER' && { eWalletType }),
+        ...(paymentMethod === 'BANK_TRANSFER' && receiptUrl && { bankTransferReceipt: receiptUrl }),
       };
 
       // إضافة بيانات الأقساط إذا كانت الدفع بالتقسيط
@@ -391,13 +474,20 @@ export default function CheckoutPage() {
       
       if (deliveryMethod === 'STORE_PICKUP') {
         toast.success(`تم إنشاء الطلب بنجاح! 🎉\nالمبلغ المدفوع مقدماً: ${downPayment.toFixed(2)} ج.م\nالمبلغ المتبقي: ${remainingAmount.toFixed(2)} ج.م`);
+      } else if (paymentMethod === 'BANK_TRANSFER') {
+        toast.success("تم إنشاء الطلب بنجاح! جاري مراجعة طلبك 🎉");
       } else {
         toast.success("تم إنشاء الطلب بنجاح! 🎉");
       }
       
       // تأخير التوجيه قليلاً لتجنب خطأ Router أثناء الـ render
       setTimeout(() => {
-        router.push(`/orders/${order.id}`);
+        // توجيه للصفحة المناسبة حسب طريقة الدفع
+        if (paymentMethod === 'BANK_TRANSFER') {
+          router.push(`/order-pending?orderNumber=${order.orderNumber}`);
+        } else {
+          router.push(`/orders/${order.id}`);
+        }
       }, 100);
     } catch (error) {
       console.error("Order creation error:", error);
@@ -733,15 +823,82 @@ export default function CheckoutPage() {
                         <div className="flex items-center gap-2 mb-2">
                           <Package className="w-5 h-5 text-blue-400" />
                           <h3 className="text-lg font-bold text-white">
-                            تحويل بنكي
+                            تحويل بنكي / إنستاباي
                           </h3>
                         </div>
-                        <p className="text-gray-300 text-sm mb-2">
+                        <p className="text-gray-300 text-sm mb-3">
                           احصل على خصم 5% بالدفع المسبق عبر التحويل البنكي
                         </p>
-                        <div className="bg-gray-900/50 rounded p-2 text-xs text-gray-400">
-                          سيتم إرسال تفاصيل الحساب البنكي بعد تأكيد الطلب
-                        </div>
+                        
+                        {/* معلومات المحفظة */}
+                        {paymentMethod === 'BANK_TRANSFER' && (
+                          <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-4 space-y-3">
+                            <div className="text-center">
+                              <p className="text-blue-300 font-semibold mb-2">
+                                يرجى التحويل على محفظة إنستاباي
+                              </p>
+                              <div className="bg-white/10 rounded-lg p-3 inline-block">
+                                <p className="text-white text-2xl font-bold tracking-wider">
+                                  01555512778
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* رفع صورة الإيصال */}
+                            <div className="space-y-2">
+                              <Label htmlFor="receipt" className="text-white">
+                                إرفاق صورة إيصال التحويل <span className="text-red-400">*</span>
+                              </Label>
+                              
+                              {receiptPreview ? (
+                                <div className="relative">
+                                  <img 
+                                    src={receiptPreview} 
+                                    alt="معاينة الإيصال" 
+                                    className="w-full h-48 object-cover rounded-lg border-2 border-blue-500"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    className="absolute top-2 right-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setBankTransferReceipt(null);
+                                      setReceiptPreview(null);
+                                    }}
+                                  >
+                                    حذف
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="relative">
+                                  <input
+                                    type="file"
+                                    id="receipt"
+                                    accept="image/*"
+                                    onChange={handleReceiptChange}
+                                    className="hidden"
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                  <label
+                                    htmlFor="receipt"
+                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-500 rounded-lg cursor-pointer hover:bg-blue-900/20 transition-colors"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Package className="w-8 h-8 text-blue-400 mb-2" />
+                                    <span className="text-sm text-blue-300">اضغط لاختيار صورة الإيصال</span>
+                                    <span className="text-xs text-gray-400 mt-1">PNG, JPG أو JPEG - حد أقصى 5MB</span>
+                                  </label>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="bg-yellow-900/30 border border-yellow-500/30 rounded p-2 text-xs text-yellow-300">
+                              <strong>ملحوظة:</strong> بعد إتمام الطلب، سيتم مراجعة الإيصال وتأكيد الطلب في أسرع وقت
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

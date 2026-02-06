@@ -28,16 +28,32 @@ export async function POST(req: NextRequest) {
     const { subscription, action } = await req.json();
 
     if (action === 'subscribe') {
-      // حفظ subscription في قاعدة البيانات
+      // التحقق من صحة بيانات الاشتراك
+      if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+        return NextResponse.json({ 
+          error: 'بيانات الاشتراك غير صحيحة' 
+        }, { status: 400 });
+      }
+
+      const userAgent = req.headers.get('user-agent') || undefined;
+
+      // حفظ subscription في قاعدة البيانات مع الـ schema الجديد
       await prisma.pushSubscription.upsert({
-        where: { userId: session.user.id },
+        where: { endpoint: subscription.endpoint },
         create: {
           userId: session.user.id,
-          subscription: JSON.stringify(subscription),
+          endpoint: subscription.endpoint,
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth,
+          userAgent,
+          isActive: true,
         },
         update: {
-          subscription: JSON.stringify(subscription),
-          updatedAt: new Date(),
+          userId: session.user.id,
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth,
+          userAgent,
+          isActive: true,
         },
       });
 
@@ -63,8 +79,21 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'unsubscribe') {
-      await prisma.pushSubscription.delete({
-        where: { userId: session.user.id },
+      const { endpoint } = await req.json();
+      
+      if (!endpoint) {
+        return NextResponse.json({ 
+          error: 'يجب توفير endpoint' 
+        }, { status: 400 });
+      }
+
+      // إلغاء تفعيل الاشتراك بدلاً من حذفه
+      await prisma.pushSubscription.updateMany({
+        where: { 
+          endpoint,
+          userId: session.user.id 
+        },
+        data: { isActive: false },
       });
 
       return NextResponse.json({ 
@@ -94,34 +123,63 @@ export async function PUT(req: NextRequest) {
 
     const { userId, title, body, data } = await req.json();
 
-    // جلب subscription المستخدم
-    const subscription = await prisma.pushSubscription.findUnique({
-      where: { userId },
+    // جلب جميع subscriptions النشطة للمستخدم
+    const subscriptions = await prisma.pushSubscription.findMany({
+      where: { 
+        userId,
+        isActive: true 
+      },
     });
 
-    if (!subscription) {
+    if (subscriptions.length === 0) {
       return NextResponse.json({ 
         error: 'المستخدم غير مشترك في الإشعارات' 
       }, { status: 404 });
     }
 
-    const subscriptionObject = JSON.parse(subscription.subscription);
+    // إرسال الإشعار لجميع الأجهزة
+    const results = await Promise.allSettled(
+      subscriptions.map(async (sub) => {
+        const subscriptionObject = {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
+          },
+        };
 
-    // إرسال الإشعار
-    await webpush.sendNotification(
-      subscriptionObject,
-      JSON.stringify({
-        title,
-        body,
-        icon: '/icon-192x192.png',
-        badge: '/badge-72x72.png',
-        data,
+        try {
+          await webpush.sendNotification(
+            subscriptionObject,
+            JSON.stringify({
+              title,
+              body,
+              icon: '/icon-192x192.png',
+              badge: '/badge-72x72.png',
+              data,
+            })
+          );
+          return { success: true, endpoint: sub.endpoint };
+        } catch (error: any) {
+          // إذا كان الاشتراك منتهي أو invalid، قم بإلغاء تفعيله
+          if (error.statusCode === 410 || error.statusCode === 404) {
+            await prisma.pushSubscription.update({
+              where: { id: sub.id },
+              data: { isActive: false },
+            });
+          }
+          throw error;
+        }
       })
     );
 
+    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
+
     return NextResponse.json({ 
       success: true,
-      message: 'تم إرسال الإشعار بنجاح'
+      message: `تم إرسال الإشعار بنجاح إلى ${successful} جهاز`,
+      stats: { successful, failed, total: subscriptions.length }
     });
   } catch (error) {
     console.error('Send notification error:', error);

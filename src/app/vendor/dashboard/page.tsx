@@ -161,6 +161,10 @@ export default function VendorDashboard() {
         if (event.data && event.data.type === 'NEW_NOTIFICATION') {
           console.log('📩 رسالة جديدة من Service Worker:', event.data)
           playNotificationSound()
+        } else if (event.data && event.data.type === 'NAVIGATE') {
+          // الانتقال للصفحة المطلوبة عند النقر على الإشعار
+          console.log('🔗 الانتقال إلى:', event.data.url)
+          router.push(event.data.url)
         }
       })
     }
@@ -194,16 +198,94 @@ export default function VendorDashboard() {
     }
   }, [])
 
-  // طلب إذن الإشعارات
+  // طلب إذن الإشعارات وتسجيل Push Subscription
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          console.log('✅ تم منح إذن الإشعارات')
+    const setupPushNotifications = async () => {
+      // التحقق من دعم المتصفح للإشعارات وService Worker
+      if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('❌ المتصفح لا يدعم Push Notifications')
+        return
+      }
+
+      // طلب إذن الإشعارات
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') {
+          console.log('⚠️  تم رفض إذن الإشعارات')
+          return
         }
-      })
+      }
+
+      if (Notification.permission === 'granted') {
+        console.log('✅ تم منح إذن الإشعارات')
+        
+        try {
+          // انتظار تسجيل Service Worker
+          const registration = await navigator.serviceWorker.ready
+          
+          // التحقق من وجود subscription سابق
+          let subscription = await registration.pushManager.getSubscription()
+          
+          if (!subscription) {
+            // إنشاء subscription جديد
+            const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+            if (!vapidPublicKey) {
+              console.error('❌ VAPID Public Key غير موجود')
+              return
+            }
+
+            // تحويل VAPID key من base64 إلى Uint8Array
+            const urlBase64ToUint8Array = (base64String: string) => {
+              const padding = '='.repeat((4 - base64String.length % 4) % 4)
+              const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/')
+
+              const rawData = window.atob(base64)
+              const outputArray = new Uint8Array(rawData.length)
+
+              for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i)
+              }
+              return outputArray
+            }
+
+            subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+            })
+
+            console.log('✅ تم إنشاء Push Subscription بنجاح')
+          }
+
+          // حفظ الـ subscription في قاعدة البيانات
+          const response = await fetch('/api/push/subscribe', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'subscribe',
+              subscription: subscription.toJSON(),
+            }),
+          })
+
+          if (response.ok) {
+            console.log('✅ تم حفظ Push Subscription في قاعدة البيانات')
+          } else {
+            console.error('❌ فشل حفظ Push Subscription')
+          }
+        } catch (error) {
+          console.error('❌ خطأ في تسجيل Push Subscription:', error)
+        }
+      }
     }
-  }, [])
+
+    // تشغيل الدالة بعد التحقق من تسجيل الدخول
+    if (status === 'authenticated') {
+      setupPushNotifications()
+    }
+  }, [status])
 
   useEffect(() => {
     if (status === 'unauthenticated') {

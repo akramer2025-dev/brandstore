@@ -421,6 +421,33 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
                       {paymentMethodLabels[order.paymentMethod] || order.paymentMethod}
                     </p>
                   </div>
+                  
+                  {/* عرض صورة إيصال التحويل البنكي */}
+                  {order.paymentMethod === 'BANK_TRANSFER' && order.bankTransferReceipt && (
+                    <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-3">
+                      <p className="text-blue-300 text-sm mb-2 flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        إيصال التحويل البنكي
+                      </p>
+                      <a 
+                        href={order.bankTransferReceipt} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block relative group"
+                      >
+                        <img 
+                          src={order.bankTransferReceipt} 
+                          alt="إيصال التحويل البنكي" 
+                          className="w-full rounded-lg border-2 border-blue-500 hover:border-blue-400 transition-all cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                          <ExternalLink className="h-8 w-8 text-white" />
+                        </div>
+                      </a>
+                      <p className="text-xs text-gray-400 mt-2">اضغط على الصورة للعرض بالحجم الكامل</p>
+                    </div>
+                  )}
+                  
                   {order.paymentStatus && (
                     <div className={`${order.paymentStatus === 'PAID' ? 'bg-green-500/20 border-green-500/30' : 'bg-orange-500/20 border-orange-500/30'} border rounded-lg p-3 text-center`}>
                       <p className={`${order.paymentStatus === 'PAID' ? 'text-green-300' : 'text-orange-300'} text-sm mb-1`}>

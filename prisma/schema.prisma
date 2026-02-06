@@ -290,6 +290,7 @@ model Order {
   paymentStatus    PaymentStatus     @default(PENDING)
   paymentMethod    PaymentMethod     @default(CASH_ON_DELIVERY)
   eWalletType      String?           // نوع المحفظة: etisalat_cash, vodafone_cash, we_pay
+  bankTransferReceipt String?        // صورة إيصال التحويل البنكي (Cloudinary URL)
   totalAmount      Float
   deliveryFee      Float             @default(0)
   finalAmount      Float
@@ -1151,12 +1152,36 @@ model VendorNotification {
   @@index([vendorId, isRead])
 }
 
+model CustomerNotification {
+  id          String   @id @default(cuid())
+  customerId  String   // معرف العميل
+  type        CustomerNotificationType // نوع الإشعار
+  title       String   // عنوان الإشعار
+  message     String   // نص الإشعار
+  orderId     String?  // معرف الطلب (إن وجد)
+  isRead      Boolean  @default(false) // هل تم قراءته
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("customer_notifications")
+  @@index([customerId, isRead])
+}
+
 enum NotificationType {
   NEW_ORDER      // طلب جديد
   ORDER_STATUS   // تحديث حالة الطلب
   LOW_STOCK      // مخزون منخفض
   NEW_MESSAGE    // رسالة جديدة
   SYSTEM         // إشعار نظام
+}
+
+enum CustomerNotificationType {
+  ORDER_CONFIRMED   // تم قبول الطلب
+  ORDER_SHIPPED     // تم شحن الطلب
+  ORDER_DELIVERED   // تم توصيل الطلب
+  ORDER_CANCELLED   // تم إلغاء الطلب
+  NEW_MESSAGE       // رسالة جديدة
+  SYSTEM            // إشعار نظام
 }
 
 // ============ نظام المستخدمين الفرعيين ============
@@ -1271,13 +1296,17 @@ model VendorShippingCompany {
 // ============ اشتراكات الإشعارات Push ============
 model PushSubscription {
   id           String   @id @default(cuid())
-  userId       String   @unique
-  subscription String   // JSON string of subscription object
+  userId       String   // معرف المستخدم (Vendor أو Customer)
+  endpoint     String   @unique // Push endpoint URL
+  p256dh       String   // Public key for encryption
+  auth         String   // Authentication secret
+  userAgent    String?  // نوع المتصفح/الجهاز
+  isActive     Boolean  @default(true) // هل الاشتراك نشط
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@map("push_subscriptions")
-  @@index([userId])
+  @@index([userId, isActive])
 }
 
 // ============ استعادة كلمة المرور ============

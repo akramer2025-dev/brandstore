@@ -74,19 +74,38 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
 
+  // تحديد الصفحة المطلوب فتحها بناءً على نوع الإشعار
+  let targetUrl = '/vendor/dashboard';
+  
+  if (event.notification.data) {
+    const { type, orderId } = event.notification.data;
+    
+    if (type === 'NEW_ORDER' && orderId) {
+      targetUrl = `/vendor/orders/${orderId}`;
+    } else if (type === 'ORDER_CONFIRMED' && orderId) {
+      targetUrl = `/orders/${orderId}`;
+    }
+  }
+
   // فتح أو التركيز على صفحة التطبيق
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
         // البحث عن نافذة مفتوحة
         for (let client of clientList) {
-          if (client.url.includes('/vendor/dashboard') && 'focus' in client) {
-            return client.focus();
+          if ('focus' in client) {
+            return client.focus().then(() => {
+              // إرسال رسالة للصفحة للانتقال للرابط المطلوب
+              client.postMessage({
+                type: 'NAVIGATE',
+                url: targetUrl
+              });
+            });
           }
         }
         // فتح نافذة جديدة
         if (clients.openWindow) {
-          return clients.openWindow('/vendor/dashboard');
+          return clients.openWindow(targetUrl);
         }
       })
   );

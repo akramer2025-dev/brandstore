@@ -28,6 +28,7 @@ export class OrderService {
     deliveryFee?: number;
     paymentMethod?: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
     eWalletType?: string;
+    bankTransferReceipt?: string;
     deliveryMethod?: 'HOME_DELIVERY' | 'STORE_PICKUP';
     governorate?: string;
     pickupLocation?: string;
@@ -109,6 +110,7 @@ export class OrderService {
         customerNotes: data.customerNotes,
         paymentMethod,
         eWalletType: data.eWalletType,
+        bankTransferReceipt: data.bankTransferReceipt,
         deliveryMethod,
         governorate: data.governorate,
         pickupLocation: data.pickupLocation,
@@ -508,6 +510,7 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
     itemsCount: number;
   }) {
     try {
+      // إنشاء إشعار في قاعدة البيانات
       await prisma.vendorNotification.create({
         data: {
           vendorId: data.vendorId,
@@ -516,6 +519,24 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
           message: `لديك طلب جديد من ${data.customerName} بقيمة ${data.totalAmount.toFixed(2)} ج.م (${data.itemsCount} منتج). رقم الطلب: #${data.orderNumber.slice(0, 8).toUpperCase()}`,
           orderId: data.orderId,
         },
+      });
+
+      // إرسال Push Notification للتاجر (حتى لو التطبيق مقفول)
+      const { sendPushToVendor } = await import('./push-service');
+      await sendPushToVendor(data.vendorId, {
+        title: '🎉 طلب جديد!',
+        body: `طلب من ${data.customerName} بقيمة ${data.totalAmount.toFixed(2)} ج.م`,
+        data: {
+          type: 'NEW_ORDER',
+          orderId: data.orderId,
+          orderNumber: data.orderNumber,
+        },
+        actions: [
+          {
+            action: 'view',
+            title: 'عرض الطلب',
+          },
+        ],
       });
     } catch (error) {
       console.error('Error sending vendor notification:', error);

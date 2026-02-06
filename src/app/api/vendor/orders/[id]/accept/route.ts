@@ -61,6 +61,35 @@ export async function POST(
       },
     });
 
+    // إنشاء إشعار للعميل بقبول الطلب
+    await prisma.customerNotification.create({
+      data: {
+        customerId: updatedOrder.customerId,
+        type: 'ORDER_CONFIRMED',
+        title: 'تم قبول طلبك! 🎉',
+        message: `تم قبول طلبك رقم ${updatedOrder.orderNumber} وجاري تجهيزه للشحن`,
+        orderId: updatedOrder.id,
+      },
+    });
+
+    // إرسال Push Notification للعميل (حتى لو التطبيق مقفول)
+    const { sendPushToCustomer } = await import('@/lib/push-service');
+    await sendPushToCustomer(updatedOrder.customerId, {
+      title: 'تم قبول طلبك! 🎉',
+      body: `طلبك رقم ${updatedOrder.orderNumber} جاري تجهيزه`,
+      data: {
+        type: 'ORDER_CONFIRMED',
+        orderId: updatedOrder.id,
+        orderNumber: updatedOrder.orderNumber,
+      },
+      actions: [
+        {
+          action: 'view',
+          title: 'عرض الطلب',
+        },
+      ],
+    });
+
     return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error('Error accepting order:', error);
