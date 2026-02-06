@@ -179,8 +179,8 @@ export default function VendorDashboard() {
           console.error('❌ Service Worker registration failed:', error)
         })
 
-      // الاستماع للرسائل من Service Worker
-      navigator.serviceWorker.addEventListener('message', (event) => {
+      // الاستماع للرسائل من Service Worker - مع تأخير 5 ثواني بعد التحميل
+      const messageHandler = (event: MessageEvent) => {
         if (event.data && event.data.type === 'NEW_NOTIFICATION') {
           console.log('📩 رسالة جديدة من Service Worker:', event.data)
           // تشغيل الصوت فقط بعد التحميل الأولي
@@ -195,7 +195,18 @@ export default function VendorDashboard() {
           console.log('🔗 الانتقال إلى:', event.data.url)
           router.push(event.data.url)
         }
-      })
+      }
+      
+      // تأخير تفعيل المستمع 5 ثواني
+      const timer = setTimeout(() => {
+        console.log('🎧 تفعيل Service Worker message listener')
+        navigator.serviceWorker.addEventListener('message', messageHandler)
+      }, 5000)
+      
+      return () => {
+        clearTimeout(timer)
+        navigator.serviceWorker.removeEventListener('message', messageHandler)
+      }
     }
   }, [])
 
@@ -400,76 +411,85 @@ export default function VendorDashboard() {
       return
     }
 
-    console.log('▶️ بدء polling للإشعارات كل 10 ثواني...')
-    console.log('📊 العدد الحالي:', prevUnreadCountRef.current)
-
-    const interval = setInterval(async () => {
-      try {
-        console.log('🔄 جلب إشعارات جديدة...')
-        const res = await fetch('/api/vendor/notifications')
-        if (res.ok) {
-          const data = await res.json()
-          const newUnreadCount = data.unreadCount || 0
-          const notifications = data.notifications || []
-          
-          console.log(`📨 الإشعارات: سابق=${prevUnreadCountRef.current}, جديد=${newUnreadCount}, isInitialLoad=${isInitialLoadRef.current}`)
-          
-          // إذا زاد عدد الإشعارات، تحقق من وجود إشعارات حديثة (آخر دقيقة)
-          if (!isInitialLoadRef.current && newUnreadCount > prevUnreadCountRef.current) {
-            // التحقق من وجود إشعارات جديدة تم إنشاؤها خلال آخر دقيقة فقط
-            const oneMinuteAgo = new Date(Date.now() - 60 * 1000)
-            const recentNewNotifications = notifications.filter((notif: any) => {
-              const createdAt = new Date(notif.createdAt)
-              return !notif.isRead && createdAt > oneMinuteAgo
-            })
-            
-            // فقط شغل الصوت إذا كان هناك إشعارات حديثة فعلاً (ليست قديمة)
-            if (recentNewNotifications.length > 0) {
-              console.log(`🔔🔔🔔 طلب جديد! العدد: ${prevUnreadCountRef.current} → ${newUnreadCount}`)
-              console.log(`✨ إشعارات حديثة: ${recentNewNotifications.length}`)
-              console.log('🔊 محاولة تشغيل الصوت...')
-              
-              // تهيئة AudioContext قبل التشغيل
-              if (!audioContextRef.current) {
-                console.log('⚠️ AudioContext غير موجود، جاري التهيئة...')
-                initAudioContext()
-              }
-              
-              playNotificationSound()
-              console.log('✅ تم استدعاء playNotificationSound()')
-              
-              // إظهار إشعار desktop أيضاً
-              if ('Notification' in window && Notification.permission === 'granted') {
-                console.log('🔔 إرسال Desktop Notification...')
-                new Notification('🎉 طلب جديد!', {
-                  body: `لديك ${recentNewNotifications.length} طلب جديد في المتجر`,
-                  icon: '/icon-192x192.png',
-                  tag: 'new-order',
-                  requireInteraction: true,
-                })
-              } else {
-                console.log('⚠️ Desktop Notification غير متاح -', 
-                  'Notification' in window ? 'Permission: ' + Notification.permission : 'Not supported')
-              }
-            } else {
-              console.log('⏸️ لا توجد إشعارات جديدة حديثة، تجاهل تشغيل الصوت')
-            }
-          }
-          
-          prevUnreadCountRef.current = newUnreadCount
-          setUnreadCount(newUnreadCount)
-        } else {
-          console.error('❌ فشل جلب الإشعارات:', res.status)
-        }
-      } catch (error) {
-        console.error('❌ Failed to fetch notifications:', error)
-      }
-    }, 10000) // كل 10 ثواني
+    console.log('⏳ انتظار 10 ثواني قبل بدء polling للإشعارات...')
     
-    console.log('✅ Polling interval تم تشغيله')
+    let interval: NodeJS.Timeout | null = null
+    
+    // تأخير 10 ثواني قبل بدء الـ polling لتجنب False Positives
+    const startupDelay = setTimeout(() => {
+      console.log('▶️ بدء polling للإشعارات كل 10 ثواني...')
+      console.log('📊 العدد الحالي:', prevUnreadCountRef.current)
+
+      interval = setInterval(async () => {
+        try {
+          console.log('🔄 جلب إشعارات جديدة...')
+          const res = await fetch('/api/vendor/notifications')
+          if (res.ok) {
+            const data = await res.json()
+            const newUnreadCount = data.unreadCount || 0
+            const notifications = data.notifications || []
+            
+            console.log(`📨 الإشعارات: سابق=${prevUnreadCountRef.current}, جديد=${newUnreadCount}, isInitialLoad=${isInitialLoadRef.current}`)
+            
+            // إذا زاد عدد الإشعارات، تحقق من وجود إشعارات حديثة (آخر دقيقة)
+            if (!isInitialLoadRef.current && newUnreadCount > prevUnreadCountRef.current) {
+              // التحقق من وجود إشعارات جديدة تم إنشاؤها خلال آخر دقيقة فقط
+              const oneMinuteAgo = new Date(Date.now() - 60 * 1000)
+              const recentNewNotifications = notifications.filter((notif: any) => {
+                const createdAt = new Date(notif.createdAt)
+                return !notif.isRead && createdAt > oneMinuteAgo
+              })
+              
+              // فقط شغل الصوت إذا كان هناك إشعارات حديثة فعلاً (ليست قديمة)
+              if (recentNewNotifications.length > 0) {
+                console.log(`🔔🔔🔔 طلب جديد! العدد: ${prevUnreadCountRef.current} → ${newUnreadCount}`)
+                console.log(`✨ إشعارات حديثة: ${recentNewNotifications.length}`)
+                console.log('🔊 محاولة تشغيل الصوت...')
+                
+                // تهيئة AudioContext قبل التشغيل
+                if (!audioContextRef.current) {
+                  console.log('⚠️ AudioContext غير موجود، جاري التهيئة...')
+                  initAudioContext()
+                }
+                
+                playNotificationSound()
+                console.log('✅ تم استدعاء playNotificationSound()')
+                
+                // إظهار إشعار desktop أيضاً
+                if ('Notification' in window && Notification.permission === 'granted') {
+                  console.log('🔔 إرسال Desktop Notification...')
+                  new Notification('🎉 طلب جديد!', {
+                    body: `لديك ${recentNewNotifications.length} طلب جديد في المتجر`,
+                    icon: '/icon-192x192.png',
+                    tag: 'new-order',
+                    requireInteraction: true,
+                  })
+                } else {
+                  console.log('⚠️ Desktop Notification غير متاح -', 
+                    'Notification' in window ? 'Permission: ' + Notification.permission : 'Not supported')
+                }
+              } else {
+                console.log('⏸️ لا توجد إشعارات جديدة حديثة، تجاهل تشغيل الصوت')
+              }
+            }
+            
+            prevUnreadCountRef.current = newUnreadCount
+            setUnreadCount(newUnreadCount)
+          } else {
+            console.error('❌ فشل جلب الإشعارات:', res.status)
+          }
+        } catch (error) {
+          console.error('❌ Failed to fetch notifications:', error)
+        }
+      }, 10000) // كل 10 ثواني
+      
+      console.log('✅ Polling interval تم تشغيله')
+    }, 10000) // تأخير 10 ثواني قبل بدء الـ polling
+    
     return () => {
-      console.log('🛑 إيقاف polling interval')
-      clearInterval(interval)
+      console.log('🛑 إيقاف polling interval وstartup delay')
+      clearTimeout(startupDelay)
+      if (interval) clearInterval(interval)
     }
   }, [status, session])
 
