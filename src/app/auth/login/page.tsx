@@ -22,8 +22,39 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    setError('');
     try {
-      await signIn('google', { callbackUrl: '/' });
+      const result = await signIn('google', { 
+        redirect: false,
+        callbackUrl: '/' 
+      });
+      
+      if (result?.error) {
+        console.error('Google sign-in error:', result.error);
+        setError('حدث خطأ في تسجيل الدخول بواسطة Google');
+        setGoogleLoading(false);
+        return;
+      }
+      
+      // انتظر قليلاً للتأكد من تحديث الـsession
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // جلب session للتوجيه المناسب
+      const sessionResponse = await fetch('/api/auth/session');
+      const sessionData = await sessionResponse.json();
+      
+      if (sessionData?.user?.role === 'ADMIN') {
+        router.push('/admin');
+      } else if (sessionData?.user?.role === 'VENDOR') {
+        router.push('/vendor/dashboard');
+      } else if (sessionData?.user?.role === 'MANUFACTURER') {
+        router.push('/manufacturer/dashboard');
+      } else if (sessionData?.user?.role === 'DELIVERY_STAFF') {
+        router.push('/delivery-dashboard');
+      } else {
+        router.push('/');
+      }
+      router.refresh();
     } catch (error) {
       console.error('Google sign-in error:', error);
       setError('حدث خطأ في تسجيل الدخول بواسطة Google');

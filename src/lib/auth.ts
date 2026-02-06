@@ -64,8 +64,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      // السماح بتسجيل الدخول - PrismaAdapter يتعامل مع إنشاء المستخدمين تلقائياً
-      return true;
+      try {
+        // للمستخدمين الجدد من Google، تأكد من وجود role
+        if (account?.provider === "google" && user.email) {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { id: true, role: true }
+          });
+          
+          // إذا المستخدم موجود لكن ليس لديه role
+          if (existingUser && !existingUser.role) {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { role: "CUSTOMER" }
+            });
+            console.log('✅ تم تعيين role CUSTOMER للمستخدم:', user.email);
+          }
+        }
+        return true;
+      } catch (error) {
+        console.error('❌ خطأ في signIn callback:', error);
+        return true; // السماح بالدخول حتى لو حصل خطأ
+      }
     },
     async jwt({ token, user, account }) {
       if (user) {

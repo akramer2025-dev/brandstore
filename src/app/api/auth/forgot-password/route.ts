@@ -19,6 +19,8 @@ function getResend() {
 export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();
+    
+    console.log('🔍 Forgot password request for:', email);
 
     if (!email) {
       return NextResponse.json(
@@ -32,8 +34,11 @@ export async function POST(req: NextRequest) {
       where: { email },
     });
 
+    console.log('👤 User found:', user ? `${user.name} (${user.email})` : 'Not found');
+
     // لأسباب أمنية، نرجع نفس الرسالة حتى لو المستخدم غير موجود
     if (!user) {
+      console.log('⚠️ User not found, but returning success message for security');
       return NextResponse.json({
         message: 'إذا كان البريد الإلكتروني موجود في نظامنا، ستستلم رسالة لإعادة تعيين كلمة المرور',
       });
@@ -42,20 +47,26 @@ export async function POST(req: NextRequest) {
     // توليد token عشوائي
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 3600000); // ساعة واحدة
+    
+    console.log('🔐 Generated reset token:', resetToken.substring(0, 10) + '...');
 
     // حذف أي tokens قديمة لنفس البريد
-    await prisma.passwordResetToken.deleteMany({
+    const deleted = await prisma.passwordResetToken.deleteMany({
       where: { email },
     });
+    
+    console.log('🗑️ Deleted old tokens:', deleted.count);
 
     // حفظ الـ token الجديد
-    await prisma.passwordResetToken.create({
+    const savedToken = await prisma.passwordResetToken.create({
       data: {
         email,
         token: resetToken,
         expiresAt,
       },
     });
+    
+    console.log('💾 Token saved to database:', savedToken.id);
 
     // رابط إعادة تعيين كلمة المرور
     const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
@@ -64,7 +75,18 @@ export async function POST(req: NextRequest) {
     try {
       const resend = getResend();
       if (!resend) {
-        console.warn('Resend is not configured. Skipping email send.');
+        console.warn('⚠️ Resend API Key غير موجود!');
+        console.log('🔗 رابط إعادة التعيين (للاختبار):', resetUrl);
+        // في حالة التطوير، نعرض الـtoken في console
+        if (process.env.NODE_ENV === 'development') {
+          console.log('\n=== رابط إعادة تعيين كلمة المرور ===');
+          console.log(resetUrl);
+          console.log('===================================\n');
+          return NextResponse.json({
+            message: 'تم توليد رابط إعادة التعيين (تحقق من console في وضع التطوير)',
+            resetUrl: resetUrl // فقط في development
+          });
+        }
         return NextResponse.json(
           { error: 'خدمة البريد الإلكتروني غير متاحة حالياً. يرجى المحاولة لاحقاً.' },
           { status: 503 }
@@ -179,9 +201,14 @@ export async function POST(req: NextRequest) {
         `,
       });
 
-      console.log('✅ Password reset email sent to:', email);
+      console.log('✅ Password reset email sent successfully to:', email);
     } catch (emailError: any) {
       console.error('❌ Email sending failed:', emailError);
+      console.error('Error details:', {
+        message: emailError.message,
+        stack: emailError.stack,
+        name: emailError.name
+      });
       
       // لو فشل إرسال الإيميل، نحذف الـ token
       await prisma.passwordResetToken.delete({
@@ -194,13 +221,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log('🎉 Forgot password process completed successfully for:', email);
     return NextResponse.json({
       message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني',
     });
   } catch (error: any) {
-    console.error('Error in forgot-password:', error);
+    console.error('❌ Forgot password error:', error);
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء معالجة طلبك' },
+      { error: 'حدث خطأ في معالجة الطلب' },
       { status: 500 }
     );
   }
