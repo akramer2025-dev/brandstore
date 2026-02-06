@@ -1,5 +1,8 @@
 import { prisma } from './prisma';
 import { InventoryService } from './inventory-service';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export class OrderService {
   /**
@@ -148,6 +151,16 @@ export class OrderService {
         totalAmount: order.totalAmount,
         itemsCount: data.items.length,
       });
+    }
+
+    // إرسال إيميل تلقائي لشركة بوسطة للشحن (للتوصيل المنزلي فقط)
+    if (deliveryMethod === 'HOME_DELIVERY') {
+      try {
+        await this.sendToBustaShipping(order.id);
+      } catch (error) {
+        console.error('Error sending to Busta shipping:', error);
+        // لا نوقف العملية إذا فشل إرسال الإيميل
+      }
     }
 
     return order;
@@ -495,6 +508,102 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
       });
     } catch (error) {
       console.error('Error sending vendor notification:', error);
+    }
+  }
+
+  /**
+   * إرسال طلب لشركة بوسطة تلقائياً
+   */
+  private static async sendToBustaShipping(orderId: string) {
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          items: {
+            include: {
+              product: {
+                select: { titleAr: true, title: true, price: true },
+              },
+            },
+          },
+          customer: {
+            select: { name: true, email: true, phone: true },
+          },
+        },
+      });
+
+      if (!order) return;
+
+      const productsHtml = order.items
+        .map(
+          (item) => `
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;">${item.product?.titleAr || item.product?.title}</td>
+            <td style="padding:10px;border:1px solid #ddd;text-align:center;">${item.quantity}</td>
+            <td style="padding:10px;border:1px solid #ddd;text-align:center;">${(item.quantity * item.price).toFixed(2)} جنيه</td>
+          </tr>`
+        )
+        .join('');
+
+      const bustaEmail = process.env.BUSTA_EMAIL || 'shipping@busta-egypt.com';
+
+      await resend.emails.send({
+        from: 'Remostore <orders@remostore.net>',
+        to: [bustaEmail],
+        subject: `طلب شحن جديد - رقم الطلب: ${order.orderNumber}`,
+        html: `
+<!DOCTYPE html>
+<html dir="rtl">
+<head><meta charset="UTF-8"></head>
+<body style="font-family:'Segoe UI',Tahoma,sans-serif;">
+  <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:20px;text-align:center;">
+    <h1>🚚 طلب شحن جديد من Remostore</h1>
+  </div>
+  <div style="padding:20px;">
+    <div style="border:2px solid #e1e5e9;border-radius:10px;padding:20px;margin:10px 0;background:#f8f9fa;">
+      <h2>📦 تفاصيل الطلب</h2>
+      <p><strong>رقم الطلب:</strong> ${order.orderNumber}</p>
+      <p><strong>التاريخ:</strong> ${new Date(order.createdAt).toLocaleDateString('ar-EG')}</p>
+      <p><strong>الدفع:</strong> ${order.paymentMethod === 'CASH_ON_DELIVERY' ? 'دفع عند الاستلام' : 'مدفوع'}</p>
+    </div>
+    <div style="border:2px solid #e1e5e9;border-radius:10px;padding:20px;margin:10px 0;background:#f8f9fa;">
+      <h2>👤 بيانات العميل</h2>
+      <p><strong>الاسم:</strong> ${order.customer.name}</p>
+      <p><strong>الهاتف:</strong> ${order.deliveryPhone}</p>
+      <p><strong>العنوان:</strong> ${order.deliveryAddress}</p>
+      ${order.governorate ? `<p><strong>المحافظة:</strong> ${order.governorate}</p>` : ''}
+      ${order.customerNotes ? `<p><strong>ملاحظات:</strong> ${order.customerNotes}</p>` : ''}
+    </div>
+    <div style="border:2px solid #e1e5e9;border-radius:10px;padding:20px;margin:10px 0;background:#f8f9fa;">
+      <h2>🛍️ المنتجات</h2>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr>
+          <th style="background:#667eea;color:white;padding:12px;text-align:right;">المنتج</th>
+          <th style="background:#667eea;color:white;padding:12px;">الكمية</th>
+          <th style="background:#667eea;color:white;padding:12px;">السعر</th>
+        </tr></thead>
+        <tbody>${productsHtml}</tbody>
+      </table>
+      <p style="margin-top:15px;font-size:1.2em;font-weight:bold;color:#28a745;">💰 الإجمالي: ${order.finalAmount.toFixed(2)} جنيه</p>
+    </div>
+  </div>
+</body>
+</html>`,
+      });
+
+      // تحديث حالة الشحنة
+      await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          bustaStatus: 'SENT_TO_BUSTA',
+          bustaSentAt: new Date(),
+          shippingCompany: 'BOSTA',
+        },
+      });
+
+      console.log('Order sent to Busta shipping successfully:', orderId);
+    } catch (error) {
+      console.error('Error sending to Busta shipping:', error);
     }
   }
 }

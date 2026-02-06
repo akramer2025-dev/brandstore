@@ -179,6 +179,13 @@ export default async function AdminDashboard() {
             color="text-teal-600"
           />
           <ActionCard
+            title="🚚 شحنات بوسطة"
+            description="إدارة ومتابعة شحنات شركة بوسطة"
+            href="/admin/shipping"
+            icon={<Truck className="w-12 h-12" />}
+            color="text-blue-600"
+          />
+          <ActionCard
             title="موظفي التوصيل"
             description="إدارة فريق التوصيل"
             href="/admin/delivery-staff"

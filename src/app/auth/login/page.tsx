@@ -185,10 +185,6 @@ export default function LoginPage() {
                   نسيت كلمة المرور؟
                 </Link>
               </div>
-                <Link href="/auth/forgot-password" className="text-purple-600 hover:text-purple-700 font-medium">
-                  نسيت كلمة المرور؟
-                </Link>
-              </div>
             </CardContent>
 
             <CardFooter className="flex flex-col gap-4">

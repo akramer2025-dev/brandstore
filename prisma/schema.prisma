@@ -309,6 +309,13 @@ model Order {
   governorate      String?           // المحافظة (للتوصيل المنزلي)
   downPayment      Float?            // الدفعة المقدمة
   remainingAmount  Float?            // المبلغ المتبقي
+  // 🚚 حقول شركة بوسطة للشحن
+  bustaShipmentId  String?           // رقم الشحنة من شركة بوسطة
+  bustaStatus      BustaStatus?      // حالة الشحنة
+  bustaNotes       String?           // ملاحظات من شركة بوسطة
+  bustaSentAt      DateTime?         // تاريخ إرسال الطلب لشركة بوسطة
+  bustaTrackingUrl String?           // رابط تتبع الشحنة
+  shippingCompany  String?           @default("BOSTA") // شركة الشحن
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   installmentPlan  InstallmentPlan?
@@ -722,6 +729,19 @@ enum OrderStatus {
 enum DeliveryMethod {
   HOME_DELIVERY    // توصيل للمنزل
   STORE_PICKUP     // استلام من المتجر
+}
+
+enum BustaStatus {
+  PENDING         // في انتظار الإرسال لبوسطة
+  SENT_TO_BUSTA   // تم الإرسال لشركة بوسطة
+  PICKED_UP       // تم الاستلام من المتجر
+  IN_TRANSIT      // في الطريق للعميل
+  OUT_FOR_DELIVERY // خرج للتوصيل
+  DELIVERED       // تم التوصيل
+  ATTEMPTED       // فشل في التوصيل (محاولة)
+  RETURNED        // تم الإرجاع للمتجر
+  CANCELLED       // ملغي
+  EXCEPTION       // استثناء أو مشكلة
 }
 
 enum PaymentStatus {
