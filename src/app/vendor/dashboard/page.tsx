@@ -410,35 +410,49 @@ export default function VendorDashboard() {
         if (res.ok) {
           const data = await res.json()
           const newUnreadCount = data.unreadCount || 0
+          const notifications = data.notifications || []
           
           console.log(`📨 الإشعارات: سابق=${prevUnreadCountRef.current}, جديد=${newUnreadCount}, isInitialLoad=${isInitialLoadRef.current}`)
           
-          // إذا زاد عدد الإشعارات، شغل الصوت أوتوماتيك (بعد التحميل الأولي فقط)
+          // إذا زاد عدد الإشعارات، تحقق من وجود إشعارات حديثة (آخر دقيقة)
           if (!isInitialLoadRef.current && newUnreadCount > prevUnreadCountRef.current) {
-            console.log(`🔔🔔🔔 طلب جديد! العدد: ${prevUnreadCountRef.current} → ${newUnreadCount}`)
-            console.log('🔊 محاولة تشغيل الصوت...')
+            // التحقق من وجود إشعارات جديدة تم إنشاؤها خلال آخر دقيقة فقط
+            const oneMinuteAgo = new Date(Date.now() - 60 * 1000)
+            const recentNewNotifications = notifications.filter((notif: any) => {
+              const createdAt = new Date(notif.createdAt)
+              return !notif.isRead && createdAt > oneMinuteAgo
+            })
             
-            // تهيئة AudioContext قبل التشغيل
-            if (!audioContextRef.current) {
-              console.log('⚠️ AudioContext غير موجود، جاري التهيئة...')
-              initAudioContext()
-            }
-            
-            playNotificationSound()
-            console.log('✅ تم استدعاء playNotificationSound()')
-            
-            // إظهار إشعار desktop أيضاً
-            if ('Notification' in window && Notification.permission === 'granted') {
-              console.log('🔔 إرسال Desktop Notification...')
-              new Notification('🎉 طلب جديد!', {
-                body: `لديك ${newUnreadCount} طلب جديد في المتجر`,
-                icon: '/icon-192x192.png',
-                tag: 'new-order',
-                requireInteraction: true,
-              })
+            // فقط شغل الصوت إذا كان هناك إشعارات حديثة فعلاً (ليست قديمة)
+            if (recentNewNotifications.length > 0) {
+              console.log(`🔔🔔🔔 طلب جديد! العدد: ${prevUnreadCountRef.current} → ${newUnreadCount}`)
+              console.log(`✨ إشعارات حديثة: ${recentNewNotifications.length}`)
+              console.log('🔊 محاولة تشغيل الصوت...')
+              
+              // تهيئة AudioContext قبل التشغيل
+              if (!audioContextRef.current) {
+                console.log('⚠️ AudioContext غير موجود، جاري التهيئة...')
+                initAudioContext()
+              }
+              
+              playNotificationSound()
+              console.log('✅ تم استدعاء playNotificationSound()')
+              
+              // إظهار إشعار desktop أيضاً
+              if ('Notification' in window && Notification.permission === 'granted') {
+                console.log('🔔 إرسال Desktop Notification...')
+                new Notification('🎉 طلب جديد!', {
+                  body: `لديك ${recentNewNotifications.length} طلب جديد في المتجر`,
+                  icon: '/icon-192x192.png',
+                  tag: 'new-order',
+                  requireInteraction: true,
+                })
+              } else {
+                console.log('⚠️ Desktop Notification غير متاح -', 
+                  'Notification' in window ? 'Permission: ' + Notification.permission : 'Not supported')
+              }
             } else {
-              console.log('⚠️ Desktop Notification غير متاح -', 
-                'Notification' in window ? 'Permission: ' + Notification.permission : 'Not supported')
+              console.log('⏸️ لا توجد إشعارات جديدة حديثة، تجاهل تشغيل الصوت')
             }
           }
           
