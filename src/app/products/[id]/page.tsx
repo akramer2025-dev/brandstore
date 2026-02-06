@@ -28,6 +28,8 @@ import {
   X,
   Instagram,
   Store,
+  Download,
+  Smartphone,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -73,6 +75,8 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   const { addItem } = useCartStore();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
@@ -149,6 +153,20 @@ export default function ProductDetailPage() {
       fetchProduct();
     }
   }, [productId]);
+
+  // Check if PWA is installed
+  useEffect(() => {
+    const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+    setIsStandalone(isStandaloneMode);
+    
+    // Show banner if not standalone and not dismissed
+    if (!isStandaloneMode) {
+      const dismissed = localStorage.getItem('product-page-install-banner-dismissed');
+      if (!dismissed) {
+        setShowInstallBanner(true);
+      }
+    }
+  }, []);
 
   const fetchProduct = async () => {
     setLoading(true);
@@ -240,6 +258,34 @@ export default function ProductDetailPage() {
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 relative z-10">
+        {/* Install App Banner */}
+        {showInstallBanner && !isStandalone && (
+          <div className="mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 rounded-xl p-3 sm:p-4 shadow-2xl animate-fade-in">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="bg-white/20 rounded-full p-2 backdrop-blur-sm">
+                  <Smartphone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-white font-bold text-sm sm:text-base">حمّل تطبيق Remostore</h3>
+                  <p className="text-white/90 text-xs sm:text-sm">تجربة أسرع وأسهل مع التطبيق 🚀</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => {
+                  setShowInstallBanner(false);
+                  localStorage.setItem('product-page-install-banner-dismissed', 'true');
+                }}
+                variant="ghost"
+                size="sm"
+                className="hover:bg-white/20 text-white p-2"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-8 overflow-x-auto">
           <Link href="/" className="hover:text-teal-400">الرئيسية</Link>

@@ -85,7 +85,7 @@ export default function CheckoutPage() {
     landmark: "",
     postalCode: "",
     notes: "",
-    saveAddress: false,
+    saveAddress: true,
     addressTitle: "",
   });
 
@@ -251,14 +251,18 @@ export default function CheckoutPage() {
   const finalTotal = deliveryMethod === 'HOME_DELIVERY' ? (totalPrice + deliveryFee) : downPayment;
 
   const saveNewAddress = async () => {
-    if (!formData.saveAddress || !formData.addressTitle) return null;
+    if (!formData.saveAddress) return null;
 
     try {
+      // توليد عنوان تلقائي إذا لم يتم توفيره
+      const autoTitle = formData.addressTitle || 
+        `${formData.governorate || ''} - ${formData.city || ''} - ${formData.district || ''}`;
+
       const response = await fetch('/api/addresses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: formData.addressTitle,
+          title: autoTitle,
           fullName: formData.fullName,
           phone: formData.phone,
           alternativePhone: formData.alternativePhone,

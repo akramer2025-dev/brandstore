@@ -2,7 +2,9 @@ import { prisma } from './prisma';
 import { InventoryService } from './inventory-service';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export class OrderService {
   /**
@@ -547,7 +549,7 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
 
       const bustaEmail = process.env.BUSTA_EMAIL || 'shipping@busta-egypt.com';
 
-      await resend.emails.send({
+      await getResend().emails.send({
         from: 'Remostore <orders@remostore.net>',
         to: [bustaEmail],
         subject: `طلب شحن جديد - رقم الطلب: ${order.orderNumber}`,

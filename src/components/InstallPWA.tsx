@@ -25,6 +25,12 @@ export default function InstallPWA() {
     const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     setIsIOS(iOS);
 
+    // Detect if coming from social media (Facebook, Instagram, etc.)
+    const referrer = document.referrer;
+    const isFromSocial = /facebook|instagram|fb\.com|t\.co|twitter|tiktok/i.test(referrer);
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasFbclid = urlParams.has('fbclid') || urlParams.has('utm_source');
+
     // Listen for install prompt (Android/Desktop)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -32,13 +38,25 @@ export default function InstallPWA() {
       setInstallPrompt(promptEvent);
       setIsInstallable(true);
       
-      // Show banner after 3 seconds
+      // Show banner immediately if from social media, otherwise after 2 seconds
+      const delay = (isFromSocial || hasFbclid) ? 500 : 2000;
       setTimeout(() => {
         const dismissed = localStorage.getItem('pwa-install-dismissed');
-        if (!dismissed) {
+        const dismissedTime = localStorage.getItem('pwa-install-dismissed-time');
+        
+        // Re-show after 1 day instead of 7 days
+        if (dismissed && dismissedTime) {
+          const daysSinceDismiss = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
+          if (daysSinceDismiss > 1) {
+            localStorage.removeItem('pwa-install-dismissed');
+            localStorage.removeItem('pwa-install-dismissed-time');
+          }
+        }
+        
+        if (!localStorage.getItem('pwa-install-dismissed')) {
           setShowBanner(true);
         }
-      }, 3000);
+      }, delay);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -46,7 +64,8 @@ export default function InstallPWA() {
     // Check if dismissed before
     const dismissed = localStorage.getItem('pwa-install-dismissed');
     if (iOS && !isStandaloneMode && !dismissed) {
-      setTimeout(() => setShowBanner(true), 3000);
+      const delay = (isFromSocial || hasFbclid) ? 500 : 2000;
+      setTimeout(() => setShowBanner(true), delay);
     }
 
     return () => {
@@ -76,11 +95,7 @@ export default function InstallPWA() {
   const handleDismiss = () => {
     setShowBanner(false);
     localStorage.setItem('pwa-install-dismissed', 'true');
-    
-    // Re-show after 7 days
-    setTimeout(() => {
-      localStorage.removeItem('pwa-install-dismissed');
-    }, 7 * 24 * 60 * 60 * 1000);
+    localStorage.setItem('pwa-install-dismissed-time', Date.now().toString());
   };
 
   // Don't show if already installed

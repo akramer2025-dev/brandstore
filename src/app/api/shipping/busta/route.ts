@@ -3,7 +3,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function POST(request: Request) {
   try {
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
     // إرسال الإيميل لشركة بوسطة
     const bustaEmail = process.env.BUSTA_EMAIL || 'shipping@busta-egypt.com';
 
-    const emailResult = await resend.emails.send({
+    const emailResult = await getResend().emails.send({
       from: "Remostore <orders@remostore.net>",
       to: [bustaEmail], // إيميل شركة بوسطة
       subject: `طلب شحن جديد - رقم الطلب: ${order.orderNumber}`,
