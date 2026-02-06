@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  ArrowRight,
   ClipboardList,
   Search,
   Filter,
@@ -20,7 +19,7 @@ import {
   Plus,
   RefreshCw,
 } from "lucide-react";
-import Link from "next/link";
+import { BackButton } from "@/components/BackButton";
 
 // Action types with icons and colors
 const actionConfig: Record<string, { icon: React.ElementType; color: string; label: string }> = {
@@ -128,12 +127,7 @@ export default function ActivityLogsPage() {
       <div className="bg-white dark:bg-slate-800 shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link
-              href="/vendor/dashboard"
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-            >
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            <BackButton fallbackUrl="/vendor/dashboard" />
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-rose-500 to-pink-600 rounded-lg text-white">
                 <ClipboardList className="w-5 h-5" />

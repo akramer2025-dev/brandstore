@@ -8,11 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { 
-  Package, Plus, Edit, Trash2, Phone, Globe, ArrowRight, 
+  Package, Plus, Edit, Trash2, Phone, Globe,
   Building2, Loader2, CheckCircle2, XCircle, Clock, Search, MapPin
 } from 'lucide-react'
 import { toast } from 'sonner'
-import Link from 'next/link'
+import { BackButton } from '@/components/BackButton'
 
 interface ShippingCompany {
   id: string
@@ -205,11 +205,7 @@ export default function ShippingCompaniesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Link href="/vendor/dashboard">
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+            <BackButton fallbackUrl="/vendor/dashboard" className="bg-white/10 backdrop-blur-sm border-white/30 hover:bg-white/20 text-gray-200" />
             <div className="bg-gradient-to-r from-orange-500 to-red-500 p-3 rounded-xl">
               <Package className="w-6 h-6 text-white" />
             </div>

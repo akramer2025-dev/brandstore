@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  ArrowRight,
   Settings,
   User,
   Lock,
@@ -15,8 +14,8 @@ import {
   Loader2,
   Check,
 } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
+import { BackButton } from "@/components/BackButton";
 
 export default function VendorSettingsPage() {
   const { data: session, status, update } = useSession();
@@ -189,12 +188,7 @@ export default function VendorSettingsPage() {
       <div className="bg-white dark:bg-slate-800 shadow-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link
-              href="/vendor/dashboard"
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-            >
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            <BackButton fallbackUrl="/vendor/dashboard" />
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-slate-500 to-slate-600 rounded-lg text-white">
                 <Settings className="w-5 h-5" />

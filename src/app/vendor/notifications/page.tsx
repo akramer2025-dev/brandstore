@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, BellOff, Check, CheckCheck, Package, MessageCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { BackButton } from "@/components/BackButton";
 
 interface Notification {
   id: string;
@@ -157,11 +158,12 @@ export default function VendorNotificationsPage() {
       <div className="relative z-10 bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white py-8 shadow-2xl">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <BackButton fallbackUrl="/vendor/dashboard" className="bg-white/10 backdrop-blur-sm border-white/30" />
               <Bell className="h-8 w-8" />
               <div>
-                <h1 className="text-4xl font-bold drop-shadow-lg">الإشعارات</h1>
-                <p className="text-teal-100 mt-2">
+                <h1 className="text-2xl md:text-4xl font-bold drop-shadow-lg">الإشعارات</h1>
+                <p className="text-teal-100 mt-1 md:mt-2 text-sm md:text-base">
                   لديك {unreadCount} إشعار غير مقروء
                 </p>
               </div>
@@ -170,10 +172,11 @@ export default function VendorNotificationsPage() {
               <Button
                 onClick={markAllAsRead}
                 variant="outline"
-                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
+                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 text-xs md:text-sm"
               >
-                <CheckCheck className="ml-2 h-5 w-5" />
-                تحديد الكل كمقروء
+                <CheckCheck className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+                <span className="hidden sm:inline">تحديد الكل كمقروء</span>
+                <span className="sm:hidden">✓ الكل</span>
               </Button>
             )}
           </div>

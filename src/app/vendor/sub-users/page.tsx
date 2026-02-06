@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  ArrowRight,
   Users,
   Plus,
   Edit2,
@@ -18,8 +17,8 @@ import {
   UserX,
   Shield,
 } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
+import { BackButton } from "@/components/BackButton";
 
 // Role display names
 const roleNames: Record<string, string> = {
@@ -235,12 +234,7 @@ export default function SubUsersPage() {
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                href="/vendor/dashboard"
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-              >
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              <BackButton fallbackUrl="/vendor/dashboard" />
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg text-white">
                   <Users className="w-5 h-5" />

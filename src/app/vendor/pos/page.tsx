@@ -24,6 +24,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
+import { BackButton } from '@/components/BackButton';
 
 interface Product {
   id: string;
@@ -232,6 +233,10 @@ export default function POSPage() {
             <p className="text-purple-300 mt-1 text-xs md:text-base">نظام كاشير احترافي</p>
           </div>
           <div className="flex gap-2 flex-wrap">
+            <BackButton 
+              fallbackUrl="/vendor/dashboard"
+              className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-xs md:text-sm"
+            />
             <Button
               onClick={() => router.push('/vendor/dashboard')}
               size="sm"
