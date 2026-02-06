@@ -34,6 +34,14 @@ interface MarketingContent {
   whatsapp: string;
 }
 
+interface ProductData {
+  id: string;
+  name: string;
+  price: number;
+  url: string;
+  image: string | null;
+}
+
 export default function MarketingModal({
   open,
   onClose,
@@ -43,6 +51,7 @@ export default function MarketingModal({
 }: MarketingModalProps) {
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState<MarketingContent | null>(null);
+  const [productData, setProductData] = useState<ProductData | null>(null);
   const [copiedTab, setCopiedTab] = useState<string | null>(null);
 
   const generateContent = async () => {
@@ -70,6 +79,7 @@ export default function MarketingModal({
 
       const data = await res.json();
       setContent(data.content);
+      setProductData(data.product);
       toast.success("✨ تم توليد المحتوى التسويقي بنجاح!");
     } catch (error) {
       console.error("Error generating content:", error);
@@ -92,8 +102,12 @@ export default function MarketingModal({
     }
   };
 
-  const shareToFacebook = (text: string) => {
-    const url = `https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(text)}`;
+  const shareToFacebook = () => {
+    if (!productData?.url) {
+      toast.error("رابط المنتج غير متوفر");
+      return;
+    }
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productData.url)}`;
     window.open(url, '_blank', 'width=600,height=400');
   };
 
@@ -194,7 +208,7 @@ export default function MarketingModal({
                   نسخ النص
                 </Button>
                 <Button
-                  onClick={() => shareToFacebook(content.facebook)}
+                  onClick={() => shareToFacebook()}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
                   <Share2 className="w-4 h-4 mr-2" />
