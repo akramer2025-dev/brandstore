@@ -7,8 +7,10 @@ export default function TestPushPage() {
   const { data: session } = useSession();
   const [status, setStatus] = useState<string>('');
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     checkPushStatus();
   }, []);
 
@@ -183,14 +185,18 @@ export default function TestPushPage() {
 
         <div className="mt-8 bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">ℹ️  معلومات:</h2>
-          <ul className="space-y-2 text-sm text-gray-400">
-            <li>• المتصفح: {navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other'}</li>
-            <li>• Service Worker: {('serviceWorker' in navigator) ? 'مدعوم ✅' : 'غير مدعوم ❌'}</li>
-            <li>• Push Manager: {('PushManager' in window) ? 'مدعوم ✅' : 'غير مدعوم ❌'}</li>
-            <li>• Notification: {('Notification' in window) ? 'مدعوم ✅' : 'غير مدعوم ❌'}</li>
-            <li>• Permission: {typeof Notification !== 'undefined' ? Notification.permission : 'N/A'}</li>
-            <li>• User ID: {session?.user?.id || 'Not logged in'}</li>
-          </ul>
+          {mounted ? (
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li>• المتصفح: {typeof navigator !== 'undefined' && navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other'}</li>
+              <li>• Service Worker: {typeof navigator !== 'undefined' && ('serviceWorker' in navigator) ? 'مدعوم ✅' : 'غير مدعوم ❌'}</li>
+              <li>• Push Manager: {typeof window !== 'undefined' && ('PushManager' in window) ? 'مدعوم ✅' : 'غير مدعوم ❌'}</li>
+              <li>• Notification: {typeof window !== 'undefined' && ('Notification' in window) ? 'مدعوم ✅' : 'غير مدعوم ❌'}</li>
+              <li>• Permission: {typeof Notification !== 'undefined' ? Notification.permission : 'N/A'}</li>
+              <li>• User ID: {session?.user?.id || 'Not logged in'}</li>
+            </ul>
+          ) : (
+            <p className="text-gray-400">جاري التحميل...</p>
+          )}
         </div>
       </div>
     </div>
