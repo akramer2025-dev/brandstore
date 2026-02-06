@@ -38,8 +38,8 @@ export async function POST(request: Request) {
           include: {
             product: {
               select: {
-                titleAr: true,
-                title: true,
+                nameAr: true,
+                name: true,
                 price: true,
                 image: true,
               },
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         (item) => `
         <tr>
           <td style="padding: 10px; border: 1px solid #ddd;">
-            ${item.product?.titleAr || item.product?.title}
+            ${item.product?.nameAr || item.product?.name}
           </td>
           <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
             ${item.quantity}
@@ -258,8 +258,8 @@ export async function GET() {
             quantity: true,
             product: {
               select: {
-                titleAr: true,
-                title: true,
+                nameAr: true,
+                name: true,
               },
             },
           },

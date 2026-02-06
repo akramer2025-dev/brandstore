@@ -32,8 +32,8 @@ export async function GET() {
             quantity: true,
             product: {
               select: {
-                titleAr: true,
-                title: true,
+                nameAr: true,
+                name: true,
               },
             },
           },

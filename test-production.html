@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فحص Production - Remostore</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+    .test-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .test-title {
+      font-size: 1.3em;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .result {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+    .success {
+      background: #d4edda;
+      border: 2px solid #28a745;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+      color: #721c24;
+    }
+    .loading {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      color: #856404;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin: 10px 5px;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-left: 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 فحص Production</h1>
+    <div class="subtitle">www.remostore.net</div>
+
+    <button onclick="testAll()">🚀 فحص شامل</button>
+    <button onclick="clearResults()">🗑️ مسح النتائج</button>
+
+    <div id="results"></div>
+  </div>
+
+  <script>
+    const PRODUCTION_URL = 'https://www.remostore.net';
+    
+    function showLoading(message) {
+      const results = document.getElementById('results');
+      results.innerHTML += `
+        <div class="result loading">
+          <div class="spinner"></div>
+          ${message}
+        </div>
+      `;
+    }
+
+    function showSuccess(title, message) {
+      const results = document.getElementById('results');
+      const lastLoading = results.querySelector('.loading:last-child');
+      if (lastLoading) lastLoading.remove();
+      
+      results.innerHTML += `
+        <div class="test-section">
+          <div class="test-title">✅ ${title}</div>
+          <div class="result success">${message}</div>
+        </div>
+      `;
+    }
+
+    function showError(title, message) {
+      const results = document.getElementById('results');
+      const lastLoading = results.querySelector('.loading:last-child');
+      if (lastLoading) lastLoading.remove();
+      
+      results.innerHTML += `
+        <div class="test-section">
+          <div class="test-title">❌ ${title}</div>
+          <div class="result error">${message}</div>
+        </div>
+      `;
+    }
+
+    function clearResults() {
+      document.getElementById('results').innerHTML = '';
+    }
+
+    async function testHomepage() {
+      showLoading('فحص الصفحة الرئيسية...');
+      try {
+        const response = await fetch(PRODUCTION_URL);
+        const html = await response.text();
+        
+        if (!response.ok) {
+          showError('الصفحة الرئيسية', `خطأ HTTP: ${response.status}`);
+          return;
+        }
+
+        // فحص وجود محتوى
+        if (html.includes('Application error')) {
+          showError('الصفحة الرئيسية', 'يوجد Application Error على الصفحة!');
+        } else if (html.length < 1000) {
+          showError('الصفحة الرئيسية', 'الصفحة فارغة أو قصيرة جداً!');
+        } else {
+          showSuccess('الصفحة الرئيسية', `✅ تحميل ناجح (${html.length} حرف)`);
+        }
+      } catch (error) {
+        showError('الصفحة الرئيسية', error.message);
+      }
+    }
+
+    async function testProducts() {
+      showLoading('فحص API المنتجات...');
+      try {
+        const response = await fetch(`${PRODUCTION_URL}/api/products`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+          showError('API المنتجات', `خطأ HTTP: ${response.status}`);
+          return;
+        }
+
+        if (data.error) {
+          showError('API المنتجات', data.error);
+        } else if (!data.products || data.products.length === 0) {
+          showError('API المنتجات', '⚠️ لا توجد منتجات! (مع أن الـ database فيها 12 منتج)');
+        } else {
+          showSuccess('API المنتجات', 
+            `✅ تم العثور على ${data.products.length} منتج:\n${data.products.slice(0, 3).map(p => `• ${p.nameAr} - ${p.price} ج.م`).join('\n')}`
+          );
+        }
+      } catch (error) {
+        showError('API المنتجات', error.message);
+      }
+    }
+
+    async function testHealth() {
+      showLoading('فحص الصحة العامة...');
+      try {
+        const response = await fetch(`${PRODUCTION_URL}/api/health`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+          showError('Health Check', `خطأ HTTP: ${response.status}`);
+          return;
+        }
+
+        if (data.status === 'ok') {
+          showSuccess('Health Check', 
+            `✅ النظام يعمل!\n` +
+            `• Database: ${data.database}\n` +
+            `• Environment: ${data.environment}`
+          );
+        } else if (data.errors && data.errors.length > 0) {
+          showError('Health Check', 
+            `❌ يوجد أخطاء:\n${data.errors.join('\n')}`
+          );
+        } else if (data.warnings && data.warnings.length > 0) {
+          showError('Health Check', 
+            `⚠️ يوجد تحذيرات:\n${data.warnings.join('\n')}`
+          );
+        }
+      } catch (error) {
+        showError('Health Check', error.message);
+      }
+    }
+
+    async function testFlashDeals() {
+      showLoading('فحص API Flash Deals...');
+      try {
+        const response = await fetch(`${PRODUCTION_URL}/api/products/flash-deals`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+          showError('Flash Deals API', `خطأ HTTP: ${response.status}`);
+          return;
+        }
+
+        if (Array.isArray(data)) {
+          showSuccess('Flash Deals API', 
+            `✅ API تعمل بشكل صحيح (${data.length} عرض)`
+          );
+        } else {
+          showError('Flash Deals API', 'الاستجابة ليست array!');
+        }
+      } catch (error) {
+        showError('Flash Deals API', error.message);
+      }
+    }
+
+    async function testAll() {
+      clearResults();
+      await testHealth();
+      await testHomepage();
+      await testProducts();
+      await testFlashDeals();
+    }
+  </script>
+</body>
+</html>

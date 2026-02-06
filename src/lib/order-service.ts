@@ -533,7 +533,7 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
           items: {
             include: {
               product: {
-                select: { titleAr: true, title: true, price: true },
+                select: { nameAr: true, name: true, price: true },
               },
             },
           },
@@ -549,7 +549,7 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
         .map(
           (item) => `
           <tr>
-            <td style="padding:10px;border:1px solid #ddd;">${item.product?.titleAr || item.product?.title}</td>
+            <td style="padding:10px;border:1px solid #ddd;">${item.product?.nameAr || item.product?.name}</td>
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">${item.quantity}</td>
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">${(item.quantity * item.price).toFixed(2)} جنيه</td>
           </tr>`
