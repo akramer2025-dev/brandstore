@@ -339,8 +339,8 @@ export default function SpinWheel() {
           </div>
         </div>
 
-        {/* Result Display */}
-        {selectedPrize && !claimSuccess && (
+        {/* Result Display - يظهر فقط بعد توقف العجلة */}
+        {selectedPrize && hasSpun && !claimSuccess && !showLoginMessage && (
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-4 animate-fade-in border-2 border-yellow-400/50">
             <p className="text-center text-white font-bold text-lg mb-2">
               🎊 مبروك! ربحت:
