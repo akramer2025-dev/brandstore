@@ -8,6 +8,7 @@ import { LogoBanner } from '@/components/LogoBanner';
 import ChatButton from '@/components/ChatButton';
 import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
+import NewsTicker from '@/components/NewsTicker';
 import Link from 'next/link';
 import { Sparkles, ShoppingBag, TrendingUp, Award, Shield, Truck, Star } from 'lucide-react';
 
@@ -65,6 +66,10 @@ export default async function HomePage() {
     return (
       <>
         {/* <SplashScreen /> */}
+        
+        {/* News Ticker - شريط الأخبار المتحرك */}
+        <NewsTicker />
+        
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 animate-fade-in" style={{ animationDelay: '0.5s', animationDuration: '1s' }}>
 
       {/* Hero Slider with Integrated Logo - Full Width */}
