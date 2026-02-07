@@ -43,22 +43,22 @@ export async function POST(request: Request) {
     const session = await auth();
 
     if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "يجب تسجيل الدخول أولاً" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { productId, rating, comment } = body;
+    const { productId, rating, comment, images } = body;
 
     if (!productId || !rating) {
       return NextResponse.json(
-        { error: "Product ID and rating are required" },
+        { error: "معرف المنتج والتقييم مطلوبان" },
         { status: 400 }
       );
     }
 
     if (rating < 1 || rating > 5) {
       return NextResponse.json(
-        { error: "Rating must be between 1 and 5" },
+        { error: "التقييم يجب أن يكون بين 1 و 5" },
         { status: 400 }
       );
     }
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     if (existingReview) {
       return NextResponse.json(
-        { error: "You have already reviewed this product" },
+        { error: "لقد قمت بتقييم هذا المنتج مسبقاً" },
         { status: 400 }
       );
     }
@@ -87,22 +87,35 @@ export async function POST(request: Request) {
           status: "DELIVERED", // Only allow review if order was delivered
         },
       },
+      include: {
+        order: true,
+      },
     });
 
     if (!hasPurchased) {
       return NextResponse.json(
-        { error: "You can only review products you have purchased" },
+        { error: "يمكنك فقط تقييم المنتجات التي اشتريتها وتم تسليمها" },
         { status: 400 }
       );
+    }
+
+    // 🎁 حساب النقاط: 5 للتقييم + 5 للصورة
+    let pointsToAward = 5; // 5 نقاط للتقييم
+    const hasImages = images && images.trim().length > 0;
+    if (hasImages) {
+      pointsToAward += 5; // 5 نقاط إضافية للصورة
     }
 
     const review = await prisma.review.create({
       data: {
         productId,
         userId: session.user.id,
+        orderId: hasPurchased.order.id,
         rating,
-        comment,
-        isApproved: false, // Requires admin approval
+        comment: comment || '',
+        images: images || '',
+        pointsAwarded: pointsToAward,
+        isApproved: true, // تلقائي (يمكن تغييره للمراجعة اليدوية)
       },
       include: {
         user: {
@@ -114,9 +127,40 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(review, { status: 201 });
+    // ✨ منح النقاط للمستخدم
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        points: {
+          increment: pointsToAward,
+        },
+      },
+    });
+
+    // تسجيل حركة النقاط
+    await prisma.pointTransaction.create({
+      data: {
+        userId: session.user.id,
+        points: pointsToAward,
+        type: 'EARNED',
+        orderId: hasPurchased.order.id,
+        description: `تقييم منتج ${hasImages ? 'مع صورة 📸' : ''} - ${pointsToAward} نقطة`,
+      },
+    });
+
+    console.log('✅ تقييم جديد مع نقاط:', {
+      reviewId: review.id,
+      points: pointsToAward,
+      hasImages,
+    });
+
+    return NextResponse.json({ 
+      review,
+      pointsAwarded: pointsToAward,
+      message: `شكراً على تقييمك! حصلت على ${pointsToAward} نقطة ⭐`,
+    }, { status: 201 });
   } catch (error) {
     console.error("Error creating review:", error);
-    return NextResponse.json({ error: "Failed to create review" }, { status: 500 });
+    return NextResponse.json({ error: "فشل في إنشاء التقييم" }, { status: 500 });
   }
 }

@@ -9,7 +9,7 @@ import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, CheckCircle2, AlertCircle, Loader2, Star } from "lucide-react";
 import { toast } from "sonner";
 
 interface Coupon {
@@ -32,6 +32,11 @@ export default function CartPage() {
   const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
   const [couponError, setCouponError] = useState("");
   
+  // نظام النقاط
+  const [userPoints, setUserPoints] = useState(0);
+  const [pointsToUse, setPointsToUse] = useState(0);
+  const [loadingPoints, setLoadingPoints] = useState(false);
+  
   const { items, removeItem, updateQuantity, clearCart, getTotalPrice } = useCartStore();
 
   useEffect(() => {
@@ -42,8 +47,26 @@ export default function CartPage() {
     if (status === "unauthenticated") {
       toast.error("يجب تسجيل الدخول أولاً");
       router.push("/auth/login");
+    } else if (status === "authenticated") {
+      // جلب نقاط المستخدم
+      fetchUserPoints();
     }
   }, [status, router]);
+
+  const fetchUserPoints = async () => {
+    setLoadingPoints(true);
+    try {
+      const response = await fetch('/api/user/points');
+      if (response.ok) {
+        const data = await response.json();
+        setUserPoints(data.points || 0);
+      }
+    } catch (error) {
+      console.error('خطأ في جلب النقاط:', error);
+    } finally {
+      setLoadingPoints(false);
+    }
+  };
 
   if (!mounted || status === "loading") {
     return (
@@ -128,7 +151,8 @@ export default function CartPage() {
 
   const totalPrice = getTotalPrice();
   const discount = appliedCoupon? appliedCoupon.discount : 0;
-  const finalPrice = Math.max(0, totalPrice - discount);
+  const pointsDiscount = pointsToUse; // كل نقطة = 1 جنيه
+  const finalPrice = Math.max(0, totalPrice - discount - pointsDiscount);
 
   // حساب الوفورات من الأسعار الوهمية
   const originalTotalPrice = items.reduce((sum, item) => {
@@ -366,6 +390,66 @@ export default function CartPage() {
                     )}
                   </div>
                   
+                  {/* Loyalty Points Section */}
+                  <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg p-3 sm:p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-5 h-5 text-purple-400 fill-purple-400" />
+                        <h3 className="font-bold text-white">نقاط الولاء</h3>
+                      </div>
+                      {loadingPoints ? (
+                        <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+                      ) : (
+                        <span className="text-purple-400 font-bold">{userPoints} نقطة</span>
+                      )}
+                    </div>
+                    
+                    {userPoints > 0 && (
+                      <>
+                        <p className="text-xs text-gray-400 mb-2">
+                          💰 استخدم نقاطك واحصل على خصم (كل نقطة = 1 جنيه)
+                        </p>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            max={Math.min(userPoints, Math.floor(totalPrice - discount))}
+                            placeholder="عدد النقاط"
+                            value={pointsToUse || ''}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value) || 0;
+                              const maxAllowed = Math.min(userPoints, Math.floor(totalPrice - discount));
+                              setPointsToUse(Math.max(0, Math.min(value, maxAllowed)));
+                            }}
+                            className="bg-gray-800 border-purple-500/50 text-white placeholder:text-gray-500"
+                          />
+                          <Button
+                            onClick={() => {
+                              const maxAllowed = Math.min(userPoints, Math.floor(totalPrice - discount));
+                              setPointsToUse(maxAllowed);
+                              toast.success(`تم استخدام ${maxAllowed} نقطة!`);
+                            }}
+                            disabled={userPoints === 0}
+                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 whitespace-nowrap"
+                          >
+                            استخدم الكل
+                          </Button>
+                        </div>
+                        {pointsToUse > 0 && (
+                          <p className="text-purple-400 text-xs mt-2 font-medium">
+                            ✨ سيتم خصم {pointsToUse} جنيه من طلبك
+                          </p>
+                        )}
+                      </>
+                    )}
+                    
+                    {userPoints === 0 && (
+                      <p className="text-xs text-gray-400">
+                        💡 اشترِ الآن واكسب نقاط ولاء! (كل 10 جنيه = 1 نقطة)
+                      </p>
+                    )}
+                  </div>
+                  
                   <div className="flex justify-between text-gray-400">
                     <span>عدد المنتجات:</span>
                     <span className="font-bold">{items.length}</span>
@@ -413,6 +497,13 @@ export default function CartPage() {
                       </div>
                     )}
                     
+                    {pointsToUse > 0 && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-purple-400 text-sm">⭐ خصم النقاط ({pointsToUse} نقطة):</span>
+                        <span className="text-purple-400 font-bold">- {pointsDiscount.toFixed(2)} جنيه</span>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-gray-400 text-sm">رسوم التوصيل:</span>
                       <span className="text-teal-400 font-bold">مجاناً</span>
@@ -421,17 +512,22 @@ export default function CartPage() {
 
                   <div className="border-t border-gray-700 pt-3 sm:pt-4">
                     {/* Total Savings Celebration */}
-                    {(fakeSavings + discount) > 0 && (
+                    {(fakeSavings + discount + pointsDiscount) > 0 && (
                       <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-lg p-3 mb-3">
                         <div className="flex items-center justify-between">
                           <span className="text-green-400 text-sm font-bold">🎉 إجمالي التوفير:</span>
                           <span className="text-green-400 font-black text-lg">
-                            {(fakeSavings + discount).toFixed(2)} جنيه
+                            {(fakeSavings + discount + pointsDiscount).toFixed(2)} جنيه
                           </span>
                         </div>
                         <p className="text-green-300 text-xs mt-1">
-                          رائع! وفّرت {Math.round(((fakeSavings + discount) / originalTotalPrice) * 100)}% من المبلغ الأصلي 💪
+                          رائع! وفّرت {Math.round(((fakeSavings + discount + pointsDiscount) / originalTotalPrice) * 100)}% من المبلغ الأصلي 💪
                         </p>
+                        {pointsToUse > 0 && (
+                          <p className="text-purple-300 text-xs mt-1">
+                            ⭐ استخدمت {pointsToUse} نقطة - سيتبقى لك {userPoints - pointsToUse} نقطة
+                          </p>
+                        )}
                       </div>
                     )}
                     

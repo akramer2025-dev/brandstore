@@ -18,6 +18,7 @@ model User {
   role             UserRole       @default(CUSTOMER)
   phone            String?
   address          String?
+  points           Int            @default(0) // نقاط الولاء
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   accounts         Account[]
@@ -31,6 +32,7 @@ model User {
   vendor           Vendor?
   wishlistItems    WishlistItem[]
   savedAddresses   SavedAddress[] // العناوين المحفوظة
+  pointTransactions PointTransaction[] // سجل حركة النقاط
 
   @@map("users")
 }
@@ -522,16 +524,19 @@ model InventoryLog {
 }
 
 model Review {
-  id         String   @id @default(cuid())
-  productId  String
-  userId     String
-  rating     Int
-  comment    String?
-  isApproved Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  productId     String
+  userId        String
+  orderId       String?  // الطلب الذي تم فيه شراء المنتج
+  rating        Int
+  comment       String?
+  images        String?  // صور التقييم (مفصولة بفواصل)
+  isApproved    Boolean  @default(false)
+  pointsAwarded Int      @default(0) // النقاط الممنوحة (5 للتقييم + 5 للصورة)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
 }
@@ -1439,4 +1444,21 @@ model Coupon {
   @@index([code])
   @@index([userId])
   @@index([isActive, expiresAt])
+}
+
+// ============ نظام النقاط (Loyalty Points) ============
+model PointTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  points      Int      // النقاط (موجب = كسب، سالب = استخدام)
+  type        String   // EARNED (كسب من شراء)، REDEEMED (استخدام في شراء)، EXPIRED (انتهت صلاحيتها)
+  orderId     String?  // الطلب المرتبط
+  description String   // وصف العملية
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("point_transactions")
+  @@index([userId])
+  @@index([orderId])
+  @@index([createdAt])
 }
