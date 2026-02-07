@@ -28,6 +28,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         console.error('❌ Error in createUser event:', error);
       }
     },
+    async signIn({ user, account, isNewUser }) {
+      console.log('🎉 Event: signIn - User:', user.email, 'Provider:', account?.provider, 'New User:', isNewUser);
+    },
+    async session({ session, token }) {
+      console.log('📝 Event: session - User:', session.user?.email, 'Role:', session.user?.role);
+    },
   },
   
   providers: [
@@ -181,17 +187,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async redirect({ url, baseUrl }) {
+      console.log('🔄 Redirect callback - URL:', url, 'BaseURL:', baseUrl);
+      
       // إذا كان URL يبدأ بـ baseUrl، استخدمه كما هو
       if (url.startsWith(baseUrl)) {
+        console.log('✅ Redirecting to:', url);
         return url;
       }
       
-      // إذا كان callbackUrl محدد، استخدمه
+      // إذا كان callbackUrl محدد كمسار نسبي
       if (url.startsWith('/')) {
-        return `${baseUrl}${url}`;
+        const fullUrl = `${baseUrl}${url}`;
+        console.log('✅ Redirecting to relative path:', fullUrl);
+        return fullUrl;
       }
       
       // التوجيه الافتراضي إلى الصفحة الرئيسية
+      console.log('✅ Redirecting to baseUrl:', baseUrl);
       return baseUrl;
     },
   },

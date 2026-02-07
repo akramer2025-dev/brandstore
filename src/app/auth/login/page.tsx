@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { FcGoogle } from 'react-icons/fc';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,13 +21,23 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  // إذا المستخدم مسجل دخول، توجيهه للصفحة الرئيسية
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      console.log('✅ User is already logged in, redirecting to home');
+      router.push('/');
+    }
+  }, [status, session, router]);
+
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     setError('');
     try {
-      // السماح لـ NextAuth بالتعامل مع redirect بشكل تلقائي
-      await signIn('google');
-      // الصفحة هتعمل redirect لـGoogle تلقائياً
+      // تسجيل الدخول مع Google وتحديد صفحة الرجوع
+      await signIn('google', { 
+        callbackUrl: '/',
+        redirect: true 
+      });
     } catch (error) {
       console.error('Google sign-in error:', error);
       setError('حدث خطأ في تسجيل الدخول بواسطة Google');
@@ -75,6 +86,30 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // عرض loading أثناء التحقق من session
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 flex items-center justify-center">
+        <div className="text-center text-white">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" />
+          <p className="text-lg">جاري التحقق من تسجيل الدخول...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // إذا المستخدم مسجل بالفعل، لا تعرض صفحة تسجيل الدخول
+  if (status === 'authenticated') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 flex items-center justify-center">
+        <div className="text-center text-white">
+          <Sparkles className="w-12 h-12 mx-auto mb-4 animate-pulse" />
+          <p className="text-lg">تم تسجيل الدخول بنجاح! جاري التوجيه...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 flex items-center justify-center p-4 relative overflow-hidden">
