@@ -19,6 +19,8 @@ model User {
   phone            String?
   address          String?
   points           Int            @default(0) // نقاط الولاء
+  partnerId        String?        // معرف الشريك (للموظفين)
+  partnerStaffPermissions Json?   // صلاحيات الموظف كـ JSON
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   accounts         Account[]
@@ -33,6 +35,7 @@ model User {
   wishlistItems    WishlistItem[]
   savedAddresses   SavedAddress[] // العناوين المحفوظة
   pointTransactions PointTransaction[] // سجل حركة النقاط
+  partner          PartnerCapital? @relation(fields: [partnerId], references: [id])
 
   @@map("users")
 }
@@ -772,6 +775,7 @@ enum UserRole {
   VENDOR
   MANUFACTURER
   MARKETING_STAFF // موظف تسويق للمنتجات المستوردة
+  PARTNER_STAFF   // موظف شريك
 }
 
 enum SaleType {
@@ -952,6 +956,7 @@ model PartnerCapital {
   updatedAt        DateTime            @updatedAt
   vendor           Vendor              @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   profitShares     ProfitDistribution[]
+  staffMembers     User[]              // موظفي الشريك
 
   @@map("partner_capitals")
 }

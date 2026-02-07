@@ -32,6 +32,8 @@ import {
   Trash2,
   Eye,
   Edit,
+  UserPlus,
+  Shield,
 } from 'lucide-react'
 
 interface Partner {
@@ -56,8 +58,19 @@ export default function AdminPartnersPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isStaffDialogOpen, setIsStaffDialogOpen] = useState(false)
   const [partnerToDelete, setPartnerToDelete] = useState<Partner | null>(null)
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null)
+  const [staffFormData, setStaffFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    phone: '',
+    canManageProducts: true,
+    canManageOrders: true,
+    canViewReports: true,
+    canManageInventory: false,
+  })
   const [formData, setFormData] = useState({
     partnerName: '',
     email: '',
@@ -262,6 +275,73 @@ export default function AdminPartnersPage() {
     } catch (error) {
       console.error('Error adding partner:', error)
       toast.error('حدث خطأ أثناء إضافة الشريك')
+    }
+  }
+
+  const openStaffDialog = (partner: Partner) => {
+    setSelectedPartner(partner)
+    setStaffFormData({
+      name: '',
+      email: '',
+      password: '',
+      phone: '',
+      canManageProducts: true,
+      canManageOrders: true,
+      canViewReports: true,
+      canManageInventory: false,
+    })
+    setIsStaffDialogOpen(true)
+  }
+
+  const handleAddStaff = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!selectedPartner) return
+    
+    try {
+      const permissions = {
+        canManageProducts: staffFormData.canManageProducts,
+        canManageOrders: staffFormData.canManageOrders,
+        canViewReports: staffFormData.canViewReports,
+        canManageInventory: staffFormData.canManageInventory,
+      }
+
+      const response = await fetch(`/api/admin/partners/${selectedPartner.id}/staff`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: staffFormData.name,
+          email: staffFormData.email,
+          password: staffFormData.password,
+          phone: staffFormData.phone,
+          permissions,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(
+          `تم إضافة الموظف بنجاح\n\nبيانات الدخول:\nالبريد: ${staffFormData.email}\nكلمة المرور: ${staffFormData.password}`,
+          { duration: 10000 }
+        )
+        setIsStaffDialogOpen(false)
+        setStaffFormData({
+          name: '',
+          email: '',
+          password: '',
+          phone: '',
+          canManageProducts: true,
+          canManageOrders: true,
+          canViewReports: true,
+          canManageInventory: false,
+        })
+      } else {
+        toast.error(data.error || 'حدث خطأ أثناء إضافة الموظف')
+      }
+    } catch (error) {
+      console.error('Error adding staff:', error)
+      toast.error('حدث خطأ أثناء إضافة الموظف')
     }
   }
 
@@ -642,6 +722,15 @@ export default function AdminPartnersPage() {
                       <Button
                         size="sm"
                         variant="outline"
+                        onClick={() => openStaffDialog(partner)}
+                        className="bg-green-500/10 border-green-500/30 text-green-300 hover:bg-green-500/20"
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        إضافة موظف
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => openEditDialog(partner)}
                         className="bg-blue-500/10 border-blue-500/30 text-blue-300 hover:bg-blue-500/20"
                       >
@@ -922,6 +1011,171 @@ export default function AdminPartnersPage() {
                 إلغاء
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Staff Dialog */}
+        <Dialog open={isStaffDialogOpen} onOpenChange={setIsStaffDialogOpen}>
+          <DialogContent className="bg-gray-900 border-green-500/30 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-white flex items-center gap-2">
+                <UserPlus className="h-6 w-6 text-green-400" />
+                إضافة موظف جديد
+              </DialogTitle>
+              <DialogDescription className="text-gray-400">
+                إضافة موظف للشريك: <strong className="text-white">{selectedPartner?.partnerName}</strong>
+              </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleAddStaff} className="space-y-6 mt-4">
+              <div className="space-y-4">
+                {/* الاسم */}
+                <div>
+                  <Label htmlFor="staff_name" className="text-white">
+                    اسم الموظف *
+                  </Label>
+                  <Input
+                    id="staff_name"
+                    value={staffFormData.name}
+                    onChange={(e) => setStaffFormData({ ...staffFormData, name: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white"
+                    required
+                  />
+                </div>
+
+                {/* البريد الإلكتروني */}
+                <div>
+                  <Label htmlFor="staff_email" className="text-white">
+                    البريد الإلكتروني (Gmail) *
+                  </Label>
+                  <Input
+                    id="staff_email"
+                    type="email"
+                    value={staffFormData.email}
+                    onChange={(e) => setStaffFormData({ ...staffFormData, email: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white"
+                    placeholder="example@gmail.com"
+                    required
+                  />
+                </div>
+
+                {/* كلمة المرور */}
+                <div>
+                  <Label htmlFor="staff_password" className="text-white">
+                    كلمة المرور *
+                  </Label>
+                  <Input
+                    id="staff_password"
+                    type="text"
+                    value={staffFormData.password}
+                    onChange={(e) => setStaffFormData({ ...staffFormData, password: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white"
+                    placeholder="أدخل كلمة مرور قوية"
+                    required
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    💡 سيتم عرض كلمة المرور مرة واحدة فقط، احفظها في مكان آمن
+                  </p>
+                </div>
+
+                {/* رقم الهاتف */}
+                <div>
+                  <Label htmlFor="staff_phone" className="text-white">
+                    رقم الهاتف
+                  </Label>
+                  <Input
+                    id="staff_phone"
+                    type="tel"
+                    value={staffFormData.phone}
+                    onChange={(e) => setStaffFormData({ ...staffFormData, phone: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white"
+                  />
+                </div>
+
+                {/* الصلاحيات */}
+                <div className="space-y-3 p-4 bg-white/5 rounded-lg border border-white/10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="h-5 w-5 text-green-400" />
+                    <Label className="text-white font-semibold">صلاحيات الموظف</Label>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="canManageProducts"
+                        checked={staffFormData.canManageProducts}
+                        onChange={(e) => setStaffFormData({ ...staffFormData, canManageProducts: e.target.checked })}
+                        className="w-4 h-4 rounded border-white/20"
+                      />
+                      <Label htmlFor="canManageProducts" className="text-gray-300 cursor-pointer">
+                        إدارة المنتجات (إضافة، تعديل، حذف)
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="canManageOrders"
+                        checked={staffFormData.canManageOrders}
+                        onChange={(e) => setStaffFormData({ ...staffFormData, canManageOrders: e.target.checked })}
+                        className="w-4 h-4 rounded border-white/20"
+                      />
+                      <Label htmlFor="canManageOrders" className="text-gray-300 cursor-pointer">
+                        إدارة الطلبات (معالجة، تحديث الحالة)
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="canViewReports"
+                        checked={staffFormData.canViewReports}
+                        onChange={(e) => setStaffFormData({ ...staffFormData, canViewReports: e.target.checked })}
+                        className="w-4 h-4 rounded border-white/20"
+                      />
+                      <Label htmlFor="canViewReports" className="text-gray-300 cursor-pointer">
+                        عرض التقارير والإحصائيات
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="canManageInventory"
+                        checked={staffFormData.canManageInventory}
+                        onChange={(e) => setStaffFormData({ ...staffFormData, canManageInventory: e.target.checked })}
+                        className="w-4 h-4 rounded border-white/20"
+                      />
+                      <Label htmlFor="canManageInventory" className="text-gray-300 cursor-pointer">
+                        إدارة المخزون
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                  <p className="text-blue-300 text-sm">
+                    ℹ️ سيتم إرسال بيانات الدخول بعد إنشاء الحساب. احفظها في مكان آمن.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button type="submit" className="flex-1 bg-green-600 hover:bg-green-700">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  إضافة الموظف
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsStaffDialogOpen(false)}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  إلغاء
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
