@@ -49,6 +49,14 @@ export default function AdminMarketingStaffPage() {
   const [selectedCommissions, setSelectedCommissions] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
+  const [isAddStaffDialogOpen, setIsAddStaffDialogOpen] = useState(false);
+  const [newStaff, setNewStaff] = useState({
+    name: '',
+    email: '',
+    password: '',
+    phone: '',
+    commissionRate: '5',
+  });
   const [stats, setStats] = useState({
     totalAmount: 0,
     paidAmount: 0,
@@ -143,6 +151,39 @@ export default function AdminMarketingStaffPage() {
     }
   };
 
+  const handleAddStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/admin/marketing-staff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStaff),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(
+          `✅ تم إضافة موظف التسويق بنجاح!\n\nبيانات الدخول:\nالبريد: ${newStaff.email}\nكلمة المرور: ${newStaff.password}\nنسبة العمولة: ${newStaff.commissionRate}%`
+        );
+        setIsAddStaffDialogOpen(false);
+        setNewStaff({
+          name: '',
+          email: '',
+          password: '',
+          phone: '',
+          commissionRate: '5',
+        });
+        fetchData(); // تحديث القائمة
+      } else {
+        alert('❌ ' + data.error);
+      }
+    } catch (error) {
+      console.error('خطأ في إضافة الموظف:', error);
+      alert('❌ حدث خطأ أثناء إضافة الموظف');
+    }
+  };
+
   const totalSelected = commissions
     .filter((c) => selectedCommissions.includes(c.id))
     .reduce((sum, c) => sum + c.commissionAmount, 0);
@@ -163,8 +204,18 @@ export default function AdminMarketingStaffPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-lg p-8 text-white mb-8">
-          <h1 className="text-3xl font-bold mb-2">إدارة موظفي التسويق 👥</h1>
-          <p className="text-purple-100">إدارة الموظفين والعمولات والمدفوعات</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">إدارة موظفي التسويق 👥</h1>
+              <p className="text-purple-100">إدارة الموظفين والعمولات والمدفوعات</p>
+            </div>
+            <button
+              onClick={() => setIsAddStaffDialogOpen(true)}
+              className="bg-white text-purple-600 px-6 py-3 rounded-lg font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
+            >
+              <span>➕</span> إضافة موظف تسويق
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -399,6 +450,107 @@ export default function AdminMarketingStaffPage() {
             </table>
           </div>
         </div>
+
+        {/* Add Staff Dialog */}
+        {isAddStaffDialogOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">إضافة موظف تسويق جديد</h2>
+                <button
+                  onClick={() => setIsAddStaffDialogOpen(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <form onSubmit={handleAddStaff} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">الاسم *</label>
+                  <input
+                    type="text"
+                    value={newStaff.name}
+                    onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
+                    className="w-full border rounded-lg px-4 py-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">البريد الإلكتروني *</label>
+                  <input
+                    type="email"
+                    value={newStaff.email}
+                    onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                    className="w-full border rounded-lg px-4 py-2"
+                    placeholder="example@gmail.com"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">كلمة المرور *</label>
+                  <input
+                    type="text"
+                    value={newStaff.password}
+                    onChange={(e) => setNewStaff({ ...newStaff, password: e.target.value })}
+                    className="w-full border rounded-lg px-4 py-2"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 سيتم عرض كلمة المرور مرة واحدة فقط، احفظها في مكان آمن
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">رقم الهاتف *</label>
+                  <input
+                    type="tel"
+                    value={newStaff.phone}
+                    onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
+                    className="w-full border rounded-lg px-4 py-2"
+                    placeholder="01012345678"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">نسبة العمولة (%) *</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={newStaff.commissionRate}
+                    onChange={(e) => setNewStaff({ ...newStaff, commissionRate: e.target.value })}
+                    className="w-full border rounded-lg px-4 py-2"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    مثال: 5 يعني 5% عمولة على كل منتج يبيعه
+                  </p>
+                </div>
+
+                <div className="flex gap-4 mt-6">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors"
+                  >
+                    ✅ إضافة الموظف
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddStaffDialogOpen(false)}
+                    className="flex-1 border border-gray-300 px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
