@@ -33,8 +33,11 @@ const newsItems = [
 export default function NewsTicker() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % newsItems.length);
     }, 5000); // تغيير كل 5 ثوانٍ
@@ -42,7 +45,8 @@ export default function NewsTicker() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!isVisible) return null;
+  // عدم عرض أي شيء حتى يتم mounted في ال client
+  if (!isMounted || !isVisible) return null;
 
   const currentItem = newsItems[currentIndex];
   const Icon = currentItem.icon;

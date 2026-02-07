@@ -26,6 +26,7 @@ export default function SpinWheel() {
   const [couponCode, setCouponCode] = useState<string>('');
   const [codeCopied, setCodeCopied] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   
   const copyCodeToClipboard = () => {
     if (couponCode) {
@@ -49,7 +50,10 @@ export default function SpinWheel() {
     console.log('🎡 ========== SpinWheel Component Loaded ==========');
     console.log('📍 Session:', session ? 'مسجل دخول' : 'غير مسجل');
     
-    let isMounted = true;
+    // تعيين mounted state
+    setIsMounted(true);
+    
+    let isMountedLocal = true;
     
     const checkIfUserHasCoupon = async () => {
       console.log('🔍 بدء فحص إمكانية إظهار العجلة...');
@@ -96,10 +100,10 @@ export default function SpinWheel() {
     checkIfUserHasCoupon().then((shouldShow) => {
       console.log('📊 نتيجة الفحص: shouldShow =', shouldShow);
       
-      if (shouldShow && isMounted) {
+      if (shouldShow && isMountedLocal) {
         console.log('⏱️ جدولة إظهار العجلة بعد 2 ثانية...');
         setTimeout(() => {
-          if (isMounted) {
+          if (isMountedLocal) {
             console.log('🎡 ✨ عرض عجلة الحظ الآن! ✨');
             setIsOpen(true);
           } else {
@@ -113,7 +117,7 @@ export default function SpinWheel() {
     
     return () => {
       console.log('🔚 SpinWheel Component Unmounted');
-      isMounted = false;
+      isMountedLocal = false;
     };
   }, [session]);
 
@@ -309,7 +313,8 @@ export default function SpinWheel() {
     }
   };
 
-  if (!isOpen) return null;
+  // عدم عرض أي شيء حتى يتم mounted في ال client
+  if (!isMounted || !isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
