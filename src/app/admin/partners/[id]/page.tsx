@@ -166,10 +166,13 @@ export default function PartnerDetailsPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* رأس المال الحالي */}
-          <Card className="bg-gradient-to-br from-green-900/50 to-emerald-900/50 border-green-500/20">
+          <Card 
+            className="backdrop-blur-sm bg-gray-800/80 border-purple-500/30 hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 hover:bg-gray-800/90 hover:border-pink-500/50 group"
+            onClick={() => setActiveTab('overview')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <DollarSign className="w-8 h-8 text-green-400" />
+                <DollarSign className="w-8 h-8 text-green-400 group-hover:scale-110 transition-transform" />
                 <span className={`text-sm px-2 py-1 rounded ${
                   parseFloat(profitPercent) >= 0 
                     ? 'bg-green-500/20 text-green-400' 
@@ -179,7 +182,7 @@ export default function PartnerDetailsPage() {
                 </span>
               </div>
               <p className="text-gray-400 text-sm mb-1">رأس المال الحالي</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
                 {partner.currentAmount.toLocaleString()} جنيه
               </p>
               <p className="text-xs text-gray-500 mt-1">
@@ -189,13 +192,16 @@ export default function PartnerDetailsPage() {
           </Card>
 
           {/* نسبة الشراكة */}
-          <Card className="bg-gradient-to-br from-blue-900/50 to-cyan-900/50 border-blue-500/20">
+          <Card 
+            className="backdrop-blur-sm bg-gray-800/80 border-purple-500/30 hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 hover:bg-gray-800/90 hover:border-pink-500/50 group"
+            onClick={() => setActiveTab('overview')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="w-8 h-8 text-blue-400" />
+                <TrendingUp className="w-8 h-8 text-blue-400 group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-gray-400 text-sm mb-1">نسبة الشراكة</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
                 {partner.capitalPercent}%
               </p>
               <p className="text-xs text-gray-500 mt-1">
@@ -205,13 +211,16 @@ export default function PartnerDetailsPage() {
           </Card>
 
           {/* إجمالي المنتجات */}
-          <Card className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 border-purple-500/20">
+          <Card 
+            className="backdrop-blur-sm bg-gray-800/80 border-purple-500/30 hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 hover:bg-gray-800/90 hover:border-pink-500/50 group"
+            onClick={() => setActiveTab('products')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <Package className="w-8 h-8 text-purple-400" />
+                <Package className="w-8 h-8 text-purple-400 group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-gray-400 text-sm mb-1">إجمالي المنتجات</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
                 {partner.totalProducts}
               </p>
               <p className="text-xs text-gray-500 mt-1">
@@ -221,13 +230,16 @@ export default function PartnerDetailsPage() {
           </Card>
 
           {/* إجمالي المبيعات */}
-          <Card className="bg-gradient-to-br from-orange-900/50 to-red-900/50 border-orange-500/20">
+          <Card 
+            className="backdrop-blur-sm bg-gray-800/80 border-purple-500/30 hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 hover:bg-gray-800/90 hover:border-pink-500/50 group"
+            onClick={() => setActiveTab('orders')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-2">
-                <ShoppingCart className="w-8 h-8 text-orange-400" />
+                <ShoppingCart className="w-8 h-8 text-orange-400 group-hover:scale-110 transition-transform" />
               </div>
               <p className="text-gray-400 text-sm mb-1">إجمالي المبيعات</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
                 {partner.totalRevenue.toLocaleString()} جنيه
               </p>
               <p className="text-xs text-gray-500 mt-1">
