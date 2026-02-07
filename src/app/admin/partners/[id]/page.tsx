@@ -124,7 +124,7 @@ export default function PartnerDetailsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
-          <BackButton href="/admin/partners" />
+          <BackButton fallbackUrl="/admin/partners" />
           <Card className="bg-gray-800/50 border-red-500/20 mt-4">
             <CardContent className="p-6 text-center">
               <p className="text-red-400">لم يتم العثور على الشريك</p>
@@ -145,7 +145,7 @@ export default function PartnerDetailsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <BackButton href="/admin/partners" />
+            <BackButton fallbackUrl="/admin/partners" />
             <h1 className="text-3xl font-bold text-white mt-4 mb-2">
               {partner.partnerName}
             </h1>

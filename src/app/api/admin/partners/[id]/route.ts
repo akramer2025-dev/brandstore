@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 // GET - جلب بيانات شريك واحد (للمدير فقط)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -14,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const partner = await prisma.partnerCapital.findUnique({
       where: { id },
@@ -30,12 +30,6 @@ export async function GET(
             },
           },
         },
-        transactions: {
-          orderBy: {
-            createdAt: 'desc'
-          },
-          take: 50
-        }
       },
     });
 
@@ -57,7 +51,7 @@ export async function GET(
         nameAr: true,
         price: true,
         stock: true,
-        sold: true,
+        soldCount: true,
         createdAt: true,
       },
       orderBy: {
@@ -70,11 +64,11 @@ export async function GET(
       where: {
         vendorId: partner.vendorId,
         status: {
-          in: ['DELIVERED', 'SHIPPED']
+          in: ['DELIVERED']
         }
       },
       _sum: {
-        total: true
+        totalAmount: true
       },
       _count: true
     });
@@ -87,7 +81,7 @@ export async function GET(
       select: {
         id: true,
         orderNumber: true,
-        total: true,
+        totalAmount: true,
         status: true,
         createdAt: true
       },
@@ -97,13 +91,39 @@ export async function GET(
       take: 10
     });
 
-    const totalRevenue = orderStats._sum.total || 0;
+    const totalRevenue = orderStats._sum?.totalAmount || 0;
     const totalOrders = orderStats._count || 0;
     const totalProfit = totalRevenue * (partner.capitalPercent / 100);
 
+    // جلب المعاملات المالية
+    const transactions = await prisma.capitalTransaction.findMany({
+      where: {
+        vendorId: partner.vendorId,
+        partnerId: partner.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 50
+    });
+
     return NextResponse.json({
-      ...partner,
+      id: partner.id,
+      partnerName: partner.partnerName,
+      partnerType: partner.partnerType,
+      capitalAmount: partner.capitalAmount,
+      initialAmount: partner.initialAmount,
+      currentAmount: partner.currentAmount,
+      capitalPercent: partner.capitalPercent,
+      joinDate: partner.joinDate,
+      isActive: partner.isActive,
+      notes: partner.notes,
       email: partner.vendor?.user?.email || '',
+      phone: partner.vendor?.phone || '',
+      user: partner.vendor?.user ? {
+        email: partner.vendor.user.email || '',
+        name: partner.vendor.user.name || ''
+      } : null,
       hasAccount: !!partner.vendor?.user,
       userId: partner.vendor?.user?.id,
       canDeleteOrders: partner.vendor?.canDeleteOrders || false,
@@ -113,9 +133,15 @@ export async function GET(
       totalRevenue,
       totalProfit,
       // البيانات التفصيلية
-      transactions: partner.transactions,
-      products,
-      recentOrders
+      transactions,
+      products: products.map(p => ({
+        ...p,
+        sold: p.soldCount
+      })),
+      recentOrders: recentOrders.map(o => ({
+        ...o,
+        total: o.totalAmount
+      }))
     });
   } catch (error) {
     console.error('Error fetching partner:', error);
@@ -129,8 +155,9 @@ export async function GET(
 // PATCH - تحديث بيانات شريك (للمدير فقط)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await auth();
     
@@ -138,7 +165,6 @@ export async function PATCH(
       return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
     }
 
-    const { id } = params;
     const body = await request.json();
     const {
       partnerName,
@@ -265,7 +291,7 @@ export async function PATCH(
 // DELETE - حذف شريك (للمدير فقط)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -274,7 +300,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // التحقق من وجود الشريك
     const partner = await prisma.partnerCapital.findUnique({
