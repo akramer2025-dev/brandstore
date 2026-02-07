@@ -1340,3 +1340,24 @@ model PasswordResetToken {
   @@index([email])
   @@index([token])
 }
+
+// ============ كوبونات الخصم ============
+model Coupon {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  discount     Float    // قيمة الخصم
+  minPurchase  Float    // الحد الأدنى للشراء
+  discountType String   @default("FIXED") // FIXED أو PERCENTAGE
+  isActive     Boolean  @default(true)
+  expiresAt    DateTime
+  maxUses      Int      @default(1) // عدد مرات الاستخدام المسموحة
+  usedCount    Int      @default(0) // عدد مرات الاستخدام الفعلي
+  userId       String?  // المستخدم المرتبط بالكوبون (null إذا كان عام)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("coupons")
+  @@index([code])
+  @@index([userId])
+  @@index([isActive, expiresAt])
+}
