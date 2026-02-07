@@ -299,7 +299,7 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
             {discount > 0 && (
               <div className="inline-flex items-center gap-1 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1 rounded-full shadow-lg">
                 <span>🎉</span>
-                <span>وفّر {(product.originalPrice! - product.price).toLocaleString()} جنيه</span>
+                <span>وفّر {(product.originalPrice! - product.price).toLocaleString('en-US')} جنيه</span>
               </div>
             )}
           </div>

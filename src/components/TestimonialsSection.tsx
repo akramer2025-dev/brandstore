@@ -95,7 +95,7 @@ export function TestimonialsSection({ reviews }: TestimonialsSectionProps) {
                     </div>
                     <div>
                       <p className="text-white font-medium text-sm">{review.user.name}</p>
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-gray-500 text-xs" suppressHydrationWarning>
                         {new Date(review.createdAt).toLocaleDateString('ar-EG', {
                           year: 'numeric',
                           month: 'long',
