@@ -123,6 +123,7 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
       id: product.id,
       name: product.nameAr,
       price: product.price,
+      originalPrice: product.originalPrice || undefined,
       image: firstImage,
     });
     toast.success("تمت الإضافة إلى السلة 🛒");
@@ -272,25 +273,34 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
             </span>
           </div>
 
-          {/* Price */}
-          <div className="flex items-end justify-between">
-            <div className="space-y-0.5">
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                  {product.price.toLocaleString('en-US')}
-                </span>
-                <span className="text-gray-400 text-[10px] sm:text-xs">جنيه</span>
-              </div>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <div className="text-gray-500 line-through text-[10px] sm:text-xs">
+          {/* Price - Enhanced */}
+          <div className="space-y-2">
+            {/* Original Price (Fake/Crossed) */}
+            {product.originalPrice && product.originalPrice > product.price && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 line-through text-sm sm:text-base font-bold">
                   {product.originalPrice.toLocaleString('en-US')} جنيه
-                </div>
-              )}
-            </div>
-            {discount > 0 && (
-              <span className="text-green-400 text-[10px] sm:text-xs font-bold bg-green-500/10 px-2 py-1 rounded-full">
-                وفر {(product.originalPrice! - product.price).toLocaleString()} جنيه
+                </span>
+                <span className="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full font-bold">
+                  -{discount}%
+                </span>
+              </div>
+            )}
+            
+            {/* Current Price (Real Price) */}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 bg-clip-text text-transparent drop-shadow-lg">
+                {product.price.toLocaleString('en-US')}
               </span>
+              <span className="text-green-400 text-sm font-bold">جنيه</span>
+            </div>
+            
+            {/* Savings Badge */}
+            {discount > 0 && (
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1 rounded-full shadow-lg">
+                <span>🎉</span>
+                <span>وفّر {(product.originalPrice! - product.price).toLocaleString()} جنيه</span>
+              </div>
             )}
           </div>
 

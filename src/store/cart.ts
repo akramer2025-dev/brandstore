@@ -6,6 +6,7 @@ export interface CartItem {
   name: string;
   nameAr?: string;
   price: number;
+  originalPrice?: number; // السعر الوهمي (قبل الخصم المزيف)
   quantity: number;
   image?: string;
   categoryName?: string;

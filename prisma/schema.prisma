@@ -22,6 +22,7 @@ model User {
   updatedAt        DateTime       @updatedAt
   accounts         Account[]
   deliveryStaff    DeliveryStaff?
+  marketingStaff   MarketingStaff?
   messagesReceived Message[]      @relation("ReceivedMessages")
   messagesSent     Message[]      @relation("SentMessages")
   orders           Order[]
@@ -221,6 +222,15 @@ model Product {
   isVisible       Boolean        @default(true) // يظهر في المتجر أم لا
   productionCost  Float?         // تكلفة الإنتاج (للأرباح)
   
+  // ============ المنتجات المستوردة ============
+  isImported       Boolean        @default(false)     // هل المنتج مستورد
+  importSource     ImportSource?  // مصدر الاستيراد (Shein, AliExpress, Alibaba)
+  marketingStaffId String?        // موظف التسويق المسؤول
+  downPaymentPercent Float        @default(100)       // نسبة الدفعة المقدمة (100% = الكل، 50% = نص)
+  deliveryDaysMin  Int?           // الحد الأدنى لأيام التوصيل
+  deliveryDaysMax  Int?           // الحد الأقصى لأيام التوصيل
+  importNotes      String?        // ملاحظات عن المنتج المستورد
+  
   // ============ إعدادات الدفع ============
   allowCashOnDelivery Boolean    @default(true) // هل يسمح بالدفع عند الاستلام
   
@@ -244,6 +254,8 @@ model Product {
   wishlistItems   WishlistItem[]
   inventoryItems  InventoryItem[]
   supplierPayments SupplierPayment[]
+  marketingStaff  MarketingStaff? @relation(fields: [marketingStaffId], references: [id])
+  commissions     MarketingCommission[]
 
   @@map("products")
 }
@@ -384,14 +396,15 @@ model InstallmentPayment {
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
-  orderId   String
-  productId String
-  quantity  Int
-  price     Float
-  createdAt DateTime @default(now())
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id])
+  id          String                @id @default(cuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  price       Float
+  createdAt   DateTime              @default(now())
+  order       Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product               @relation(fields: [productId], references: [id])
+  commissions MarketingCommission[] // عمولات موظف التسويق
 
   @@map("order_items")
 }
@@ -436,6 +449,62 @@ model DeliveryStaff {
   orders               Order[]
 
   @@map("delivery_staff")
+}
+
+// موظف التسويق للمنتجات المستوردة
+model MarketingStaff {
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  name                  String
+  phone                 String                @unique
+  email                 String?               @unique
+  commissionRate        Float                 @default(5) // نسبة العمولة (افتراضي 5%)
+  totalSales            Float                 @default(0) // إجمالي المبيعات
+  totalCommission       Float                 @default(0) // إجمالي العمولات
+  isActive              Boolean               @default(true)
+  isApproved            Boolean               @default(false)
+  // البيانات البنكية (اختيارية)
+  bankName              String?
+  accountNumber         String?
+  iban                  String?
+  accountHolderName     String?
+  // المحافظ الإلكترونية (اختيارية)
+  instaPay              String?
+  etisalatCash          String?
+  vodafoneCash          String?
+  wePay                 String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products              Product[]             // المنتجات المضافة
+  commissions           MarketingCommission[] // سجل العمولات
+
+  @@map("marketing_staff")
+}
+
+// سجل عمولات موظفي التسويق
+model MarketingCommission {
+  id                String         @id @default(cuid())
+  marketingStaffId  String
+  productId         String
+  orderId           String
+  orderItemId       String
+  productName       String         // اسم المنتج
+  saleAmount        Float          // قيمة البيع
+  commissionRate    Float          // نسبة العمولة
+  commissionAmount  Float          // قيمة العمولة
+  isPaid            Boolean        @default(false) // هل تم دفع العمولة
+  paidAt            DateTime?      // تاريخ الدفع
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  marketingStaff    MarketingStaff @relation(fields: [marketingStaffId], references: [id])
+  product           Product        @relation(fields: [productId], references: [id])
+  orderItem         OrderItem      @relation(fields: [orderItemId], references: [id])
+
+  @@map("marketing_commissions")
+  @@index([marketingStaffId])
+  @@index([productId])
+  @@index([isPaid])
 }
 
 model InventoryLog {
@@ -697,11 +766,21 @@ enum UserRole {
   DELIVERY_STAFF
   VENDOR
   MANUFACTURER
+  MARKETING_STAFF // موظف تسويق للمنتجات المستوردة
 }
 
 enum SaleType {
   SINGLE    // قطعة واحدة
   BUNDLE    // عرض (مع منتجات أخرى)
+}
+
+enum ImportSource {
+  SHEIN        // شي إن
+  ALIEXPRESS   // علي اكسبريس
+  ALIBABA      // علي بابا
+  TAOBAO       // تاوباو
+  TEMU         // تيمو
+  OTHER        // أخرى
 }
 
 enum PayoutStatus {

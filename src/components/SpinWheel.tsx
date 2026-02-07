@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Gift, Sparkles, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { X, Gift, Sparkles, CheckCircle2, Loader2, AlertCircle, Copy, Check } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -23,7 +23,17 @@ export default function SpinWheel() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [selectedPrize, setSelectedPrize] = useState<typeof prizes[0] | null>(null);
+  const [couponCode, setCouponCode] = useState<string>('');
+  const [codeCopied, setCodeCopied] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
+  
+  const copyCodeToClipboard = () => {
+    if (couponCode) {
+      navigator.clipboard.writeText(couponCode);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    }
+  };
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
   const [showLoginMessage, setShowLoginMessage] = useState(false);
@@ -36,18 +46,58 @@ export default function SpinWheel() {
   const router = useRouter();
 
   useEffect(() => {
-    // العجلة تظهر للجميع إلا إذا حصلوا على الجائزة فعلياً
-    const hasClaimed = localStorage.getItem('prizeClaimed');
+    let isMounted = true;
     
-    // تظهر فقط إذا لم يحصل على الجائزة بعد
-    if (!hasClaimed) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 2000);
+    const checkIfUserHasCoupon = async () => {
+      // التحقق من localStorage أولاً
+      const hasClaimed = localStorage.getItem('prizeClaimed');
       
-      return () => clearTimeout(timer);
-    }
-  }, []);
+      if (hasClaimed) {
+        console.log('🚫 المستخدم حصل على كوبون من قبل (localStorage)');
+        return false;
+      }
+      
+      // إذا كان مسجل دخول، التحقق من قاعدة البيانات
+      if (session?.user) {
+        try {
+          console.log('🔍 التحقق من الكوبونات في قاعدة البيانات...');
+          const response = await fetch('/api/user/coupons');
+          const data = await response.json();
+          
+          // لو عنده أي كوبونات، لا تظهر العجلة
+          if (data.coupons && data.coupons.length > 0) {
+            console.log('🚫 المستخدم لديه كوبونات نشطة:', data.coupons.length);
+            localStorage.setItem('prizeClaimed', 'true');
+            return false;
+          }
+          
+          console.log('✅ المستخدم ليس لديه كوبونات - يمكن إظهار العجلة');
+          return true;
+        } catch (error) {
+          console.error('❌ خطأ في التحقق من الكوبونات:', error);
+          return false;
+        }
+      }
+      
+      // إذا لم يكن مسجل دخول، يمكن إظهار العجلة
+      return true;
+    };
+    
+    checkIfUserHasCoupon().then((shouldShow) => {
+      if (shouldShow && isMounted) {
+        setTimeout(() => {
+          if (isMounted) {
+            console.log('🎡 إظهار عجلة الحظ...');
+            setIsOpen(true);
+          }
+        }, 2000);
+      }
+    });
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [session]);
 
   useEffect(() => {
     // تحميل الجوائز المستخدمة من localStorage
@@ -215,6 +265,7 @@ export default function SpinWheel() {
       if (response.ok) {
         const data = await response.json();
         setClaimSuccess(true);
+        setCouponCode(data.coupon?.code || ''); // حفظ الكود
         
         console.log('✅ تم حفظ الكوبون بنجاح:', data);
         
@@ -223,10 +274,10 @@ export default function SpinWheel() {
         localStorage.setItem('prizeClaimed', 'true');
         localStorage.setItem('prizeClaimedDate', new Date().toISOString());
         
-        // انتظار 3 ثوانٍ ثم إغلاق
+        // انتظار 6 ثوانٍ لإعطاء الوقت لنسخ الكود
         setTimeout(() => {
           setIsOpen(false);
-        }, 3000);
+        }, 6000);
       } else {
         const errorData = await response.json();
         console.error('❌ فشل حفظ الخصم:', errorData);
@@ -394,6 +445,37 @@ export default function SpinWheel() {
             <p className="text-center text-white/90 text-sm">
               تم إضافة خصم {selectedPrize?.value} جنيه إلى حسابك بنجاح
             </p>
+            
+            {/* Coupon Code Display */}
+            {couponCode && (
+              <div className="mt-4 bg-white/20 backdrop-blur-lg rounded-xl p-4 border-2 border-white/40">
+                <p className="text-center text-white/90 text-xs mb-2 font-bold">
+                  🎫 كود الخصم الخاص بك:
+                </p>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <div className="bg-white/30 px-4 py-2 rounded-lg">
+                    <code className="text-white font-mono font-black text-lg tracking-wider">
+                      {couponCode}
+                    </code>
+                  </div>
+                  <button
+                    onClick={copyCodeToClipboard}
+                    className="bg-white/30 hover:bg-white/40 p-2 rounded-lg transition-all duration-200 active:scale-95"
+                    title="نسخ الكود"
+                  >
+                    {codeCopied ? (
+                      <Check className="w-5 h-5 text-white" />
+                    ) : (
+                      <Copy className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+                </div>
+                <p className="text-center text-white/80 text-xs">
+                  {codeCopied ? '✓ تم النسخ!' : 'استخدمه في صفحة السلة 🛒'}
+                </p>
+              </div>
+            )}
+            
             <p className="text-center text-white/80 text-xs mt-2">
               يمكنك استخدامه عند الشراء بقيمة {selectedPrize?.minPurchase} جنيه أو أكثر 🎉
             </p>

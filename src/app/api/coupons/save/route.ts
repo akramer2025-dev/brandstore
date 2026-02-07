@@ -18,6 +18,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'بيانات غير مكتملة' }, { status: 400 });
     }
 
+    // 🔒 التحقق من أن المستخدم لا يمتلك كوبون نشط بالفعل
+    const existingCoupon = await prisma.coupon.findFirst({
+      where: {
+        userId: session.user.id,
+        isActive: true,
+        usedCount: 0, // لم يُستخدم بعد
+        expiresAt: {
+          gt: new Date(), // لم ينتهي بعد
+        },
+      },
+    });
+
+    if (existingCoupon) {
+      console.log('⚠️ المستخدم لديه كوبون نشط بالفعل:', existingCoupon.code);
+      return NextResponse.json({
+        error: 'لديك كوبون نشط بالفعل',
+        coupon: {
+          code: existingCoupon.code,
+          discount: existingCoupon.discount,
+          minPurchase: existingCoupon.minPurchase,
+        },
+      }, { status: 400 });
+    }
+
     // إنشاء كود الخصم
     const code = `LUCKY${discount}${Date.now().toString().slice(-4)}`;
     

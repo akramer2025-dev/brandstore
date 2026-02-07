@@ -7,14 +7,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+interface Coupon {
+  id: string;
+  code: string;
+  discount: number;
+  minPurchase: number;
+  maxUses: number;
+  usedCount: number;
+  isActive: boolean;
+  expiresAt: Date | null;
+}
 
 export default function CartPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState("");
   
   const { items, removeItem, updateQuantity, clearCart, getTotalPrice } = useCartStore();
 
@@ -54,10 +70,72 @@ export default function CartPage() {
 
   const handleClearCart = () => {
     clearCart();
+    setAppliedCoupon(null);
+    setCouponCode("");
     toast.success("تم إفراغ السلة");
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError("الرجاء إدخال كود الكوبون");
+      return;
+    }
+
+    setIsCheckingCoupon(true);
+    setCouponError("");
+
+    try {
+      const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: couponCode }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.valid) {
+        const coupon = data.coupon;
+        
+        // التحقق من الحد الأدنى للشراء
+        if (totalPrice < coupon.minPurchase) {
+          setCouponError(`يجب أن يكون إجمالي الطلب ${coupon.minPurchase} جنيه على الأقل للحصول على هذا الخصم`);
+          setIsCheckingCoupon(false);
+          return;
+        }
+
+        setAppliedCoupon(coupon);
+        setCouponCode("");
+        toast.success(`تم تطبيق خصم ${coupon.discount} جنيه!`);
+      } else {
+        setCouponError(data.error || "كود الكوبون غير صحيح");
+      }
+    } catch (error) {
+      console.error('Error validating coupon:', error);
+      setCouponError("حدث خطأ في التحقق من الكوبون");
+    } finally {
+      setIsCheckingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+    toast.info("تم إزالة الكوبون");
+  };
+
   const totalPrice = getTotalPrice();
+  const discount = appliedCoupon? appliedCoupon.discount : 0;
+  const finalPrice = Math.max(0, totalPrice - discount);
+
+  // حساب الوفورات من الأسعار الوهمية
+  const originalTotalPrice = items.reduce((sum, item) => {
+    const originalPrice = item.originalPrice || item.price;
+    return sum + (originalPrice * item.quantity);
+  }, 0);
+  const fakeSavings = originalTotalPrice - totalPrice;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 py-6 sm:py-12">
@@ -144,9 +222,32 @@ export default function CartPage() {
                             </button>
                           </div>
                           
-                          <p className="text-lg sm:text-2xl font-bold text-teal-400 mb-2 sm:mb-4">
-                            {(item.price * item.quantity).toFixed(2)} جنيه
-                          </p>
+                          {/* Price Display - Enhanced */}
+                          <div className="space-y-1">
+                            {/* Original Price (Crossed) */}
+                            {item.originalPrice && item.originalPrice > item.price && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 line-through text-sm">
+                                  {(item.originalPrice * item.quantity).toLocaleString()} جنيه
+                                </span>
+                                <span className="text-[10px] text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full font-bold">
+                                  -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
+                                </span>
+                              </div>
+                            )}
+                            
+                            {/* Current Price */}
+                            <p className="text-xl sm:text-2xl font-black bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                              {(item.price * item.quantity).toFixed(2)} جنيه
+                            </p>
+                            
+                            {/* Savings */}
+                            {item.originalPrice && item.originalPrice > item.price && (
+                              <p className="text-xs text-orange-400">
+                                🎉 وفّرت {((item.originalPrice - item.price) * item.quantity).toFixed(0)} جنيه
+                              </p>
+                            )}
+                          </div>
                         </div>
 
                         {/* Quantity Controls */}
@@ -202,6 +303,69 @@ export default function CartPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
+                  {/* Coupon Section */}
+                  <div className="bg-gradient-to-r from-amber-900/20 to-orange-900/20 border border-amber-500/30 rounded-lg p-3 sm:p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Tag className="w-5 h-5 text-amber-400" />
+                      <h3 className="font-bold text-white">كود الخصم</h3>
+                    </div>
+                    
+                    {!appliedCoupon ? (
+                      <>
+                        <div className="flex gap-2">
+                          <Input
+                            type="text"
+                            placeholder="أدخل كود الكوبون"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                            className="bg-gray-800 border-amber-500/50 text-white placeholder:text-gray-500"
+                            disabled={isCheckingCoupon}
+                          />
+                          <Button
+                            onClick={handleApplyCoupon}
+                            disabled={isCheckingCoupon || !couponCode.trim()}
+                            className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-4"
+                          >
+                            {isCheckingCoupon ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              "تطبيق"
+                            )}
+                          </Button>
+                        </div>
+                        
+                        {couponError && (
+                          <div className="flex items-start gap-2 mt-2 text-red-400 text-xs">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                            <span>{couponError}</span>
+                          </div>
+                        )}
+                        
+                        <p className="text-xs text-gray-400 mt-2">
+                          💡 احصل على كوبون خصم من عجلة الحظ!
+                        </p>
+                      </>
+                    ) : (
+                      <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-5 h-5 text-green-400" />
+                            <span className="font-bold text-white">{appliedCoupon.code}</span>
+                          </div>
+                          <button
+                            onClick={handleRemoveCoupon}
+                            className="text-red-400 hover:text-red-300 text-sm underline"
+                          >
+                            إزالة
+                          </button>
+                        </div>
+                        <p className="text-green-400 text-sm font-medium">
+                          خصم {appliedCoupon.discount} جنيه
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="flex justify-between text-gray-400">
                     <span>عدد المنتجات:</span>
                     <span className="font-bold">{items.length}</span>
@@ -215,12 +379,40 @@ export default function CartPage() {
                   </div>
 
                   <div className="border-t border-gray-700 pt-4">
+                    {/* Original Total (if there are savings) */}
+                    {fakeSavings > 0 && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-500 text-sm line-through">السعر الأصلي:</span>
+                        <span className="text-gray-500 line-through">
+                          {originalTotalPrice.toFixed(2)} جنيه
+                        </span>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-300">المجموع الفرعي:</span>
+                      <span className="text-gray-300">سعر المنتجات:</span>
                       <span className="text-xl font-bold text-white">
                         {totalPrice.toFixed(2)} جنيه
                       </span>
                     </div>
+                    
+                    {/* Fake Savings Display */}
+                    {fakeSavings > 0 && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-orange-400 text-sm">💰 الوفورات:</span>
+                        <span className="text-orange-400 font-bold text-sm">
+                          {fakeSavings.toFixed(2)} جنيه
+                        </span>
+                      </div>
+                    )}
+                    
+                    {appliedCoupon && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-green-400 text-sm">🎫 خصم الكوبون ({appliedCoupon.code}):</span>
+                        <span className="text-green-400 font-bold">- {discount.toFixed(2)} جنيه</span>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-gray-400 text-sm">رسوم التوصيل:</span>
                       <span className="text-teal-400 font-bold">مجاناً</span>
@@ -228,12 +420,38 @@ export default function CartPage() {
                   </div>
 
                   <div className="border-t border-gray-700 pt-3 sm:pt-4">
+                    {/* Total Savings Celebration */}
+                    {(fakeSavings + discount) > 0 && (
+                      <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-lg p-3 mb-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-green-400 text-sm font-bold">🎉 إجمالي التوفير:</span>
+                          <span className="text-green-400 font-black text-lg">
+                            {(fakeSavings + discount).toFixed(2)} جنيه
+                          </span>
+                        </div>
+                        <p className="text-green-300 text-xs mt-1">
+                          رائع! وفّرت {Math.round(((fakeSavings + discount) / originalTotalPrice) * 100)}% من المبلغ الأصلي 💪
+                        </p>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between items-center mb-4 sm:mb-6">
-                      <span className="text-base sm:text-xl font-bold text-white">الإجمالي:</span>
+                      <span className="text-base sm:text-xl font-bold text-white">الإجمالي النهائي:</span>
                       <span className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                        {totalPrice.toFixed(2)} جنيه
+                        {finalPrice.toFixed(2)} جنيه
                       </span>
                     </div>
+                    
+                    {appliedCoupon && appliedCoupon.minPurchase > finalPrice && (
+                      <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-4">
+                        <div className="flex items-start gap-2 text-amber-400 text-xs">
+                          <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                          <span>
+                            لم تصل للحد الأدنى المطلوب! أضف منتجات بقيمة {(appliedCoupon.minPurchase - totalPrice).toFixed(2)} جنيه للحصول على الخصم
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
                     <Link href="/checkout">
                       <Button className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-sm sm:text-lg py-4 sm:py-6">
