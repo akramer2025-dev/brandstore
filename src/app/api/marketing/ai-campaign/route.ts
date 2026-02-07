@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import Groq from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+// Initialize Groq client only if API key is available
+const getGroqClient = () => {
+  if (!process.env.GROQ_API_KEY) {
+    console.warn('⚠️ GROQ_API_KEY not found - AI features will be disabled');
+    return null;
+  }
+  return new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
+};
 
 // AI Marketing Agent - يعمل كموظف تسويق محترف
 export async function POST(req: NextRequest) {
@@ -15,32 +22,41 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
+    // Check if Groq is available
+    const groq = getGroqClient();
+    if (!groq) {
+      return NextResponse.json(
+        { error: "AI features are not configured. Please add GROQ_API_KEY to environment variables." },
+        { status: 503 }
+      );
+    }
+
     const { action, data } = await req.json();
 
     switch (action) {
       case "generate_campaign":
-        return await generateFullCampaign(data);
+        return await generateFullCampaign(data, groq);
       
       case "analyze_competitors":
-        return await analyzeCompetitors(data);
+        return await analyzeCompetitors(data, groq);
       
       case "suggest_posting_times":
-        return await suggestPostingTimes(data);
+        return await suggestPostingTimes(data, groq);
       
       case "create_audience_personas":
-        return await createAudiencePersonas(data);
+        return await createAudiencePersonas(data, groq);
       
       case "generate_ad_variations":
-        return await generateAdVariations(data);
+        return await generateAdVariations(data, groq);
       
       case "create_content_calendar":
-        return await createContentCalendar(data);
+        return await createContentCalendar(data, groq);
       
       case "analyze_trends":
-        return await analyzeTrends(data);
+        return await analyzeTrends(data, groq);
       
       case "optimize_budget":
-        return await optimizeBudget(data);
+        return await optimizeBudget(data, groq);
       
       default:
         return NextResponse.json({ error: "Action غير معروف" }, { status: 400 });
@@ -54,7 +70,7 @@ export async function POST(req: NextRequest) {
 }
 
 // 1. توليد حملة إعلانية كاملة
-async function generateFullCampaign(data: any) {
+async function generateFullCampaign(data: any, groq: Groq) {
   const { productName, productDescription, budget, targetAudience, platform } = data;
 
   const prompt = `أنت خبير تسويق رقمي محترف متخصص في Facebook و Instagram Ads.
@@ -142,7 +158,7 @@ async function generateFullCampaign(data: any) {
 }
 
 // 2. تحليل المنافسين
-async function analyzeCompetitors(data: any) {
+async function analyzeCompetitors(data: any, groq: Groq) {
   const { industry, competitors } = data;
 
   const prompt = `أنت محلل تسويق محترف.
@@ -203,7 +219,7 @@ async function analyzeCompetitors(data: any) {
 }
 
 // 3. اقتراح أفضل أوقات النشر
-async function suggestPostingTimes(data: any) {
+async function suggestPostingTimes(data: any, groq: Groq) {
   const { targetAudience, platform } = data;
 
   const prompt = `أنت خبير Social Media في السوق المصري.
@@ -261,7 +277,7 @@ async function suggestPostingTimes(data: any) {
 }
 
 // 4. إنشاء Audience Personas
-async function createAudiencePersonas(data: any) {
+async function createAudiencePersonas(data: any, groq: Groq) {
   const { productType, priceRange } = data;
 
   const prompt = `أنت خبير في دراسة الجمهور والسوق المصري.
@@ -330,7 +346,7 @@ async function createAudiencePersonas(data: any) {
 }
 
 // 5. توليد نصوص إعلانية متعددة للـ A/B Testing
-async function generateAdVariations(data: any) {
+async function generateAdVariations(data: any, groq: Groq) {
   const { productName, sellingPoints, tone } = data;
 
   const prompt = `أنت Copywriter محترف متخصص في Facebook و Instagram Ads.
@@ -384,7 +400,7 @@ async function generateAdVariations(data: any) {
 }
 
 // 6. إنشاء Content Calendar
-async function createContentCalendar(data: any) {
+async function createContentCalendar(data: any, groq: Groq) {
   const { duration, postsPerWeek, contentTypes } = data;
 
   const prompt = `أنت مدير محتوى محترف.
@@ -439,7 +455,7 @@ async function createContentCalendar(data: any) {
 }
 
 // 7. تحليل الترندات
-async function analyzeTrends(data: any) {
+async function analyzeTrends(data: any, groq: Groq) {
   const { industry } = data;
 
   const prompt = `أنت محلل ترندات Social Media في السوق المصري.
@@ -502,7 +518,7 @@ async function analyzeTrends(data: any) {
 }
 
 // 8. تحسين توزيع الميزانية
-async function optimizeBudget(data: any) {
+async function optimizeBudget(data: any, groq: Groq) {
   const { totalBudget, platforms, goals } = data;
 
   const prompt = `أنت خبير في إدارة الميزانيات الإعلانية.
