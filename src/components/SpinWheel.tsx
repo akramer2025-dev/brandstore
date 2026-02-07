@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Gift, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, Gift, Sparkles, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 // جميع الخصومات بنسبة 30% بالظبط
 const prizes = [
@@ -25,6 +26,7 @@ export default function SpinWheel() {
   const [hasSpun, setHasSpun] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
+  const [showLoginMessage, setShowLoginMessage] = useState(false);
   const [usedPrizes, setUsedPrizes] = useState<number[]>([]);
   const wheelRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -113,19 +115,22 @@ export default function SpinWheel() {
     const selectedPrize = availablePrizes[randomIndex];
     const prizeIndex = prizes.findIndex(p => p.id === selectedPrize.id);
     
-    // حساب زاوية الدوران بدقة عالية
-    const segmentAngle = 360 / prizes.length; // 45 درجة لكل قطعة
-    const spins = 5; // عدد اللفات الكاملة
+    // حفظ الجائزة أولاً قبل أي حساب
+    setSelectedPrize(selectedPrize);
     
-    // حساب مركز القطعة المختارة
-    // القطعة الأولى (index 0) مركزها عند 22.5 درجة (نصف 45)
-    // القطعة الثانية (index 1) مركزها عند 67.5 درجة
-    // وهكذا...
-    const centerOfPrize = (prizeIndex * segmentAngle) + (segmentAngle / 2);
+    // حساب زاوية الدوران بدقة مطلقة
+    const totalPrizes = prizes.length; // 8 جوائز
+    const segmentAngle = 360 / totalPrizes; // 45 درجة لكل جائزة
+    const spins = 5; // 5 لفات كاملة
     
-    // السهم عند 0 درجة في الأعلى، نحتاج أن ندير العجلة بحيث يكون مركز الجائزة عند 0
-    // نطرح مركز الجائزة من دورات كاملة
-    const targetAngle = (360 * spins) - centerOfPrize;
+    // كل segment بيترسم بحيث يشير للأعلى عند rotation = index * 45
+    // يعني segment 0 مركزه عند 0°، segment 1 مركزه عند 45°، وهكذا
+    // السهم ثابت عند 0° في الأعلى
+    // نريد أن يصبح الـ segment المختار تحت السهم مباشرة
+    const prizeCenterAngle = prizeIndex * segmentAngle;
+    
+    // ندير العجلة بحيث الـ segment المختار يبقى عند 0°
+    const targetAngle = (360 * spins) - prizeCenterAngle;
     
     setRotation(targetAngle);
     
@@ -137,7 +142,6 @@ export default function SpinWheel() {
     // بعد انتهاء الدوران
     setTimeout(() => {
       setIsSpinning(false);
-      setSelectedPrize(selectedPrize);
       setHasSpun(true);
       
       // صوت الفوز (نغمة واحدة قصيرة وواضحة)
@@ -181,8 +185,14 @@ export default function SpinWheel() {
   const handleClaim = async () => {
     // التحقق من تسجيل الدخول
     if (!session?.user) {
+      // حفظ الجائزة وعرض رسالة بدلاً من التوجيه
       localStorage.setItem('pendingPrize', JSON.stringify(selectedPrize));
-      router.push('/auth/signin?callbackUrl=/');
+      setShowLoginMessage(true);
+      
+      // إخفاء العجلة بعد 4 ثوان
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 4000);
       return;
     }
 
@@ -315,9 +325,15 @@ export default function SpinWheel() {
                 );
               })}
               
-              {/* Center Circle */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-xl flex items-center justify-center border-4 border-white z-10">
-                <Sparkles className="w-10 h-10 text-white drop-shadow-lg" />
+              {/* Center Circle with Logo */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white rounded-full shadow-xl flex items-center justify-center border-4 border-yellow-400 z-10 p-2">
+                <Image 
+                  src="/logo.png" 
+                  alt="Logo" 
+                  width={60} 
+                  height={60}
+                  className="object-contain"
+                />
               </div>
             </div>
           </div>
@@ -343,6 +359,24 @@ export default function SpinWheel() {
           </div>
         )}
 
+        {/* Login Message */}
+        {showLoginMessage && (
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-6 mb-4 animate-scale-in border-2 border-blue-300">
+            <div className="flex items-center justify-center mb-3">
+              <AlertCircle className="w-16 h-16 text-white animate-pulse" />
+            </div>
+            <p className="text-center text-white font-black text-xl mb-2">
+              🎁 سوف تحصل على الخصم عند تسجيل الدخول
+            </p>
+            <p className="text-center text-white/90 text-sm">
+              خصم {selectedPrize?.value} جنيه بانتظارك!
+            </p>
+            <p className="text-center text-white/80 text-xs mt-2">
+              سجل دخول الآن لإضافة الخصم لحسابك
+            </p>
+          </div>
+        )}
+
         {/* Success Message */}
         {claimSuccess && (
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 mb-4 animate-scale-in border-2 border-green-300">
@@ -356,7 +390,7 @@ export default function SpinWheel() {
               تم إضافة خصم {selectedPrize?.value} جنيه إلى حسابك بنجاح
             </p>
             <p className="text-center text-white/80 text-xs mt-2">
-              يمكنك استخدامه الآن عند الدفع 🎉
+              يمكنك استخدامه عند الشراء بقيمة {selectedPrize?.minPurchase} جنيه أو أكثر 🎉
             </p>
           </div>
         )}
@@ -369,9 +403,9 @@ export default function SpinWheel() {
               disabled={isSpinning}
               className="w-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white font-black text-lg py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
             >
-              {isSpinning ? '🎡 جاري الدوران...' : '🎯 اسحب حظك!'}
+              {isSpinning ? '🎡 جاري الدوران...' : '🎯 جرب حظك!'}
             </button>
-          ) : !claimSuccess ? (
+          ) : !claimSuccess && !showLoginMessage ? (
             <button
               onClick={handleClaim}
               disabled={isClaiming}

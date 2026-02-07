@@ -10,6 +10,7 @@ import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
 import NewsTicker from '@/components/NewsTicker';
 import SpinWheel from '@/components/SpinWheel';
+import PendingPrizeHandler from '@/components/PendingPrizeHandler';
 import Link from 'next/link';
 import { Sparkles, ShoppingBag, TrendingUp, Award, Shield, Truck, Star } from 'lucide-react';
 
@@ -67,6 +68,9 @@ export default async function HomePage() {
     return (
       <>
         {/* <SplashScreen /> */}
+        
+        {/* Pending Prize Handler - معالجة الجائزة المعلقة */}
+        <PendingPrizeHandler />
         
         {/* Spin Wheel - عجلة الحظ للزوار الجدد */}
         <SpinWheel />

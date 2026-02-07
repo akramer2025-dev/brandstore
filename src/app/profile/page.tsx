@@ -16,6 +16,10 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
+  Gift,
+  Ticket,
+  Calendar,
+  ShoppingBag,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -36,6 +40,11 @@ export default function ProfilePage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // Coupons
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [totalDiscount, setTotalDiscount] = useState(0);
+  const [loadingCoupons, setLoadingCoupons] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -46,8 +55,27 @@ export default function ProfilePage() {
     if (session?.user) {
       setName(session.user.name || "");
       setEmail(session.user.email || "");
+      
+      // تحميل الكوبونات
+      fetchCoupons();
     }
   }, [session, status, router]);
+  
+  const fetchCoupons = async () => {
+    try {
+      setLoadingCoupons(true);
+      const response = await fetch('/api/coupons/my-coupons');
+      if (response.ok) {
+        const data = await response.json();
+        setCoupons(data.coupons || []);
+        setTotalDiscount(data.totalDiscount || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+    } finally {
+      setLoadingCoupons(false);
+    }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -342,6 +370,119 @@ export default function ProfilePage() {
               <span>حالة الحساب:</span>
               <span className="text-green-400 font-bold">نشط</span>
             </div>
+          </CardContent>
+        </Card>
+        
+        {/* Coupons Section - رصيد الخصومات */}
+        <Card className="bg-gray-800/80 border-teal-500/20 mt-6">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Gift className="w-5 h-5 text-yellow-400" />
+              رصيد الخصومات
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingCoupons ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+              </div>
+            ) : coupons.length > 0 ? (
+              <>
+                {/* Total Discount */}
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 mb-6 border border-yellow-500/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm mb-1">إجمالي الخصومات المتاحة</p>
+                      <p className="text-4xl font-black text-yellow-400">{totalDiscount} جنيه</p>
+                    </div>
+                    <Ticket className="w-16 h-16 text-yellow-400/30" />
+                  </div>
+                </div>
+                
+                {/* Coupons List */}
+                <div className="space-y-4">
+                  <p className="text-gray-300 font-semibold mb-3">الكوبونات المتاحة ({coupons.length})</p>
+                  {coupons.map((coupon) => {
+                    const isExpiringSoon = coupon.expiresAt && 
+                      new Date(coupon.expiresAt).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000;
+                    const isUsed = coupon.usedCount >= coupon.maxUses;
+                    
+                    return (
+                      <div 
+                        key={coupon.id}
+                        className={`bg-gradient-to-r ${
+                          isUsed ? 'from-gray-700/50 to-gray-600/50' : 
+                          'from-teal-600/20 to-cyan-600/20'
+                        } rounded-lg p-4 border ${
+                          isUsed ? 'border-gray-600/30' : 'border-teal-500/30'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full ${
+                                isUsed ? 'bg-gray-600/50 text-gray-400' : 
+                                'bg-yellow-500/20 text-yellow-400'
+                              } font-bold text-lg`}>
+                                <Gift className="w-4 h-4" />
+                                {coupon.discount} جنيه
+                              </div>
+                              {isUsed && (
+                                <span className="text-xs px-2 py-1 bg-red-500/20 text-red-400 rounded">
+                                  مستخدم
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 text-sm">
+                                <ShoppingBag className="w-4 h-4 text-gray-400" />
+                                <span className="text-gray-300">
+                                  للشراء بقيمة {coupon.minPurchase} جنيه أو أكثر
+                                </span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 text-sm">
+                                <Ticket className="w-4 h-4 text-gray-400" />
+                                <span className="text-gray-400 font-mono">{coupon.code}</span>
+                              </div>
+                              
+                              {coupon.expiresAt && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Calendar className="w-4 h-4 text-gray-400" />
+                                  <span className={isExpiringSoon ? 'text-orange-400' : 'text-gray-400'}>
+                                    {isExpiringSoon && '⚠️ '}
+                                    صالح حتى {new Date(coupon.expiresAt).toLocaleDateString('ar-EG')}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className={`text-3xl ${isUsed ? 'opacity-30' : ''}`}>
+                            🎁
+                          </div>
+                        </div>
+                        
+                        {!isUsed && (
+                          <div className="mt-3 pt-3 border-t border-gray-700">
+                            <p className="text-xs text-gray-400">
+                              💡 استخدم هذا الكود عند الدفع للحصول على الخصم
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <Gift className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400 mb-2">لا توجد خصومات متاحة حالياً</p>
+                <p className="text-sm text-gray-500">قم بتدوير عجلة الحظ للحصول على خصومات رائعة! 🎡</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
