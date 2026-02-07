@@ -95,7 +95,7 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
       { text: 'الأكثر مبيعاً', icon: TrendingUp, color: 'from-orange-500 to-red-500' },
       { text: 'جديد', icon: Zap, color: 'from-green-500 to-emerald-500' },
       { text: 'مميز', icon: Award, color: 'from-purple-500 to-pink-500' },
-      { text: 'شحن مجاني', icon: Truck, color: 'from-blue-500 to-cyan-500' },
+      { text: 'عرض خاص', icon: Award, color: 'from-blue-500 to-cyan-500' },
     ];
     
     let hash = 0;
@@ -275,17 +275,15 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
 
           {/* Price - Enhanced */}
           <div className="space-y-2">
-            {/* Original Price (Fake/Crossed) */}
-            {product.originalPrice && product.originalPrice > product.price && (
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500 line-through text-sm sm:text-base font-bold">
-                  {product.originalPrice.toLocaleString('en-US')} جنيه
-                </span>
-                <span className="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full font-bold">
-                  -{discount}%
-                </span>
-              </div>
-            )}
+            {/* Original Price (Crossed) - دائماً يظهر */}
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 line-through text-sm sm:text-base font-bold">
+                {displayOriginalPrice.toLocaleString('en-US')} جنيه
+              </span>
+              <span className="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full font-bold">
+                -{Math.round(((displayOriginalPrice - product.price) / displayOriginalPrice) * 100)}%
+              </span>
+            </div>
             
             {/* Current Price (Real Price) */}
             <div className="flex items-baseline gap-1.5">
@@ -295,13 +293,11 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
               <span className="text-green-400 text-sm font-bold">جنيه</span>
             </div>
             
-            {/* Savings Badge */}
-            {discount > 0 && (
-              <div className="inline-flex items-center gap-1 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1 rounded-full shadow-lg">
-                <span>🎉</span>
-                <span>وفّر {(product.originalPrice! - product.price).toLocaleString('en-US')} جنيه</span>
-              </div>
-            )}
+            {/* Savings Badge - دائماً يظهر */}
+            <div className="inline-flex items-center gap-1 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1 rounded-full shadow-lg">
+              <span>🎉</span>
+              <span>وفّر {(displayOriginalPrice - product.price).toLocaleString('en-US')} جنيه</span>
+            </div>
           </div>
 
           {/* Features Icons */}
