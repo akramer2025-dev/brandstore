@@ -684,3 +684,58 @@
 .animate-scale-in {
   animation: scale-in 0.4s ease-out;
 }
+
+/* Cloud Animations for test-design page */
+@keyframes float {
+  0%, 100% { 
+    transform: translateX(0) translateY(0); 
+  }
+  25% { 
+    transform: translateX(15px) translateY(-5px); 
+  }
+  50% { 
+    transform: translateX(30px) translateY(0px); 
+  }
+  75% { 
+    transform: translateX(15px) translateY(5px); 
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% { 
+    transform: translateX(0) translateY(0); 
+  }
+  33% { 
+    transform: translateX(20px) translateY(-8px); 
+  }
+  66% { 
+    transform: translateX(40px) translateY(8px); 
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% { 
+    transform: translateX(0) translateY(0); 
+  }
+  30% { 
+    transform: translateX(-15px) translateY(6px); 
+  }
+  60% { 
+    transform: translateX(-30px) translateY(-6px); 
+  }
+  90% { 
+    transform: translateX(-15px) translateY(4px); 
+  }
+}
+
+.animate-float {
+  animation: float 18s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 25s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 20s ease-in-out infinite;
+}
