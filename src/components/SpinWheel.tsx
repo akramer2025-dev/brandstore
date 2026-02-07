@@ -34,11 +34,11 @@ export default function SpinWheel() {
   const router = useRouter();
 
   useEffect(() => {
-    // التحقق من الزيارة الأولى وأن المستخدم لم يحصل على جائزة من قبل
-    const hasVisited = localStorage.getItem('hasVisitedBefore');
+    // العجلة تظهر للجميع إلا إذا حصلوا على الجائزة فعلياً
     const hasClaimed = localStorage.getItem('prizeClaimed');
     
-    if (!hasVisited && !hasClaimed) {
+    // تظهر فقط إذا لم يحصل على الجائزة بعد
+    if (!hasClaimed) {
       const timer = setTimeout(() => {
         setIsOpen(true);
       }, 2000);
@@ -113,10 +113,19 @@ export default function SpinWheel() {
     const selectedPrize = availablePrizes[randomIndex];
     const prizeIndex = prizes.findIndex(p => p.id === selectedPrize.id);
     
-    // حساب زاوية الدوران بدقة
-    const segmentAngle = 360 / prizes.length;
-    const spins = 5;
-    const targetAngle = (360 * spins) + (360 - (prizeIndex * segmentAngle) - (segmentAngle / 2));
+    // حساب زاوية الدوران بدقة عالية
+    const segmentAngle = 360 / prizes.length; // 45 درجة لكل قطعة
+    const spins = 5; // عدد اللفات الكاملة
+    
+    // حساب مركز القطعة المختارة
+    // القطعة الأولى (index 0) مركزها عند 22.5 درجة (نصف 45)
+    // القطعة الثانية (index 1) مركزها عند 67.5 درجة
+    // وهكذا...
+    const centerOfPrize = (prizeIndex * segmentAngle) + (segmentAngle / 2);
+    
+    // السهم عند 0 درجة في الأعلى، نحتاج أن ندير العجلة بحيث يكون مركز الجائزة عند 0
+    // نطرح مركز الجائزة من دورات كاملة
+    const targetAngle = (360 * spins) - centerOfPrize;
     
     setRotation(targetAngle);
     
@@ -157,8 +166,8 @@ export default function SpinWheel() {
 
   const handleClose = () => {
     setIsOpen(false);
-    // تسجيل فقط أن المستخدم زار (لكن ليس أنه حصل على جائزة)
-    localStorage.setItem('hasVisitedBefore', 'true');
+    // لا نحفظ hasVisitedBefore هنا - العجلة ستظهر مرة أخرى
+    // العجلة تختفي نهائياً فقط عند الحصول على الجائزة
     
     // إيقاف الصوت إذا كان يعمل
     if (oscillatorRef.current && audioContextRef.current) {
