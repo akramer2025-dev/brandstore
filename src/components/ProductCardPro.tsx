@@ -110,6 +110,15 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
     return null;
   }, [product.id]);
 
+  // إضافة originalPrice افتراضي إذا لم يكن موجوداً (لإظهار الخصم)
+  const displayOriginalPrice = useMemo(() => {
+    if (product.originalPrice && product.originalPrice > product.price) {
+      return product.originalPrice;
+    }
+    // إنشاء سعر أصلي افتراضي (40% أعلى من السعر الحالي)
+    return Math.round(product.price * 1.4);
+  }, [product.price, product.originalPrice]);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
