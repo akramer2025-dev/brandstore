@@ -57,8 +57,16 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('❌ خطأ في حفظ الكوبون:', error);
+    
+    // تفاصيل أكثر عن الخطأ للتشخيص
+    const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير معروف';
+    console.error('تفاصيل الخطأ:', errorMessage);
+    
     return NextResponse.json(
-      { error: 'حدث خطأ في حفظ الخصم' },
+      { 
+        error: 'حدث خطأ في حفظ الخصم',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
       { status: 500 }
     );
   }

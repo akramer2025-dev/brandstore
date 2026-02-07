@@ -213,7 +213,10 @@ export default function SpinWheel() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         setClaimSuccess(true);
+        
+        console.log('✅ تم حفظ الكوبون بنجاح:', data);
         
         // تسجيل أن المستخدم حصل على الجائزة وعدم إظهار العجلة مرة أخرى
         localStorage.setItem('hasVisitedBefore', 'true');
@@ -225,12 +228,14 @@ export default function SpinWheel() {
           setIsOpen(false);
         }, 3000);
       } else {
-        alert('حدث خطأ في حفظ الخصم. حاول مرة أخرى.');
+        const errorData = await response.json();
+        console.error('❌ فشل حفظ الخصم:', errorData);
+        alert(`حدث خطأ في حفظ الخصم: ${errorData.error || 'حاول مرة أخرى'}`);
         setIsClaiming(false);
       }
     } catch (error) {
-      console.error('Error claiming prize:', error);
-      alert('حدث خطأ في حفظ الخصم. حاول مرة أخرى.');
+      console.error('❌ Error claiming prize:', error);
+      alert('حدث خطأ في الاتصال بالخادم. تحقق من اتصال الإنترنت.');
       setIsClaiming(false);
     }
   };

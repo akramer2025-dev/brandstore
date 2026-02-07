@@ -408,11 +408,11 @@ export default function ProductDetailPage() {
 
             {/* Vendor Info */}
             {product.vendor && (
-              <Card className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/30">
+              <Card className="backdrop-blur-sm bg-gray-800/90 border-purple-500/40 hover:shadow-xl hover:border-pink-500/50 transition-all duration-300">
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center gap-3">
                     {product.vendor.logo && (
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 border border-purple-500/30">
                         <Image
                           src={product.vendor.logo}
                           alt={product.vendor.storeNameAr}
@@ -423,8 +423,8 @@ export default function ProductDetailPage() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm text-gray-400 mb-0.5">بائع المنتج</p>
-                      <h3 className="text-white font-bold text-sm sm:text-base truncate">{product.vendor.storeNameAr}</h3>
+                      <p className="text-xs sm:text-sm text-gray-300 mb-0.5 font-medium">بائع المنتج</p>
+                      <h3 className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent font-bold text-sm sm:text-base truncate">{product.vendor.storeNameAr}</h3>
                       {product.vendor.rating > 0 && (
                         <div className="flex items-center gap-1 mt-1">
                           <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
@@ -433,7 +433,7 @@ export default function ProductDetailPage() {
                       )}
                     </div>
                     <Link href={`/products?vendorId=${product.vendor.id}`}>
-                      <Button size="sm" variant="outline" className="border-purple-500/50 hover:bg-purple-500/10 text-xs sm:text-sm whitespace-nowrap">
+                      <Button size="sm" variant="outline" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-0 text-white text-xs sm:text-sm whitespace-nowrap shadow-lg hover:shadow-xl transition-all">
                         منتجات أخرى
                       </Button>
                     </Link>
