@@ -9,6 +9,7 @@ import ChatButton from '@/components/ChatButton';
 import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
 import NewsTicker from '@/components/NewsTicker';
+import SpinWheel from '@/components/SpinWheel';
 import Link from 'next/link';
 import { Sparkles, ShoppingBag, TrendingUp, Award, Shield, Truck, Star } from 'lucide-react';
 
@@ -66,6 +67,9 @@ export default async function HomePage() {
     return (
       <>
         {/* <SplashScreen /> */}
+        
+        {/* Spin Wheel - عجلة الحظ للزوار الجدد */}
+        <SpinWheel />
         
         {/* News Ticker - شريط الأخبار المتحرك */}
         <NewsTicker />
