@@ -65,19 +65,19 @@ export async function POST(request: NextRequest) {
     const product = await prisma.product.create({
       data: {
         nameAr,
-        nameEn: nameEn || nameAr,
+        name: nameEn || nameAr,
         descriptionAr,
-        descriptionEn: descriptionEn || descriptionAr,
+        description: descriptionEn || descriptionAr,
         price: parseFloat(price.toString()),
         stock: parseInt(stock?.toString() || '0'),
         categoryId,
         images: images || '[]',
         isImported: true,
         importSource,
-        importLink,
         marketingStaffId: staff.id,
         downPaymentPercent: parseFloat(downPaymentPercent.toString()),
-        estimatedDeliveryDays: parseInt(estimatedDeliveryDays.toString()),
+        deliveryDaysMin: parseInt(estimatedDeliveryDays.toString()),
+        deliveryDaysMax: parseInt(estimatedDeliveryDays.toString()) + 7,
         // السعر الأصلي (للعرض بنسبة الخصم الوهمية)
         originalPrice: parseFloat(price.toString()) * 1.35, // 35% أعلى
       },
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         category: {
           select: {
             nameAr: true,
-            nameEn: true,
+            name: true,
           },
         },
       },
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         category: {
           select: {
             nameAr: true,
-            nameEn: true,
+            name: true,
           },
         },
       },

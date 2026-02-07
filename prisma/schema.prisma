@@ -258,6 +258,7 @@ model Product {
   reviews         Review[]
   wishlistItems   WishlistItem[]
   inventoryItems  InventoryItem[]
+  socialMediaPosts SocialMediaPost[]
   supplierPayments SupplierPayment[]
   marketingStaff  MarketingStaff? @relation(fields: [marketingStaffId], references: [id])
   commissions     MarketingCommission[]
@@ -1466,4 +1467,50 @@ model PointTransaction {
   @@index([userId])
   @@index([orderId])
   @@index([createdAt])
+}
+
+// ============ ربط السوشيال ميديا ============
+model SocialMediaAccount {
+  id            String   @id @default(cuid())
+  platform      String   // FACEBOOK, INSTAGRAM
+  pageId        String   // Facebook Page ID or Instagram Business Account ID
+  pageName      String   // اسم الصفحة
+  accessToken   String   @db.Text  // Access Token (طويل الأمد)
+  tokenExpiry   DateTime? // تاريخ انتهاء التوكن
+  isActive      Boolean  @default(true)
+  lastSync      DateTime? // آخر مزامنة
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  posts         SocialMediaPost[]
+
+  @@map("social_media_accounts")
+  @@unique([platform, pageId])
+  @@index([platform, isActive])
+}
+
+// منشورات السوشيال ميديا
+model SocialMediaPost {
+  id            String   @id @default(cuid())
+  accountId     String
+  postId        String?  // Facebook/Instagram Post ID
+  content       String   @db.Text
+  imageUrl      String?
+  productId     String?
+  status        String   // DRAFT, SCHEDULED, PUBLISHED, FAILED
+  scheduledFor  DateTime?
+  publishedAt   DateTime?
+  error         String?  @db.Text
+  likes         Int      @default(0)
+  comments      Int      @default(0)
+  shares        Int      @default(0)
+  reach         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  account       SocialMediaAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  product       Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("social_media_posts")
+  @@index([accountId, status])
+  @@index([productId])
+  @@index([scheduledFor])
 }

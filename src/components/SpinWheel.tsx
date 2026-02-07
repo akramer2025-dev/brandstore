@@ -46,14 +46,21 @@ export default function SpinWheel() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('🎡 ========== SpinWheel Component Loaded ==========');
+    console.log('📍 Session:', session ? 'مسجل دخول' : 'غير مسجل');
+    
     let isMounted = true;
     
     const checkIfUserHasCoupon = async () => {
+      console.log('🔍 بدء فحص إمكانية إظهار العجلة...');
+      
       // التحقق من localStorage أولاً
       const hasClaimed = localStorage.getItem('prizeClaimed');
+      console.log('🔍 localStorage.prizeClaimed =', hasClaimed);
       
       if (hasClaimed) {
-        console.log('🚫 المستخدم حصل على كوبون من قبل (localStorage)');
+        console.log('🚫 السبب: المستخدم حصل على كوبون من قبل (localStorage)');
+        console.log('💡 الحل: امسح localStorage باستخدام: localStorage.clear()');
         return false;
       }
       
@@ -66,7 +73,8 @@ export default function SpinWheel() {
           
           // لو عنده أي كوبونات، لا تظهر العجلة
           if (data.coupons && data.coupons.length > 0) {
-            console.log('🚫 المستخدم لديه كوبونات نشطة:', data.coupons.length);
+            console.log('🚫 السبب: المستخدم لديه كوبونات نشطة:', data.coupons.length);
+            console.log('💡 الحل: استخدم حساب جديد أو امسح الكوبونات');
             localStorage.setItem('prizeClaimed', 'true');
             return false;
           }
@@ -75,26 +83,36 @@ export default function SpinWheel() {
           return true;
         } catch (error) {
           console.error('❌ خطأ في التحقق من الكوبونات:', error);
-          return false;
+          console.log('⚠️ سيتم إظهار العجلة على أي حال');
+          return true; // إظهار العجلة في حالة الخطأ
         }
       }
       
       // إذا لم يكن مسجل دخول، يمكن إظهار العجلة
+      console.log('✅ المستخدم غير مسجل - يمكن إظهار العجلة');
       return true;
     };
     
     checkIfUserHasCoupon().then((shouldShow) => {
+      console.log('📊 نتيجة الفحص: shouldShow =', shouldShow);
+      
       if (shouldShow && isMounted) {
+        console.log('⏱️ جدولة إظهار العجلة بعد 2 ثانية...');
         setTimeout(() => {
           if (isMounted) {
-            console.log('🎡 إظهار عجلة الحظ...');
+            console.log('🎡 ✨ عرض عجلة الحظ الآن! ✨');
             setIsOpen(true);
+          } else {
+            console.log('⚠️ Component unmounted - لن يتم إظهار العجلة');
           }
         }, 2000);
+      } else {
+        console.log('❌ لن يتم إظهار العجلة - راجع الأسباب أعلاه');
       }
     });
     
     return () => {
+      console.log('🔚 SpinWheel Component Unmounted');
       isMounted = false;
     };
   }, [session]);

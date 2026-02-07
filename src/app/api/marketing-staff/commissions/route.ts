@@ -92,10 +92,11 @@ export async function POST(request: NextRequest) {
           marketingStaffId: marketingStaff.id,
           productId: product.id,
           orderId: order.id,
+          orderItemId: item.id,
+          productName: product.nameAr,
           saleAmount,
           commissionRate: marketingStaff.commissionRate,
           commissionAmount,
-          quantity: item.quantity,
         },
       });
 
@@ -175,13 +176,6 @@ export async function GET(request: NextRequest) {
           select: {
             nameAr: true,
             price: true,
-          },
-        },
-        order: {
-          select: {
-            id: true,
-            status: true,
-            createdAt: true,
           },
         },
       },

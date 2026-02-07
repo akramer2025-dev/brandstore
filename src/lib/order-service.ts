@@ -600,7 +600,6 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
           where: { id: orderId },
           data: {
             bustaStatus: 'PENDING',
-            shippingNotes: 'في انتظار الإرسال - خدمة البريد غير متاحة',
           },
         });
         return;

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعادة تعيين عجلة الحظ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .reset-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        .home-btn {
+            background: #f0f0f0;
+            color: #666;
+        }
+        .home-btn:hover {
+            background: #e0e0e0;
+        }
+        .success {
+            display: none;
+            background: #10b981;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🎡</div>
+        <h1>إعادة تعيين عجلة الحظ</h1>
+        <p>لرؤية عجلة الحظ مرة أخرى، اضغط على الزر أدناه لمسح البيانات المحفوظة</p>
+        
+        <div class="button-group">
+            <button class="reset-btn" onclick="resetWheel()">
+                🔄 مسح البيانات وإعادة التعيين
+            </button>
+            <button class="home-btn" onclick="goHome()">
+                🏠 العودة للصفحة الرئيسية
+            </button>
+        </div>
+        
+        <div id="success" class="success">
+            ✅ تم مسح البيانات بنجاح!<br>
+            سيتم توجيهك للصفحة الرئيسية...
+        </div>
+    </div>
+
+    <script>
+        function resetWheel() {
+            // مسح localStorage
+            localStorage.clear();
+            
+            // مسح sessionStorage أيضاً
+            sessionStorage.clear();
+            
+            // إظهار رسالة النجاح
+            document.getElementById('success').style.display = 'block';
+            
+            // التوجيه للصفحة الرئيسية بعد ثانيتين
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        }
+        
+        function goHome() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

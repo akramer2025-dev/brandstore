@@ -47,8 +47,6 @@ export async function POST(request: NextRequest) {
       data: {
         isPaid: true,
         paidAt: new Date(),
-        paymentMethod,
-        paymentReference,
       },
       include: {
         marketingStaff: {
@@ -105,8 +103,6 @@ export async function PUT(request: NextRequest) {
       data: {
         isPaid: true,
         paidAt: new Date(),
-        paymentMethod,
-        paymentReference,
       },
     });
 

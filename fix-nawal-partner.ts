@@ -38,7 +38,7 @@ async function fixNawalPartner() {
     const partner = await prisma.partnerCapital.create({
       data: {
         vendorId: user.vendor.id,
-        partnerName: user.name,
+        partnerName: user.name || 'Nawal',
         partnerType: 'PARTNER',
         capitalAmount: 0,
         initialAmount: 0,

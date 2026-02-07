@@ -24,23 +24,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
           console.log('✅ Assigned CUSTOMER role to new user:', user.email);
         }
-        
-        // إنشاء customer record تلقائياً للمستخدمين الجدد
-        if (user.id) {
-          const hasCustomer = await prisma.customer.findUnique({
-            where: { userId: user.id }
-          });
-          
-          if (!hasCustomer) {
-            await prisma.customer.create({
-              data: {
-                userId: user.id,
-                name: user.name || user.email?.split('@')[0] || 'مستخدم',
-              }
-            });
-            console.log('✅ Created customer record for new user:', user.email);
-          }
-        }
       } catch (error) {
         console.error('❌ Error in createUser event:', error);
       }
@@ -120,21 +103,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 data: { role: "CUSTOMER" }
               });
               console.log('✅ تم تعيين role CUSTOMER للمستخدم:', user.email);
-            }
-            
-            // تأكد من وجود customer record
-            const hasCustomer = await prisma.customer.findUnique({
-              where: { userId: existingUser.id }
-            });
-            
-            if (!hasCustomer) {
-              await prisma.customer.create({
-                data: {
-                  userId: existingUser.id,
-                  name: existingUser.name || user.name || 'مستخدم',
-                }
-              });
-              console.log('✅ تم إنشاء customer record للمستخدم:', user.email);
             }
           } else {
             console.log('🆕 New user from Google, will be created as CUSTOMER by adapter');

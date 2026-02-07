@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎡 افتح هنا للعجلة!</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 30px;
+      padding: 60px 40px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+      animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .spinner {
+      font-size: 100px;
+      animation: spin 3s linear infinite;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    h1 {
+      color: #f5576c;
+      margin-bottom: 20px;
+      font-size: 42px;
+      font-weight: bold;
+    }
+    
+    .warning-box {
+      background: #fff3cd;
+      border: 3px solid #ff6b6b;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 30px 0;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+    
+    .warning-box h2 {
+      color: #ff6b6b;
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+    
+    .warning-box p {
+      color: #856404;
+      font-size: 20px;
+      line-height: 1.6;
+    }
+    
+    .correct-url {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      font-size: 32px;
+      font-weight: bold;
+      margin: 30px 0;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .wrong-urls {
+      background: #ffebee;
+      border: 2px dashed #f44336;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: right;
+    }
+    
+    .wrong-urls h3 {
+      color: #d32f2f;
+      margin-bottom: 15px;
+      font-size: 22px;
+    }
+    
+    .wrong-url {
+      color: #c62828;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      text-decoration: line-through;
+      margin: 8px 0;
+    }
+    
+    .btn-big {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      border: none;
+      padding: 25px 60px;
+      border-radius: 60px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 30px 10px;
+      transition: all 0.3s;
+      box-shadow: 0 10px 40px rgba(245, 87, 108, 0.5);
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-big:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 50px rgba(245, 87, 108, 0.7);
+    }
+    
+    .steps {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 25px 0;
+      text-align: right;
+    }
+    
+    .step {
+      background: white;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 12px;
+      border-right: 5px solid #f5576c;
+      font-size: 20px;
+      line-height: 1.8;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .step strong {
+      color: #f5576c;
+      font-size: 24px;
+    }
+    
+    .countdown {
+      font-size: 80px;
+      font-weight: bold;
+      color: #667eea;
+      margin: 20px 0;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner">🎡</div>
+    <h1>لازم تفتح الصفحة دي!</h1>
+    
+    <div class="warning-box">
+      <h2>⚠️ انتباه مهم!</h2>
+      <p><strong>العجلة تظهر فقط في الصفحة الرئيسية</strong></p>
+      <p>مش في صفحات Admin أو Partners</p>
+    </div>
+
+    <div class="correct-url">
+      ✅ http://localhost:3001
+    </div>
+
+    <div class="wrong-urls">
+      <h3>❌ لا تفتح هذه الصفحات:</h3>
+      <div class="wrong-url">❌ http://localhost:3001/admin/...</div>
+      <div class="wrong-url">❌ http://localhost:3001/partners/...</div>
+      <div class="wrong-url">❌ http://localhost:3001/profile/...</div>
+      <div class="wrong-url">❌ أي صفحة غير الصفحة الرئيسية</div>
+    </div>
+
+    <div class="steps">
+      <h3 style="color: #667eea; margin-bottom: 20px; font-size: 26px;">📋 الخطوات الصحيحة:</h3>
+      
+      <div class="step">
+        <strong>1️⃣</strong> اضغط على الزر الأزرق تحت ⬇️
+      </div>
+      
+      <div class="step">
+        <strong>2️⃣</strong> انتظر ثانيتين فقط ⏱️
+      </div>
+      
+      <div class="step">
+        <strong>3️⃣</strong> العجلة هتظهر في وسط الشاشة! 🎡✨
+      </div>
+    </div>
+
+    <div id="countdown" class="countdown"></div>
+
+    <a href="http://localhost:3001" class="btn-big" onclick="startCountdown()">
+      🚀 افتح الصفحة الرئيسية الآن!
+    </a>
+
+    <div style="margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 12px;">
+      <p style="color: #2e7d32; font-size: 18px; line-height: 1.8;">
+        💡 <strong>نصيحة:</strong> احفظ الصفحة الرئيسية في Bookmarks عشان متتوهش! 😊
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function startCountdown() {
+      const countdownEl = document.getElementById('countdown');
+      countdownEl.style.display = 'block';
+      let count = 2;
+      
+      const interval = setInterval(() => {
+        countdownEl.textContent = count;
+        count--;
+        
+        if (count < 0) {
+          clearInterval(interval);
+          countdownEl.textContent = '🎡';
+        }
+      }, 1000);
+    }
+
+    // Auto-redirect بعد 5 ثواني
+    let autoRedirectCountdown = 10;
+    const autoRedirect = setInterval(() => {
+      autoRedirectCountdown--;
+      
+      if (autoRedirectCountdown === 0) {
+        clearInterval(autoRedirect);
+        console.log('🚀 جاري التحويل للصفحة الرئيسية...');
+        window.location.href = 'http://localhost:3001';
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

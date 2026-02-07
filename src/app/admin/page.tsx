@@ -167,6 +167,13 @@ export default async function AdminDashboard() {
             color="text-pink-600"
           />
           <ActionCard
+            title="✨ مساعد التسويق AI"
+            description="حملات كاملة، نصوص إعلانية، خطط محتوى، وأكثر - كل شيء بالذكاء الاصطناعي!"
+            href="/admin/ai-marketing"
+            icon={<TrendingUp className="w-12 h-12" />}
+            color="text-purple-600"
+          />
+          <ActionCard
             title="إدارة المخزون"
             description="متابعة وتحديث كميات المخزون"
             href="/admin/inventory"

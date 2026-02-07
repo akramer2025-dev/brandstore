@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { TrendingUp, Package } from 'lucide-react';
+import { ChevronLeft, Grid, Package } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -19,62 +19,88 @@ interface CategoriesSectionProps {
 
 export function CategoriesSection({ categories }: CategoriesSectionProps) {
   return (
-    <section className="py-12 bg-gray-900/50">
+    <section className="py-6 md:py-8 bg-gray-900/30 border-b border-gray-800/50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-6 md:mb-8">
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-100">تسوق حسب الفئة</h2>
-          <Link href="/products" className="text-cyan-400 font-semibold hover:text-cyan-300 flex items-center gap-1 md:gap-2 text-sm md:text-base">
-            <span className="hidden sm:inline">عرض الكل</span>
-            <span className="sm:hidden">الكل</span>
-            <TrendingUp className="w-4 h-4 md:w-5 md:h-5" />
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4 md:mb-6">
+          <div className="flex items-center gap-2">
+            <Grid className="w-5 h-5 text-teal-400" />
+            <h2 className="text-lg md:text-xl font-bold text-white">تسوق حسب الفئة</h2>
+          </div>
+          <Link 
+            href="/products" 
+            className="text-teal-400 font-medium hover:text-teal-300 flex items-center gap-1 text-sm transition-colors"
+          >
+            <span>عرض الكل</span>
+            <ChevronLeft className="w-4 h-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-          {categories.map((category, index) => {
-            const productCount = category._count?.products || 0;
-            return (
-              <Link 
-                key={category.id} 
-                href={`/products?category=${category.id}`}
-                className="group"
-              >
-                <div className="bg-gradient-to-br from-gray-800/50 to-orange-900/20 rounded-xl md:rounded-2xl p-3 md:p-4 text-center hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:-translate-y-2 border-2 border-orange-500/50 animate-border-glow backdrop-blur-sm overflow-hidden relative">
-                  {/* Badge للفئات الأكثر منتجات */}
-                  {index === 0 && productCount > 0 && (
-                    <div className="absolute top-2 right-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold z-10">
-                      الأكثر
+        {/* Horizontal Scrollable Categories */}
+        <div className="relative">
+          {/* Scroll Container */}
+          <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {categories.map((category, index) => {
+              const productCount = category._count?.products || 0;
+              return (
+                <Link 
+                  key={category.id} 
+                  href={`/products?category=${category.id}`}
+                  className="group flex-shrink-0 snap-start"
+                >
+                  <div className="w-20 md:w-24 lg:w-28">
+                    {/* Category Image */}
+                    <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 mb-2 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-800/80 to-teal-900/30 border-2 border-gray-700/50 group-hover:border-teal-500/50 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-teal-500/20">
+                      {/* Badge */}
+                      {index === 0 && productCount > 0 && (
+                        <div className="absolute top-1 right-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-2 py-0.5 rounded-full text-[9px] font-bold z-10">
+                          🔥
+                        </div>
+                      )}
+                      <Image
+                        src={category.image || '/placeholder-category.png'}
+                        alt={category.nameAr}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-300"
+                        sizes="(max-width: 768px) 80px, (max-width: 1024px) 96px, 112px"
+                      />
                     </div>
-                  )}
-                  <div className="relative w-full aspect-square mb-3 rounded-xl overflow-hidden group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg">
-                    <Image
-                      src={category.image || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400'}
-                      alt={category.nameAr}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-                      className="object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
-                    {/* عدد المنتجات */}
+                    
+                    {/* Category Name */}
+                    <h3 className="text-white font-bold text-xs md:text-sm text-center mb-1 line-clamp-2 group-hover:text-teal-400 transition-colors">
+                      {category.nameAr}
+                    </h3>
+                    
+                    {/* Product Count */}
                     {productCount > 0 && (
-                      <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1">
-                        <Package className="w-3 h-3" />
-                        {productCount}
-                      </div>
+                      <p className="text-gray-400 text-[10px] md:text-xs text-center">
+                        {productCount} منتج
+                      </p>
                     )}
                   </div>
-                  <h3 className="font-bold text-sm md:text-base text-gray-200 group-hover:text-cyan-400 transition-colors">
-                    {category.nameAr}
-                  </h3>
-                </div>
-              </Link>
-            );
-          })}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Scroll Indicator */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-full bg-gradient-to-l from-transparent to-gray-900/50 pointer-events-none md:hidden"></div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-full bg-gradient-to-r from-transparent to-gray-900/50 pointer-events-none md:hidden"></div>
+        </div>
+
+        {/* Scroll Hint */}
+        <div className="text-center mt-3">
+          <p className="text-gray-500 text-xs">
+            ← اسحب لرؤية المزيد →
+          </p>
         </div>
       </div>
+
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 }

@@ -77,10 +77,11 @@ export async function calculateCommissionsForOrder(orderId: string) {
           marketingStaffId: marketingStaff.id,
           productId: product.id,
           orderId: order.id,
+          orderItemId: item.id,
+          productName: product.nameAr,
           saleAmount,
           commissionRate: marketingStaff.commissionRate,
           commissionAmount,
-          quantity: item.quantity,
         },
       });
 

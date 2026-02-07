@@ -79,16 +79,29 @@ export async function POST(request: Request) {
     }
 
     // Check if user has purchased this product
+    // أولاً: نجد الطلبات الموصلة للمستخدم
+    const deliveredOrders = await prisma.order.findMany({
+      where: {
+        customerId: session.user.id,
+        status: "DELIVERED",
+      },
+      select: { id: true },
+    });
+
+    if (deliveredOrders.length === 0) {
+      return NextResponse.json(
+        { error: "لا توجد لديك طلبات مكتملة" },
+        { status: 400 }
+      );
+    }
+
+    const orderIds = deliveredOrders.map(o => o.id);
+
+    // ثانياً: نتحقق من وجود المنتج في هذه الطلبات
     const hasPurchased = await prisma.orderItem.findFirst({
       where: {
         productId,
-        order: {
-          userId: session.user.id,
-          status: "DELIVERED", // Only allow review if order was delivered
-        },
-      },
-      include: {
-        order: true,
+        orderId: { in: orderIds },
       },
     });
 
@@ -110,7 +123,7 @@ export async function POST(request: Request) {
       data: {
         productId,
         userId: session.user.id,
-        orderId: hasPurchased.order.id,
+        orderId: hasPurchased.orderId,
         rating,
         comment: comment || '',
         images: images || '',
@@ -143,7 +156,7 @@ export async function POST(request: Request) {
         userId: session.user.id,
         points: pointsToAward,
         type: 'EARNED',
-        orderId: hasPurchased.order.id,
+        orderId: hasPurchased.orderId,
         description: `تقييم منتج ${hasImages ? 'مع صورة 📸' : ''} - ${pointsToAward} نقطة`,
       },
     });

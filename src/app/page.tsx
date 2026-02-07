@@ -5,6 +5,9 @@ import { ProductsSlider } from '@/components/ProductsSlider';
 import { HeroSlider } from '@/components/HeroSlider';
 import { CategoriesSection } from '@/components/CategoriesSection';
 import { LogoBanner } from '@/components/LogoBanner';
+import { BestSellersSection } from '@/components/BestSellersSection';
+import { TestimonialsSection } from '@/components/TestimonialsSection';
+import { FeaturesSection } from '@/components/FeaturesSection';
 import ChatButton from '@/components/ChatButton';
 import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
@@ -13,8 +16,21 @@ import SpinWheel from '@/components/SpinWheel';
 import PendingPrizeHandler from '@/components/PendingPrizeHandler';
 import Link from 'next/link';
 import { Sparkles, ShoppingBag, TrendingUp, Award, Shield, Truck, Star } from 'lucide-react';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'ريمو ستور - تسوق أونلاين | أفضل الأسعار والعروض',
+  description: 'تسوق أحدث المنتجات بأفضل الأسعار في ريمو ستور. شحن سريع لجميع المحافظات، دفع آمن، ضمان جودة 100%. منتجات أصلية وعروض حصرية يومية.',
+  keywords: 'تسوق أونلاين، ريمو ستور، متجر إلكتروني، شراء أونلاين مصر، أفضل الأسعار، شحن سريع، منتجات أصلية، عروض وخصومات',
+  openGraph: {
+    title: 'ريمو ستور - تسوق أونلاين | أفضل الأسعار والعروض',
+    description: 'تسوق أحدث المنتجات بأفضل الأسعار. شحن سريع، دفع آمن، ضمان جودة.',
+    type: 'website',
+    locale: 'ar_EG',
+  },
+};
 
 async function getProducts() {
   try {
@@ -54,15 +70,75 @@ async function getCategories() {
   }
 }
 
+async function getBestSellingProducts() {
+  try {
+    // جلب المنتجات الأكثر مبيعاً من OrderItem
+    const topProducts = await prisma.orderItem.groupBy({
+      by: ['productId'],
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: 8,
+    });
+
+    // جلب تفاصيل المنتجات
+    const productIds = topProducts.map(item => item.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      include: {
+        category: true,
+        reviews: { select: { rating: true } },
+      },
+    });
+
+    // إضافة عدد المبيعات لكل منتج
+    const productsWithSales = products.map(product => {
+      const sales = topProducts.find(item => item.productId === product.id);
+      return {
+        ...product,
+        soldCount: sales?._sum.quantity || 0,
+      };
+    });
+
+    // ترتيب حسب المبيعات
+    return productsWithSales.sort((a, b) => b.soldCount - a.soldCount);
+  } catch (error) {
+    console.error('Error fetching best selling products:', error);
+    return [];
+  }
+}
+
+async function getTopReviews() {
+  try {
+    // جلب أفضل التقييمات (5 نجوم فقط)
+    return await prisma.review.findMany({
+      where: {
+        rating: { gte: 4 },
+        isApproved: true,
+      },
+      include: {
+        user: { select: { name: true, image: true } },
+        product: { select: { nameAr: true, name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+    });
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return [];
+  }
+}
+
 
 export default async function HomePage() {
   // السماح لجميع المستخدمين برؤية الصفحة الرئيسية
   // لن يتم redirect تلقائي لأي مستخدم
   
   try {
-    const [products, categories] = await Promise.all([
+    const [products, categories, bestSellers, topReviews] = await Promise.all([
       getProducts(),
       getCategories(),
+      getBestSellingProducts(),
+      getTopReviews(),
     ]);
 
     return (
@@ -83,8 +159,10 @@ export default async function HomePage() {
       {/* Hero Slider with Integrated Logo - Full Width */}
       <HeroSlider />
 
-      {/* Flash Deals Section */}
-      <FlashDeals />
+      {/* Categories Section - تسوق حسب الفئة (أفقي مثل نون وشي إن) */}
+      {categories.length > 0 && (
+        <CategoriesSection categories={categories} />
+      )}
 
       {/* Products Section - أحدث المنتجات أولاً */}
       <section className="py-10 md:py-16 bg-gradient-to-b from-gray-900/50 via-gray-900/80 to-gray-900/50">
@@ -142,10 +220,34 @@ export default async function HomePage() {
       </section>
 
 
-      {/* Categories Section */}
+      {/* Flash Deals Section */}
+      <FlashDeals />
+
+      {/* Best Sellers Section */}
+      {bestSellers.length > 0 && (
+        <BestSellersSection products={bestSellers} />
+      )}
+
+      {/* Features Section */}
+      <FeaturesSection />
+
+      {/* Testimonials Section */}
+      {topReviews.length > 0 && (
+        <TestimonialsSection reviews={topReviews.map(review => ({
+          ...review,
+          comment: review.comment || 'تجربة رائعة!',
+          createdAt: review.createdAt.toISOString(),
+          user: {
+            name: review.user.name || 'عميل',
+            image: review.user.image || null
+          },
+          product: { nameAr: review.product.nameAr || review.product.name }
+        }))} />
+      )}
+
+      {/* Trust Badges */}
       {categories.length > 0 && (
         <>
-          <CategoriesSection categories={categories} />
           {/* Trust Badges تحت الفئات */}
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 my-8 py-4 px-4 bg-gray-800/30 rounded-2xl border border-gray-700/50">
             <div className="flex items-center gap-2 text-gray-300">
