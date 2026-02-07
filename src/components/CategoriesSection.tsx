@@ -95,12 +95,6 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
           </p>
         </div>
       </div>
-
-      <style jsx global>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </section>
   );
 }

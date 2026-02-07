@@ -166,7 +166,7 @@ function FlashDealCard({ product }: { product: FlashDeal }) {
             {product.soldCount > 0 && (
               <div className="flex items-center gap-1 text-teal-400">
                 <TrendingUp className="w-4 h-4" />
-                <span className="text-xs">{product.soldCount.toLocaleString()}+ مبيعات</span>
+                <span className="text-xs">{product.soldCount.toLocaleString('en-US')}+ مبيعات</span>
               </div>
             )}
           </div>
@@ -175,12 +175,12 @@ function FlashDealCard({ product }: { product: FlashDeal }) {
           <div className="space-y-1">
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold text-yellow-400">
-                {product.price.toLocaleString()} جنيه
+                {product.price.toLocaleString('en-US')} جنيه
               </span>
             </div>
             {product.originalPrice && (
               <div className="text-gray-500 line-through text-sm">
-                السعر الأصلي {product.originalPrice.toLocaleString()} جنيه
+                السعر الأصلي {product.originalPrice.toLocaleString('en-US')} جنيه
               </div>
             )}
           </div>

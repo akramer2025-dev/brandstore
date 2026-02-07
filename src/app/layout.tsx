@@ -61,7 +61,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Remostore" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={`${cairo.variable} font-sans antialiased`}>
+      <body className={`${cairo.variable} font-sans antialiased`} suppressHydrationWarning>
         <StarryBackground />
         <Providers>
           <ServiceWorkerRegistration />
