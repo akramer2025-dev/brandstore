@@ -26,21 +26,21 @@ export default function LoginPage() {
     if (status === 'authenticated' && session?.user) {
       console.log('✅ User is already logged in, redirecting based on role:', session.user.role);
       
-      // التوجيه حسب نوع المستخدم
+      // التوجيه حسب نوع المستخدم (باستخدام replace بدلاً من push لضمان التوجيه)
       if (session.user.role === 'ADMIN') {
-        router.push('/admin');
+        router.replace('/admin');
       } else if (session.user.role === 'VENDOR') {
-        router.push('/vendor/dashboard');
+        router.replace('/vendor/dashboard');
       } else if (session.user.role === 'MANUFACTURER') {
-        router.push('/manufacturer/dashboard');
+        router.replace('/manufacturer/dashboard');
       } else if (session.user.role === 'DELIVERY_STAFF') {
-        router.push('/delivery-dashboard');
+        router.replace('/delivery-dashboard');
       } else if (session.user.role === 'MARKETING_STAFF') {
-        router.push('/marketing/dashboard');
+        router.replace('/marketing/dashboard');
       } else if (session.user.role === 'CUSTOMER') {
-        router.push('/');
+        router.replace('/');
       } else {
-        router.push('/');
+        router.replace('/');
       }
     }
   }, [status, session, router]);
@@ -80,21 +80,20 @@ export default function LoginPage() {
         const sessionResponse = await fetch('/api/auth/session');
         const sessionData = await sessionResponse.json();
         
-        // التوجيه حسب نوع المستخدم
+        // التوجيه حسب نوع المستخدم (باستخدام replace لضمان التوجيه السريع)
         if (sessionData?.user?.role === 'ADMIN') {
-          router.push('/admin');
+          router.replace('/admin');
         } else if (sessionData?.user?.role === 'VENDOR') {
-          router.push('/vendor/dashboard');
+          router.replace('/vendor/dashboard');
         } else if (sessionData?.user?.role === 'MANUFACTURER') {
-          router.push('/manufacturer/dashboard');
+          router.replace('/manufacturer/dashboard');
         } else if (sessionData?.user?.role === 'DELIVERY_STAFF') {
-          router.push('/delivery-dashboard');
+          router.replace('/delivery-dashboard');
         } else if (sessionData?.user?.role === 'CUSTOMER') {
-          router.push('/customer');
+          router.replace('/customer');
         } else {
-          router.push('/');
+          router.replace('/');
         }
-        router.refresh();
       }
     } catch (error) {
       setError('حدث خطأ أثناء تسجيل الدخول');

@@ -60,8 +60,8 @@ export default function RegisterPage() {
         return;
       }
 
-      // Redirect to login
-      router.push('/auth/login?registered=true');
+      // Redirect to login (باستخدام replace لضمان التوجيه السريع)
+      router.replace('/auth/login?registered=true');
     } catch (error) {
       setError('حدث خطأ أثناء إنشاء الحساب');
     } finally {
