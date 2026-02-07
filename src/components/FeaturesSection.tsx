@@ -72,7 +72,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-12 md:py-20 bg-gradient-to-b from-gray-900/50 via-gray-900/80 to-gray-900/50 relative overflow-hidden">
+    <section className="py-6 md:py-10 bg-gradient-to-b from-gray-900/50 via-gray-900/80 to-gray-900/50 relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl"></div>

@@ -28,7 +28,7 @@ export function TestimonialsSection({ reviews }: TestimonialsSectionProps) {
   }
 
   return (
-    <section className="py-12 md:py-20 bg-gradient-to-b from-gray-900/50 via-purple-900/10 to-gray-900/50 relative overflow-hidden">
+    <section className="py-6 md:py-10 bg-gradient-to-b from-gray-900/50 via-purple-900/10 to-gray-900/50 relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent"></div>
       

@@ -31,7 +31,7 @@ export function BestSellersSection({ products }: BestSellersSectionProps) {
   }
 
   return (
-    <section className="py-12 md:py-20 bg-gradient-to-b from-gray-900/80 via-orange-900/10 to-gray-900/80 relative overflow-hidden">
+    <section className="py-6 md:py-10 bg-gradient-to-b from-gray-900/80 via-orange-900/10 to-gray-900/80 relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-orange-900/20 via-transparent to-transparent"></div>
       <div className="absolute top-10 left-10 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>

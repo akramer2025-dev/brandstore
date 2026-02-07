@@ -19,10 +19,10 @@ interface CategoriesSectionProps {
 
 export function CategoriesSection({ categories }: CategoriesSectionProps) {
   return (
-    <section className="py-6 md:py-8 bg-gray-900/30 border-b border-gray-800/50">
+    <section className="py-4 md:py-5 bg-gray-900/30 border-b border-gray-800/50">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4 md:mb-6">
+        <div className="flex items-center justify-between mb-3 md:mb-4">
           <div className="flex items-center gap-2">
             <Grid className="w-5 h-5 text-teal-400" />
             <h2 className="text-lg md:text-xl font-bold text-white">تسوق حسب الفئة</h2>
