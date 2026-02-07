@@ -25,16 +25,20 @@ export default function SpinWheel() {
   const [hasSpun, setHasSpun] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
+  const [usedPrizes, setUsedPrizes] = useState<number[]>([]);
   const wheelRef = useRef<HTMLDivElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const oscillatorRef = useRef<OscillatorNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const { data: session } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    // التحقق من الزيارة الأولى
+    // التحقق من الزيارة الأولى وأن المستخدم لم يحصل على جائزة من قبل
     const hasVisited = localStorage.getItem('hasVisitedBefore');
+    const hasClaimed = localStorage.getItem('prizeClaimed');
     
-    if (!hasVisited) {
-      // تأخير بسيط قبل إظهار العجلة
+    if (!hasVisited && !hasClaimed) {
       const timer = setTimeout(() => {
         setIsOpen(true);
       }, 2000);
@@ -43,100 +47,131 @@ export default function SpinWheel() {
     }
   }, []);
 
+  useEffect(() => {
+    // تحميل الجوائز المستخدمة من localStorage
+    const stored = localStorage.getItem('usedPrizeIds');
+    if (stored) {
+      setUsedPrizes(JSON.parse(stored));
+    }
+  }, []);
+
   const spinWheel = () => {
     if (isSpinning || hasSpun) return;
 
     setIsSpinning(true);
     
-    // تشغيل صوت الدوران باستخدام Web Audio API
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    // إنشاء Audio Context للصوت
+    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = audioContextRef.current;
+    
+    // إنشاء مذبذب الصوت
+    oscillatorRef.current = audioContext.createOscillator();
+    gainNodeRef.current = audioContext.createGain();
+    
+    const oscillator = oscillatorRef.current;
+    const gainNode = gainNodeRef.current;
     
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    oscillator.frequency.value = 200;
-    oscillator.type = 'sine';
-    gainNode.gain.value = 0.1;
+    oscillator.type = 'triangle';
+    gainNode.gain.value = 0.08;
     
     try {
       oscillator.start();
-      // إيقاف الصوت بعد 4.5 ثواني
-      setTimeout(() => {
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        oscillator.stop(audioContext.currentTime + 0.5);
-      }, 4500);
+      
+      // تغيير التردد بناءً على الوقت (يبطأ تدريجياً مع العجلة)
+      const startFreq = 800;
+      const endFreq = 200;
+      const duration = 5;
+      
+      // التغيير التدريجي للتردد ليتماشى مع تباطؤ العجلة
+      oscillator.frequency.setValueAtTime(startFreq, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(endFreq, audioContext.currentTime + duration);
+      
+      // تلاشي الصوت في النهاية
+      gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      
+      // إيقاف الصوت
+      oscillator.stop(audioContext.currentTime + duration);
     } catch (e) {
       console.log('Sound not available');
     }
     
-    // اختيار جائزة عشوائية
-    const randomIndex = Math.floor(Math.random() * prizes.length);
-    const prize = prizes[randomIndex];
+    // اختيار جائزة مختلفة عن السابقة
+    let availablePrizes = prizes.filter(p => !usedPrizes.includes(p.id));
+    
+    // إذا تم استخدام كل الجوائز، أعد التعيين
+    if (availablePrizes.length === 0) {
+      availablePrizes = prizes;
+      setUsedPrizes([]);
+      localStorage.removeItem('usedPrizeIds');
+    }
+    
+    const randomIndex = Math.floor(Math.random() * availablePrizes.length);
+    const selectedPrize = availablePrizes[randomIndex];
+    const prizeIndex = prizes.findIndex(p => p.id === selectedPrize.id);
     
     // حساب زاوية الدوران بدقة
-    const segmentAngle = 360 / prizes.length; // 45 درجة لكل قطعة
-    const spins = 5; // عدد اللفات الكاملة
-    
-    // حساب الزاوية المستهدفة بحيث يكون السهم في منتصف القطعة المختارة
-    // السهم في الأعلى (0 درجة)، نريد أن تكون القطعة المختارة في الأعلى
-    const targetAngle = (360 * spins) + (360 - (randomIndex * segmentAngle) - (segmentAngle / 2));
+    const segmentAngle = 360 / prizes.length;
+    const spins = 5;
+    const targetAngle = (360 * spins) + (360 - (prizeIndex * segmentAngle) - (segmentAngle / 2));
     
     setRotation(targetAngle);
+    
+    // حفظ الجائزة المستخدمة
+    const newUsedPrizes = [...usedPrizes, selectedPrize.id];
+    setUsedPrizes(newUsedPrizes);
+    localStorage.setItem('usedPrizeIds', JSON.stringify(newUsedPrizes));
     
     // بعد انتهاء الدوران
     setTimeout(() => {
       setIsSpinning(false);
-      setSelectedPrize(prize);
+      setSelectedPrize(selectedPrize);
       setHasSpun(true);
       
-      // صوت الفوز
+      // صوت الفوز (نغمة واحدة قصيرة وواضحة)
       try {
-        const winOscillator = audioContext.createOscillator();
-        const winGain = audioContext.createGain();
+        const winContext = new AudioContext();
+        const winOscillator = winContext.createOscillator();
+        const winGain = winContext.createGain();
         
         winOscillator.connect(winGain);
-        winGain.connect(audioContext.destination);
+        winGain.connect(winContext.destination);
         
-        winOscillator.frequency.value = 800;
+        winOscillator.frequency.value = 1200;
         winOscillator.type = 'sine';
-        winGain.gain.value = 0.15;
+        winGain.gain.value = 0.2;
         
         winOscillator.start();
-        winOscillator.stop(audioContext.currentTime + 0.3);
-        
-        // نغمة ثانية
-        setTimeout(() => {
-          const win2 = audioContext.createOscillator();
-          const gain2 = audioContext.createGain();
-          win2.connect(gain2);
-          gain2.connect(audioContext.destination);
-          win2.frequency.value = 1000;
-          win2.type = 'sine';
-          gain2.gain.value = 0.15;
-          win2.start();
-          win2.stop(audioContext.currentTime + 0.3);
-        }, 300);
+        winGain.gain.exponentialRampToValueAtTime(0.01, winContext.currentTime + 0.5);
+        winOscillator.stop(winContext.currentTime + 0.5);
       } catch (e) {
         console.log('Win sound not available');
       }
       
-      // حفظ الجائزة في localStorage
-      localStorage.setItem('userPrize', JSON.stringify(prize));
-    }, 5000); // 5 ثوانٍ للدوران
+      localStorage.setItem('userPrize', JSON.stringify(selectedPrize));
+    }, 5000);
   };
 
   const handleClose = () => {
     setIsOpen(false);
-    // تسجيل أن المستخدم زار الموقع
+    // تسجيل فقط أن المستخدم زار (لكن ليس أنه حصل على جائزة)
     localStorage.setItem('hasVisitedBefore', 'true');
+    
+    // إيقاف الصوت إذا كان يعمل
+    if (oscillatorRef.current && audioContextRef.current) {
+      try {
+        oscillatorRef.current.stop();
+        audioContextRef.current.close();
+      } catch (e) {}
+    }
   };
 
   const handleClaim = async () => {
     // التحقق من تسجيل الدخول
     if (!session?.user) {
-      // توجيه للتسجيل
       localStorage.setItem('pendingPrize', JSON.stringify(selectedPrize));
       router.push('/auth/signin?callbackUrl=/');
       return;
@@ -160,19 +195,23 @@ export default function SpinWheel() {
 
       if (response.ok) {
         setClaimSuccess(true);
-        localStorage.setItem('hasVisitedBefore', 'true');
         
-        // انتظار ثانيتين ثم إغلاق
+        // تسجيل أن المستخدم حصل على الجائزة وعدم إظهار العجلة مرة أخرى
+        localStorage.setItem('hasVisitedBefore', 'true');
+        localStorage.setItem('prizeClaimed', 'true');
+        localStorage.setItem('prizeClaimedDate', new Date().toISOString());
+        
+        // انتظار 3 ثوانٍ ثم إغلاق
         setTimeout(() => {
           setIsOpen(false);
         }, 3000);
       } else {
         alert('حدث خطأ في حفظ الخصم. حاول مرة أخرى.');
+        setIsClaiming(false);
       }
     } catch (error) {
       console.error('Error claiming prize:', error);
       alert('حدث خطأ في حفظ الخصم. حاول مرة أخرى.');
-    } finally {
       setIsClaiming(false);
     }
   };
