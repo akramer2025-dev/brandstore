@@ -30,6 +30,12 @@ export async function GET(
             },
           },
         },
+        transactions: {
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 50
+        }
       },
     });
 
@@ -40,12 +46,76 @@ export async function GET(
       );
     }
 
+    // جلب المنتجات
+    const products = await prisma.product.findMany({
+      where: {
+        vendorId: partner.vendorId
+      },
+      select: {
+        id: true,
+        name: true,
+        nameAr: true,
+        price: true,
+        stock: true,
+        sold: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    // حساب إحصائيات الطلبات
+    const orderStats = await prisma.order.aggregate({
+      where: {
+        vendorId: partner.vendorId,
+        status: {
+          in: ['DELIVERED', 'SHIPPED']
+        }
+      },
+      _sum: {
+        total: true
+      },
+      _count: true
+    });
+
+    // جلب آخر الطلبات
+    const recentOrders = await prisma.order.findMany({
+      where: {
+        vendorId: partner.vendorId
+      },
+      select: {
+        id: true,
+        orderNumber: true,
+        total: true,
+        status: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 10
+    });
+
+    const totalRevenue = orderStats._sum.total || 0;
+    const totalOrders = orderStats._count || 0;
+    const totalProfit = totalRevenue * (partner.capitalPercent / 100);
+
     return NextResponse.json({
       ...partner,
       email: partner.vendor?.user?.email || '',
       hasAccount: !!partner.vendor?.user,
       userId: partner.vendor?.user?.id,
       canDeleteOrders: partner.vendor?.canDeleteOrders || false,
+      // إحصائيات
+      totalProducts: products.length,
+      totalOrders,
+      totalRevenue,
+      totalProfit,
+      // البيانات التفصيلية
+      transactions: partner.transactions,
+      products,
+      recentOrders
     });
   } catch (error) {
     console.error('Error fetching partner:', error);

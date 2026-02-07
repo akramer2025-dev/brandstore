@@ -13,18 +13,43 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
+  userId: string | null;
   addItem: (item: Omit<CartItem, 'quantity'>) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  setUserId: (userId: string | null) => void;
+  initializeCart: (userId: string | null) => void;
 }
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      userId: null,
+      
+      setUserId: (userId) => {
+        const currentUserId = get().userId;
+        
+        // إذا تغير المستخدم، امسح السلة القديمة
+        if (currentUserId !== userId) {
+          set({ userId, items: [] });
+        }
+      },
+      
+      initializeCart: (userId) => {
+        const currentUserId = get().userId;
+        
+        // إذا كان المستخدم مختلف عن المحفوظ، امسح السلة
+        if (currentUserId !== userId) {
+          set({ userId, items: [] });
+        } else if (!currentUserId && userId) {
+          // إذا كان المستخدم سجل دخول لأول مرة
+          set({ userId });
+        }
+      },
       
       addItem: (item) => {
         const items = get().items;

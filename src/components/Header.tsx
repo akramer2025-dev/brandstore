@@ -30,6 +30,7 @@ export function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const totalItems = useCartStore((state) => state.getTotalItems());
+  const { clearCart, setUserId } = useCartStore();
   const { items: wishlistItems, notifications, fetchWishlist, fetchNotifications } = useWishlist();
   const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,6 +44,13 @@ export function Header() {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [isNotificationSupported, setIsNotificationSupported] = useState(false);
   const [isNotificationSubscribed, setIsNotificationSubscribed] = useState(false);
+  
+  const handleLogout = async () => {
+    // مسح السلة عند تسجيل الخروج
+    clearCart();
+    setUserId(null);
+    await signOut();
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -476,7 +484,7 @@ export function Header() {
                   )}
                   <DropdownMenuSeparator className="bg-teal-500/20" />
                   <DropdownMenuItem
-                    onClick={() => signOut()}
+                    onClick={handleLogout}
                     className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-900/20"
                   >
                     <LogOut className="w-4 h-4 mr-2" />

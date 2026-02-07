@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -29,6 +30,8 @@ import {
   CheckCircle,
   XCircle,
   Trash2,
+  Eye,
+  Edit,
 } from 'lucide-react'
 
 interface Partner {
@@ -559,8 +562,7 @@ export default function AdminPartnersPage() {
             partners.map((partner) => (
               <Card
                 key={partner.id}
-                className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 transition-all duration-300 cursor-pointer"
-                onClick={() => openEditDialog(partner)}
+                className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 transition-all duration-300"
               >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -626,7 +628,26 @@ export default function AdminPartnersPage() {
                       )}
                     </div>
 
-                    <div className="flex flex-col gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex flex-col gap-2 ml-4">
+                      <Link href={`/admin/partners/${partner.id}`}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20 w-full"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          التفاصيل
+                        </Button>
+                      </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openEditDialog(partner)}
+                        className="bg-blue-500/10 border-blue-500/30 text-blue-300 hover:bg-blue-500/20"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        تعديل
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
