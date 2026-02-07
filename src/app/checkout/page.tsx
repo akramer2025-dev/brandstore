@@ -69,6 +69,16 @@ export default function CheckoutPage() {
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [downPaymentPercent, setDownPaymentPercent] = useState(30); // Default 30%
   
+  // Checkout settings (enabled/disabled features)
+  const [checkoutSettings, setCheckoutSettings] = useState({
+    deliveryMethodHomeDelivery: true,
+    deliveryMethodStorePickup: true,
+    paymentMethodCashOnDelivery: true,
+    paymentMethodBankTransfer: true,
+    paymentMethodEWallet: true,
+    paymentMethodInstallment: true,
+  });
+  
   // Bank Transfer Receipt states
   const [bankTransferReceipt, setBankTransferReceipt] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
@@ -180,15 +190,29 @@ export default function CheckoutPage() {
 
   const fetchSystemSettings = async () => {
     try {
-      const response = await fetch('/api/settings?keys=min_down_payment_percent,store_pickup_locations,allow_store_pickup');
+      const keys = [
+        'min_down_payment_percent',
+        'store_pickup_locations',
+        'allow_store_pickup',
+        'delivery_method_home_delivery',
+        'delivery_method_store_pickup',
+        'payment_method_cash_on_delivery',
+        'payment_method_bank_transfer',
+        'payment_method_e_wallet',
+        'payment_method_installment',
+      ];
+      
+      const response = await fetch(`/api/settings?keys=${keys.join(',')}`);
       if (response.ok) {
         const settings = await response.json();
         
+        // Load min down payment
         const minDownPayment = settings.find((s: any) => s.key === 'min_down_payment_percent');
         if (minDownPayment) {
           setDownPaymentPercent(parseInt(minDownPayment.value));
         }
         
+        // Load pickup locations
         const pickupLocs = settings.find((s: any) => s.key === 'store_pickup_locations');
         if (pickupLocs) {
           try {
@@ -200,6 +224,33 @@ export default function CheckoutPage() {
           } catch (e) {
             console.error('Error parsing pickup locations:', e);
           }
+        }
+        
+        // Load checkout settings
+        const checkoutSettingsData = {
+          deliveryMethodHomeDelivery: settings.find((s: any) => s.key === 'delivery_method_home_delivery')?.value !== 'false',
+          deliveryMethodStorePickup: settings.find((s: any) => s.key === 'delivery_method_store_pickup')?.value !== 'false',
+          paymentMethodCashOnDelivery: settings.find((s: any) => s.key === 'payment_method_cash_on_delivery')?.value !== 'false',
+          paymentMethodBankTransfer: settings.find((s: any) => s.key === 'payment_method_bank_transfer')?.value !== 'false',
+          paymentMethodEWallet: settings.find((s: any) => s.key === 'payment_method_e_wallet')?.value !== 'false',
+          paymentMethodInstallment: settings.find((s: any) => s.key === 'payment_method_installment')?.value !== 'false',
+        };
+        setCheckoutSettings(checkoutSettingsData);
+        
+        // Set default delivery method based on enabled settings
+        if (!checkoutSettingsData.deliveryMethodHomeDelivery && checkoutSettingsData.deliveryMethodStorePickup) {
+          setDeliveryMethod('STORE_PICKUP');
+        } else if (checkoutSettingsData.deliveryMethodHomeDelivery) {
+          setDeliveryMethod('HOME_DELIVERY');
+        }
+        
+        // Set default payment method based on enabled settings
+        if (!checkoutSettingsData.paymentMethodCashOnDelivery && checkoutSettingsData.paymentMethodBankTransfer) {
+          setPaymentMethod('BANK_TRANSFER');
+        } else if (!checkoutSettingsData.paymentMethodCashOnDelivery && !checkoutSettingsData.paymentMethodBankTransfer && checkoutSettingsData.paymentMethodEWallet) {
+          setPaymentMethod('E_WALLET_TRANSFER');
+        } else if (!checkoutSettingsData.paymentMethodCashOnDelivery && !checkoutSettingsData.paymentMethodBankTransfer && !checkoutSettingsData.paymentMethodEWallet && checkoutSettingsData.paymentMethodInstallment) {
+          setPaymentMethod('INSTALLMENT_4');
         }
       }
     } catch (error) {
@@ -557,44 +608,47 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                   {/* Home Delivery */}
-                  <div
-                    onClick={() => setDeliveryMethod('HOME_DELIVERY')}
-                    className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
-                      deliveryMethod === 'HOME_DELIVERY'
-                        ? 'border-teal-500 bg-teal-900/30'
-                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  {checkoutSettings.deliveryMethodHomeDelivery && (
+                    <div
+                      onClick={() => setDeliveryMethod('HOME_DELIVERY')}
+                      className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
                         deliveryMethod === 'HOME_DELIVERY'
-                          ? 'border-teal-500 bg-teal-500'
-                          : 'border-gray-500'
-                      }`}>
-                        {deliveryMethod === 'HOME_DELIVERY' && (
-                          <CheckCircle2 className="w-4 h-4 text-white" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1 sm:mb-2">
-                          <Home className="w-4 h-4 sm:w-5 sm:h-5 text-teal-400" />
-                          <h3 className="text-base sm:text-lg font-bold text-white">
-                            التوصيل للمنزل
-                          </h3>
+                          ? 'border-teal-500 bg-teal-900/30'
+                          : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          deliveryMethod === 'HOME_DELIVERY'
+                            ? 'border-teal-500 bg-teal-500'
+                            : 'border-gray-500'
+                        }`}>
+                          {deliveryMethod === 'HOME_DELIVERY' && (
+                            <CheckCircle2 className="w-4 h-4 text-white" />
+                          )}
                         </div>
-                        <p className="text-gray-300 text-xs sm:text-sm mb-2">
-                          سيتم توصيل طلبك إلى عنوانك
-                        </p>
-                        <div className="flex items-center gap-2 text-xs text-teal-400">
-                          <CheckCircle2 className="w-3 h-3" />
-                          رسوم توصيل حسب المحافظة
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                            <Home className="w-4 h-4 sm:w-5 sm:h-5 text-teal-400" />
+                            <h3 className="text-base sm:text-lg font-bold text-white">
+                              التوصيل للمنزل
+                            </h3>
+                          </div>
+                          <p className="text-gray-300 text-xs sm:text-sm mb-2">
+                            سيتم توصيل طلبك إلى عنوانك
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-teal-400">
+                            <CheckCircle2 className="w-3 h-3" />
+                            رسوم توصيل حسب المحافظة
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Store Pickup */}
-                  <div
+                  {checkoutSettings.deliveryMethodStorePickup && (
+                    <div
                     onClick={() => setDeliveryMethod('STORE_PICKUP')}
                     className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
                       deliveryMethod === 'STORE_PICKUP'
@@ -669,6 +723,7 @@ export default function CheckoutPage() {
                       </div>
                     )}
                   </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -778,21 +833,22 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                   {/* Cash on Delivery */}
-                  <div
-                    onClick={() => setPaymentMethod('CASH_ON_DELIVERY')}
-                    className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
-                      paymentMethod === 'CASH_ON_DELIVERY'
-                        ? 'border-teal-500 bg-teal-900/30'
-                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  {checkoutSettings.paymentMethodCashOnDelivery && (
+                    <div
+                      onClick={() => setPaymentMethod('CASH_ON_DELIVERY')}
+                      className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
                         paymentMethod === 'CASH_ON_DELIVERY'
-                          ? 'border-teal-500 bg-teal-500'
-                          : 'border-gray-500'
-                      }`}>
-                        {paymentMethod === 'CASH_ON_DELIVERY' && (
+                          ? 'border-teal-500 bg-teal-900/30'
+                          : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          paymentMethod === 'CASH_ON_DELIVERY'
+                            ? 'border-teal-500 bg-teal-500'
+                            : 'border-gray-500'
+                        }`}>
+                          {paymentMethod === 'CASH_ON_DELIVERY' && (
                           <CheckCircle2 className="w-4 h-4 text-white" />
                         )}
                       </div>
@@ -819,16 +875,18 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   </div>
+                  )}
 
                   {/* Bank Transfer */}
-                  <div
-                    onClick={() => setPaymentMethod('BANK_TRANSFER')}
-                    className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
-                      paymentMethod === 'BANK_TRANSFER'
-                        ? 'border-blue-500 bg-blue-900/30'
-                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
-                    }`}
-                  >
+                  {checkoutSettings.paymentMethodBankTransfer && (
+                    <div
+                      onClick={() => setPaymentMethod('BANK_TRANSFER')}
+                      className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
+                        paymentMethod === 'BANK_TRANSFER'
+                          ? 'border-blue-500 bg-blue-900/30'
+                          : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                      }`}
+                    >
                     <div className="flex items-start gap-4">
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                         paymentMethod === 'BANK_TRANSFER'
@@ -922,16 +980,18 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   </div>
+                  )}
 
                   {/* E-Wallet Transfer */}
-                  <div
-                    onClick={() => setPaymentMethod('E_WALLET_TRANSFER')}
-                    className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
-                      paymentMethod === 'E_WALLET_TRANSFER'
-                        ? 'border-green-500 bg-green-900/30'
-                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
-                    }`}
-                  >
+                  {checkoutSettings.paymentMethodEWallet && (
+                    <div
+                      onClick={() => setPaymentMethod('E_WALLET_TRANSFER')}
+                      className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
+                        paymentMethod === 'E_WALLET_TRANSFER'
+                          ? 'border-green-500 bg-green-900/30'
+                          : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                      }`}
+                    >
                     <div className="flex items-start gap-4">
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                         paymentMethod === 'E_WALLET_TRANSFER'
@@ -1034,16 +1094,18 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   </div>
+                  )}
 
                   {/* Installment */}
-                  <div
-                    onClick={() => setPaymentMethod('INSTALLMENT_4')}
-                    className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
-                      paymentMethod.startsWith('INSTALLMENT_')
-                        ? 'border-purple-500 bg-purple-900/30'
-                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
-                    }`}
-                  >
+                  {checkoutSettings.paymentMethodInstallment && (
+                    <div
+                      onClick={() => setPaymentMethod('INSTALLMENT_4')}
+                      className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
+                        paymentMethod.startsWith('INSTALLMENT_')
+                          ? 'border-purple-500 bg-purple-900/30'
+                          : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                      }`}
+                    >
                     <div className="flex items-start gap-4">
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                         paymentMethod.startsWith('INSTALLMENT_')
@@ -1067,9 +1129,10 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   </div>
+                  )}
 
                   {/* Installment Calculator */}
-                  {paymentMethod.startsWith('INSTALLMENT_') && (
+                  {paymentMethod.startsWith('INSTALLMENT_') && checkoutSettings.paymentMethodInstallment && (
                     <div className="bg-gray-900/50 rounded-lg p-4">
                       <InstallmentCalculator
                         totalAmount={finalTotal}
