@@ -5,6 +5,7 @@ import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, P
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
+import { BackButton } from "@/components/BackButton";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -48,6 +49,7 @@ export default async function AdminDashboard() {
                 className="h-16 w-16 object-contain drop-shadow-2xl"
               />
               <div>
+                <BackButton fallbackUrl="/" label="العودة للرئيسية" className="mb-2" />
                 <h1 className="text-3xl md:text-4xl font-bold drop-shadow-lg">لوحة الإدارة</h1>
                 <p className="text-purple-100 mt-1 text-base md:text-lg">مرحبًا {session.user?.name || "المدير"}</p>
               </div>

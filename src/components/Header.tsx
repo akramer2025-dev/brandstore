@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff, LayoutDashboard, MapPin } from "lucide-react";
+import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff, LayoutDashboard, MapPin, Wallet, Coins } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,8 +37,14 @@ export function Header() {
   const [suggestions, setSuggestions] = useState<ProductSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+  
+  // Wallet/Balance state
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [couponsCount, setCouponsCount] = useState<number>(0);
   
   // Notification states
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
@@ -114,6 +120,31 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // إغلاق البحث في الموبايل عند الضغط على Escape وتركيز على input
+  useEffect(() => {
+    if (isMobileSearchOpen) {
+      // Focus on input after animation
+      setTimeout(() => mobileSearchInputRef.current?.focus(), 100);
+      
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setIsMobileSearchOpen(false);
+          setSearchTerm("");
+          setShowSuggestions(false);
+        }
+      };
+      
+      document.addEventListener('keydown', handleEscape);
+      // منع السكرول في الخلفية
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [isMobileSearchOpen]);
+
   useEffect(() => {
     setMounted(true);
     
@@ -127,15 +158,31 @@ export function Header() {
     if (session?.user) {
       fetchWishlist();
       fetchNotifications();
+      fetchWalletBalance();
       
       // Refresh notifications every 5 minutes
       const interval = setInterval(() => {
         fetchNotifications();
+        fetchWalletBalance();
       }, 5 * 60 * 1000);
       
       return () => clearInterval(interval);
     }
   }, [session]);
+
+  // جلب رصيد الكوبونات
+  const fetchWalletBalance = async () => {
+    try {
+      const response = await fetch('/api/user/coupons');
+      if (response.ok) {
+        const data = await response.json();
+        setWalletBalance(data.totalBalance || 0);
+        setCouponsCount(data.availableCouponsCount || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch wallet balance:', error);
+    }
+  };
 
   const checkNotificationSubscription = async () => {
     try {
@@ -336,6 +383,16 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
+            {/* Mobile Search Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileSearchOpen(true)}
+              className="sm:hidden text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-8 h-8"
+            >
+              <Search className="w-4 h-4 animate-pulse" />
+            </Button>
+            
             {/* Wishlist */}
             {session && (
               <Link href="/wishlist">
@@ -419,6 +476,31 @@ export function Header() {
                     <p className="text-sm font-medium text-white">{session.user?.name}</p>
                     <p className="text-xs text-gray-400">{session.user?.email}</p>
                   </div>
+                  
+                  {/* عرض الرصيد */}
+                  {mounted && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile/wallet" className="cursor-pointer">
+                        <div className="w-full py-1 bg-gradient-to-r from-teal-600/20 to-cyan-600/20 rounded-md px-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Coins className="w-4 h-4 text-amber-400" />
+                              <span className="text-xs text-gray-200 font-medium">رصيد الخصومات</span>
+                            </div>
+                            <span className="text-sm font-bold text-amber-400">
+                              {walletBalance.toFixed(0)} ج
+                            </span>
+                          </div>
+                          {couponsCount > 0 && (
+                            <p className="text-xs text-gray-400 mt-1">
+                              {couponsCount} كوبون متاح • اضغط للتفاصيل
+                            </p>
+                          )}
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  
                   <DropdownMenuSeparator className="bg-teal-500/20" />
                   <DropdownMenuItem asChild>
                     <Link href="/orders" className="cursor-pointer text-gray-300 hover:text-cyan-400">
@@ -504,6 +586,132 @@ export function Header() {
           </div>
         </div>
       </div>
+      
+      {/* Mobile Search Overlay */}
+      {isMobileSearchOpen && (
+        <div className="fixed inset-0 z-[100] bg-gray-900/98 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setIsMobileSearchOpen(false);
+                  setSearchTerm("");
+                  setShowSuggestions(false);
+                }}
+                className="text-gray-300 hover:text-red-400 hover:bg-red-900/30 shrink-0"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </Button>
+              
+              <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400 w-5 h-5" />
+                  <Input
+                    ref={mobileSearchInputRef}
+                    type="text"
+                    placeholder="ابحث عن منتج..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pr-12 pl-4 h-12 bg-gray-800/80 border-2 border-teal-500/50 text-white placeholder:text-gray-400 focus:border-cyan-400 text-base rounded-xl shadow-lg shadow-cyan-500/20"
+                  />
+                </div>
+                
+                <Button 
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="border-2 border-teal-500/50 hover:bg-teal-700/30 text-cyan-400 w-12 h-12 shrink-0 rounded-xl"
+                  title="البحث بالصورة"
+                >
+                  <ImageIcon className="w-5 h-5" />
+                </Button>
+                
+                <Button 
+                  type="submit"
+                  size="lg"
+                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-6 h-12 shrink-0 rounded-xl shadow-lg shadow-cyan-500/30"
+                >
+                  بحث
+                </Button>
+              </form>
+            </div>
+            
+            {/* Mobile Search Suggestions */}
+            {searchTerm.trim().length >= 2 && suggestions.length > 0 && (
+              <div className="bg-gray-800/90 border-2 border-teal-500/30 rounded-xl shadow-2xl max-h-[calc(100vh-120px)] overflow-y-auto backdrop-blur-sm">
+                <div className="p-2">
+                  <p className="text-gray-400 text-xs px-3 py-2 font-medium">النتائج المقترحة:</p>
+                  {suggestions.map((product) => (
+                    <button
+                      key={product.id}
+                      type="button"
+                      onClick={() => {
+                        router.push(`/products/${product.id}`);
+                        setSearchTerm("");
+                        setShowSuggestions(false);
+                        setIsMobileSearchOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-gradient-to-r hover:from-teal-900/40 hover:to-cyan-900/40 transition-all duration-200 rounded-lg mb-2 active:scale-95"
+                    >
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-16 h-16 object-cover rounded-lg shadow-md"
+                      />
+                      <div className="flex-1 text-right">
+                        <p className="text-white text-sm font-medium mb-1">{product.name}</p>
+                        <p className="text-cyan-400 text-base font-bold">{product.price} جنيه</p>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Empty State */}
+            {searchTerm.trim().length >= 2 && suggestions.length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-20 h-20 mx-auto mb-4 bg-gray-800/50 rounded-full flex items-center justify-center">
+                  <Search className="w-10 h-10 text-gray-600" />
+                </div>
+                <p className="text-gray-400 text-lg font-medium">لا توجد نتائج</p>
+                <p className="text-gray-500 text-sm mt-1">حاول البحث بكلمات أخرى</p>
+              </div>
+            )}
+            
+            {/* Hints */}
+            {searchTerm.trim().length === 0 && (
+              <div className="text-center py-12 px-4">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-teal-600/20 to-cyan-600/20 rounded-full flex items-center justify-center animate-pulse">
+                  <Search className="w-10 h-10 text-cyan-400" />
+                </div>
+                <h3 className="text-white text-xl font-bold mb-2">ابحث عن منتجاتك المفضلة</h3>
+                <p className="text-gray-400 text-sm mb-6">أدخل اسم المنتج أو الفئة أو العلامة التجارية</p>
+                
+                <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
+                  {['تيشيرتات', 'أحذية', 'مستحضرات تجميل', 'اكسسوارات', 'ذهب'].map((keyword) => (
+                    <button
+                      key={keyword}
+                      onClick={() => setSearchTerm(keyword)}
+                      className="px-4 py-2 bg-gray-800/50 hover:bg-teal-600/30 text-gray-300 hover:text-cyan-400 rounded-full text-sm border border-gray-700/50 hover:border-cyan-500/50 transition-all duration-200 active:scale-95"
+                    >
+                      {keyword}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
