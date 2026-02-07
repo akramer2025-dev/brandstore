@@ -21,11 +21,27 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // إذا المستخدم مسجل دخول، توجيهه للصفحة الرئيسية
+  // إذا المستخدم مسجل دخول، توجيهه للصفحة المناسبة حسب دوره
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
-      console.log('✅ User is already logged in, redirecting to home');
-      router.push('/');
+      console.log('✅ User is already logged in, redirecting based on role:', session.user.role);
+      
+      // التوجيه حسب نوع المستخدم
+      if (session.user.role === 'ADMIN') {
+        router.push('/admin');
+      } else if (session.user.role === 'VENDOR') {
+        router.push('/vendor/dashboard');
+      } else if (session.user.role === 'MANUFACTURER') {
+        router.push('/manufacturer/dashboard');
+      } else if (session.user.role === 'DELIVERY_STAFF') {
+        router.push('/delivery-dashboard');
+      } else if (session.user.role === 'MARKETING_STAFF') {
+        router.push('/marketing/dashboard');
+      } else if (session.user.role === 'CUSTOMER') {
+        router.push('/');
+      } else {
+        router.push('/');
+      }
     }
   }, [status, session, router]);
 
@@ -33,11 +49,11 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError('');
     try {
-      // تسجيل الدخول مع Google وتحديد صفحة الرجوع
+      // تسجيل الدخول مع Google - سيتم التوجيه تلقائياً بواسطة useEffect حسب role المستخدم
       await signIn('google', { 
-        callbackUrl: '/',
-        redirect: true 
+        redirect: false 
       });
+      // بعد نجاح تسجيل الدخول، الـ useEffect سيقوم بالتوجيه التلقائي
     } catch (error) {
       console.error('Google sign-in error:', error);
       setError('حدث خطأ في تسجيل الدخول بواسطة Google');
