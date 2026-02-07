@@ -11,6 +11,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   debug: process.env.NODE_ENV === 'development',
   
+  // حل مشكلة linking accounts من نفس الإيميل
+  // (مهم لو المستخدم عنده حساب credentials وعايز يضيف Google)
+  allowDangerousEmailAccountLinking: false,
+  
   events: {
     async createUser({ user }) {
       try {
@@ -92,8 +96,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       try {
         console.log('🔐 SignIn callback - Provider:', account?.provider, 'Email:', user.email);
         
-        // للمستخدمين الجدد من Google
-        if (account?.provider === "google" && user.email) {
+        // التحقق من وجود email
+        if (!user.email) {
+          console.error('❌ No email provided');
+          return false;
+        }
+        
+        // للمستخدمين من Google
+        if (account?.provider === "google") {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
             select: { id: true, role: true, name: true }
@@ -114,10 +124,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             console.log('🆕 New user from Google, will be created as CUSTOMER by adapter');
           }
         }
+        
         return true;
       } catch (error) {
         console.error('❌ خطأ في signIn callback:', error);
-        return true; // السماح بالدخول حتى لو حصل خطأ
+        // في حالة الخطأ، نسمح بالدخول للتجربة
+        // لكن نسجل الخطأ للتتبع
+        return true;
       }
     },
     async jwt({ token, user, account, trigger }) {
@@ -189,6 +202,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async redirect({ url, baseUrl }) {
       console.log('🔄 Redirect callback - URL:', url, 'BaseURL:', baseUrl);
       
+      // تجاوز أي redirect لو كان فيه "error"
+      if (url.includes('error=')) {
+        console.log('⚠️ Error in redirect URL, going to home');
+        return baseUrl;
+      }
+      
       // إذا كان URL يبدأ بـ baseUrl، استخدمه كما هو
       if (url.startsWith(baseUrl)) {
         console.log('✅ Redirecting to:', url);
@@ -200,6 +219,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const fullUrl = `${baseUrl}${url}`;
         console.log('✅ Redirecting to relative path:', fullUrl);
         return fullUrl;
+      }
+      
+      // إذا كان URL خارجي (Google OAuth redirect)
+      if (url.startsWith('http')) {
+        try {
+          const urlObj = new URL(url);
+          // إذا كان من نفس الـ origin
+          if (urlObj.origin === baseUrl) {
+            console.log('✅ Redirecting to same origin:', url);
+            return url;
+          }
+        } catch (e) {
+          console.error('❌ Error parsing URL:', e);
+        }
       }
       
       // التوجيه الافتراضي إلى الصفحة الرئيسية
