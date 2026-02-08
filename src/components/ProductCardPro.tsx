@@ -180,17 +180,23 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
       }
     } catch (error) {
       toast.error("حدث خطأ، حاول مرة أخرى");
-    } fdiv 
-        ref={cardRef}
-        className={`transition-all duration-700 ${
-          isVisible 
-            ? 'opacity-100 translate-y-0' 
-            : 'opacity-0 translate-y-8'
-        }`}
-        style={{
-          transitionDelay: `${Math.min(index * 100, 800)}ms`
-        }}
-      >
+    } finally {
+      setIsAddingToWishlist(false);
+    }
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={`transition-all duration-700 ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-8'
+      }`}
+      style={{
+        transitionDelay: `${Math.min(index * 100, 800)}ms`
+      }}
+    >
         <Card 
           className="group relative overflow-hidden h-full transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-2xl"
           style={{
