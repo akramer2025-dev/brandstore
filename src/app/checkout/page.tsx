@@ -910,11 +910,47 @@ export default function CheckoutPage() {
               <Card className="bg-gray-800/80 border-teal-500/20">
                 <CardHeader className="p-4 sm:p-6">
                   <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
-                    طريقة الدفع
+                    <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
+                    طريقة الدفع - محفظة وي باي
                   </CardTitle>
+                  <p className="text-gray-300 text-sm mt-2">
+                    💳 الدفع عن طريق وي باي (WE Pay) فقط
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
+                  
+                  {/* WE Pay - Simple and Only Payment Method */}
+                  <div className="bg-gradient-to-r from-purple-600 to-emerald-600 text-white rounded-xl p-6 shadow-2xl">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-white/20 p-3 rounded-full">
+                        <CreditCard className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold">محفظة وي باي</h3>
+                        <p className="text-white/80 text-sm">WE Pay Wallet</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-5 backdrop-blur-sm border border-white/20">
+                      <p className="text-white/90 mb-3 text-sm font-medium">رقم التحويل:</p>
+                      <div className="bg-white text-purple-700 rounded-lg p-4 text-center">
+                        <p className="text-3xl font-black tracking-wider">01555512778</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 bg-yellow-400/20 border border-yellow-400/40 rounded-lg p-3">
+                      <div className="flex items-start gap-2">
+                        <div className="text-yellow-200 mt-0.5">💡</div>
+                        <p className="text-yellow-100 text-sm">
+                          قم بتحويل المبلغ على الرقم أعلاه ثم اكتب رقم التحويل والمحفظة في ملاحظات الطلبء
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* HIDDEN - Keep old payment methods hidden but in code for later use */}
+                  {false && (
+                    <>
                   {/* Info message for non-clothing items */}
                   {!isAllClothing && (
                     <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-3 mb-4">
@@ -1400,6 +1436,8 @@ export default function CheckoutPage() {
                         }}
                       />
                     </div>
+                  )}
+                  </>
                   )}
                 </CardContent>
               </Card>

@@ -550,19 +550,24 @@ export default function CartPage() {
                     )}
 
                     <Link href="/checkout">
-                      <Button className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-sm sm:text-lg py-4 sm:py-6">
-                        <ShoppingBag className="w-5 h-5 ml-2" />
-                        إتمام الطلب
+                      <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-base sm:text-xl py-5 sm:py-7 shadow-2xl hover:shadow-green-500/50 transition-all">
+                        <ShoppingBag className="w-6 h-6 ml-2" />
+                        إتمام الدفع
+                        <ArrowRight className="w-5 h-5 mr-2 animate-pulse" />
                       </Button>
                     </Link>
+                    
+                    <p className="text-center text-xs text-gray-400 mt-2">
+                      💳 الدفع عن طريق محفظة وي باي
+                    </p>
                   </div>
 
-                  <div className="bg-gradient-to-r from-teal-900/20 to-cyan-900/20 border border-teal-500/30 rounded-lg p-3 sm:p-4 text-center">
-                    <p className="text-xs sm:text-sm text-teal-300 font-medium">
-                      💳 طرق دفع متعددة متاحة
+                  <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-3 sm:p-4 text-center">
+                    <p className="text-xs sm:text-sm text-green-300 font-bold">
+                      💳 الدفع عن طريق محفظة وي باي (WE Pay)
                     </p>
-                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1">
-                      دفع عند الاستلام • تحويل بنكي • محفظة إلكترونية • تقسيط
+                    <p className="text-[10px] sm:text-xs text-gray-300 mt-1 font-medium">
+                      📱 رقم التحويل: <span className="text-white">01555512778</span>
                     </p>
                   </div>
                 </CardContent>
