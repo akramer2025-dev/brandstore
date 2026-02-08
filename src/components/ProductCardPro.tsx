@@ -185,29 +185,12 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
     }
   };
 
-  return (
-    <div
-      ref={cardRef}
-      className={`transition-all duration-700 ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
-          : 'opacity-0 translate-y-8'
-      }`}
-      style={{
-        transitionDelay: `${Math.min(index * 100, 800)}ms`
-      }}
-    >
-        <Card 
-          className="group relative overflow-hidden h-full transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-2xl"
-          style={{
-            border: '2px solid transparent',
-            backgroundImage: 'linear-gradient(white, white), linear-gradient(to right, rgb(147, 51, 234), rgb(236, 72, 153), rgb(249, 115, 22))',
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box'
-          }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-            <Star
+  // Render stars
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
             key={star}
             className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${
               star <= rating
@@ -223,18 +206,29 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
   };
 
   return (
-    <Link href={`/products/${product.id}`}>
-      <Card 
-        className="group relative overflow-hidden h-full transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-2xl"
-        style={{
-          border: '2px solid transparent',
-          backgroundImage: 'linear-gradient(white, white), linear-gradient(to right, rgb(147, 51, 234), rgb(236, 72, 153), rgb(249, 115, 22))',
-          backgroundOrigin: 'border-box',
-          backgroundClip: 'padding-box, border-box'
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
+    <div
+      ref={cardRef}
+      className={`transition-all duration-700 ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-8'
+      }`}
+      style={{
+        transitionDelay: `${Math.min(index * 100, 800)}ms`
+      }}
+    >
+      <Link href={`/products/${product.id}`}>
+        <Card 
+          className="group relative overflow-hidden h-full transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-2xl"
+          style={{
+            border: '2px solid transparent',
+            backgroundImage: 'linear-gradient(white, white), linear-gradient(to right, rgb(147, 51, 234), rgb(236, 72, 153), rgb(249, 115, 22))',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box'
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
         {/* Badge - Top Left */}
         {badge && (
           <div className={`absolute top-3 left-3 z-20 bg-gradient-to-r ${badge.color} text-white font-bold px-3 py-1.5 rounded-full text-xs shadow-lg flex items-center gap-1.5`}>
