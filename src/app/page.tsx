@@ -33,6 +33,31 @@ export const metadata: Metadata = {
   },
 };
 
+// 🎨 Helper function لاختيار الصورة المناسبة للفئة
+function getCategoryImage(categoryName: string, categoryImage?: string | null): string {
+  // إذا كان في صورة محفوظة، استخدمها
+  if (categoryImage) {
+    return categoryImage;
+  }
+
+  // خريطة الصور حسب الفئات الموجودة
+  const name = categoryName.toLowerCase();
+  
+  // فئات محددة بالضبط
+  if (name.includes('تيشيرت')) return 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop&q=80';
+  if (name.includes('أحذية') || name === 'shoes') return 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=100&h=100&fit=crop&q=80';
+  if (name.includes('بناطيل') || name === 'pants') return 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=100&h=100&fit=crop&q=80';
+  if (name.includes('جواك') || name === 'jackets') return 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=100&h=100&fit=crop&q=80';
+  if (name.includes('شي إن') || name === 'shein') return 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=100&h=100&fit=crop&q=80';
+  if (name.includes('ترينديول') || name === 'trendyol') return 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=100&h=100&fit=crop&q=80';
+  if (name.includes('تجميل') || name === 'cosmetics') return 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=100&h=100&fit=crop&q=80';
+  if (name.includes('ذهب') || name.includes('فضه') || name === 'golde') return 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100&h=100&fit=crop&q=80';
+  if (name.includes('اكسسوار') || name === 'accessories') return 'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=100&h=100&fit=crop&q=80';
+  
+  // صورة افتراضية للفئات العامة أو غير المعروفة
+  return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=100&h=100&fit=crop&q=80';
+}
+
 async function getProducts() {
   try {
     return await prisma.product.findMany({
@@ -166,23 +191,7 @@ export default async function HomePage() {
                 >
                   <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 ring-1 sm:ring-2 ring-purple-200">
                     <Image
-                        src={
-                          category.nameAr.includes('جواك') || category.nameAr.includes('جاكت') ? 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('تيشيرت') || category.nameAr.includes('قميص') ? 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('بنطل') || category.nameAr.includes('بنطلون') || category.nameAr.includes('بناطيل') ? 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('أحذية') || category.nameAr.includes('حذاء') || category.nameAr.includes('شوز') ? 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('اكسسوار') || category.nameAr.includes('إكسسوارات') || category.nameAr.includes('اكسسوارات') ? 'https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('ساعة') || category.nameAr.includes('ساعات') ? 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('حقيبة') || category.nameAr.includes('شنط') || category.nameAr.includes('حقائب') ? 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('نظارة') || category.nameAr.includes('نظارات') ? 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('ملابس') || category.nameAr.includes('لبس') ? 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('الكتروني') ? 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('تجميل') || category.nameAr.includes('مكياج') ? 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('منزل') || category.nameAr.includes('منزلي') ? 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('رياضة') || category.nameAr.includes('رياضي') ? 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=100&h=100&fit=crop&q=80' :
-                          category.nameAr.includes('أطفال') || category.nameAr.includes('طفل') ? 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=100&h=100&fit=crop&q=80' :
-                          'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=100&h=100&fit=crop&q=80'
-                        }
+                        src={getCategoryImage(category.nameAr, category.image)}
                         alt={category.nameAr}
                         width={32}
                         height={32}

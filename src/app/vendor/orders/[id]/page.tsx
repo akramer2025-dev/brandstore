@@ -137,6 +137,32 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
   const handleSchedulePickup = async () => {
     toast.info('سيتم إضافة نظام جدولة المواعيد قريباً');
   };
+
+  const handleShipWithBosta = async () => {
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/orders/${id}/ship`, {
+        method: 'POST',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'فشل في إرسال الطلب لبوسطة');
+      }
+      
+      toast.success('تم إرسال الطلب لشركة بوسطة بنجاح! ✅');
+      if (data.shipment?.trackingUrl) {
+        toast.info(`رقم التتبع: ${data.shipment.trackingNumber}`);
+      }
+      fetchOrder();
+    } catch (error: any) {
+      toast.error(error.message || 'حدث خطأ في إرسال الطلب لبوسطة');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleRejectOrder = async () => {
     if (!rejectionReason.trim()) {
       toast.error('يرجى إدخال سبب الرفض');
@@ -428,6 +454,46 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
                 </CardContent>
               </Card>
             )}
+
+            {/* معلومات شحنة بوسطة */}
+            {order.bustaShipmentId && (
+              <Card className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-xl border-blue-400/30 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-blue-400" />
+                    شحنة بوسطة 🚚
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <p className="text-gray-300 text-sm mb-1">رقم الشحنة</p>
+                    <p className="text-white font-mono text-lg">{order.bustaShipmentId}</p>
+                  </div>
+                  {order.bustaStatus && (
+                    <div className="bg-white/10 rounded-lg p-3">
+                      <p className="text-gray-300 text-sm mb-1">الحالة</p>
+                      <p className="text-white font-medium">{order.bustaStatus}</p>
+                    </div>
+                  )}
+                  {order.bustaTrackingUrl && (
+                    <a 
+                      href={order.bustaTrackingUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-3 transition-colors"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      تتبع الشحنة
+                    </a>
+                  )}
+                  {order.bustaSentAt && (
+                    <p className="text-gray-400 text-sm text-center">
+                      تم الإرسال: {new Date(order.bustaSentAt).toLocaleDateString('ar-EG')}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* الملخص المالي */}
@@ -602,6 +668,18 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
                       )}
                       {order.deliveryMethod === 'HOME_DELIVERY' && (
                         <>
+                          <Button 
+                            onClick={handleShipWithBosta}
+                            disabled={actionLoading || order.bustaShipmentId}
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+                          >
+                            {actionLoading ? (
+                              <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                            ) : (
+                              <Truck className="w-4 h-4 ml-2" />
+                            )}
+                            {order.bustaShipmentId ? '✅ تم الإرسال لبوسطة' : '🚚 إرسال لبوسطة'}
+                          </Button>
                           <Button 
                             onClick={handleSendToAdmin}
                             disabled={actionLoading}
