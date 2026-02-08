@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { purchasePrice, sellingPrice, quantity = 1, description } = body;
+    const { purchasePrice, sellingPrice, quantity = 1, description, supplierId } = body;
 
     // التحقق من البيانات
     if (!purchasePrice || !sellingPrice) {
@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
     const offlineProduct = await prisma.offlineProduct.create({
       data: {
         vendorId: vendor.id,
+        supplierId: supplierId || null,
         description: description || `بضاعة ${new Date().toLocaleDateString('ar-EG')}`,
         purchasePrice: parsedPurchasePrice,
         sellingPrice: parsedSellingPrice,
@@ -140,6 +141,15 @@ export async function GET(request: NextRequest) {
 
     const offlineProducts = await prisma.offlineProduct.findMany({
       where: { vendorId: vendor.id },
+      include: {
+        supplier: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
 

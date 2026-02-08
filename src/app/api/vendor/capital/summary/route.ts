@@ -12,17 +12,16 @@ export async function GET(req: NextRequest) {
     }
 
     const vendor = await prisma.vendor.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id },
+      select: {
+        id: true,
+        capitalBalance: true,
+      }
     })
 
     if (!vendor) {
       return NextResponse.json({ error: 'لم يتم العثور على الشريك' }, { status: 404 })
     }
-
-    // جلب رأس المال الحالي
-    const partner = await prisma.partnerCapital.findFirst({
-      where: { vendorId: vendor.id, isActive: true }
-    })
 
     // إحصائيات المنتجات
     const ownedProducts = await prisma.product.count({
@@ -78,7 +77,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       capital: {
-        current: partner?.capitalAmount || 0,
+        current: vendor.capitalBalance || 0,
         totalDeposits: deposits._sum.amount || 0,
         totalWithdrawals: withdrawals._sum.amount || 0
       },

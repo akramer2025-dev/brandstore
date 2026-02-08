@@ -13,12 +13,9 @@ export async function GET(req: NextRequest) {
 
     const vendor = await prisma.vendor.findUnique({
       where: { userId: session.user.id },
-      include: {
-        partners: {
-          where: { partnerType: 'OWNER' },
-          orderBy: { createdAt: 'desc' },
-          take: 1
-        }
+      select: {
+        id: true,
+        capitalBalance: true,
       }
     });
 
@@ -26,9 +23,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'لم يتم العثور على الشريك' }, { status: 404 });
     }
 
-    const capital = vendor.partners[0] || null;
-
-    return NextResponse.json({ capital });
+    return NextResponse.json({ 
+      capitalBalance: vendor.capitalBalance || 0 
+    });
 
   } catch (error) {
     console.error('Error fetching capital:', error);

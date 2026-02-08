@@ -176,6 +176,7 @@ model Vendor {
   sales              Sale[]
   purchases          Purchase[]
   offlineProducts    OfflineProduct[]
+  offlineSuppliers   OfflineSupplier[]
   user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("vendors")
@@ -1549,17 +1550,61 @@ model Visitor {
 model OfflineProduct {
   id              String   @id @default(cuid())
   vendorId        String
+  supplierId      String?  // المورد (اختياري)
   description     String?  // وصف اختياري
   purchasePrice   Float    // سعر الشراء
   sellingPrice    Float    // سعر البيع
   quantity        Int      @default(1) // الكمية
   profit          Float    // الربح = (سعر البيع - سعر الشراء) × الكمية
+  amountPaid      Float    @default(0) // المبلغ المدفوع للمورد
+  isPaid          Boolean  @default(false) // هل تم الدفع للمورد بالكامل
+  paidAt          DateTime? // تاريخ الدفع الكامل للمورد
   createdAt       DateTime @default(now())
   createdBy       String   // الشخص اللي أضافها
   
   vendor          Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  supplier        OfflineSupplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
   
   @@map("offline_products")
   @@index([vendorId])
+  @@index([supplierId])
+  @@index([createdAt])
+}
+
+// موردين البضاعة الخارجية
+model OfflineSupplier {
+  id              String   @id @default(cuid())
+  vendorId        String
+  name            String   // اسم المورد
+  phone           String?  // رقم التليفون
+  address         String?  // العنوان
+  notes           String?  // ملاحظات
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  vendor          Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  offlineProducts OfflineProduct[]
+  payments        OfflineSupplierPayment[]
+  
+  @@map("offline_suppliers")
+  @@index([vendorId])
+}
+
+// دفعات موردين البضاعة الخارجية
+model OfflineSupplierPayment {
+  id              String   @id @default(cuid())
+  vendorId        String
+  supplierId      String
+  amount          Float    // المبلغ المدفوع
+  paymentMethod   String   @default("CASH") // طريقة الدفع
+  notes           String?  // ملاحظات
+  paidBy          String   // الشخص اللي دفع
+  createdAt       DateTime @default(now())
+  
+  supplier        OfflineSupplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  
+  @@map("offline_supplier_payments")
+  @@index([vendorId])
+  @@index([supplierId])
   @@index([createdAt])
 }
