@@ -53,7 +53,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
   }
 
   return (
-    <div className="relative w-full h-[300px] md:h-[350px] lg:h-[450px] overflow-hidden group">
+    <div className="relative w-full h-[280px] sm:h-[320px] md:h-[380px] lg:h-[450px] overflow-hidden group">
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
@@ -84,42 +84,42 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
           {/* Content */}
           <div className="absolute inset-0 flex items-center">
             <div className="container mx-auto px-3 md:px-8">
-              <div className="max-w-xl md:max-w-2xl mt-16 md:mt-0">
+              <div className="max-w-xl md:max-w-2xl">
                 {/* Category Badge with Logo */}
-                <div className="inline-flex items-center gap-1.5 md:gap-2 bg-white/20 backdrop-blur-md text-white px-2.5 py-1.5 md:px-4 md:py-2 rounded-full mb-2 md:mb-3 animate-fade-in-down border border-white/30">
-                  <div className="relative w-4 h-4 md:w-5 md:h-5 flex-shrink-0">
+                <div className="inline-flex items-center gap-1 md:gap-2 bg-white/20 backdrop-blur-md text-white px-2 py-1 md:px-4 md:py-2 rounded-full mb-1.5 md:mb-3 animate-fade-in-down border border-white/30">
+                  <div className="relative w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0">
                     <Image
                       src="/logo.png"
                       alt="SP"
                       fill
-                      sizes="(max-width: 768px) 16px, 20px"
+                      sizes="(max-width: 768px) 14px, 20px"
                       className="object-contain"
                     />
                   </div>
-                  <span className="text-xs md:text-sm font-semibold">من مصانع ريمو ستور</span>
+                  <span className="text-[10px] md:text-sm font-semibold">من مصانع ريمو ستور</span>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-xl md:text-4xl lg:text-5xl font-bold text-white mb-2 md:mb-3 animate-fade-in-up leading-tight drop-shadow-2xl">
+                <h1 className="text-base sm:text-xl md:text-4xl lg:text-5xl font-bold text-white mb-1.5 md:mb-3 animate-fade-in-up leading-tight drop-shadow-2xl">
                   {slide.titleAr}
                 </h1>
 
                 {/* Subtitle */}
                 {slide.subtitleAr && (
-                  <p className="text-sm md:text-lg lg:text-xl text-gray-100 mb-3 md:mb-5 animate-fade-in-up animation-delay-200 drop-shadow-lg">
+                  <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-gray-100 mb-2 md:mb-5 animate-fade-in-up animation-delay-200 drop-shadow-lg line-clamp-1 md:line-clamp-none">
                     {slide.subtitleAr}
                   </p>
                 )}
 
                 {/* Made in Egypt Badge */}
-                <div className="flex flex-wrap gap-2 mb-3 md:mb-5 animate-fade-in-up animation-delay-300">
-                  <div className="bg-white/95 backdrop-blur-sm px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg shadow-lg">
-                    <p className="text-xs md:text-sm font-semibold text-gray-800">
+                <div className="flex flex-wrap gap-1.5 md:gap-2 mb-2 md:mb-5 animate-fade-in-up animation-delay-300">
+                  <div className="bg-white/95 backdrop-blur-sm px-2 py-1 md:px-4 md:py-2 rounded-lg shadow-lg">
+                    <p className="text-[9px] sm:text-xs md:text-sm font-semibold text-gray-800">
                       🏭 صناعة محلية بجودة عالمية
                     </p>
                   </div>
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg shadow-lg">
-                    <p className="text-xs md:text-sm font-bold text-white">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-2 py-1 md:px-4 md:py-2 rounded-lg shadow-lg">
+                    <p className="text-[9px] sm:text-xs md:text-sm font-bold text-white">
                       ✅ ضمان الجودة
                     </p>
                   </div>
@@ -128,10 +128,10 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
                 {/* CTA Button */}
                 <Link
                   href={slide.link || '/products'}
-                  className="inline-flex items-center gap-2 md:gap-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-4 py-2.5 md:px-7 md:py-3.5 rounded-lg md:rounded-xl text-sm md:text-base font-bold shadow-2xl hover:shadow-teal-500/50 transition-all duration-300 hover:scale-105 animate-fade-in-up animation-delay-400"
+                  className="inline-flex items-center gap-1.5 md:gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-3 py-1.5 sm:px-4 sm:py-2.5 md:px-7 md:py-3.5 rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base font-bold shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 animate-fade-in-up animation-delay-400"
                 >
                   <span>{slide.buttonTextAr || 'تسوق الآن'}</span>
-                  <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 animate-bounce-x" />
+                  <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 animate-bounce-x" />
                 </Link>
               </div>
             </div>
@@ -155,20 +155,20 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
         <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 text-white" />
       </button>
 
-      {/* Dots */}
-      <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 md:gap-3 z-30">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`transition-all duration-300 rounded-full ${
-              index === currentSlide
-                ? 'w-12 md:w-16 h-3 md:h-4 bg-gradient-to-r from-teal-500 to-cyan-500'
-                : 'w-3 md:w-4 h-3 md:h-4 bg-white/50 hover:bg-white/80'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
+      {/* Single Wave Only - موجة واحدة فقط بدون مساحة مستقيمة */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none overflow-hidden" style={{ height: '60px' }}>
+        <svg
+          className="absolute bottom-0 w-full"
+          style={{ height: '60px' }}
+          viewBox="0 0 1440 60"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0,60 L0,30 Q240,10 480,30 T960,30 Q1200,10 1440,30 L1440,60 Z"
+            fill="rgb(255, 255, 255)"
           />
-        ))}
+        </svg>
       </div>
     </div>
   );

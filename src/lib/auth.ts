@@ -11,10 +11,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   debug: process.env.NODE_ENV === 'development',
   
-  // حل مشكلة linking accounts من نفس الإيميل
-  // (مهم لو المستخدم عنده حساب credentials وعايز يضيف Google)
-  allowDangerousEmailAccountLinking: false,
-  
   events: {
     async createUser({ user }) {
       try {
@@ -177,7 +173,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             where: { userId: token.id as string },
             select: { businessType: true }
           });
-          if (vendor) {
+          if (vendor && vendor.businessType) {
             token.vendorType = vendor.businessType;
           }
         } catch (error) {

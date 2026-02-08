@@ -105,9 +105,9 @@ export default function LoginPage() {
   // عرض loading أثناء التحقق من session
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 flex items-center justify-center">
-        <div className="text-center text-white">
-          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" />
+      <div className="min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white flex items-center justify-center">
+        <div className="text-center text-gray-900">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-purple-600" />
           <p className="text-lg">جاري التحقق من تسجيل الدخول...</p>
         </div>
       </div>
@@ -117,9 +117,9 @@ export default function LoginPage() {
   // إذا المستخدم مسجل بالفعل، لا تعرض صفحة تسجيل الدخول
   if (status === 'authenticated') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 flex items-center justify-center">
-        <div className="text-center text-white">
-          <Sparkles className="w-12 h-12 mx-auto mb-4 animate-pulse" />
+      <div className="min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white flex items-center justify-center">
+        <div className="text-center text-gray-900">
+          <Sparkles className="w-12 h-12 mx-auto mb-4 animate-pulse text-purple-600" />
           <p className="text-lg">تم تسجيل الدخول بنجاح! جاري التوجيه...</p>
         </div>
       </div>
@@ -127,12 +127,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-600 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-float-delayed"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-teal-500/20 rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-400/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-400/20 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-orange-400/20 rounded-full blur-3xl animate-float-slow"></div>
       </div>
 
       {/* Grid Pattern */}
@@ -145,10 +145,10 @@ export default function LoginPage() {
             {/* Logo Container with Enhanced Effects */}
             <div className="relative">
               {/* Glow Effect Background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-400 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 scale-110"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 scale-110"></div>
               
               {/* Main Logo Card */}
-              <div className="relative bg-white/15 backdrop-blur-xl p-6 rounded-3xl border-2 border-white/40 shadow-2xl transition-all duration-500 group-hover:bg-white/25 group-hover:scale-105 group-hover:border-white/60">
+              <div className="relative bg-white/95 backdrop-blur-xl p-6 rounded-3xl border-2 border-purple-200 shadow-2xl transition-all duration-500 group-hover:bg-white group-hover:scale-105 group-hover:border-purple-300">
                 <div className="flex items-center justify-center gap-4">
                   {/* Logo Image with Animation */}
                   <div className="relative">
@@ -162,14 +162,14 @@ export default function LoginPage() {
                   
                   {/* Brand Text */}
                   <div className="text-right">
-                    <h1 className="text-4xl font-black text-white drop-shadow-lg mb-1 tracking-tight">
+                    <h1 className="text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent drop-shadow-lg mb-1 tracking-tight">
                       براند ستور
                     </h1>
                     <div className="flex items-center gap-2 justify-end">
-                      <span className="text-sm font-semibold text-white/90 drop-shadow">تسوق بذكاء</span>
-                      <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+                      <span className="text-sm font-semibold text-purple-700 drop-shadow">تسوق بذكاء</span>
+                      <Sparkles className="w-4 h-4 text-pink-500 animate-pulse" />
                     </div>
-                    <p className="text-xs text-white/70 mt-1 font-medium">BS Brand Store</p>
+                    <p className="text-xs text-gray-600 mt-1 font-medium">BS Brand Store</p>
                   </div>
                 </div>
               </div>
@@ -181,11 +181,11 @@ export default function LoginPage() {
         <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-xl">
           <CardHeader className="space-y-1 pb-6">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
                 تسجيل الدخول
               </CardTitle>
-              <div className="bg-gradient-to-br from-teal-100 to-cyan-100 p-2 rounded-lg">
-                <Sparkles className="w-5 h-5 text-teal-600" />
+              <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-2 rounded-lg">
+                <Sparkles className="w-5 h-5 text-purple-600" />
               </div>
             </div>
             <CardDescription className="text-base">
@@ -264,7 +264,7 @@ export default function LoginPage() {
             <CardFooter className="flex flex-col gap-4">
               <Button
                 type="submit"
-                className="w-full h-12 text-lg font-bold bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 hover:from-teal-700 hover:via-cyan-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="w-full h-12 text-lg font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 text-white border-0"
                 disabled={loading || googleLoading}
               >
                 {loading ? (
@@ -311,7 +311,7 @@ export default function LoginPage() {
 
               <div className="text-center text-sm text-gray-600">
                 ليس لديك حساب؟{' '}
-                <Link href="/auth/register" className="text-teal-600 hover:text-teal-700 font-bold">
+                <Link href="/auth/register" className="text-purple-600 hover:text-purple-700 font-bold">
                   سجل كعميل
                 </Link>
               </div>

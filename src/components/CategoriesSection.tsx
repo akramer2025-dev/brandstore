@@ -19,17 +19,17 @@ interface CategoriesSectionProps {
 
 export function CategoriesSection({ categories }: CategoriesSectionProps) {
   return (
-    <section className="py-4 md:py-5 bg-gray-900/30 border-b border-gray-800/50">
+    <section className="py-4 md:py-5 bg-gradient-to-r from-purple-900 via-purple-800 to-purple-900 border-b border-purple-500/50 shadow-lg shadow-purple-500/20">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-3 md:mb-4">
           <div className="flex items-center gap-2">
-            <Grid className="w-5 h-5 text-teal-400" />
+            <Grid className="w-5 h-5 text-purple-300" />
             <h2 className="text-lg md:text-xl font-bold text-white">تسوق حسب الفئة</h2>
           </div>
           <Link 
             href="/products" 
-            className="text-teal-400 font-medium hover:text-teal-300 flex items-center gap-1 text-sm transition-colors"
+            className="text-purple-300 font-medium hover:text-purple-200 flex items-center gap-1 text-sm transition-colors"
           >
             <span>عرض الكل</span>
             <ChevronLeft className="w-4 h-4" />
@@ -50,10 +50,10 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                 >
                   <div className="w-20 md:w-24 lg:w-28">
                     {/* Category Image */}
-                    <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 mb-2 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-800/80 to-teal-900/30 border-2 border-gray-700/50 group-hover:border-teal-500/50 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-teal-500/20">
+                    <div className="relative w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 mb-2 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-900/80 to-purple-700/50 border-2 border-purple-600/50 group-hover:border-purple-400/70 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-purple-400/30">
                       {/* Badge */}
                       {index === 0 && productCount > 0 && (
-                        <div className="absolute top-1 right-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-2 py-0.5 rounded-full text-[9px] font-bold z-10">
+                        <div className="absolute top-1 right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-0.5 rounded-full text-[9px] font-bold z-10 shadow-md shadow-purple-500/50">
                           🔥
                         </div>
                       )}
@@ -67,7 +67,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                     </div>
                     
                     {/* Category Name */}
-                    <h3 className="text-white font-bold text-xs md:text-sm text-center mb-1 line-clamp-2 group-hover:text-teal-400 transition-colors">
+                    <h3 className="text-white font-bold text-xs md:text-sm text-center mb-1 line-clamp-2 group-hover:text-purple-300 transition-colors">
                       {category.nameAr}
                     </h3>
                     
@@ -84,8 +84,8 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
           </div>
 
           {/* Scroll Indicator */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-full bg-gradient-to-l from-transparent to-gray-900/50 pointer-events-none md:hidden"></div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-full bg-gradient-to-r from-transparent to-gray-900/50 pointer-events-none md:hidden"></div>
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-full bg-gradient-to-l from-transparent to-purple-900/50 pointer-events-none md:hidden"></div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-full bg-gradient-to-r from-transparent to-purple-900/50 pointer-events-none md:hidden"></div>
         </div>
 
         {/* Scroll Hint */}

@@ -20,15 +20,8 @@ import { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'ريمو ستور - تسوق أونلاين | أفضل الأسعار والعروض',
-  description: 'تسوق أحدث المنتجات بأفضل الأسعار في ريمو ستور. شحن سريع لجميع المحافظات، دفع آمن، ضمان جودة 100%. منتجات أصلية وعروض حصرية يومية.',
-  keywords: 'تسوق أونلاين، ريمو ستور، متجر إلكتروني، شراء أونلاين مصر، أفضل الأسعار، شحن سريع، منتجات أصلية، عروض وخصومات',
-  openGraph: {
-    title: 'ريمو ستور - تسوق أونلاين | أفضل الأسعار والعروض',
-    description: 'تسوق أحدث المنتجات بأفضل الأسعار. شحن سريع، دفع آمن، ضمان جودة.',
-    type: 'website',
-    locale: 'ar_EG',
-  },
+  title: 'تجربة Theme فاتح - ريمو ستور',
+  description: 'صفحة تجريبية بألوان فاتحة متناسقة مع الشعار',
 };
 
 async function getProducts() {
@@ -89,7 +82,7 @@ async function getTopReviews() {
 }
 
 
-export default async function HomePage() {
+export default async function TestLightPage() {
   try {
     const [products, categories, topReviews] = await Promise.all([
       getProducts(),
@@ -346,19 +339,19 @@ export default async function HomePage() {
       </>
     );
   } catch (error) {
-    console.error('Error rendering home page:', error);
+    console.error('Error rendering test light page:', error);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center p-8 bg-white rounded-xl shadow-lg max-w-md">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent mb-4">⚠️ حدث خطأ</h1>
           <p className="text-gray-600 mb-6">
-            عذراً، حدث خطأ أثناء تحميل الصفحة الرئيسية.
+            عذراً، حدث خطأ أثناء تحميل الصفحة التجريبية.
           </p>
           <Link 
             href="/"
             className="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white rounded-lg transition shadow-lg"
           >
-            إعادة تحميل الصفحة
+            العودة للصفحة الرئيسية
           </Link>
         </div>
       </div>

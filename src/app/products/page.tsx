@@ -107,20 +107,20 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white">
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="container mx-auto px-4 py-12 relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-blue-400 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent mb-4">
             جميع المنتجات
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-500 text-lg">
             تصفح مجموعتنا الكاملة من المنتجات
           </p>
         </div>
@@ -128,17 +128,16 @@ export default function ProductsPage() {
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <div className={`lg:col-span-1 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <Card className="bg-gray-800/80 border-teal-500/20 sticky top-24">
+            <Card className="bg-white border-purple-200 shadow-lg sticky top-24">
               <CardContent className="p-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                    <SlidersHorizontal className="w-5 h-5 text-teal-400" />
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent flex items-center gap-2">
+                    <SlidersHorizontal className="w-5 h-5 text-purple-600" />
                     الفلاتر
                   </h3>
                   <button
                     onClick={clearFilters}
-                    className="text-sm text-teal-400 hover:text-teal-300 flex items-center gap-1"
-                  >
+                    className="text-sm text-purple-600 hover:text-purple-700 flex items-center gap-1">
                     <X className="w-4 h-4" />
                     مسح الكل
                   </button>
@@ -146,14 +145,14 @@ export default function ProductsPage() {
 
                 {/* Categories */}
                 <div>
-                  <h4 className="text-sm font-bold text-gray-300 mb-3">الفئات</h4>
+                  <h4 className="text-sm font-bold text-gray-700 mb-3">الفئات</h4>
                   <div className="space-y-2">
                     <button
                       onClick={() => setSelectedCategory(null)}
                       className={`w-full text-right px-3 py-2 rounded-lg transition-colors ${
                         selectedCategory === null
-                          ? 'bg-teal-600 text-white'
-                          : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+                          ? 'bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white'
+                          : 'bg-purple-50 text-gray-700 hover:bg-purple-100'
                       }`}
                     >
                       <span className="flex items-center justify-between">
@@ -167,8 +166,8 @@ export default function ProductsPage() {
                         onClick={() => setSelectedCategory(category.id)}
                         className={`w-full text-right px-3 py-2 rounded-lg transition-colors ${
                           selectedCategory === category.id
-                            ? 'bg-teal-600 text-white'
-                            : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
+                            ? 'bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white'
+                            : 'bg-purple-50 text-gray-700 hover:bg-purple-100'
                         }`}
                       >
                         <span className="flex items-center justify-between">
@@ -182,7 +181,7 @@ export default function ProductsPage() {
 
                 {/* Price Range */}
                 <div>
-                  <h4 className="text-sm font-bold text-gray-300 mb-3">نطاق السعر</h4>
+                  <h4 className="text-sm font-bold text-gray-700 mb-3">نطاق السعر</h4>
                   <div className="space-y-3">
                     <input
                       type="range"
@@ -190,9 +189,9 @@ export default function ProductsPage() {
                       max="10000"
                       value={priceRange[1]}
                       onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                      className="w-full accent-teal-500"
+                      className="w-full accent-purple-600"
                     />
-                    <div className="flex items-center justify-between text-sm text-gray-400">
+                    <div className="flex items-center justify-between text-sm text-gray-500">
                       <span>{priceRange[0]} جنيه</span>
                       <span>{priceRange[1]} جنيه</span>
                     </div>
@@ -201,11 +200,11 @@ export default function ProductsPage() {
 
                 {/* Sort */}
                 <div>
-                  <h4 className="text-sm font-bold text-gray-300 mb-3">الترتيب</h4>
+                  <h4 className="text-sm font-bold text-gray-700 mb-3">الترتيب</h4>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="newest">الأحدث</option>
                     <option value="price-asc">السعر: من الأقل للأعلى</option>
@@ -229,12 +228,12 @@ export default function ProductsPage() {
                     placeholder="ابحث عن المنتجات..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pr-10 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                    className="w-full pr-10 bg-white border-purple-200 text-gray-700 placeholder:text-gray-400 focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
                 <Button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden bg-teal-600 hover:bg-teal-700"
+                  className="lg:hidden bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white"
                 >
                   <SlidersHorizontal className="w-5 h-5" />
                 </Button>
@@ -244,7 +243,7 @@ export default function ProductsPage() {
               {(selectedCategory || searchQuery || priceRange[1] < 10000) && (
                 <div className="flex flex-wrap gap-2">
                   {selectedCategory && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-teal-600 text-white text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white text-sm rounded-full">
                       {categories.find(c => c.id === selectedCategory)?.nameAr}
                       <button onClick={() => setSelectedCategory(null)}>
                         <X className="w-3 h-3" />
@@ -252,7 +251,7 @@ export default function ProductsPage() {
                     </span>
                   )}
                   {searchQuery && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-teal-600 text-white text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white text-sm rounded-full">
                       بحث: {searchQuery}
                       <button onClick={() => setSearchQuery("")}>
                         <X className="w-3 h-3" />
@@ -264,19 +263,19 @@ export default function ProductsPage() {
             </div>
 
             {/* Results Count */}
-            <div className="mb-6 text-gray-400">
+            <div className="mb-6 text-gray-600">
               عرض {filteredProducts.length} من {products.length} منتج
             </div>
 
             {/* Products */}
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-12 h-12 animate-spin text-teal-500" />
+                <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
               </div>
             ) : filteredProducts.length === 0 ? (
-              <Card className="bg-gray-800/80 border-teal-500/20 p-12 text-center">
-                <p className="text-xl text-gray-400 mb-4">لا توجد منتجات تطابق البحث</p>
-                <Button onClick={clearFilters} className="bg-teal-600 hover:bg-teal-700">
+              <Card className="bg-white border-purple-200 shadow-lg p-12 text-center">
+                <p className="text-xl text-gray-600 mb-4">لا توجد منتجات تطابق البحث</p>
+                <Button onClick={clearFilters} className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white">
                   مسح الفلاتر
                 </Button>
               </Card>

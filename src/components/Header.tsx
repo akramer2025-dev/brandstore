@@ -235,7 +235,7 @@ export function Header() {
       setIsNotificationSubscribed(true);
 
       // إظهار إشعار تجريبي
-      registration.showNotification('مرحباً في Remostore! 🎉', {
+      registration.showNotification('مرحباً في Remo Store! 🎉', {
         body: 'تم تفعيل الإشعارات بنجاح. ستصلك إشعارات بكل جديد!',
         icon: '/icon-192x192.png',
         badge: '/icon-192x192.png',
@@ -270,35 +270,35 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-teal-500/20">
-      <div className="container mx-auto px-2 sm:px-4 py-2">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 backdrop-blur-sm border-b border-purple-300/20">
+      <div className="container mx-auto px-2 sm:px-4 py-1">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo/Brand */}
-          <Link href="/" className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 group">
-            <div className="relative w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex-shrink-0 group-hover:scale-110 transition-transform">
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 md:gap-3 flex-shrink-0 group">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
               <img 
                 src="/logo.png" 
                 alt="ريمو ستور - Remo Store" 
-                className="w-full h-full object-contain drop-shadow-lg"
+                className="w-full h-full object-contain drop-shadow-2xl"
               />
             </div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent whitespace-nowrap">
-              Remostore
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-extrabold text-white tracking-tight drop-shadow-2xl whitespace-nowrap group-hover:text-purple-100 transition-all duration-300">
+              Remo Store
             </h1>
           </Link>
 
           {/* Navigation & Search */}
           <div className="flex items-center gap-2 sm:gap-4 flex-1">
             <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
-              <Link href="/" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap text-sm">
+              <Link href="/" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap text-xs">
                 الرئيسية
               </Link>
-              <Link href="/products" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap text-sm">
+              <Link href="/products" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap text-xs">
                 المنتجات
               </Link>
               <Link 
                 href="/flash-deals" 
-                className="text-yellow-400 hover:text-yellow-300 transition-colors whitespace-nowrap font-bold flex items-center gap-1 animate-pulse text-sm"
+                className="text-yellow-400 hover:text-yellow-300 transition-colors whitespace-nowrap font-bold flex items-center gap-1 animate-pulse text-xs"
               >
                 ⚡ عروض خاطفة
               </Link>
@@ -388,9 +388,9 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileSearchOpen(true)}
-              className="sm:hidden text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-8 h-8"
+              className="sm:hidden text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-7 h-7"
             >
-              <Search className="w-4 h-4 animate-pulse" />
+              <Search className="w-3 h-3 animate-pulse" />
             </Button>
             
             {/* Wishlist */}
@@ -399,9 +399,9 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative text-gray-300 hover:text-pink-400 hover:bg-pink-900/30 hover:scale-110 transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10"
+                  className="relative text-gray-300 hover:text-pink-400 hover:bg-pink-900/30 hover:scale-110 transition-all duration-300 w-7 h-7 sm:w-8 sm:h-8"
                 >
-                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+                  <Heart className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse" />
                   {mounted && wishlistItems.length > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
                       {wishlistItems.length}
@@ -425,7 +425,7 @@ export function Header() {
                 variant="ghost"
                 size="icon"
                 onClick={isNotificationSubscribed ? unsubscribeFromNotifications : subscribeToNotifications}
-                className={`relative transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10 ${
+                className={`relative transition-all duration-300 w-7 h-7 sm:w-8 sm:h-8 ${
                   isNotificationSubscribed
                     ? 'text-green-400 hover:text-green-300 hover:bg-green-900/30'
                     : 'text-gray-500 hover:text-gray-400 hover:bg-gray-700/30'
@@ -433,9 +433,9 @@ export function Header() {
                 title={isNotificationSubscribed ? 'إيقاف الإشعارات الفورية' : 'تفعيل الإشعارات الفورية'}
               >
                 {isNotificationSubscribed ? (
-                  <Bell className="w-3 h-3 sm:w-4 sm:h-4 fill-green-400" />
+                  <Bell className="w-3 h-3 sm:w-3 sm:h-3 fill-green-400" />
                 ) : (
-                  <BellOff className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <BellOff className="w-3 h-3 sm:w-3 sm:h-3" />
                 )}
                 {isNotificationSubscribed && (
                   <span className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full" />
@@ -448,9 +448,9 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-8 h-8 sm:w-10 sm:h-10"
+                className="relative text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-7 h-7 sm:w-8 sm:h-8"
               >
-                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce-scale" />
+                <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 animate-bounce-scale" />
                 {mounted && totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
                     {totalItems}
@@ -466,9 +466,9 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 w-8 h-8 sm:w-10 sm:h-10"
+                    className="text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 w-7 h-7 sm:w-8 sm:h-8"
                   >
-                    <User className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <User className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-gray-800 border-teal-500/20">

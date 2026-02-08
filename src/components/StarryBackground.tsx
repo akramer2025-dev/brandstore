@@ -69,8 +69,8 @@ export default function StarryBackground() {
           this.x, this.y, this.size * 3
         );
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.5, 'rgba(147, 197, 253, 0.5)'); // cyan-300
-        gradient.addColorStop(1, 'rgba(147, 197, 253, 0)');
+        gradient.addColorStop(0.5, 'rgba(192, 132, 252, 0.8)'); // purple-400
+        gradient.addColorStop(1, 'rgba(192, 132, 252, 0)');
         
         ctx.fillStyle = gradient;
         ctx.beginPath();
@@ -137,8 +137,8 @@ export default function StarryBackground() {
           this.y - Math.sin(this.angle) * this.length
         );
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.5, 'rgba(147, 197, 253, 0.8)');
-        gradient.addColorStop(1, 'rgba(147, 197, 253, 0)');
+        gradient.addColorStop(0.5, 'rgba(216, 180, 254, 0.9)'); // purple-300
+        gradient.addColorStop(1, 'rgba(192, 132, 252, 0)'); // purple-400
 
         ctx.strokeStyle = gradient;
         ctx.lineWidth = 2;
@@ -162,16 +162,16 @@ export default function StarryBackground() {
       }
     }
 
-    // Create stars - reduced count for better performance
+    // Create stars - increased count for more visibility
     const stars: Star[] = [];
-    const starCount = 60; // Reduced from 150
+    const starCount = 120; // Increased for more visible stars
     for (let i = 0; i < starCount; i++) {
       stars.push(new Star());
     }
 
     // Create shooting stars
     const shootingStars: ShootingStar[] = [];
-    const shootingStarCount = 2; // Reduced from 3
+    const shootingStarCount = 4; // Increased for more effect
     for (let i = 0; i < shootingStarCount; i++) {
       shootingStars.push(new ShootingStar());
     }
@@ -183,7 +183,7 @@ export default function StarryBackground() {
       if (inactiveStar) {
         inactiveStar.trigger();
       }
-      shootingStarTimer = setTimeout(triggerShootingStar, Math.random() * 12000 + 5000); // Slower
+      shootingStarTimer = setTimeout(triggerShootingStar, Math.random() * 8000 + 3000); // More frequent
     };
     triggerShootingStar();
 
@@ -229,7 +229,7 @@ export default function StarryBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.6 }}
+      style={{ opacity: 0.8 }}
     />
   );
 }

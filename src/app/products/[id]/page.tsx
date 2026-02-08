@@ -234,19 +234,19 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 flex items-center justify-center">
-        <Loader2 className="w-12 h-12 animate-spin text-teal-500" />
+      <div className="min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 flex items-center justify-center">
-        <Card className="bg-gray-800/80 border-teal-500/20 p-12 text-center">
-          <p className="text-xl text-gray-400 mb-4">المنتج غير موجود</p>
+      <div className="min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white flex items-center justify-center">
+        <Card className="bg-white border-purple-200 p-12 text-center">
+          <p className="text-xl text-gray-600 mb-4">المنتج غير موجود</p>
           <Link href="/products">
-            <Button className="bg-teal-600 hover:bg-teal-700">
+            <Button className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white">
               العودة للمنتجات
             </Button>
           </Link>
@@ -261,11 +261,11 @@ export default function ProductDetailPage() {
     : ['https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white">
       {/* Background Effects - hidden on mobile */}
       <div className="hidden md:block fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-pink-400/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 relative z-10">
@@ -300,24 +300,24 @@ export default function ProductDetailPage() {
         )}
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-400 mb-4 sm:mb-8 overflow-x-auto">
-          <Link href="/" className="hover:text-teal-400">الرئيسية</Link>
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-8 overflow-x-auto">
+          <Link href="/" className="hover:text-purple-600">الرئيسية</Link>
           <ArrowRight className="w-4 h-4 rotate-180" />
-          <Link href="/products" className="hover:text-teal-400">المنتجات</Link>
+          <Link href="/products" className="hover:text-purple-600">المنتجات</Link>
           <ArrowRight className="w-4 h-4 rotate-180" />
-          <Link href={`/products?category=${product.categoryId}`} className="hover:text-teal-400">
+          <Link href={`/products?category=${product.categoryId}`} className="hover:text-purple-600">
             {product.category.nameAr}
           </Link>
           <ArrowRight className="w-4 h-4 rotate-180" />
-          <span className="text-white">{product.nameAr}</span>
+          <span className="text-gray-900 font-semibold">{product.nameAr}</span>
         </div>
 
         {/* Product Details */}
         <div className="grid lg:grid-cols-2 gap-6 sm:gap-12 mb-8 sm:mb-16">
           {/* Image Gallery */}
           <div className="space-y-4">
-            <Card className="bg-gray-800/80 border-teal-500/20 overflow-hidden">
-              <div className="aspect-square relative bg-gray-900">
+            <Card className="bg-white border-purple-200 overflow-hidden shadow-xl">
+              <div className="aspect-square relative bg-purple-50">
                 <Image
                   src={images[selectedImage] || '/placeholder.jpg'}
                   alt={product.nameAr}
@@ -348,8 +348,8 @@ export default function ProductDetailPage() {
                     onClick={() => setSelectedImage(index)}
                     className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                       selectedImage === index
-                        ? 'border-teal-500 ring-2 ring-teal-500/50'
-                        : 'border-gray-700 hover:border-teal-500/50'
+                        ? 'border-purple-600 ring-2 ring-purple-500/50'
+                        : 'border-purple-200 hover:border-purple-400'
                     }`}
                   >
                     <Image
@@ -368,11 +368,11 @@ export default function ProductDetailPage() {
           {/* Product Info */}
           <div className="space-y-4 sm:space-y-6">
             <div>
-              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-teal-600/20 text-teal-400 rounded-full text-xs sm:text-sm mb-3 sm:mb-4">
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs sm:text-sm mb-3 sm:mb-4 border border-purple-200">
                 <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 {product.category.nameAr}
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">{product.nameAr}</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">{product.nameAr}</h1>
               
               {/* Product Rating */}
               <div className="flex items-center gap-3 mb-3">
@@ -388,22 +388,22 @@ export default function ProductDetailPage() {
                     />
                   ))}
                 </div>
-                <span className="text-gray-400 text-sm">
+                <span className="text-gray-500 text-sm">
                   {product.reviews && product.reviews.length > 0 
                     ? `(${product.reviews.length} ${product.reviews.length === 1 ? 'تقييم' : 'تقييمات'})`
                     : 'لا توجد تقييمات بعد'}
                 </span>
               </div>
               
-              <p className="text-gray-400 text-sm sm:text-base md:text-lg leading-relaxed">{product.descriptionAr}</p>
+              <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">{product.descriptionAr}</p>
             </div>
 
             {/* Price & Stock */}
             <div className="flex items-baseline gap-2 sm:gap-4">
-              <span className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
                 {product.price.toLocaleString()}
               </span>
-              <span className="text-lg sm:text-xl md:text-2xl text-gray-400">جنيه</span>
+              <span className="text-lg sm:text-xl md:text-2xl text-gray-600">جنيه</span>
             </div>
 
             {/* Vendor Info */}
@@ -497,25 +497,25 @@ export default function ProductDetailPage() {
               <Button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-4 sm:py-6 text-sm sm:text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold py-4 sm:py-6 text-sm sm:text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
               >
                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-2" />
                 إضافة للسلة
               </Button>
               <Button 
                 variant="outline" 
-                className={`border-teal-500/50 hover:bg-teal-500/10 p-3 sm:p-4 md:p-6 transition-all ${isInWishlist(product.id) ? 'bg-red-500/20 border-red-500/50' : ''}`}
+                className={`border-purple-300 hover:bg-purple-100 p-3 sm:p-4 md:p-6 transition-all ${isInWishlist(product.id) ? 'bg-red-100 border-red-300' : ''}`}
                 onClick={handleToggleWishlist}
               >
-                <Heart className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-all ${isInWishlist(product.id) ? 'text-red-500 fill-red-500' : 'text-teal-400'}`} />
+                <Heart className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-all ${isInWishlist(product.id) ? 'text-red-500 fill-red-500' : 'text-purple-600'}`} />
               </Button>
               <div className="relative">
                 <Button 
                   variant="outline" 
-                  className="border-teal-500/50 hover:bg-teal-500/10 p-3 sm:p-4 md:p-6"
+                  className="border-purple-300 hover:bg-purple-100 p-3 sm:p-4 md:p-6"
                   onClick={() => setShowShareMenu(!showShareMenu)}
                 >
-                  <Share2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-teal-400" />
+                  <Share2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-purple-600" />
                 </Button>
                 
                 {/* Share Menu */}
@@ -525,12 +525,12 @@ export default function ProductDetailPage() {
                       className="fixed inset-0 z-40" 
                       onClick={() => setShowShareMenu(false)}
                     />
-                    <div className="absolute left-0 sm:right-0 bottom-full mb-2 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[200px]">
-                      <div className="p-3 border-b border-gray-700 flex items-center justify-between">
-                        <span className="text-white font-semibold text-sm">مشاركة المنتج</span>
+                    <div className="absolute left-0 sm:right-0 bottom-full mb-2 bg-white border-2 border-purple-200 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[200px]">
+                      <div className="p-3 border-b border-purple-200 flex items-center justify-between">
+                        <span className="text-gray-900 font-semibold text-sm">مشاركة المنتج</span>
                         <button 
                           onClick={() => setShowShareMenu(false)}
-                          className="text-gray-400 hover:text-white"
+                          className="text-gray-500 hover:text-gray-900"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -543,7 +543,7 @@ export default function ProductDetailPage() {
                           <div className="w-9 h-9 bg-green-500 rounded-full flex items-center justify-center">
                             <MessageCircle className="w-5 h-5 text-white" />
                           </div>
-                          <span className="text-white group-hover:text-green-400 font-medium">واتساب</span>
+                          <span className="text-gray-900 group-hover:text-green-600 font-medium">واتساب</span>
                         </button>
                         <button
                           onClick={shareToFacebook}
@@ -552,16 +552,16 @@ export default function ProductDetailPage() {
                           <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center">
                             <Facebook className="w-5 h-5 text-white" />
                           </div>
-                          <span className="text-white group-hover:text-blue-400 font-medium">فيسبوك</span>
+                          <span className="text-gray-900 group-hover:text-blue-600 font-medium">فيسبوك</span>
                         </button>
                         <button
                           onClick={copyLink}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-600/50 rounded-lg transition-colors group"
+                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-purple-100 rounded-lg transition-colors group"
                         >
-                          <div className="w-9 h-9 bg-gray-600 rounded-full flex items-center justify-center">
+                          <div className="w-9 h-9 bg-purple-600 rounded-full flex items-center justify-center">
                             <Copy className="w-5 h-5 text-white" />
                           </div>
-                          <span className="text-white group-hover:text-teal-400 font-medium">نسخ الرابط</span>
+                          <span className="text-gray-900 group-hover:text-purple-600 font-medium">نسخ الرابط</span>
                         </button>
                       </div>
                     </div>
@@ -571,7 +571,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Brand & Quality Features - Dynamic based on Product & Vendor */}
-            <div className="hidden md:block bg-gradient-to-br from-teal-900/40 to-cyan-900/40 rounded-xl p-6 border border-teal-500/30 space-y-4">
+            <div className="hidden md:block bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200 space-y-4 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 flex-shrink-0">
                   {product.vendor?.logo ? (
@@ -589,33 +589,33 @@ export default function ProductDetailPage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg">
+                  <h3 className="text-gray-900 font-bold text-lg">
                     {product.vendor ? `منتج من ${product.vendor.storeNameAr || product.vendor.storeName}` : 'منتج أصلي من ريمو ستور'}
                   </h3>
-                  <p className="text-teal-400 text-sm">
+                  <p className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent text-sm font-semibold">
                     {product.category?.nameAr || 'منتج مميز'}
                   </p>
                 </div>
               </div>
 
               <div className="grid gap-3">
-                <div className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
-                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-teal-600/20 rounded-full">
-                    <Check className="w-5 h-5 text-teal-400" />
+                <div className="flex items-start gap-3 bg-white rounded-lg p-3 border border-purple-100">
+                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-purple-100 rounded-full">
+                    <Check className="w-5 h-5 text-purple-600" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-1">جودة مضمونة</h4>
-                    <p className="text-gray-400 text-sm">منتج أصلي من بائع موثوق - نضمن لك الجودة والأصالة</p>
+                    <h4 className="text-gray-900 font-semibold mb-1">جودة مضمونة</h4>
+                    <p className="text-gray-600 text-sm">منتج أصلي من بائع موثوق - نضمن لك الجودة والأصالة</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
-                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-teal-600/20 rounded-full">
-                    <Check className="w-5 h-5 text-teal-400" />
+                <div className="flex items-start gap-3 bg-white rounded-lg p-3 border border-purple-100">
+                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-purple-100 rounded-full">
+                    <Check className="w-5 h-5 text-purple-600" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-1">خامات عالية الجودة</h4>
-                    <p className="text-gray-400 text-sm">
+                    <h4 className="text-gray-900 font-semibold mb-1">خامات عالية الجودة</h4>
+                    <p className="text-gray-600 text-sm">
                       {product.category?.nameAr?.includes('ملابس') || product.category?.nameAr?.includes('قميص') || product.category?.nameAr?.includes('بنطلون')
                         ? 'أقمشة مختارة بعناية - راحة ومتانة طوال اليوم'
                         : 'مواد ممتازة تضمن أداء عالي وعمر أطول'}
@@ -623,31 +623,31 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
-                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-teal-600/20 rounded-full">
-                    <Truck className="w-5 h-5 text-teal-400" />
+                <div className="flex items-start gap-3 bg-white rounded-lg p-3 border border-purple-100">
+                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-purple-100 rounded-full">
+                    <Truck className="w-5 h-5 text-purple-600" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-1">شحن سريع وآمن</h4>
-                    <p className="text-gray-400 text-sm">توصيل لجميع المحافظات مع إمكانية الفحص قبل الاستلام</p>
+                    <h4 className="text-gray-900 font-semibold mb-1">شحن سريع وآمن</h4>
+                    <p className="text-gray-600 text-sm">توصيل لجميع المحافظات مع إمكانية الفحص قبل الاستلام</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 bg-gray-800/50 rounded-lg p-3">
-                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-teal-600/20 rounded-full">
-                    <Shield className="w-5 h-5 text-teal-400" />
+                <div className="flex items-start gap-3 bg-white rounded-lg p-3 border border-purple-100">
+                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-purple-100 rounded-full">
+                    <Shield className="w-5 h-5 text-purple-600" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-white font-semibold mb-1">ضمان الاسترجاع</h4>
-                    <p className="text-gray-400 text-sm">استرجع أو استبدل المنتج إذا لم يناسبك</p>
+                    <h4 className="text-gray-900 font-semibold mb-1">ضمان الاسترجاع</h4>
+                    <p className="text-gray-600 text-sm">استرجع أو استبدل المنتج إذا لم يناسبك</p>
                   </div>
                 </div>
               </div>
 
               {product.vendor && (
-                <div className="flex items-center gap-2 pt-3 border-t border-teal-500/20">
+                <div className="flex items-center gap-2 pt-3 border-t border-purple-200">
                   <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  <span className="text-gray-300 text-sm">
+                  <span className="text-gray-700 text-sm">
                     {product.vendor.rating > 0 
                       ? `تقييم البائع: ${product.vendor.rating.toFixed(1)} من 5`
                       : 'بائع موثوق على ريمو ستور'}
@@ -657,24 +657,24 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Features */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-700">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-purple-200">
               <div className="text-center">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
-                  <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-purple-100 rounded-full">
+                  <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
-                <p className="text-xs sm:text-sm text-gray-400">شحن سريع</p>
+                <p className="text-xs sm:text-sm text-gray-600">شحن سريع</p>
               </div>
               <div className="text-center">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
-                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-purple-100 rounded-full">
+                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
-                <p className="text-xs sm:text-sm text-gray-400">ضمان الجودة</p>
+                <p className="text-xs sm:text-sm text-gray-600">ضمان الجودة</p>
               </div>
               <div className="text-center">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-teal-600/20 rounded-full">
-                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1.5 sm:mb-2 flex items-center justify-center bg-purple-100 rounded-full">
+                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
-                <p className="text-xs sm:text-sm text-gray-400">فحص عند الاستلام</p>
+                <p className="text-xs sm:text-sm text-gray-600">فحص عند الاستلام</p>
               </div>
             </div>
 
@@ -682,7 +682,7 @@ export default function ProductDetailPage() {
             {product.vendor && (
               <div className="pt-4 sm:pt-6">
                 <Link href={`/products?vendorId=${product.vendor.id}`}>
-                  <Button className="w-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-600 hover:via-amber-600 hover:to-orange-600 text-white font-bold py-4 sm:py-5 text-base sm:text-lg rounded-xl shadow-lg hover:shadow-orange-500/40 transition-all duration-300 group">
+                  <Button className="w-full bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold py-4 sm:py-5 text-base sm:text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 group">
                     <Store className="w-5 h-5 sm:w-6 sm:h-6 ml-2 group-hover:scale-110 transition-transform" />
                     تصفح جميع منتجات {product.vendor.storeNameAr || 'التاجر'}
                     <ArrowRight className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -696,11 +696,11 @@ export default function ProductDetailPage() {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-white">منتجات مشابهة</h2>
+            <h2 className="text-3xl font-bold text-gray-900">منتجات مشابهة</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((relatedProduct) => (
                 <Link key={relatedProduct.id} href={`/products/${relatedProduct.id}`}>
-                  <Card className="bg-gray-800/80 border-teal-500/20 hover:border-teal-500/50 transition-all cursor-pointer group">
+                  <Card className="bg-white border-purple-200 hover:border-purple-400 hover:shadow-xl transition-all cursor-pointer group">
                     <div className="aspect-square relative overflow-hidden">
                       <Image
                         src={relatedProduct.images?.split(',')[0]?.trim() || '/placeholder.jpg'}
@@ -714,10 +714,10 @@ export default function ProductDetailPage() {
                       />
                     </div>
                     <CardContent className="p-4">
-                      <h3 className="text-white font-bold mb-2 group-hover:text-teal-400 transition-colors">
+                      <h3 className="text-gray-900 font-bold mb-2 group-hover:text-purple-600 transition-colors">
                         {relatedProduct.nameAr}
                       </h3>
-                      <p className="text-teal-400 font-bold text-xl">
+                      <p className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent font-bold text-xl">
                         {relatedProduct.price.toLocaleString()} جنيه
                       </p>
                     </CardContent>
@@ -731,7 +731,7 @@ export default function ProductDetailPage() {
         {/* Reviews Section */}
         <div className="mt-16 space-y-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <h2 className="text-3xl font-bold text-white">آراء العملاء</h2>
+            <h2 className="text-3xl font-bold text-gray-900">آراء العملاء</h2>
             {product.reviews && product.reviews.length > 0 ? (
               <div className="flex items-center gap-2">
                 <div className="flex items-center">
@@ -746,28 +746,28 @@ export default function ProductDetailPage() {
                     />
                   ))}
                 </div>
-                <span className="text-gray-400 text-lg">
+                <span className="text-gray-600 text-lg">
                   ({product.reviews.length} {product.reviews.length === 1 ? 'تقييم' : 'تقييمات'})
                 </span>
               </div>
             ) : (
-              <span className="text-gray-400">لا توجد تقييمات بعد</span>
+              <span className="text-gray-500">لا توجد تقييمات بعد</span>
             )}
           </div>
 
           {product.reviews && product.reviews.length > 0 ? (
             <div className="grid gap-6">
               {product.reviews.map((review) => (
-                <Card key={review.id} className="bg-gray-800/80 border-teal-500/20">
+                <Card key={review.id} className="bg-white border-purple-200 shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
                         <User className="w-6 h-6 text-white" />
                       </div>
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center justify-between flex-wrap gap-2">
-                          <h3 className="text-white font-bold text-lg">{review.user.name}</h3>
-                          <span className="text-gray-400 text-sm">
+                          <h3 className="text-gray-900 font-bold text-lg">{review.user.name}</h3>
+                          <span className="text-gray-500 text-sm">
                             {new Date(review.createdAt).toLocaleDateString('ar-EG', {
                               year: 'numeric',
                               month: 'long',
@@ -787,7 +787,7 @@ export default function ProductDetailPage() {
                             />
                           ))}
                         </div>
-                        <p className="text-gray-300 leading-relaxed">{review.comment}</p>
+                        <p className="text-gray-700 leading-relaxed">{review.comment}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -795,18 +795,18 @@ export default function ProductDetailPage() {
               ))}
             </div>
           ) : (
-            <Card className="bg-gray-800/80 border-teal-500/20">
+            <Card className="bg-white border-purple-200 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-teal-600/20 flex items-center justify-center">
-                  <MessageCircle className="w-8 h-8 text-teal-400" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
+                  <MessageCircle className="w-8 h-8 text-purple-600" />
                 </div>
-                <h3 className="text-white font-bold text-xl mb-2">كن أول من يقيّم هذا المنتج!</h3>
-                <p className="text-gray-400 mb-4">
+                <h3 className="text-gray-900 font-bold text-xl mb-2">كن أول من يقيّم هذا المنتج!</h3>
+                <p className="text-gray-600 mb-4">
                   شاركنا رأيك بعد الشراء لمساعدة الآخرين في اتخاذ قرارهم
                 </p>
                 <div className="flex items-center justify-center gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="w-8 h-8 text-gray-600" />
+                    <Star key={star} className="w-8 h-8 text-gray-300" />
                   ))}
                 </div>
               </CardContent>

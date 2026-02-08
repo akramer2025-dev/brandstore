@@ -52,7 +52,7 @@ export default function NewsTicker() {
   const Icon = currentItem.icon;
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 border-b-2 border-teal-500/30 shadow-lg">
+    <div className="relative w-full overflow-hidden bg-gradient-to-r from-purple-900 via-purple-800 to-purple-900 border-b-2 border-purple-500/50 shadow-lg shadow-purple-500/20">
       {/* Background Animation */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
       
@@ -94,7 +94,7 @@ export default function NewsTicker() {
                   onClick={() => setCurrentIndex(index)}
                   className={`transition-all duration-300 rounded-full ${
                     index === currentIndex 
-                      ? 'w-6 h-2 bg-gradient-to-r from-teal-400 to-cyan-400' 
+                      ? 'w-6 h-2 bg-gradient-to-r from-purple-400 to-pink-400' 
                       : 'w-2 h-2 bg-gray-600 hover:bg-gray-500'
                   }`}
                   aria-label={`الانتقال إلى الإعلان ${index + 1}`}
@@ -109,7 +109,7 @@ export default function NewsTicker() {
       </div>
 
       {/* Bottom Glow Effect */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-400/50 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent" />
     </div>
   );
 }

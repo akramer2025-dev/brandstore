@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Heart, Star, Eye, Zap, TrendingUp, Award, Shield, Truck } from "lucide-react";
+import { ShoppingCart, Heart, Star, Zap, TrendingUp, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart";
@@ -181,32 +181,33 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`}>
       <Card 
-        className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-2 border-orange-500/50 animate-border-glow transition-all duration-500 cursor-pointer group relative overflow-hidden h-full hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-2"
+        className="group relative overflow-hidden h-full transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-2xl"
+        style={{
+          border: '2px solid transparent',
+          backgroundImage: 'linear-gradient(white, white), linear-gradient(to right, rgb(147, 51, 234), rgb(236, 72, 153), rgb(249, 115, 22))',
+          backgroundOrigin: 'border-box',
+          backgroundClip: 'padding-box, border-box'
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Animated Gradient Border Effect */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 animate-pulse" />
-        </div>
-
-        {/* Badge - Top Right */}
+        {/* Badge - Top Left */}
         {badge && (
-          <div className={`absolute top-2 right-2 sm:top-3 sm:right-3 z-20 bg-gradient-to-r ${badge.color} text-white font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs shadow-lg flex items-center gap-1`}>
-            <badge.icon className="w-3 h-3" />
+          <div className={`absolute top-3 left-3 z-20 bg-gradient-to-r ${badge.color} text-white font-bold px-3 py-1.5 rounded-full text-xs shadow-lg flex items-center gap-1.5`}>
+            <badge.icon className="w-3.5 h-3.5" />
             <span>{badge.text}</span>
           </div>
         )}
 
-        {/* Discount Badge - Top Left */}
+        {/* Discount Badge - Top Right */}
         {discount > 0 && (
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 bg-gradient-to-r from-red-600 to-orange-500 text-white font-black px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm shadow-lg animate-bounce">
+          <div className="absolute top-3 right-3 z-20 bg-gradient-to-r from-red-500 to-orange-500 text-white font-black px-3 py-1.5 rounded-xl text-sm shadow-lg">
             -{discount}%
           </div>
         )}
 
         {/* Product Image */}
-        <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
+        <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 rounded-t-2xl">
           <Image
             src={firstImage}
             alt={product.nameAr}
@@ -218,116 +219,55 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
             }}
           />
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Quick Actions - Show on Hover */}
-          <div className={`absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <button
-              onClick={handleToggleWishlist}
-              disabled={isAddingToWishlist}
-              className={`p-2.5 rounded-full transition-all duration-300 shadow-xl backdrop-blur-sm ${
-                inWishlist 
-                  ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white scale-110' 
-                  : 'bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white'
-              } ${isAddingToWishlist ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <Heart className={`w-4 h-4 transition-all ${inWishlist ? 'fill-current' : ''}`} />
-            </button>
-            <button className="p-2.5 rounded-full bg-white/90 text-gray-700 hover:bg-teal-500 hover:text-white transition-all duration-300 shadow-xl backdrop-blur-sm">
-              <Eye className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Wishlist Button - Bottom Right of Image */}
+          <button
+            onClick={handleToggleWishlist}
+            disabled={isAddingToWishlist}
+            className={`absolute bottom-3 right-3 p-2.5 rounded-full transition-all duration-300 shadow-lg backdrop-blur-md z-30 ${
+              inWishlist 
+                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white scale-110' 
+                : 'bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white'
+            } ${isAddingToWishlist ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <Heart className={`w-4 h-4 transition-all ${inWishlist ? 'fill-current' : ''}`} />
+          </button>
 
           {/* Stock Badge */}
-          {product.stock === 0 ? (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white text-sm font-bold px-4 py-2 rounded-lg backdrop-blur-sm">
+          {product.stock === 0 && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white text-sm font-bold px-6 py-3 rounded-xl backdrop-blur-md z-20">
               نفذت الكمية
-            </div>
-          ) : product.stock <= 10 && (
-            <div className="absolute bottom-2 left-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[9px] sm:text-xs font-bold px-2 py-1 rounded-full animate-pulse shadow-lg flex items-center gap-1">
-              <Zap className="w-3 h-3" />
-              {product.stock} متبقي فقط!
             </div>
           )}
         </div>
 
-        <CardContent className="p-3 sm:p-4 space-y-2.5 sm:space-y-3 relative z-10">
-          {/* Category */}
-          {product.category && (
-            <span className="inline-block text-[10px] sm:text-xs text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full font-medium">
-              {product.category.nameAr}
-            </span>
-          )}
-
+        <CardContent className="p-2.5 space-y-1.5 bg-white rounded-b-2xl">
           {/* Product Name */}
-          <h3 className="text-white font-bold text-xs sm:text-sm md:text-base line-clamp-2 group-hover:text-teal-400 transition-colors min-h-[2.5rem] sm:min-h-[3rem]">
+          <h3 className="font-bold text-xs md:text-sm line-clamp-1 bg-gradient-to-r from-purple-700 via-pink-600 to-orange-600 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:via-pink-500 group-hover:to-orange-500 transition-all">
             {product.nameAr}
           </h3>
           
-          {/* Rating & Reviews */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              {renderStars(rating)}
-              <span className="text-yellow-400 font-bold text-xs">{rating}</span>
-              <span className="text-gray-500 text-[10px] sm:text-xs">({reviewCount})</span>
-            </div>
+          {/* Rating */}
+          <div className="flex items-center gap-1.5">
+            {renderStars(rating)}
+            <span className="text-yellow-600 font-bold text-xs">{rating}</span>
+            <span className="text-gray-400 text-[10px]">({reviewCount})</span>
           </div>
 
-          {/* Sales Count */}
-          <div className="flex items-center gap-1 text-gray-400 text-[10px] sm:text-xs">
-            <TrendingUp className="w-3 h-3 text-green-400" />
-            <span className="text-green-400 font-medium">
-              {soldCount > 999 ? `${(soldCount / 1000).toFixed(1)}K` : soldCount}+ تم بيعه
+          {/* Price */}
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent">
+              {product.price.toLocaleString('en-US')}
             </span>
-          </div>
-
-          {/* Price - Enhanced */}
-          <div className="space-y-2">
-            {/* Original Price (Crossed) - دائماً يظهر */}
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500 line-through text-sm sm:text-base font-bold">
-                {displayOriginalPrice.toLocaleString('en-US')} جنيه
-              </span>
-              <span className="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full font-bold">
-                -{Math.round(((displayOriginalPrice - product.price) / displayOriginalPrice) * 100)}%
-              </span>
-            </div>
-            
-            {/* Current Price (Real Price) */}
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 bg-clip-text text-transparent drop-shadow-lg">
-                {product.price.toLocaleString('en-US')}
-              </span>
-              <span className="text-green-400 text-sm font-bold">جنيه</span>
-            </div>
-            
-            {/* Savings Badge - دائماً يظهر */}
-            <div className="inline-flex items-center gap-1 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1 rounded-full shadow-lg">
-              <span>🎉</span>
-              <span>وفّر {(displayOriginalPrice - product.price).toLocaleString('en-US')} جنيه</span>
-            </div>
-          </div>
-
-          {/* Features Icons */}
-          <div className="flex items-center gap-2 text-gray-400 text-[10px]">
-            <div className="flex items-center gap-1">
-              <Shield className="w-3 h-3 text-teal-400" />
-              <span>ضمان</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Truck className="w-3 h-3 text-teal-400" />
-              <span>توصيل سريع</span>
-            </div>
+            <span className="text-green-600 text-xs font-bold">ج.م</span>
           </div>
 
           {/* Add to Cart Button */}
           <Button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="w-full bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-600 hover:from-teal-500 hover:via-cyan-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm py-2.5 sm:py-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-teal-500/30 group/btn"
+            className="w-full bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold text-xs py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl rounded-xl group/btn"
           >
-            <ShoppingCart className="w-4 h-4 ml-2 group-hover/btn:animate-bounce" />
+            <ShoppingCart className="w-3.5 h-3.5 ml-1.5 group-hover/btn:scale-110 transition-transform" />
             أضف للسلة
           </Button>
         </CardContent>

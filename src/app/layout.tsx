@@ -3,7 +3,6 @@ import { Cairo } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
-import StarryBackground from "@/components/StarryBackground";
 import InstallPWA from "@/components/InstallPWA";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 
@@ -62,7 +61,6 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className={`${cairo.variable} font-sans antialiased`} suppressHydrationWarning>
-        <StarryBackground />
         <Providers>
           <ServiceWorkerRegistration />
           <Header />
