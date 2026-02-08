@@ -105,6 +105,14 @@ export async function PATCH(
   }
 }
 
+// PUT - Update delivery zone (ADMIN only) - Same as PATCH
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return PATCH(req, { params });
+}
+
 // DELETE - Delete delivery zone (ADMIN only)
 export async function DELETE(
   req: NextRequest,
