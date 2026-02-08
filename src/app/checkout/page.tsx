@@ -1347,11 +1347,12 @@ export default function CheckoutPage() {
                             <div className="bg-yellow-900/30 border border-yellow-500/30 rounded p-2 text-xs text-yellow-300">
                               💡 حول على الرقم أعلاه واكتب المبلغ والمحفظة المستخدمة في ملاحظات الطلب
                             </div>
+                            </div>
                           </div>
-                        </div>
                         )}
                       </div>
                     </div>
+                  </div>
                   )}
 
                   {/* Installment */}
