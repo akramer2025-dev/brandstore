@@ -49,19 +49,26 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError('');
     try {
+      console.log('🔵 Starting Google Sign-In...');
+      
       // تسجيل الدخول مع Google - سيتم التوجيه تلقائياً
       const result = await signIn('google', { 
-        redirect: false 
+        callbackUrl: '/',
+        redirect: true  // دع NextAuth يتعامل مع الـ redirect
       });
       
+      console.log('🔵 Google Sign-In result:', result);
+      
+      // هذا الكود لن يتم تنفيذه إذا كان redirect: true
+      // لكنه احتياطي في حالة حدوث خطأ
       if (result?.error) {
-        setError('حدث خطأ في تسجيل الدخول بواسطة Google');
+        console.error('❌ Google Sign-In error:', result.error);
+        setError(`حدث خطأ: ${result.error}`);
         setGoogleLoading(false);
       }
-      // بعد نجاح تسجيل الدخول، الـ useEffect سيقوم بالتوجيه التلقائي
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      setError('حدث خطأ في تسجيل الدخول بواسطة Google');
+    } catch (error: any) {
+      console.error('❌ Google Sign-In exception:', error);
+      setError(error?.message || 'حدث خطأ في تسجيل الدخول بواسطة Google');
       setGoogleLoading(false);
     }
   };
