@@ -118,10 +118,19 @@ model Vendor {
   phone              String?
   alternativePhone   String?
   whatsapp           String?
-  address            String?
-  city               String?
-  region             String?
-  postalCode         String?
+  // عنوان المتجر (مطلوب للشحن مع بوسطة)
+  address            String?        // العنوان الكامل (نص حر)
+  governorate        String?        // المحافظة
+  city               String?        // المدينة/المركز
+  region             String?        // الحي/المنطقة
+  district           String?        // المنطقة (نسخة ثانية للتوافق)
+  street             String?        // اسم الشارع
+  buildingNumber     String?        // رقم المبنى/العمارة
+  floorNumber        String?        // رقم الطابق
+  apartmentNumber    String?        // رقم الشقة
+  landmark           String?        // أقرب معلم
+  postalCode         String?        // الرمز البريدي
+  pickupInstructions String?        // تعليمات استلام الشحنات
   description        String?
   descriptionAr      String?
   category           String?

@@ -5,6 +5,14 @@ import { prisma } from './prisma';
 
 interface BostaDeliveryData {
   orderId: string;
+  // Pickup (Vendor Store Address)
+  pickupAddress?: string;
+  pickupCity?: string;
+  pickupGovernorate?: string;
+  pickupPhone?: string;
+  pickupName?: string;
+  pickupInstructions?: string;
+  // Delivery (Customer Address)
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
@@ -61,6 +69,21 @@ export class BostaService {
               description: 'ملابس',
             },
           },
+          // 📍 Pickup Address (Vendor Store) - عنوان استلام الشحنة من المتجر
+          ...(data.pickupAddress && {
+            pickupAddress: {
+              firstLine: data.pickupAddress,
+              city: {
+                name: data.pickupCity || data.pickupGovernorate || 'القاهرة',
+              },
+              zone: '',
+            },
+            sender: {
+              firstName: data.pickupName || 'المتجر',
+              phone: data.pickupPhone || '',
+            },
+          }),
+          // 📍 Delivery Address (Customer) - عنوان توصيل الشحنة للعميل
           dropOffAddress: {
             firstLine: data.deliveryAddress,
             city: {
@@ -76,7 +99,10 @@ export class BostaService {
           cod: data.cashOnDelivery, // Cash on Delivery amount
           allowToOpenPackage: true, // السماح بفتح الطرد للفحص
           businessReference: data.orderId, // رقم الطلب عندك
-          notes: data.notes || 'فحص المنتج قبل الدفع',
+          notes: [
+            data.notes || 'فحص المنتج قبل الدفع',
+            data.pickupInstructions ? `تعليمات الاستلام: ${data.pickupInstructions}` : '',
+          ].filter(Boolean).join(' - '),
         }),
       });
 

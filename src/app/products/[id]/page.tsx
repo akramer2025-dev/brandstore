@@ -328,15 +328,6 @@ export default function ProductDetailPage() {
                     (e.target as HTMLImageElement).src = '/placeholder.jpg';
                   }}
                 />
-                
-                {/* Logo Watermark */}
-                <div className="absolute top-4 left-4 w-20 h-20 bg-white/98 backdrop-blur-md shadow-2xl animate-glow-rotate overflow-hidden" style={{ clipPath: 'polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)' }}>
-                  <img 
-                    src="/logo.png?v=2026" 
-                    alt="ريمو ستور - Remo Store" 
-                    className="w-full h-full scale-150 -translate-y-2 object-contain"
-                  />
-                </div>
               </div>
             </Card>
 

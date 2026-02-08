@@ -49,10 +49,15 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError('');
     try {
-      // تسجيل الدخول مع Google - سيتم التوجيه تلقائياً بواسطة useEffect حسب role المستخدم
-      await signIn('google', { 
+      // تسجيل الدخول مع Google - سيتم التوجيه تلقائياً
+      const result = await signIn('google', { 
         redirect: false 
       });
+      
+      if (result?.error) {
+        setError('حدث خطأ في تسجيل الدخول بواسطة Google');
+        setGoogleLoading(false);
+      }
       // بعد نجاح تسجيل الدخول، الـ useEffect سيقوم بالتوجيه التلقائي
     } catch (error) {
       console.error('Google sign-in error:', error);

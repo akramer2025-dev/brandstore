@@ -1099,33 +1099,32 @@ export default function CheckoutPage() {
                   {/* Installment */}
                   {checkoutSettings.paymentMethodInstallment && (
                     <div
-                      onClick={() => setPaymentMethod('INSTALLMENT_4')}
-                      className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
-                        paymentMethod.startsWith('INSTALLMENT_')
-                          ? 'border-purple-500 bg-purple-900/30'
-                          : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                      className={`relative border-2 rounded-lg p-4 transition-all opacity-60 cursor-not-allowed ${
+                        'border-gray-600 bg-gray-700/30'
                       }`}
                     >
+                    {/* Badge "قريباً" */}
+                    <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      قريباً ⭐
+                    </div>
+                    
                     <div className="flex items-start gap-4">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                        paymentMethod.startsWith('INSTALLMENT_')
-                          ? 'border-purple-500 bg-purple-500'
-                          : 'border-gray-500'
-                      }`}>
-                        {paymentMethod.startsWith('INSTALLMENT_') && (
-                          <CheckCircle2 className="w-4 h-4 text-white" />
-                        )}
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 border-gray-500`}>
+                        {/* Disabled */}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <Calendar className="w-5 h-5 text-purple-400" />
                           <h3 className="text-lg font-bold text-white">
-                            الدفع بالتقسيط
+                            ValU - الدفع بالتقسيط
                           </h3>
                         </div>
-                        <p className="text-gray-300 text-sm">
-                          قسّط مشترياتك على 4، 6، 12، أو 24 شهر
+                        <p className="text-gray-300 text-sm mb-2">
+                          قسّط مشترياتك على 4، 6، 12، أو 24 شهر مع ValU
                         </p>
+                        <div className="bg-purple-900/20 border border-purple-500/30 rounded p-2 text-xs text-purple-300">
+                          <strong>قريباً:</strong> سنوفر قريباً خدمة التقسيط بالتعاون مع ValU
+                        </div>
                       </div>
                     </div>
                   </div>

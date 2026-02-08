@@ -31,11 +31,16 @@ export async function POST(
 
     const orderId = params.id;
 
-    // 📦 جلب تفاصيل الطلب
+    // 📦 جلب تفاصيل الطلب مع بيانات الـ Vendor
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
         customer: true,
+        vendor: {
+          include: {
+            user: true,
+          },
+        },
         items: {
           include: {
             product: true,
@@ -50,6 +55,51 @@ export async function POST(
         { status: 404 }
       );
     }
+
+    // ✅ تحقق من وجود عنوان المتجر (للاستلام)
+    if (!order.vendor) {
+      return NextResponse.json(
+        { error: 'الطلب غير مرتبط ببائع' },
+        { status: 400 }
+      );
+    }
+
+    if (!order.vendor.governorate || !order.vendor.city || !order.vendor.street) {
+      return NextResponse.json(
+        { 
+          error: 'عنوان المتجر غير مكتمل',
+          message: 'يرجى إضافة عنوان المتجر أولاً من صفحة "عنوان المتجر"',
+          missingFields: {
+            governorate: !order.vendor.governorate,
+            city: !order.vendor.city,
+            street: !order.vendor.street,
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // بناء عنوان المتجر الكامل للاستلام
+    const pickupAddressParts = [];
+    if (order.vendor.street) pickupAddressParts.push(order.vendor.street);
+    if (order.vendor.buildingNumber) pickupAddressParts.push(`عمارة ${order.vendor.buildingNumber}`);
+    if (order.vendor.floorNumber) pickupAddressParts.push(`الطابق ${order.vendor.floorNumber}`);
+    if (order.vendor.apartmentNumber) pickupAddressParts.push(`شقة ${order.vendor.apartmentNumber}`);
+    if (order.vendor.region) pickupAddressParts.push(order.vendor.region);
+    console.log('📍 Pickup from:', pickupAddress);
+    console.log('📍 Deliver to:', order.deliveryAddress);
+
+    const bostaService = new BostaService();
+    const shipment = await bostaService.createDelivery({
+      orderId: order.id,
+      // Pickup (Vendor Store Address)
+      pickupAddress: pickupAddress,
+      pickupCity: order.vendor.city,
+      pickupGovernorate: order.vendor.governorate,
+      pickupPhone: order.vendor.phone || order.vendor.user?.phone || '',
+      pickupName: order.vendor.storeName || order.vendor.businessName || 'المتجر',
+      pickupInstructions: order.vendor.pickupInstructions || undefined,
+      // Delivery (Customer Address)= order.vendor.address || pickupAddressParts.join('، ');
 
     // ✅ تحقق من إمكانية الشحن
     if (order.status === 'CANCELLED') {
