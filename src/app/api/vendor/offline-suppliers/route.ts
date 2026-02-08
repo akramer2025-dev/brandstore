@@ -34,7 +34,9 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             purchasePrice: true,
+            sellingPrice: true,
             quantity: true,
+            soldQuantity: true,
             profit: true,
             isPaid: true,
             amountPaid: true,
@@ -71,6 +73,24 @@ export async function GET(request: NextRequest) {
       const totalProducts = supplier.offlineProducts.length;
       const lastPaymentDate = supplier.payments[0]?.createdAt || null;
 
+      // حساب البضاعة المتبقية عند المورد
+      const remainingQuantity = supplier.offlineProducts.reduce(
+        (sum, p) => sum + (p.quantity - p.soldQuantity),
+        0
+      );
+      const remainingCost = supplier.offlineProducts.reduce(
+        (sum, p) => sum + ((p.quantity - p.soldQuantity) * p.purchasePrice),
+        0
+      );
+      const remainingExpectedRevenue = supplier.offlineProducts.reduce(
+        (sum, p) => sum + ((p.quantity - p.soldQuantity) * p.sellingPrice),
+        0
+      );
+      const soldRevenue = supplier.offlineProducts.reduce(
+        (sum, p) => sum + (p.soldQuantity * p.sellingPrice),
+        0
+      );
+
       return {
         id: supplier.id,
         name: supplier.name,
@@ -85,6 +105,11 @@ export async function GET(request: NextRequest) {
           pendingAmount,
           totalProducts,
           lastPaymentDate,
+          // البضاعة المتبقية
+          remainingQuantity,
+          remainingCost,
+          remainingExpectedRevenue,
+          soldRevenue,
         },
       };
     });

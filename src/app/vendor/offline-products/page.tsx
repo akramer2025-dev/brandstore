@@ -19,6 +19,8 @@ import {
   Calculator,
   Plus,
   Users,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { BackButton } from '@/components/BackButton';
 
@@ -53,6 +55,10 @@ interface Supplier {
     pendingAmount: number;
     totalProducts: number;
     lastPaymentDate: string | null;
+    remainingQuantity: number;
+    remainingCost: number;
+    remainingExpectedRevenue: number;
+    soldRevenue: number;
   };
 }
 
@@ -80,6 +86,8 @@ export default function OfflineProductsPage() {
   const [showSupplierDialog, setShowSupplierDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showSellDialog, setShowSellDialog] = useState(false);
+  const [showEditSupplierDialog, setShowEditSupplierDialog] = useState(false);
+  const [showEditProductDialog, setShowEditProductDialog] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<OfflineProduct | null>(null);
   const [sellQuantity, setSellQuantity] = useState('');
@@ -312,6 +320,131 @@ export default function OfflineProductsPage() {
     }
   };
 
+  const handleEditSupplier = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedSupplier) return;
+    
+    if (!supplierForm.name.trim()) {
+      toast.error('اسم المورد مطلوب');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/vendor/offline-suppliers/${selectedSupplier.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(supplierForm),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('تم تعديل المورد بنجاح');
+        setSupplierForm({ name: '', phone: '', address: '', notes: '' });
+        setShowEditSupplierDialog(false);
+        setSelectedSupplier(null);
+        fetchSuppliers();
+      } else {
+        toast.error(data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSupplier = async (supplier: Supplier) => {
+    if (!confirm(`هل أنت متأكد من حذف المورد "${supplier.name}"؟`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/vendor/offline-suppliers/${supplier.id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('تم حذف المورد بنجاح');
+        fetchSuppliers();
+      } else {
+        toast.error(data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedProduct) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/vendor/offline-products/${selectedProduct.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('تم تعديل البضاعة بنجاح');
+        setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', description: '', supplierId: '' });
+        setShowEditProductDialog(false);
+        setSelectedProduct(null);
+        fetchData();
+      } else {
+        toast.error(data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteProduct = async (product: OfflineProduct) => {
+    if (!confirm(`هل أنت متأكد من حذف هذه البضاعة؟\nسيتم إرجاع ${(product.purchasePrice * product.quantity).toFixed(0)} ج لرأس المال`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/vendor/offline-products/${product.id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(
+          <div>
+            <p className="font-bold">تم حذف البضاعة بنجاح</p>
+            <p className="text-sm">تم إرجاع {data.refundedAmount.toFixed(0)} ج لرأس المال</p>
+          </div>
+        );
+        fetchData();
+        fetchCapital();
+      } else {
+        toast.error(data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const calculateProfit = () => {
     const purchase = parseFloat(formData.purchasePrice) || 0;
     const selling = parseFloat(formData.sellingPrice) || 0;
@@ -459,37 +592,98 @@ export default function OfflineProductsPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-2 text-sm mb-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">إجمالي المشتريات:</span>
-                        <span className="text-white font-bold">{supplier.stats.totalPurchases.toFixed(0)} ج</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">المدفوع:</span>
-                        <span className="text-green-400 font-bold">{supplier.stats.totalPaid.toFixed(0)} ج</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">المتبقي:</span>
-                        <span className="text-red-400 font-bold">{supplier.stats.pendingAmount.toFixed(0)} ج</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">عدد المنتجات:</span>
-                        <span className="text-white font-bold">{supplier.stats.totalProducts}</span>
+                    {/* المدفوعات */}
+                    <div className="mb-3 p-2 bg-red-500/10 rounded border border-red-500/30">
+                      <p className="text-red-200 text-xs font-bold mb-1">💰 المدفوعات للمورد:</p>
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">إجمالي المشتريات:</span>
+                          <span className="text-white font-bold">{supplier.stats.totalPurchases.toFixed(0)} ج</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">المدفوع:</span>
+                          <span className="text-green-400 font-bold">{supplier.stats.totalPaid.toFixed(0)} ج</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">المتبقي للدفع:</span>
+                          <span className="text-red-400 font-bold">{supplier.stats.pendingAmount.toFixed(0)} ج</span>
+                        </div>
                       </div>
                     </div>
 
-                    {supplier.stats.pendingAmount > 0 && (
+                    {/* البضاعة المتبقية عند المورد */}
+                    {supplier.stats.remainingQuantity > 0 && (
+                      <div className="mb-3 p-2 bg-yellow-500/10 rounded border border-yellow-500/30">
+                        <p className="text-yellow-200 text-xs font-bold mb-1">📦 البضاعة عند المورد:</p>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">عدد القطع المتبقية:</span>
+                            <span className="text-white font-bold">{supplier.stats.remainingQuantity} قطعة</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">قيمتها الأصلية:</span>
+                            <span className="text-orange-400 font-bold">{supplier.stats.remainingCost.toFixed(0)} ج</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">لو اتباعت هتبقى:</span>
+                            <span className="text-green-400 font-bold">{supplier.stats.remainingExpectedRevenue.toFixed(0)} ج</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* المبيعات */}
+                    {supplier.stats.soldRevenue > 0 && (
+                      <div className="mb-3 p-2 bg-blue-500/10 rounded border border-blue-500/30">
+                        <p className="text-blue-200 text-xs font-bold mb-1">💵 المبيعات المحصلة:</p>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">مبيعات المورد:</span>
+                          <span className="text-blue-400 font-bold">{supplier.stats.soldRevenue.toFixed(0)} ج</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="text-xs text-gray-400 mb-3">
+                      عدد المنتجات: {supplier.stats.totalProducts}
+                    </div>
+
+                    <div className="flex gap-2">
+                      {supplier.stats.pendingAmount > 0 && (
+                        <Button
+                          onClick={() => {
+                            setSelectedSupplier(supplier);
+                            setShowPaymentDialog(true);
+                          }}
+                          className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-sm"
+                        >
+                          <DollarSign className="w-4 h-4 ml-1" />
+                          دفع
+                        </Button>
+                      )}
                       <Button
                         onClick={() => {
                           setSelectedSupplier(supplier);
-                          setShowPaymentDialog(true);
+                          setSupplierForm({
+                            name: supplier.name,
+                            phone: supplier.phone || '',
+                            address: supplier.address || '',
+                            notes: supplier.notes || '',
+                          });
+                          setShowEditSupplierDialog(true);
                         }}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-sm"
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700"
                       >
-                        <DollarSign className="w-4 h-4 ml-2" />
-                        دفع للمورد
+                        <Edit className="w-4 h-4" />
                       </Button>
-                    )}
+                      <Button
+                        onClick={() => handleDeleteSupplier(supplier)}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -762,18 +956,44 @@ export default function OfflineProductsPage() {
                       {/* Actions */}
                       <div className="flex gap-2">
                         {remainingQuantity > 0 ? (
-                          <Button
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setSellQuantity('');
-                              setShowSellDialog(true);
-                            }}
-                            size="sm"
-                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-                          >
-                            <DollarSign className="w-4 h-4 ml-1" />
-                            تسجيل بيع
-                          </Button>
+                          <>
+                            <Button
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setSellQuantity('');
+                                setShowSellDialog(true);
+                              }}
+                              size="sm"
+                              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                            >
+                              <DollarSign className="w-4 h-4 ml-1" />
+                              بيع
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setFormData({
+                                  purchasePrice: product.purchasePrice.toString(),
+                                  sellingPrice: product.sellingPrice.toString(),
+                                  quantity: product.quantity.toString(),
+                                  description: product.description || '',
+                                  supplierId: product.supplier?.id || '',
+                                });
+                                setShowEditProductDialog(true);
+                              }}
+                              size="sm"
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteProduct(product)}
+                              size="sm"
+                              variant="destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </>
                         ) : (
                           <div className="flex-1 text-center py-2 bg-gray-700/50 rounded text-gray-400 text-sm">
                             ✓ تم البيع بالكامل
@@ -1150,6 +1370,229 @@ export default function OfflineProductsPage() {
                         </>
                       ) : (
                         'تأكيد البيع'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Edit Supplier Dialog */}
+        {showEditSupplierDialog && selectedSupplier && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md bg-gray-900 border-blue-500/50">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Edit className="w-5 h-5" />
+                    تعديل مورد: {selectedSupplier.name}
+                  </span>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setShowEditSupplierDialog(false);
+                      setSelectedSupplier(null);
+                      setSupplierForm({ name: '', phone: '', address: '', notes: '' });
+                    }}
+                    size="sm"
+                    variant="ghost"
+                    className="text-gray-400 hover:text-white"
+                  >
+                    ✕
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleEditSupplier} className="space-y-4">
+                  <div>
+                    <Label htmlFor="editSupplierName" className="text-white">
+                      اسم المورد *
+                    </Label>
+                    <Input
+                      id="editSupplierName"
+                      value={supplierForm.name}
+                      onChange={(e) => setSupplierForm({ ...supplierForm, name: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editSupplierPhone" className="text-white">
+                      رقم التليفون
+                    </Label>
+                    <Input
+                      id="editSupplierPhone"
+                      type="tel"
+                      value={supplierForm.phone}
+                      onChange={(e) => setSupplierForm({ ...supplierForm, phone: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editSupplierAddress" className="text-white">
+                      العنوان
+                    </Label>
+                    <Input
+                      id="editSupplierAddress"
+                      value={supplierForm.address}
+                      onChange={(e) => setSupplierForm({ ...supplierForm, address: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editSupplierNotes" className="text-white">
+                      ملاحظات
+                    </Label>
+                    <Textarea
+                      id="editSupplierNotes"
+                      value={supplierForm.notes}
+                      onChange={(e) => setSupplierForm({ ...supplierForm, notes: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                      rows={2}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setShowEditSupplierDialog(false);
+                        setSelectedSupplier(null);
+                        setSupplierForm({ name: '', phone: '', address: '', notes: '' });
+                      }}
+                      variant="outline"
+                      className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
+                    >
+                      إلغاء
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          جاري الحفظ...
+                        </>
+                      ) : (
+                        'حفظ التعديلات'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Edit Product Dialog */}
+        {showEditProductDialog && selectedProduct && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md bg-gray-900 border-blue-500/50">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Edit className="w-5 h-5" />
+                    تعديل بضاعة
+                  </span>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setShowEditProductDialog(false);
+                      setSelectedProduct(null);
+                      setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', description: '', supplierId: '' });
+                    }}
+                    size="sm"
+                    variant="ghost"
+                    className="text-gray-400 hover:text-white"
+                  >
+                    ✕
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleEditProduct} className="space-y-4">
+                  <div>
+                    <Label htmlFor="editPurchasePrice" className="text-white">
+                      سعر الشراء (للوحدة) *
+                    </Label>
+                    <Input
+                      id="editPurchasePrice"
+                      type="number"
+                      step="0.01"
+                      value={formData.purchasePrice}
+                      onChange={(e) => setFormData({ ...formData, purchasePrice: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editSellingPrice" className="text-white">
+                      سعر البيع (للوحدة) *
+                    </Label>
+                    <Input
+                      id="editSellingPrice"
+                      type="number"
+                      step="0.01"
+                      value={formData.sellingPrice}
+                      onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editQuantity" className="text-white">
+                      الكمية *
+                    </Label>
+                    <Input
+                      id="editQuantity"
+                      type="number"
+                      min="1"
+                      value={formData.quantity}
+                      onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editDescription" className="text-white">
+                      وصف
+                    </Label>
+                    <Textarea
+                      id="editDescription"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                      rows={2}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setShowEditProductDialog(false);
+                        setSelectedProduct(null);
+                        setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', description: '', supplierId: '' });
+                      }}
+                      variant="outline"
+                      className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
+                    >
+                      إلغاء
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          جاري الحفظ...
+                        </>
+                      ) : (
+                        'حفظ التعديلات'
                       )}
                     </Button>
                   </div>
