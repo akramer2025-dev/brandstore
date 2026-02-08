@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { toast } from "sonner";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 
 interface ProductCardProps {
   product: {
@@ -63,8 +63,35 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   
   const inWishlist = isInWishlist(product.id);
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, []);
   
   // Extract first image from comma-separated images
   const firstImage = product.images 
@@ -153,17 +180,28 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
       }
     } catch (error) {
       toast.error("حدث خطأ، حاول مرة أخرى");
-    } finally {
-      setIsAddingToWishlist(false);
-    }
-  };
-
-  // Render stars
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
+    } fdiv 
+        ref={cardRef}
+        className={`transition-all duration-700 ${
+          isVisible 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-8'
+        }`}
+        style={{
+          transitionDelay: `${Math.min(index * 100, 800)}ms`
+        }}
+      >
+        <Card 
+          className="group relative overflow-hidden h-full transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-2xl"
+          style={{
+            border: '2px solid transparent',
+            backgroundImage: 'linear-gradient(white, white), linear-gradient(to right, rgb(147, 51, 234), rgb(236, 72, 153), rgb(249, 115, 22))',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box'
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+            <Star
             key={star}
             className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${
               star <= rating
@@ -261,6 +299,7 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
             <span className="text-green-600 text-xs font-bold">ج.م</span>
           </div>
 
+      </div>
           {/* Add to Cart Button */}
           <Button
             onClick={handleAddToCart}

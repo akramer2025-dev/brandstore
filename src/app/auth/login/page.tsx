@@ -139,65 +139,56 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo/Brand - Enhanced Design */}
-        <div className="text-center mb-10">
+        {/* Logo/Brand - Simplified Modern Design */}
+        <div className="text-center mb-8">
           <Link href="/" className="inline-block group">
-            {/* Logo Container with Enhanced Effects */}
-            <div className="relative">
-              {/* Glow Effect Background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 scale-110"></div>
+            <div className="flex flex-col items-center gap-3">
+              {/* Logo Image with Glow */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-full blur-xl opacity-40 group-hover:opacity-70 transition-all duration-500 scale-110"></div>
+                <img 
+                  src="/logo.png" 
+                  alt="Remo Store" 
+                  className="relative w-20 h-20 rounded-full object-contain transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 drop-shadow-2xl"
+                />
+              </div>
               
-              {/* Main Logo Card */}
-              <div className="relative bg-white/95 backdrop-blur-xl p-6 rounded-3xl border-2 border-purple-200 shadow-2xl transition-all duration-500 group-hover:bg-white group-hover:scale-105 group-hover:border-purple-300">
-                <div className="flex items-center justify-center gap-4">
-                  {/* Logo Image with Animation */}
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-white rounded-2xl blur-md opacity-50"></div>
-                    <img 
-                      src="/logo.png" 
-                      alt="BS Brand Store" 
-                      className="relative w-24 h-24 rounded-2xl object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] transform transition-transform duration-500 group-hover:rotate-3 group-hover:scale-110"
-                    />
-                  </div>
-                  
-                  {/* Brand Text */}
-                  <div className="text-right">
-                    <h1 className="text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent drop-shadow-lg mb-1 tracking-tight">
-                      براند ستور
-                    </h1>
-                    <div className="flex items-center gap-2 justify-end">
-                      <span className="text-sm font-semibold text-purple-700 drop-shadow">تسوق بذكاء</span>
-                      <Sparkles className="w-4 h-4 text-pink-500 animate-pulse" />
-                    </div>
-                    <p className="text-xs text-gray-600 mt-1 font-medium">BS Brand Store</p>
-                  </div>
-                </div>
+              {/* Brand Text */}
+              <div className="text-center">
+                <h1 className="text-3xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent mb-1">
+                  ريمو ستور
+                </h1>
+                <p className="text-sm text-gray-600 font-medium flex items-center gap-1.5 justify-center">
+                  <Sparkles className="w-3.5 h-3.5 text-pink-500" />
+                  تسوق بذكاء وثقة
+                  <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                </p>
               </div>
             </div>
           </Link>
         </div>
 
         {/* Login Card */}
-        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-xl">
-          <CardHeader className="space-y-1 pb-6">
+        <Card className="border-0 shadow-2xl bg-white/98 backdrop-blur-xl hover:shadow-purple-200/50 transition-all duration-300">
+          <CardHeader className="space-y-2 pb-6 border-b border-purple-100">
             <div className="flex items-center justify-between">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
                 تسجيل الدخول
               </CardTitle>
-              <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-2 rounded-lg">
-                <Sparkles className="w-5 h-5 text-purple-600" />
+              <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-2.5 rounded-xl shadow-inner">
+                <ShoppingBag className="w-5 h-5 text-purple-600" />
               </div>
             </div>
-            <CardDescription className="text-base">
-              للجميع: العملاء • الإدارة • الشركاء • موظفي التوصيل
+            <CardDescription className="text-base text-gray-600">
+              🛍️ للجميع: العملاء • الإدارة • الشركاء • موظفي التوصيل
             </CardDescription>
           </CardHeader>
 
           <form onSubmit={handleSubmit} suppressHydrationWarning>
             <CardContent className="space-y-4">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
-                  {error}
+                <div className="bg-red-50 border-2 border-red-300 text-red-800 px-4 py-3 rounded-xl text-sm font-medium animate-shake shadow-lg">
+                  ⚠️ {error}
                 </div>
               )}
 
@@ -264,7 +255,7 @@ export default function LoginPage() {
             <CardFooter className="flex flex-col gap-4">
               <Button
                 type="submit"
-                className="w-full h-12 text-lg font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 text-white border-0"
+                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 shadow-xl hover:shadow-2xl hover:shadow-purple-300/50 transition-all duration-300 hover:scale-[1.02] active:scale-95 text-white border-0 rounded-xl"
                 disabled={loading || googleLoading}
               >
                 {loading ? (
@@ -294,7 +285,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading || googleLoading}
-                className="w-full h-12 text-base font-semibold bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-300 hover:border-gray-400 transition-all duration-300 hover:scale-105 shadow-md"
+                className="w-full h-13 text-base font-semibold bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-300 hover:border-purple-300 transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl rounded-xl"
               >
                 {googleLoading ? (
                   <>
@@ -328,7 +319,7 @@ export default function LoginPage() {
               <div className="text-center">
                 <Link
                   href="/auth/join-us"
-                  className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white rounded-xl font-bold hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5"
+                  className="inline-flex items-center justify-center gap-2 w-full px-6 py-4 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white rounded-xl font-bold hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-purple-300/50 transform hover:scale-[1.02] active:scale-95"
                 >
                   <ShoppingBag className="w-5 h-5" />
                   انضم كشريك (محل • مصنع • مندوب توصيل)
@@ -348,9 +339,11 @@ export default function LoginPage() {
         </Card>
 
         {/* Footer Info */}
-        <div className="text-center mt-6 text-white/80 text-sm">
-          <p>محمي بتشفير SSL 🔒</p>
-          <p className="mt-1">جميع الحقوق محفوظة © 2026 Eng/Akram elmasry</p>
+        <div className="text-center mt-8 space-y-2">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-purple-200">
+            <span className="text-sm font-medium text-gray-700">🔒 محمي بتشفير SSL</span>
+          </div>
+          <p className="text-sm text-gray-600 font-medium">جميع الحقوق محفوظة © 2026 Remostore</p>
         </div>
       </div>
     </div>

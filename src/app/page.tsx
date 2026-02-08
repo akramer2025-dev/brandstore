@@ -4,6 +4,7 @@ import { ProductCardPro } from '@/components/ProductCardPro';
 import { ProductsSlider } from '@/components/ProductsSlider';
 import { HeroSlider } from '@/components/HeroSlider';
 import { CategoriesSection } from '@/components/CategoriesSection';
+import { AnimatedSection } from '@/components/AnimatedSection';
 import { LogoBanner } from '@/components/LogoBanner';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import ChatButton from '@/components/ChatButton';
@@ -199,21 +200,23 @@ export default async function HomePage() {
       <section className="py-4 sm:py-6 bg-gradient-to-br from-purple-50 via-white to-purple-50">
         <div className="container mx-auto px-3 sm:px-4">
           {/* Section Header */}
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
-                أحدث المنتجات
-              </h2>
-              <p className="text-gray-500 text-xs sm:text-sm mt-1">اكتشف أحدث الإضافات لمتجرنا</p>
+          <AnimatedSection animation="fadeInDown" delay={0}>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+                  أحدث المنتجات
+                </h2>
+                <p className="text-gray-500 text-xs sm:text-sm mt-1">اكتشف أحدث الإضافات لمتجرنا</p>
+              </div>
+              <Link 
+                href="/products"
+                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 font-semibold text-sm transition-all"
+              >
+                عرض الكل
+                <TrendingUp className="w-4 h-4 text-purple-600" />
+              </Link>
             </div>
-            <Link 
-              href="/products"
-              className="hidden md:flex items-center gap-2 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 font-semibold text-sm transition-all"
-            >
-              عرض الكل
-              <TrendingUp className="w-4 h-4 text-purple-600" />
-            </Link>
-          </div>
+          </AnimatedSection>
 
           {products.length > 0 ? (
             <>
@@ -225,15 +228,17 @@ export default async function HomePage() {
               </div>
 
               {/* View All Button */}
-              <div className="text-center">
-                <Link 
-                  href="/products"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all text-sm sm:text-base"
-                >
-                  <span>عرض جميع المنتجات</span>
-                  <TrendingUp className="w-5 h-5" />
-                </Link>
-              </div>
+              <AnimatedSection animation="scaleIn" delay={200}>
+                <div className="text-center">
+                  <Link 
+                    href="/products"
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white px-4 sm:px-8 py-2.5 sm:py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all text-sm sm:text-base"
+                  >
+                    <span>عرض جميع المنتجات</span>
+                    <TrendingUp className="w-5 h-5" />
+                  </Link>
+                </div>
+              </AnimatedSection>
             </>
           ) : (
             <div className="text-center py-12 sm:py-16 md:py-24">
