@@ -716,6 +716,59 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
               </Card>
             )}
 
+            {/* أزرار الشحن - بعد قبول الطلب */}
+            {(order.status === 'ACCEPTED' || order.status === 'PROCESSING') && order.deliveryMethod === 'HOME_DELIVERY' && (
+              <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-blue-400" />
+                    إرسال الطلب للشحن
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
+                    <p className="text-blue-200 text-sm mb-3">
+                      اختر طريقة الشحن المناسبة
+                    </p>
+                    <div className="space-y-2">
+                      <Button 
+                        onClick={handleShipWithBosta}
+                        disabled={actionLoading || order.bustaShipmentId}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+                      >
+                        {actionLoading ? (
+                          <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                        ) : (
+                          <Truck className="w-4 h-4 ml-2" />
+                        )}
+                        {order.bustaShipmentId ? '✅ تم الإرسال لبوسطة' : '🚚 إرسال لبوسطة'}
+                      </Button>
+                      <Button 
+                        onClick={handleSendToAdmin}
+                        disabled={actionLoading}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        {actionLoading ? (
+                          <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                        ) : (
+                          <Send className="w-4 h-4 ml-2" />
+                        )}
+                        إرسال للإدارة
+                      </Button>
+                      <Button 
+                        onClick={handleAssignDelivery}
+                        disabled={actionLoading}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <UserCheck className="w-4 h-4 ml-2" />
+                        تعيين مندوب توصيل
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {order.deliveryMethod === 'STORE_PICKUP' && order.status === 'CONFIRMED' && (
               <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
                 <CardHeader>
