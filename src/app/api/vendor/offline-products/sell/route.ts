@@ -47,8 +47,11 @@ export async function POST(request: NextRequest) {
     }
 
     // جلب بيانات البضاعة
-    const product = await prisma.offlineProduct.findUnique({
-      where: { id: productId, vendorId: vendor.id },
+    const product = await prisma.offlineProduct.findFirst({
+      where: { 
+        id: productId,
+        vendorId: vendor.id,
+      },
     });
 
     if (!product) {
