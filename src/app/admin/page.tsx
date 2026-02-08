@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { BackButton } from "@/components/BackButton";
+import VisitorStatsCard from "@/components/VisitorStatsCard";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -21,13 +22,24 @@ export default async function AdminDashboard() {
     pendingOrders,
     lowStockProducts,
     totalDeliveryStaff,
+    totalUsers,
+    totalCustomers,
   ] = await Promise.all([
     prisma.product.count(),
     prisma.order.count(),
     prisma.order.count({ where: { status: "PENDING" } }),
     prisma.product.count({ where: { stock: { lte: 10 } } }),
     prisma.deliveryStaff.count(),
+    prisma.user.count(),
+    prisma.user.count({ where: { role: "CUSTOMER" } }),
   ]);
+
+  // حساب العملاء اللي اشتروا فعلاً (عملوا order)
+  const actualBuyers = await prisma.order.findMany({
+    select: { customerId: true },
+    distinct: ['customerId'],
+  });
+  const actualBuyersCount = actualBuyers.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 relative overflow-hidden">
@@ -100,6 +112,49 @@ export default async function AdminDashboard() {
             icon={<Truck className="w-8 h-8" />}
             color="bg-gradient-to-r from-purple-500 to-pink-500"
           />
+        </div>
+
+        {/* Visitor & Users Stats */}
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <VisitorStatsCard />
+          <div className="bg-gradient-to-br from-emerald-600/20 to-teal-600/20 border border-emerald-500/40 backdrop-blur-sm rounded-xl p-4 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-2 bg-emerald-500/30 rounded-lg">
+                <Users className="w-5 h-5 text-emerald-300" />
+              </div>
+              <h3 className="text-lg font-bold text-white">المستخدمين المسجلين</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gradient-to-br from-emerald-500/30 to-emerald-600/30 rounded-lg p-3 text-center border border-emerald-400/30">
+                <p className="text-emerald-200 text-xs mb-1">الإجمالي</p>
+                <p className="text-2xl font-black text-white">{totalUsers}</p>
+              </div>
+              <div className="bg-gradient-to-br from-teal-500/30 to-teal-600/30 rounded-lg p-3 text-center border border-teal-400/30">
+                <p className="text-teal-200 text-xs mb-1">العملاء</p>
+                <p className="text-2xl font-black text-white">{totalCustomers}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-orange-600/20 to-red-600/20 border border-orange-500/40 backdrop-blur-sm rounded-xl p-4 hover:shadow-xl hover:shadow-orange-500/20 transition-all duration-300">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-2 bg-orange-500/30 rounded-lg">
+                <ShoppingBag className="w-5 h-5 text-orange-300" />
+              </div>
+              <h3 className="text-lg font-bold text-white">اشتروا فعلياً</h3>
+            </div>
+            <div className="space-y-2">
+              <div className="text-center">
+                <p className="text-4xl font-black text-white mb-1">{actualBuyersCount}</p>
+                <p className="text-orange-200 text-xs">عميل قام بالشراء</p>
+              </div>
+              <div className="bg-orange-500/20 rounded-lg p-2 text-center border border-orange-400/30">
+                <p className="text-orange-300 text-xs mb-1">نسبة التحويل</p>
+                <p className="text-2xl font-black text-white">
+                  {totalCustomers > 0 ? Math.round((actualBuyersCount / totalCustomers) * 100) : 0}%
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Low Stock Alert */}

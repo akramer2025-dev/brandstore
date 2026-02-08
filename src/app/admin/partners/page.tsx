@@ -82,6 +82,7 @@ export default function AdminPartnersPage() {
     notes: '',
     createUserAccount: false,
     canDeleteOrders: true,
+    canUploadShein: false,
   })
 
   const [editFormData, setEditFormData] = useState({
@@ -96,6 +97,7 @@ export default function AdminPartnersPage() {
     email: '',
     hasAccount: false,
     canDeleteOrders: false,
+    canUploadShein: false,
   })
 
   useEffect(() => {
@@ -149,6 +151,7 @@ export default function AdminPartnersPage() {
       email: data.email || '',
       hasAccount: data.hasAccount || false,
       canDeleteOrders: data.canDeleteOrders || false,
+      canUploadShein: data.canUploadShein || false,
     })
     setIsEditDialogOpen(true)
   }
@@ -539,6 +542,22 @@ export default function AdminPartnersPage() {
                       />
                       <Label htmlFor="canDeleteOrders" className="text-white cursor-pointer">
                         🗑️ السماح بحذف الطلبات
+                      </Label>
+                    </div>
+                  )}
+
+                  {/* صلاحية رفع منتجات شي إن */}
+                  {formData.createUserAccount && (
+                    <div className="flex items-center gap-2 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                      <input
+                        type="checkbox"
+                        id="canUploadShein"
+                        checked={formData.canUploadShein}
+                        onChange={(e) => setFormData({ ...formData, canUploadShein: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="canUploadShein" className="text-white cursor-pointer">
+                        🛍️ السماح برفع منتجات شي إن
                       </Label>
                     </div>
                   )}
@@ -937,6 +956,20 @@ export default function AdminPartnersPage() {
                         <Label htmlFor="edit_canDeleteOrders" className="text-white cursor-pointer flex items-center gap-2">
                           <Trash2 className="h-4 w-4" />
                           السماح بحذف الطلبات
+                        </Label>
+                      </div>
+
+                      {/* صلاحية رفع منتجات شي إن */}
+                      <div className="flex items-center gap-2 p-3 bg-purple-900/20 rounded-lg border border-purple-500/30">
+                        <input
+                          type="checkbox"
+                          id="edit_canUploadShein"
+                          checked={editFormData.canUploadShein}
+                          onChange={(e) => setEditFormData({ ...editFormData, canUploadShein: e.target.checked })}
+                          className="rounded"
+                        />
+                        <Label htmlFor="edit_canUploadShein" className="text-white cursor-pointer flex items-center gap-2">
+                          🛍️ السماح برفع منتجات شي إن
                         </Label>
                       </div>
                     </div>

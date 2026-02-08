@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       notes,
       createUserAccount = false,
       canDeleteOrders = false,
+      canUploadShein = false,
     } = body;
 
     console.log('📝 محاولة إضافة شريك جديد:', { partnerName, email, createUserAccount });
@@ -197,6 +198,7 @@ export async function POST(request: NextRequest) {
             capitalBalance: 0,
             isApproved: true,
             canDeleteOrders: canDeleteOrders,
+            canUploadShein: canUploadShein,
           },
         });
 

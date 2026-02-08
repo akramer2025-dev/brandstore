@@ -162,6 +162,7 @@ model Vendor {
   totalSales         Int            @default(0)
   // صلاحيات الشريك
   canDeleteOrders    Boolean        @default(false) // صلاحية حذف الطلبات
+  canUploadShein     Boolean        @default(false) // صلاحية رفع منتجات شي إن
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
   orders             Order[]
@@ -1522,4 +1523,22 @@ model SocialMediaPost {
   @@index([accountId, status])
   @@index([productId])
   @@index([scheduledFor])
+}
+
+// تتبع زوار الموقع
+model Visitor {
+  id          String   @id @default(cuid())
+  ipAddress   String?  // IP Address
+  userAgent   String?  // Browser/Device info
+  page        String?  // الصفحة التي تمت زيارتها
+  referrer    String?  // المصدر
+  country     String?  // البلد
+  city        String?  // المدينة
+  device      String?  // نوع الجهاز (mobile, desktop, tablet)
+  browser     String?  // المتصفح
+  visitedAt   DateTime @default(now())
+  
+  @@map("visitors")
+  @@index([ipAddress, visitedAt])
+  @@index([visitedAt])
 }

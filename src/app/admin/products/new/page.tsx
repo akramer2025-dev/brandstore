@@ -32,10 +32,27 @@ export default function NewProductPage() {
     description: "",
     descriptionAr: "",
     price: "",
+    originalPrice: "",
     stock: "",
     categoryId: "",
     sku: "",
+    sizes: [] as string[],
+    colors: [] as string[],
   });
+
+  const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+  const availableColors = [
+    { name: 'أحمر', value: 'red', hex: '#EF4444' },
+    { name: 'أزرق', value: 'blue', hex: '#3B82F6' },
+    { name: 'أخضر', value: 'green', hex: '#10B981' },
+    { name: 'أصفر', value: 'yellow', hex: '#F59E0B' },
+    { name: 'أسود', value: 'black', hex: '#000000' },
+    { name: 'أبيض', value: 'white', hex: '#FFFFFF' },
+    { name: 'رمادي', value: 'gray', hex: '#6B7280' },
+    { name: 'بني', value: 'brown', hex: '#92400E' },
+    { name: 'وردي', value: 'pink', hex: '#EC4899' },
+    { name: 'بنفسجي', value: 'purple', hex: '#8B5CF6' },
+  ];
 
   // Fetch categories on mount
   useEffect(() => {
@@ -213,8 +230,11 @@ export default function NewProductPage() {
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
+          originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           stock: parseInt(formData.stock),
           images: images.join(','),
+          sizes: formData.sizes.join(','),
+          colors: formData.colors.join(','),
         }),
       });
 
@@ -497,15 +517,85 @@ export default function NewProductPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="stock">الكمية *</Label>
+                  <Label htmlFor="originalPrice">السعر الأصلي (قبل الخصم)</Label>
                   <Input
-                    id="stock"
+                    id="originalPrice"
                     type="number"
-                    placeholder="50"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    required
+                    step="0.01"
+                    placeholder="399.99"
+                    value={formData.originalPrice}
+                    onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
                   />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="stock">الكمية *</Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  placeholder="50"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  required
+                />
+              </div>
+
+              {/* المقاسات */}
+              <div className="space-y-2">
+                <Label>المقاسات المتاحة</Label>
+                <div className="flex flex-wrap gap-2">
+                  {availableSizes.map(size => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        if (formData.sizes.includes(size)) {
+                          setFormData({ ...formData, sizes: formData.sizes.filter(s => s !== size) });
+                        } else {
+                          setFormData({ ...formData, sizes: [...formData.sizes, size] });
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                        formData.sizes.includes(size)
+                          ? 'bg-teal-500 border-teal-500 text-white'
+                          : 'bg-gray-50 border-gray-300 hover:border-teal-400'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* الألوان */}
+              <div className="space-y-2">
+                <Label>الألوان المتاحة</Label>
+                <div className="grid grid-cols-5 gap-2">
+                  {availableColors.map(color => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => {
+                        if (formData.colors.includes(color.name)) {
+                          setFormData({ ...formData, colors: formData.colors.filter(c => c !== color.name) });
+                        } else {
+                          setFormData({ ...formData, colors: [...formData.colors, color.name] });
+                        }
+                      }}
+                      className={`p-3 rounded-lg border-2 transition-all ${
+                        formData.colors.includes(color.name)
+                          ? 'border-teal-500 ring-2 ring-teal-500'
+                          : 'border-gray-200 hover:border-teal-400'
+                      }`}
+                      style={{ backgroundColor: color.hex }}
+                      title={color.name}
+                    >
+                      {formData.colors.includes(color.name) && (
+                        <div className="text-white font-bold text-center drop-shadow-md">✓</div>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
 
