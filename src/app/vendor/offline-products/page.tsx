@@ -599,6 +599,27 @@ export default function OfflineProductsPage() {
                   />
                 </div>
 
+                {/* Quantity Summary */}
+                {formData.quantity && parseInt(formData.quantity) > 0 && (
+                  <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                    <p className="text-blue-200 text-sm mb-2 font-bold">ملخص القطع:</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center p-2 bg-blue-500/20 rounded">
+                        <p className="text-blue-400 text-[10px] mb-1">القطع المشتراة</p>
+                        <p className="text-white font-bold text-lg">{parseInt(formData.quantity)}</p>
+                      </div>
+                      <div className="text-center p-2 bg-gray-700/50 rounded">
+                        <p className="text-gray-400 text-[10px] mb-1">القطع المباعة</p>
+                        <p className="text-white font-bold text-lg">0</p>
+                      </div>
+                      <div className="text-center p-2 bg-yellow-500/20 rounded border border-yellow-500/30">
+                        <p className="text-yellow-400 text-[10px] mb-1">القطع المتبقية</p>
+                        <p className="text-white font-bold text-lg">{parseInt(formData.quantity)}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Profit Calculator */}
                 {formData.purchasePrice && formData.sellingPrice && (
                   <div className="p-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg border border-green-500/30">
