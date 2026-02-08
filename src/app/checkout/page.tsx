@@ -14,7 +14,7 @@ import InstallmentCalculator from "@/components/InstallmentCalculator";
 import AddressSelector from "@/components/AddressSelector";
 import AddressForm from "@/components/AddressForm";
 
-type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
+type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24' | 'PARTIAL_PAYMENT_50' | 'FULL_PAYMENT';
 type EWalletType = 'etisalat_cash' | 'vodafone_cash' | 'we_pay';
 type DeliveryMethod = 'HOME_DELIVERY' | 'STORE_PICKUP';
 
@@ -86,6 +86,32 @@ export default function CheckoutPage() {
   
   const { items, getTotalPrice, clearCart } = useCartStore();
 
+  // Check if all items are clothing (COD only for clothing)
+  const clothingCategories = [
+    'تيشيرتات', 'T-Shirts',
+    'أحذية', 'Shoes',
+    'بناطيل', 'Pants',
+    'جواكت', 'Jackets',
+    'شي إن', 'Shein',
+    'ترينديول', 'Trendyol',
+    'ملابس',
+    'اكسسورارت', 'accessories'
+  ];
+  
+  const isAllClothing = items.every(item => 
+    item.categoryName && clothingCategories.includes(item.categoryName)
+  );
+  
+  // Check if cart has Shein or Trendyol items
+  const hasSheinOrTrendyol = items.some(item => 
+    item.categoryName && ['شي إن', 'Shein', 'ترينديول', 'Trendyol'].includes(item.categoryName)
+  );
+  
+  // Check if all items are Shein/Trendyol
+  const isAllSheinOrTrendyol = items.every(item => 
+    item.categoryName && ['شي إن', 'Shein', 'ترينديول', 'Trendyol'].includes(item.categoryName)
+  );
+
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -148,6 +174,20 @@ export default function CheckoutPage() {
       }));
     }
   }, [session]);
+
+  // Auto-select payment method based on cart items
+  useEffect(() => {
+    if (mounted && items.length > 0) {
+      // If cart has Shein/Trendyol, default to partial payment
+      if (hasSheinOrTrendyol && paymentMethod === 'CASH_ON_DELIVERY') {
+        setPaymentMethod('PARTIAL_PAYMENT_50');
+      }
+      // If cart contains non-clothing items, default to E-Wallet
+      else if (!isAllClothing && paymentMethod === 'CASH_ON_DELIVERY') {
+        setPaymentMethod('E_WALLET_TRANSFER');
+      }
+    }
+  }, [mounted, items, isAllClothing, hasSheinOrTrendyol, paymentMethod]);
 
   const fetchSavedAddresses = async () => {
     setLoadingAddresses(true);
@@ -302,9 +342,25 @@ export default function CheckoutPage() {
   }
 
   const totalPrice = getTotalPrice();
-  const downPayment = deliveryMethod === 'STORE_PICKUP' ? (totalPrice * downPaymentPercent / 100) : 0;
-  const remainingAmount = deliveryMethod === 'STORE_PICKUP' ? (totalPrice - downPayment) : 0;
-  const finalTotal = deliveryMethod === 'HOME_DELIVERY' ? (totalPrice + deliveryFee) : downPayment;
+  
+  // Calculate amounts based on payment method
+  let downPayment = 0;
+  let remainingAmount = 0;
+  
+  if (deliveryMethod === 'STORE_PICKUP') {
+    downPayment = totalPrice * downPaymentPercent / 100;
+    remainingAmount = totalPrice - downPayment;
+  } else if (paymentMethod === 'PARTIAL_PAYMENT_50') {
+    downPayment = totalPrice / 2; // 50% مقدم
+    remainingAmount = totalPrice / 2; // 50% عند الاستلام
+  } else if (paymentMethod === 'FULL_PAYMENT') {
+    downPayment = totalPrice; // دفع كامل
+    remainingAmount = 0;
+  }
+  
+  const finalTotal = deliveryMethod === 'HOME_DELIVERY' ? 
+    (paymentMethod === 'PARTIAL_PAYMENT_50' || paymentMethod === 'FULL_PAYMENT' ? downPayment + deliveryFee : totalPrice + deliveryFee) : 
+    downPayment;
 
   const saveNewAddress = async () => {
     if (!formData.saveAddress) return null;
@@ -428,6 +484,24 @@ export default function CheckoutPage() {
       return;
     }
     
+    // Validate COD is only for clothing (but not Shein/Trendyol)
+    if (paymentMethod === 'CASH_ON_DELIVERY') {
+      if (!isAllClothing) {
+        toast.error("الدفع عند الاستلام متاح فقط للملابس. يرجى اختيار طريقة دفع أخرى.");
+        return;
+      }
+      if (hasSheinOrTrendyol) {
+        toast.error("منتجات شي إن وترينديول تتطلب دفع جزئي أو كامل مقدماً.");
+        return;
+      }
+    }
+    
+    // Validate Shein/Trendyol requires partial or full payment
+    if (hasSheinOrTrendyol && !['PARTIAL_PAYMENT_50', 'FULL_PAYMENT', 'E_WALLET_TRANSFER'].includes(paymentMethod)) {
+      toast.error("منتجات شي إن وترينديول تتطلب دفع جزئي (50%) أو دفع كامل مقدماً.");
+      return;
+    }
+    
     // التحقق من طريقة التوصيل
     if (deliveryMethod === 'HOME_DELIVERY') {
       if (!formData.fullName || !formData.phone || !formData.governorate || 
@@ -511,6 +585,11 @@ export default function CheckoutPage() {
           downPayment: downPayment,
           remainingAmount: remainingAmount
         }),
+        ...((paymentMethod === 'PARTIAL_PAYMENT_50' || paymentMethod === 'FULL_PAYMENT') && {
+          downPayment: downPayment,
+          remainingAmount: remainingAmount,
+          isPartialPayment: paymentMethod === 'PARTIAL_PAYMENT_50'
+        }),
         ...(paymentMethod === 'E_WALLET_TRANSFER' && { eWalletType }),
         ...(paymentMethod === 'BANK_TRANSFER' && receiptUrl && { bankTransferReceipt: receiptUrl }),
       };
@@ -547,6 +626,10 @@ export default function CheckoutPage() {
         toast.success(`تم إنشاء الطلب بنجاح! 🎉\nالمبلغ المدفوع مقدماً: ${downPayment.toFixed(2)} ج.م\nالمبلغ المتبقي: ${remainingAmount.toFixed(2)} ج.م`);
       } else if (paymentMethod === 'BANK_TRANSFER') {
         toast.success("تم إنشاء الطلب بنجاح! جاري مراجعة طلبك 🎉");
+      } else if (paymentMethod === 'PARTIAL_PAYMENT_50') {
+        toast.success(`تم إنشاء الطلب بنجاح! 🎉\n✅ المبلغ المدفوع: ${downPayment.toFixed(2)} ج.م\n📦 المبلغ عند الاستلام: ${(remainingAmount + deliveryFee).toFixed(2)} ج.م`);
+      } else if (paymentMethod === 'FULL_PAYMENT') {
+        toast.success(`تم إنشاء الطلب بنجاح! 🎉\n✅ تم دفع المبلغ كاملاً: ${(downPayment + deliveryFee).toFixed(2)} ج.م\n📦 لا توجد مبالغ إضافية`);
       } else {
         toast.success("تم إنشاء الطلب بنجاح! 🎉");
       }
@@ -832,8 +915,17 @@ export default function CheckoutPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
-                  {/* Cash on Delivery */}
-                  {checkoutSettings.paymentMethodCashOnDelivery && (
+                  {/* Info message for non-clothing items */}
+                  {!isAllClothing && (
+                    <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-3 mb-4">
+                      <p className="text-blue-300 text-sm">
+                        💡 <strong>ملحوظة:</strong> الدفع عند الاستلام متاح فقط للملابس. يرجى اختيار طريقة دفع أخرى.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Cash on Delivery - Only for regular clothing (not Shein/Trendyol) */}
+                  {checkoutSettings.paymentMethodCashOnDelivery && isAllClothing && !hasSheinOrTrendyol && (
                     <div
                       onClick={() => setPaymentMethod('CASH_ON_DELIVERY')}
                       className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
@@ -876,9 +968,160 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                   )}
+                  
+                  {/* Special Payment for Shein/Trendyol - Partial or Full Payment */}
+                  {hasSheinOrTrendyol && (
+                    <>
+                      {/* Info message for Shein/Trendyol */}
+                      <div className="bg-purple-900/30 border border-purple-500/30 rounded-lg p-3 mb-4">
+                        <p className="text-purple-300 text-sm">
+                          ⭐ <strong>منتجات شي إن وترينديول:</strong> يجب دفع نصف المبلغ على الأقل مقدماً أو دفع المبلغ كاملاً.
+                        </p>
+                      </div>
 
-                  {/* Bank Transfer */}
-                  {checkoutSettings.paymentMethodBankTransfer && (
+                      {/* Partial Payment 50% */}
+                      <div
+                        onClick={() => setPaymentMethod('PARTIAL_PAYMENT_50')}
+                        className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
+                          paymentMethod === 'PARTIAL_PAYMENT_50'
+                            ? 'border-purple-500 bg-purple-900/30'
+                            : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            paymentMethod === 'PARTIAL_PAYMENT_50'
+                              ? 'border-purple-500 bg-purple-500'
+                              : 'border-gray-500'
+                          }`}>
+                            {paymentMethod === 'PARTIAL_PAYMENT_50' && (
+                              <CheckCircle2 className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                              <Banknote className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                              <h3 className="text-base sm:text-lg font-bold text-white">
+                                دفع جزئي (50% مقدم)
+                              </h3>
+                            </div>
+                            <p className="text-gray-300 text-xs sm:text-sm mb-2">
+                              ادفع نصف المبلغ الآن والنصف الآخر عند استلام الطلب
+                            </p>
+                            <div className="bg-purple-900/20 border border-purple-500/20 rounded p-2 mb-2">
+                              <div className="flex justify-between items-center text-xs sm:text-sm">
+                                <span className="text-gray-300">المبلغ المطلوب الآن:</span>
+                                <span className="text-purple-300 font-bold">{(totalPrice / 2).toFixed(2)} ج.م</span>
+                              </div>
+                              <div className="flex justify-between items-center text-xs sm:text-sm mt-1">
+                                <span className="text-gray-300">المبلغ عند الاستلام:</span>
+                                <span className="text-purple-300 font-bold">{(totalPrice / 2 + deliveryFee).toFixed(2)} ج.م</span>
+                              </div>
+                            </div>
+                            <div className="space-y-0.5 sm:space-y-1">
+                              <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-400">
+                                <CheckCircle2 className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                                مناسب لمن يريد تقسيم المبلغ
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <CheckCircle2 className="w-3 h-3 text-purple-400" />
+                                توفير في السيولة المالية
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Full Payment */}
+                      <div
+                        onClick={() => setPaymentMethod('FULL_PAYMENT')}
+                        className={`cursor-pointer border-2 rounded-lg p-3 sm:p-4 transition-all ${
+                          paymentMethod === 'FULL_PAYMENT'
+                            ? 'border-amber-500 bg-amber-900/30'
+                            : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            paymentMethod === 'FULL_PAYMENT'
+                              ? 'border-amber-500 bg-amber-500'
+                              : 'border-gray-500'
+                          }`}>
+                            {paymentMethod === 'FULL_PAYMENT' && (
+                              <CheckCircle2 className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                              <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+                              <h3 className="text-base sm:text-lg font-bold text-white">
+                                دفع كامل مقدماً 💎
+                              </h3>
+                            </div>
+                            <p className="text-gray-300 text-xs sm:text-sm mb-2">
+                              ادفع المبلغ كاملاً الآن واستلم طلبك بدون أي مبالغ إضافية
+                            </p>
+                            <div className="bg-amber-900/20 border border-amber-500/20 rounded p-2 mb-2">
+                              <div className="flex justify-between items-center text-xs sm:text-sm">
+                                <span className="text-gray-300">المبلغ المطلوب الآن:</span>
+                                <span className="text-amber-300 font-bold">{(totalPrice + deliveryFee).toFixed(2)} ج.م</span>
+                              </div>
+                              <div className="flex justify-between items-center text-xs sm:text-sm mt-1">
+                                <span className="text-gray-300">المبلغ عند الاستلام:</span>
+                                <span className="text-green-400 font-bold">0.00 ج.م</span>
+                              </div>
+                            </div>
+                            <div className="space-y-0.5 sm:space-y-1">
+                              <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-400">
+                                <CheckCircle2 className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                                لا توجد مبالغ إضافية عند الاستلام
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <CheckCircle2 className="w-3 h-3 text-amber-400" />
+                                استلام سريع وآمن
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* Payment Instructions for Shein/Trendyol Partial/Full Payment */}
+                  {(paymentMethod === 'PARTIAL_PAYMENT_50' || paymentMethod === 'FULL_PAYMENT') && (
+                    <div className="bg-gradient-to-r from-purple-900/40 to-amber-900/40 border-2 border-purple-500/50 rounded-lg p-4 space-y-3">
+                      <div className="text-center">
+                        <p className="text-white font-bold text-lg mb-3">
+                          📱 معلومات الدفع
+                        </p>
+                        <p className="text-purple-300 font-semibold mb-2">
+                          يرجى التحويل على إحدى المحافظ التالية:
+                        </p>
+                        <div className="space-y-2">
+                          <div className="bg-white/10 rounded-lg p-3">
+                            <p className="text-white text-2xl font-bold tracking-wider">
+                              01555512778
+                            </p>
+                            <p className="text-gray-300 text-sm mt-1">
+                              فودافون كاش 📱 | وي باي 💳 | إتصالات كاش ✨
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-3 bg-purple-900/30 border border-purple-500/30 rounded p-2">
+                          <p className="text-purple-200 text-sm">
+                            المبلغ المطلوب تحويله: <span className="font-bold">{downPayment.toFixed(2)} ج.م</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-yellow-900/30 border border-yellow-500/30 rounded p-3 text-xs text-yellow-300">
+                        <strong>⚠️ هام:</strong> بعد إتمام التحويل، سيتم التواصل معك لتأكيد الطلب. يرجى الاحتفاظ بإيصال التحويل.
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Bank Transfer - HIDDEN */}
+                  {false && checkoutSettings.paymentMethodBankTransfer && (
                     <div
                       onClick={() => setPaymentMethod('BANK_TRANSFER')}
                       className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
@@ -1014,7 +1257,22 @@ export default function CheckoutPage() {
                         </p>
                         
                         {paymentMethod === 'E_WALLET_TRANSFER' && (
-                          <div className="space-y-2 mt-3">
+                          <div className="space-y-3 mt-3">
+                            {/* Phone Number Display */}
+                            <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-4">
+                              <div className="text-center">
+                                <p className="text-green-300 font-semibold mb-2">
+                                  رقم التليفون للتحويل
+                                </p>
+                                <div className="bg-white/10 rounded-lg p-3 inline-block">
+                                  <p className="text-white text-2xl font-bold tracking-wider">
+                                    01555512778
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
                             <p className="text-sm text-gray-400 mb-2">اختر المحفظة الإلكترونية:</p>
                             
                             {/* Vodafone Cash */}
@@ -1086,8 +1344,8 @@ export default function CheckoutPage() {
                               </div>
                             </div>
 
-                            <div className="bg-gray-900/50 rounded p-2 text-xs text-gray-400 mt-2">
-                              سيتم إرسال رقم المحفظة بعد تأكيد الطلب
+                            <div className="bg-yellow-900/30 border border-yellow-500/30 rounded p-2 text-xs text-yellow-300">
+                              💡 حول على الرقم أعلاه واكتب المبلغ والمحفظة المستخدمة في ملاحظات الطلب
                             </div>
                           </div>
                         )}
