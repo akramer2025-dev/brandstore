@@ -299,7 +299,6 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
             <span className="text-green-600 text-xs font-bold">ج.م</span>
           </div>
 
-      </div>
           {/* Add to Cart Button */}
           <Button
             onClick={handleAddToCart}
@@ -312,5 +311,6 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
         </CardContent>
       </Card>
     </Link>
+    </div>
   );
 }
