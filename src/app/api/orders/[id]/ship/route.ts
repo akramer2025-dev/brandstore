@@ -86,20 +86,10 @@ export async function POST(
     if (order.vendor.floorNumber) pickupAddressParts.push(`الطابق ${order.vendor.floorNumber}`);
     if (order.vendor.apartmentNumber) pickupAddressParts.push(`شقة ${order.vendor.apartmentNumber}`);
     if (order.vendor.region) pickupAddressParts.push(order.vendor.region);
-    console.log('📍 Pickup from:', pickupAddress);
-    console.log('📍 Deliver to:', order.deliveryAddress);
-
-    const bostaService = new BostaService();
-    const shipment = await bostaService.createDelivery({
-      orderId: order.id,
-      // Pickup (Vendor Store Address)
-      pickupAddress: pickupAddress,
-      pickupCity: order.vendor.city,
-      pickupGovernorate: order.vendor.governorate,
-      pickupPhone: order.vendor.phone || order.vendor.user?.phone || '',
-      pickupName: order.vendor.storeName || order.vendor.businessName || 'المتجر',
-      pickupInstructions: order.vendor.pickupInstructions || undefined,
-      // Delivery (Customer Address)= order.vendor.address || pickupAddressParts.join('، ');
+    if (order.vendor.city) pickupAddressParts.push(order.vendor.city);
+    if (order.vendor.governorate) pickupAddressParts.push(order.vendor.governorate);
+    
+    const pickupAddress = order.vendor.address || pickupAddressParts.join('، ');
 
     // ✅ تحقق من إمكانية الشحن
     if (order.status === 'CANCELLED') {
@@ -141,10 +131,20 @@ export async function POST(
       deliveryAddress: order.deliveryAddress,
       city: order.governorate || 'القاهرة',
       zone: '', // يمكن إضافة Zone إذا متوفر
-      cashOnDelivery: order.finalAmount,
-      notes: order.customerNotes || 'فحص المنتج قبل الدفع',
-    });
+    console.log('📍 Pickup from:', pickupAddress);
+    console.log('📍 Deliver to:', order.deliveryAddress);
 
+    const bostaService = new BostaService();
+    const shipment = await bostaService.createDelivery({
+      orderId: order.id,
+      // Pickup (Vendor Store Address)
+      pickupAddress: pickupAddress,
+      pickupCity: order.vendor.city,
+      pickupGovernorate: order.vendor.governorate,
+      pickupPhone: order.vendor.phone || order.vendor.user?.phone || '',
+      pickupName: order.vendor.storeName || order.vendor.businessName || 'المتجر',
+      pickupInstructions: order.vendor.pickupInstructions || undefined,
+      // Delivery (Customer Address)
     if (!shipment.success) {
       return NextResponse.json(
         {
