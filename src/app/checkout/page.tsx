@@ -1348,10 +1348,10 @@ export default function CheckoutPage() {
                               💡 حول على الرقم أعلاه واكتب المبلغ والمحفظة المستخدمة في ملاحظات الطلب
                             </div>
                           </div>
-                        </div>
                         )}
                       </div>
                     </div>
+                  )}
 
                   {/* Installment */}
                   {checkoutSettings.paymentMethodInstallment && (
