@@ -128,6 +128,7 @@ export async function GET(
       userId: partner.vendor?.user?.id,
       canDeleteOrders: partner.vendor?.canDeleteOrders || false,
       canUploadShein: partner.vendor?.canUploadShein || false,
+      canAddOfflineProducts: partner.vendor?.canAddOfflineProducts || false,
       // إحصائيات
       totalProducts: products.length,
       totalOrders,
@@ -178,6 +179,7 @@ export async function PATCH(
       newPassword,
       canDeleteOrders,
       canUploadShein,
+      canAddOfflineProducts,
     } = body;
 
     // التحقق من وجود الشريك
@@ -275,6 +277,15 @@ export async function PATCH(
         data: { canUploadShein },
       });
       console.log('✅ تم تحديث صلاحية رفع منتجات شي إن:', canUploadShein);
+    }
+
+    // تحديث صلاحية إضافة بضاعة خارج النظام
+    if (existingPartner.vendorId && canAddOfflineProducts !== undefined) {
+      await prisma.vendor.update({
+        where: { id: existingPartner.vendorId },
+        data: { canAddOfflineProducts },
+      });
+      console.log('✅ تم تحديث صلاحية البضاعة الخارجية:', canAddOfflineProducts);
     }
 
     // تحديث الشريك

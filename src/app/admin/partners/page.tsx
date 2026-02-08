@@ -83,6 +83,7 @@ export default function AdminPartnersPage() {
     createUserAccount: false,
     canDeleteOrders: true,
     canUploadShein: false,
+    canAddOfflineProducts: false,
   })
 
   const [editFormData, setEditFormData] = useState({
@@ -98,6 +99,7 @@ export default function AdminPartnersPage() {
     hasAccount: false,
     canDeleteOrders: false,
     canUploadShein: false,
+    canAddOfflineProducts: false,
   })
 
   useEffect(() => {
@@ -152,6 +154,7 @@ export default function AdminPartnersPage() {
       hasAccount: data.hasAccount || false,
       canDeleteOrders: data.canDeleteOrders || false,
       canUploadShein: data.canUploadShein || false,
+      canAddOfflineProducts: data.canAddOfflineProducts || false,
     })
     setIsEditDialogOpen(true)
   }
@@ -558,6 +561,22 @@ export default function AdminPartnersPage() {
                       />
                       <Label htmlFor="canUploadShein" className="text-white cursor-pointer">
                         🛍️ السماح برفع منتجات شي إن
+                      </Label>
+                    </div>
+                  )}
+
+                  {/* صلاحية إضافة بضاعة خارج النظام */}
+                  {formData.createUserAccount && (
+                    <div className="flex items-center gap-2 p-3 bg-orange-900/30 rounded-lg border border-orange-500/30">
+                      <input
+                        type="checkbox"
+                        id="canAddOfflineProducts"
+                        checked={formData.canAddOfflineProducts}
+                        onChange={(e) => setFormData({ ...formData, canAddOfflineProducts: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="canAddOfflineProducts" className="text-white cursor-pointer">
+                        📦 السماح بإضافة بضاعة خارج النظام
                       </Label>
                     </div>
                   )}
@@ -970,6 +989,20 @@ export default function AdminPartnersPage() {
                         />
                         <Label htmlFor="edit_canUploadShein" className="text-white cursor-pointer flex items-center gap-2">
                           🛍️ السماح برفع منتجات شي إن
+                        </Label>
+                      </div>
+
+                      {/* صلاحية إضافة بضاعة خارج النظام */}
+                      <div className="flex items-center gap-2 p-3 bg-orange-900/20 rounded-lg border border-orange-500/30">
+                        <input
+                          type="checkbox"
+                          id="edit_canAddOfflineProducts"
+                          checked={editFormData.canAddOfflineProducts}
+                          onChange={(e) => setEditFormData({ ...editFormData, canAddOfflineProducts: e.target.checked })}
+                          className="rounded"
+                        />
+                        <Label htmlFor="edit_canAddOfflineProducts" className="text-white cursor-pointer flex items-center gap-2">
+                          📦 السماح بإضافة بضاعة خارج النظام
                         </Label>
                       </div>
                     </div>

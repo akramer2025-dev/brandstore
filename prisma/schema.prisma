@@ -163,6 +163,7 @@ model Vendor {
   // صلاحيات الشريك
   canDeleteOrders    Boolean        @default(false) // صلاحية حذف الطلبات
   canUploadShein     Boolean        @default(false) // صلاحية رفع منتجات شي إن
+  canAddOfflineProducts Boolean     @default(false) // صلاحية إضافة بضاعة خارج النظام
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
   orders             Order[]
@@ -174,6 +175,7 @@ model Vendor {
   vouchers           VendorVoucher[]
   sales              Sale[]
   purchases          Purchase[]
+  offlineProducts    OfflineProduct[]
   user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("vendors")
@@ -1541,4 +1543,23 @@ model Visitor {
   @@map("visitors")
   @@index([ipAddress, visitedAt])
   @@index([visitedAt])
+}
+
+// بضاعة خارج النظام (بدون صور أو تفاصيل)
+model OfflineProduct {
+  id              String   @id @default(cuid())
+  vendorId        String
+  description     String?  // وصف اختياري
+  purchasePrice   Float    // سعر الشراء
+  sellingPrice    Float    // سعر البيع
+  quantity        Int      @default(1) // الكمية
+  profit          Float    // الربح = (سعر البيع - سعر الشراء) × الكمية
+  createdAt       DateTime @default(now())
+  createdBy       String   // الشخص اللي أضافها
+  
+  vendor          Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  
+  @@map("offline_products")
+  @@index([vendorId])
+  @@index([createdAt])
 }
