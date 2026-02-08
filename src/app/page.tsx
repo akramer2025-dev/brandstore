@@ -7,6 +7,7 @@ import { CategoriesSection } from '@/components/CategoriesSection';
 import { AnimatedSection } from '@/components/AnimatedSection';
 import { LogoBanner } from '@/components/LogoBanner';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
+import { InfiniteProductCarousel } from '@/components/InfiniteProductCarousel';
 import ChatButton from '@/components/ChatButton';
 import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
 async function getProducts() {
   try {
     return await prisma.product.findMany({
-      take: 12,
+      take: 20, // زودنا العدد للشريط المتحرك
       include: {
         category: true,
       },
@@ -102,6 +103,9 @@ export default async function HomePage() {
       <>
         {/* Brand Background Pattern */}
         <BrandBackgroundPattern />
+
+        {/* Splash Screen with Video - أول حاجة تظهر */}
+        <SplashScreen />
 
         {/* Main Content */}
         <div>
@@ -251,6 +255,13 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+
+
+      {/* Infinite Product Carousel - الصف الـ11 */}
+      {products.length > 10 && (
+        <InfiniteProductCarousel products={products.slice(10)} speed={80} />
+      )}
 
 
 

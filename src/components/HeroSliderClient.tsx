@@ -79,6 +79,20 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
             
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/50 to-transparent"></div>
+            
+            {/* Logo Watermark - Professional Branding */}
+            <div className="absolute top-4 md:top-6 right-4 md:right-8 z-20 animate-fade-in">
+              <div className="relative w-16 h-16 md:w-24 md:h-24 lg:w-28 lg:h-28 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-2xl border-2 border-white/20 p-2 md:p-3 hover:scale-110 transition-all duration-300 hover:bg-white/20">
+                <Image
+                  src="/logo.png"
+                  alt="ريمو ستور"
+                  fill
+                  sizes="(max-width: 768px) 64px, (max-width: 1024px) 96px, 112px"
+                  className="object-contain drop-shadow-2xl p-1"
+                  priority={index === 0}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Content */}

@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Sparkles } from 'lucide-react';
 import Image from 'next/image';
 
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Hide splash screen after 2 seconds
+    // إخفاء الـ splash screen بعد 3 ثواني
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -18,61 +20,72 @@ export default function SplashScreen() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 animate-fade-out" style={{ animationDelay: '2.5s', animationFillMode: 'forwards' }}>
-      {/* Animated Background Circles */}
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 animate-fade-in">
+      {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        {/* Floating Circles */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      {/* Logo Container */}
-      <div className="relative z-10 flex flex-col items-center gap-8">
-        {/* Hexagon Logo with Advanced Animation */}
-        <div className="relative">
-          {/* Rotating Rings */}
-          <div className="absolute inset-0 w-40 h-40 md:w-52 md:h-52">
-            <div className="absolute inset-0 border-4 border-cyan-400/30 rounded-full animate-spin-slow"></div>
-            <div className="absolute inset-4 border-4 border-purple-400/30 rounded-full animate-spin-reverse"></div>
-            <div className="absolute inset-8 border-4 border-blue-400/30 rounded-full animate-spin-slow"></div>
-          </div>
-
-          {/* Main Logo */}
-          <div 
-            className="relative w-40 h-40 md:w-52 md:h-52 backdrop-blur-md shadow-2xl animate-logo-splash overflow-hidden" 
-            style={{ clipPath: 'polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)' }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 via-transparent to-purple-400/20 animate-pulse"></div>
-            <img 
+      {/* Content */}
+      <div className="relative z-10 text-center px-4">
+        {/* Logo */}
+        <div className="mb-8 animate-bounce">
+          <div className="w-40 h-40 mx-auto bg-white/20 backdrop-blur-lg rounded-full flex items-center justify-center shadow-2xl border-4 border-white/30 p-4">
+            <Image 
               src="/logo.png" 
-              alt="ريمو ستور - Remo Store" 
-              className="w-full h-full scale-150 -translate-y-3 object-contain mix-blend-multiply"
-              style={{ filter: 'drop-shadow(0 0 10px rgba(6, 182, 212, 0.3))' }}
+              alt="ريمو ستور" 
+              width={120}
+              height={120}
+              className="object-contain animate-pulse drop-shadow-2xl"
+              priority
             />
           </div>
-
-          {/* Sparkles */}
-          <div className="absolute -top-2 left-1/2 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-          <div className="absolute top-1/4 -right-2 w-2 h-2 bg-purple-400 rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
-          <div className="absolute bottom-1/4 -left-2 w-2 h-2 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
-          <div className="absolute -bottom-2 left-1/4 w-2 h-2 bg-pink-400 rounded-full animate-ping" style={{ animationDelay: '0.9s' }}></div>
         </div>
 
-        {/* Brand Text */}
-        <div className="text-center space-y-2 animate-slide-up" style={{ animationDelay: '0.5s' }}>
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-            ريمو ستور
+        {/* Welcome Text */}
+        <div className="space-y-4 animate-fade-in-up">
+          <h1 className="text-5xl md:text-7xl font-black text-white drop-shadow-2xl animate-scale-in">
+            مرحباً بك! 🎉
           </h1>
-          <p className="text-gray-300 text-lg md:text-xl animate-fade-in" style={{ animationDelay: '1s' }}>
-            متجرك الإلكتروني الأول
+          <p className="text-2xl md:text-3xl text-white/90 font-bold drop-shadow-lg animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+            أهلاً وسهلاً في ريمو ستور 
+          </p>
+          <p className="text-xl md:text-2xl text-white/80 drop-shadow-lg animate-fade-in-up" style={{animationDelay: '0.6s'}}>
+            🛍️ أفضل المنتجات بأرخص الأسعار! ✨
           </p>
         </div>
 
-        {/* Loading Bar */}
-        <div className="w-64 h-1.5 bg-gray-700/50 rounded-full overflow-hidden animate-fade-in" style={{ animationDelay: '1.5s' }}>
-          <div className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 animate-loading-bar rounded-full"></div>
+        {/* Loading Dots */}
+        <div className="flex items-center justify-center gap-3 mt-12 animate-fade-in" style={{animationDelay: '0.9s'}}>
+          <div className="w-4 h-4 bg-white rounded-full animate-bounce"></div>
+          <div className="w-4 h-4 bg-white rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+          <div className="w-4 h-4 bg-white rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
         </div>
       </div>
+
+      {/* Progress Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-2 bg-white/20">
+        <div 
+          className="h-full bg-white"
+          style={{
+            animation: 'progress 3s linear forwards'
+          }}
+        />
+      </div>
+
+      <style jsx>{`
+        @keyframes progress {
+          from {
+            width: 0%;
+          }
+          to {
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 }
