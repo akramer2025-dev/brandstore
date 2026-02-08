@@ -121,16 +121,6 @@ export async function POST(
 
     // 🚚 إنشاء شحنة في بوسطة
     console.log('🚚 Creating shipment for order:', order.orderNumber);
-
-    const bostaService = new BostaService();
-    const shipment = await bostaService.createDelivery({
-      orderId: order.id,
-      customerName: order.customer.name,
-      customerPhone: order.deliveryPhone,
-      customerEmail: order.customer.email || undefined,
-      deliveryAddress: order.deliveryAddress,
-      city: order.governorate || 'القاهرة',
-      zone: '', // يمكن إضافة Zone إذا متوفر
     console.log('📍 Pickup from:', pickupAddress);
     console.log('📍 Deliver to:', order.deliveryAddress);
 
@@ -145,6 +135,16 @@ export async function POST(
       pickupName: order.vendor.storeName || order.vendor.businessName || 'المتجر',
       pickupInstructions: order.vendor.pickupInstructions || undefined,
       // Delivery (Customer Address)
+      customerName: order.customer.name,
+      customerPhone: order.deliveryPhone,
+      customerEmail: order.customer.email || undefined,
+      deliveryAddress: order.deliveryAddress,
+      city: order.governorate || 'القاهرة',
+      zone: '',
+      cashOnDelivery: order.paymentMethod === 'CASH_ON_DELIVERY' ? order.totalAmount : 0,
+      notes: order.notes || undefined,
+    });
+
     if (!shipment.success) {
       return NextResponse.json(
         {
