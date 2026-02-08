@@ -717,7 +717,7 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
             )}
 
             {/* أزرار الشحن - بعد قبول الطلب */}
-            {(order.status === 'ACCEPTED' || order.status === 'PROCESSING') && order.deliveryMethod === 'HOME_DELIVERY' && (
+            {(order.status === 'CONFIRMED' || order.status === 'PREPARING') && order.deliveryMethod === 'HOME_DELIVERY' && (
               <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
