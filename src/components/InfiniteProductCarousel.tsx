@@ -95,7 +95,7 @@ export function InfiniteProductCarousel({
         {/* Infinite Scroll Container */}
         <div 
           ref={scrollRef}
-          className="overflow-x-hidden scroll-smooth cursor-grab active:cursor-grabbing"
+          className="overflow-x-auto scroll-smooth cursor-grab active:cursor-grabbing"
           style={{ 
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
