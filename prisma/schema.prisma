@@ -1552,9 +1552,10 @@ model OfflineProduct {
   vendorId        String
   supplierId      String?  // المورد (اختياري)
   description     String?  // وصف اختياري
-  purchasePrice   Float    // سعر الشراء
-  sellingPrice    Float    // سعر البيع
-  quantity        Int      @default(1) // الكمية
+  purchasePrice   Float    // سعر القطعة الواحدة للشراء
+  sellingPrice    Float    // سعر القطعة الواحدة للبيع
+  quantity        Int      @default(1) // عدد القطع المشتراة
+  soldQuantity    Int      @default(0) // عدد القطع المباعة
   profit          Float    // الربح = (سعر البيع - سعر الشراء) × الكمية
   amountPaid      Float    @default(0) // المبلغ المدفوع للمورد
   isPaid          Boolean  @default(false) // هل تم الدفع للمورد بالكامل

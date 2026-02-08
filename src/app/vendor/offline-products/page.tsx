@@ -28,6 +28,7 @@ interface OfflineProduct {
   purchasePrice: number;
   sellingPrice: number;
   quantity: number;
+  soldQuantity: number;
   profit: number;
   createdAt: string;
   createdBy: string;
@@ -78,7 +79,10 @@ export default function OfflineProductsPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [showSupplierDialog, setShowSupplierDialog] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showSellDialog, setShowSellDialog] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<OfflineProduct | null>(null);
+  const [sellQuantity, setSellQuantity] = useState('');
   const [supplierForm, setSupplierForm] = useState({
     name: '',
     phone: '',
@@ -214,6 +218,61 @@ export default function OfflineProductsPage() {
         setSelectedSupplier(null);
         fetchSuppliers();
         fetchData();
+      } else {
+        toast.error(data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSellProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedProduct) return;
+    
+    const quantity = parseInt(sellQuantity);
+    if (!quantity || quantity <= 0) {
+      toast.error('عدد القطع يجب أن يكون أكبر من صفر');
+      return;
+    }
+
+    const remainingQuantity = selectedProduct.quantity - selectedProduct.soldQuantity;
+    if (quantity > remainingQuantity) {
+      toast.error(`العدد المطلوب (${quantity}) أكبر من المتبقي (${remainingQuantity})`);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/vendor/offline-products/sell', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: selectedProduct.id,
+          soldQuantity: quantity,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const revenue = data.data.revenue;
+        const profit = data.data.profitFromSale;
+        toast.success(
+          <div>
+            <p className="font-bold">تم تسجيل البيع بنجاح! 🎉</p>
+            <p className="text-sm">المبلغ: {revenue.toFixed(0)} ج</p>
+            <p className="text-sm">الربح: {profit.toFixed(0)} ج</p>
+          </div>
+        );
+        setSellQuantity('');
+        setShowSellDialog(false);
+        setSelectedProduct(null);
+        fetchData();
+        fetchCapital();
       } else {
         toast.error(data.error || 'حدث خطأ');
       }
@@ -600,12 +659,16 @@ export default function OfflineProductsPage() {
                 <p className="text-gray-400 text-center py-8">لا توجد بضائع مسجلة</p>
               ) : (
                 <div className="space-y-3">
-                  {offlineProducts.map((product) => (
+                  {offlineProducts.map((product) => {
+                    const remainingQuantity = product.quantity - product.soldQuantity;
+                    const soldPercentage = (product.soldQuantity / product.quantity) * 100;
+                    return (
                     <div
                       key={product.id}
-                      className="p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all"
+                      className="p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all"
                     >
-                      <div className="flex justify-between items-start mb-2">
+                      {/* Header */}
+                      <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
                           <p className="text-white font-medium">
                             {product.description || 'بضاعة'}
@@ -620,25 +683,86 @@ export default function OfflineProductsPage() {
                           {new Date(product.createdAt).toLocaleDateString('ar-EG')}
                         </span>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div>
-                          <p className="text-gray-400">الكمية</p>
-                          <p className="text-white font-bold">{product.quantity}</p>
+
+                      {/* Progress Bar */}
+                      <div className="mb-3">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-gray-400">التقدم</span>
+                          <span className="text-white">{soldPercentage.toFixed(0)}% مباع</span>
                         </div>
-                        <div>
-                          <p className="text-gray-400">التكلفة</p>
-                          <p className="text-red-400 font-bold">
-                            {(product.purchasePrice * product.quantity).toFixed(0)} ج
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-400">الربح</p>
-                          <p className="text-green-400 font-bold">{product.profit.toFixed(0)} ج</p>
+                        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all"
+                            style={{ width: `${soldPercentage}%` }}
+                          />
                         </div>
                       </div>
+
+                      {/* Quantity Info */}
+                      <div className="grid grid-cols-3 gap-3 mb-3">
+                        <div className="text-center p-2 bg-blue-500/10 rounded border border-blue-500/30">
+                          <p className="text-blue-400 text-[10px] mb-1">القطع المشتراة</p>
+                          <p className="text-white font-bold text-lg">{product.quantity}</p>
+                        </div>
+                        <div className="text-center p-2 bg-green-500/10 rounded border border-green-500/30">
+                          <p className="text-green-400 text-[10px] mb-1">القطع المباعة</p>
+                          <p className="text-white font-bold text-lg">{product.soldQuantity}</p>
+                        </div>
+                        <div className="text-center p-2 bg-yellow-500/10 rounded border border-yellow-500/30">
+                          <p className="text-yellow-400 text-[10px] mb-1">القطع المتبقية</p>
+                          <p className="text-white font-bold text-lg">{remainingQuantity}</p>
+                        </div>
+                      </div>
+
+                      {/* Price Info */}
+                      <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
+                        <div className="space-y-1">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">سعر الشراء/قطعة:</span>
+                            <span className="text-red-300">{product.purchasePrice.toFixed(0)} ج</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">سعر البيع/قطعة:</span>
+                            <span className="text-green-300">{product.sellingPrice.toFixed(0)} ج</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">إجمالي التكلفة:</span>
+                            <span className="text-red-400 font-bold">{(product.purchasePrice * product.quantity).toFixed(0)} ج</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">الربح المتوقع:</span>
+                            <span className="text-green-400 font-bold">{product.profit.toFixed(0)} ج</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2">
+                        {remainingQuantity > 0 ? (
+                          <Button
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setSellQuantity('');
+                              setShowSellDialog(true);
+                            }}
+                            size="sm"
+                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                          >
+                            <DollarSign className="w-4 h-4 ml-1" />
+                            تسجيل بيع
+                          </Button>
+                        ) : (
+                          <div className="flex-1 text-center py-2 bg-gray-700/50 rounded text-gray-400 text-sm">
+                            ✓ تم البيع بالكامل
+                          </div>
+                        )}
+                      </div>
+
                       <p className="text-xs text-gray-500 mt-2">بواسطة: {product.createdBy}</p>
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
             </CardContent>
@@ -864,6 +988,147 @@ export default function OfflineProductsPage() {
                         </>
                       ) : (
                         'تأكيد الدفع'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Sell Dialog */}
+        {showSellDialog && selectedProduct && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md bg-gray-900 border-green-500/50">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <DollarSign className="w-5 h-5" />
+                    تسجيل بيع قطع
+                  </span>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setShowSellDialog(false);
+                      setSelectedProduct(null);
+                      setSellQuantity('');
+                    }}
+                    size="sm"
+                    variant="ghost"
+                    className="text-gray-400 hover:text-white"
+                  >
+                    ✕
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 space-y-3">
+                  <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                    <p className="text-blue-200 text-sm mb-1">البضاعة:</p>
+                    <p className="text-white font-bold">
+                      {selectedProduct.description || 'بضاعة'}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="p-2 bg-white/5 rounded text-center">
+                      <p className="text-gray-400 text-xs">المشتراة</p>
+                      <p className="text-white font-bold text-lg">{selectedProduct.quantity}</p>
+                    </div>
+                    <div className="p-2 bg-green-500/20 rounded text-center border border-green-500/30">
+                      <p className="text-green-400 text-xs">المباعة</p>
+                      <p className="text-white font-bold text-lg">{selectedProduct.soldQuantity}</p>
+                    </div>
+                    <div className="p-2 bg-yellow-500/20 rounded text-center border border-yellow-500/30">
+                      <p className="text-yellow-400 text-xs">المتبقية</p>
+                      <p className="text-white font-bold text-lg">
+                        {selectedProduct.quantity - selectedProduct.soldQuantity}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="p-2 bg-white/5 rounded">
+                      <p className="text-gray-400 text-xs">سعر البيع/قطعة</p>
+                      <p className="text-green-300 font-bold">{selectedProduct.sellingPrice.toFixed(0)} ج</p>
+                    </div>
+                    <div className="p-2 bg-white/5 rounded">
+                      <p className="text-gray-400 text-xs">الربح/قطعة</p>
+                      <p className="text-emerald-300 font-bold">
+                        {(selectedProduct.sellingPrice - selectedProduct.purchasePrice).toFixed(0)} ج
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSellProduct} className="space-y-4">
+                  <div>
+                    <Label htmlFor="sellQuantity" className="text-white">
+                      عدد القطع المباعة *
+                    </Label>
+                    <Input
+                      id="sellQuantity"
+                      type="number"
+                      min="1"
+                      max={selectedProduct.quantity - selectedProduct.soldQuantity}
+                      value={sellQuantity}
+                      onChange={(e) => setSellQuantity(e.target.value)}
+                      className="bg-white/5 border-white/20 text-white"
+                      placeholder="1"
+                      required
+                      autoFocus
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                      الحد الأقصى: {selectedProduct.quantity - selectedProduct.soldQuantity}
+                    </p>
+                  </div>
+
+                  {sellQuantity && parseInt(sellQuantity) > 0 && parseInt(sellQuantity) <= (selectedProduct.quantity - selectedProduct.soldQuantity) && (
+                    <div className="p-3 bg-green-500/20 rounded-lg border border-green-500/30">
+                      <p className="text-green-200 text-sm mb-2">ملخص البيع:</p>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">المبلغ الإجمالي:</span>
+                          <span className="text-white font-bold">
+                            {(selectedProduct.sellingPrice * parseInt(sellQuantity)).toFixed(0)} ج
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">الربح المتوقع:</span>
+                          <span className="text-green-300 font-bold">
+                            {((selectedProduct.sellingPrice - selectedProduct.purchasePrice) * parseInt(sellQuantity)).toFixed(0)} ج
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setShowSellDialog(false);
+                        setSelectedProduct(null);;
+                        setSellQuantity('');
+                      }}
+                      variant="outline"
+                      className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
+                    >
+                      إلغاء
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          جاري التسجيل...
+                        </>
+                      ) : (
+                        'تأكيد البيع'
                       )}
                     </Button>
                   </div>

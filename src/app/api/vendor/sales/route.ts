@@ -48,6 +48,8 @@ export async function POST(req: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       // إنشاء sales لكل منتج
       const sales = [];
+      let totalRevenue = 0;
+      let totalProfit = 0;
       
       for (const item of items) {
         const product = await tx.product.findUnique({
@@ -58,6 +60,11 @@ export async function POST(req: NextRequest) {
           // استخدام السعر المخصص إذا تم تعديله، وإلا السعر الأصلي
           const salePrice = item.price || product.price;
           const costPrice = product.productionCost || 0;
+          const itemTotal = salePrice * item.quantity;
+          const itemProfit = (salePrice - costPrice) * item.quantity;
+          
+          totalRevenue += itemTotal;
+          totalProfit += itemProfit;
           
           // تسجيل البيع
           const sale = await tx.sale.create({
@@ -67,9 +74,9 @@ export async function POST(req: NextRequest) {
               productNameAr: product.nameAr,
               quantity: item.quantity,
               unitPrice: salePrice,
-              totalAmount: salePrice * item.quantity,
+              totalAmount: itemTotal,
               costPrice: costPrice,
-              profit: (salePrice - costPrice) * item.quantity,
+              profit: itemProfit,
               saleDate: new Date(),
             }
           });
@@ -90,13 +97,40 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      return sales;
+      // إضافة الإيراد لرأس المال
+      const balanceBefore = vendor.capitalBalance || 0;
+      const updatedVendor = await tx.vendor.update({
+        where: { id: vendor.id },
+        data: {
+          capitalBalance: {
+            increment: totalRevenue,
+          },
+        },
+      });
+
+      // تسجيل معاملة رأس المال
+      await tx.capitalTransaction.create({
+        data: {
+          vendorId: vendor.id,
+          type: 'SALE',
+          amount: totalRevenue,
+          balanceBefore: balanceBefore,
+          balanceAfter: updatedVendor.capitalBalance,
+          description: `بيع - POS (${items.length} منتج)`,
+          descriptionAr: `بيع - نقطة البيع (${items.length} منتج)`,
+        },
+      });
+
+      return { sales, totalRevenue, totalProfit, newBalance: updatedVendor.capitalBalance };
     });
 
     return NextResponse.json({
       success: true,
       message: 'تم إتمام البيع بنجاح',
-      sales: result
+      sales: result.sales,
+      totalRevenue: result.totalRevenue,
+      totalProfit: result.totalProfit,
+      newBalance: result.newBalance,
     });
 
   } catch (error) {
