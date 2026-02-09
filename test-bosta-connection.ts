@@ -1,8 +1,8 @@
 // 🧪 اختبار الاتصال مع Bosta API
 // Run: npx ts-node test-bosta-connection.ts
 
-const API_KEY = 'e4811f5cd1477c9d386f173921215b0cd3e81caa6deee89ff41e4d1390186ced';
-const BASE_URL = 'https://api.bosta.co/v1';
+const API_KEY = 'aa7a6bc56bef29f049f0f1612d76be9f9fb49ed894a38ad3d2a4f76132a36a41';
+const BASE_URL = 'http://app.bosta.co/api/v2';
 
 async function testBostaConnection() {
   console.log('🧪 ========================================');
