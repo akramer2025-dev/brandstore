@@ -5,10 +5,21 @@ import { Sparkles } from 'lucide-react';
 import Image from 'next/image';
 
 export default function SplashScreen() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    // التحقق إذا الـ splash اتعرض قبل كده في نفس الجلسة
+    const alreadyShown = sessionStorage.getItem('splashShown');
+    if (alreadyShown) {
+      setIsVisible(false);
+      return;
+    }
+
+    // أول مرة - اعرض الـ splash
+    setIsVisible(true);
+    sessionStorage.setItem('splashShown', 'true');
+
     // إخفاء الـ splash screen بعد 3 ثواني
     const timer = setTimeout(() => {
       setIsVisible(false);
