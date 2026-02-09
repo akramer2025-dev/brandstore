@@ -445,6 +445,42 @@ export default function OfflineProductsPage() {
     }
   };
 
+  const handleClearAll = async () => {
+    if (!confirm('⚠️ هل أنت متأكد من مسح كل البيانات؟\n\nسيتم مسح:\n✓ جميع البضائع\n✓ جميع الموردين\n✓ جميع المدفوعات\n\n❗ سيتم إرجاع قيمة البضاعة المتبقية لرأس المال')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/vendor/offline-products/clear', {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(
+          <div>
+            <p className="font-bold">تم مسح جميع البيانات بنجاح! ✅</p>
+            {data.refundedAmount > 0 && (
+              <p className="text-sm">تم إرجاع {data.refundedAmount.toFixed(0)} ج لرأس المال</p>
+            )}
+            <p className="text-sm">رأس المال الجديد: {data.newBalance.toFixed(0)} ج</p>
+          </div>
+        );
+        fetchData();
+        fetchSuppliers();
+        fetchCapital();
+      } else {
+        toast.error(data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const calculateProfit = () => {
     const purchase = parseFloat(formData.purchasePrice) || 0;
     const selling = parseFloat(formData.sellingPrice) || 0;
@@ -501,7 +537,7 @@ export default function OfflineProductsPage() {
 
         {/* Capital Summary */}
         <div className="grid md:grid-cols-3 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-lg border-blue-500/30">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-blue-200 text-sm font-bold">💰 رأس المال قبل الشراء</p>
@@ -512,7 +548,7 @@ export default function OfflineProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-lg border-purple-500/30">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-purple-200 text-sm font-bold">💵 رأس المال الحالي</p>
@@ -523,7 +559,7 @@ export default function OfflineProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-lg border-green-500/30">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-green-200 text-sm font-bold">💎 رأس المال المتوقع</p>
@@ -535,9 +571,23 @@ export default function OfflineProductsPage() {
           </Card>
         </div>
 
+        {/* Clear All Button */}
+        {(offlineProducts.length > 0 || suppliers.length > 0) && (
+          <div className="mb-6 flex justify-end">
+            <Button
+              onClick={handleClearAll}
+              variant="destructive"
+              className="bg-red-600/80 backdrop-blur-lg hover:bg-red-700/90"
+            >
+              <Trash2 className="w-4 h-4 ml-2" />
+              مسح كل شيء والبدء من جديد
+            </Button>
+          </div>
+        )}
+
         {/* Statistics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -550,7 +600,7 @@ export default function OfflineProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -563,7 +613,7 @@ export default function OfflineProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -576,7 +626,7 @@ export default function OfflineProductsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -592,7 +642,7 @@ export default function OfflineProductsPage() {
 
         {/* Suppliers Section */}
         {suppliers.length > 0 && (
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg mb-6">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Users className="w-5 h-5" />
@@ -727,7 +777,7 @@ export default function OfflineProductsPage() {
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Add Form */}
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Plus className="w-5 h-5" />
@@ -896,7 +946,7 @@ export default function OfflineProductsPage() {
           </Card>
 
           {/* Products List */}
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Receipt className="w-5 h-5" />
@@ -1639,3 +1689,4 @@ export default function OfflineProductsPage() {
     </div>
   );
 }
+
