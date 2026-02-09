@@ -260,7 +260,7 @@ export default function CustomerAssistant() {
             whileHover={{ scale: 1.08, rotate: [0, -5, 5, 0] }}
             whileTap={{ scale: 0.92 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-4 md:bottom-8 md:right-6 z-40 group"
+            className="fixed bottom-6 left-4 md:bottom-8 md:left-6 z-40 group"
             aria-label="مساعد ريمو الذكي"
           >
             <div className="relative">
@@ -299,7 +299,7 @@ export default function CustomerAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-20 md:bottom-24 right-4 left-4 sm:right-4 sm:left-auto sm:w-[420px] z-40 max-h-[68vh] md:max-h-[72vh]"
+            className="fixed bottom-20 md:bottom-24 left-4 right-4 sm:left-4 sm:right-auto sm:w-[420px] z-40 max-h-[68vh] md:max-h-[72vh]"
           >
             <Card className="bg-gradient-to-br from-slate-900 via-teal-900/95 to-slate-900 border-2 border-teal-400/60 shadow-[0_20px_60px_rgba(13,148,136,0.4)] overflow-hidden rounded-3xl backdrop-blur-xl">
               {/* رأس النافذة - تصميم محسّن */}
