@@ -154,12 +154,30 @@ export async function GET(request: NextRequest) {
     });
 
     // حساب الإحصائيات
-    const stats = offlineProducts.reduce((acc, product) => ({
-      totalCost: acc.totalCost + (product.purchasePrice * product.quantity),
-      totalRevenue: acc.totalRevenue + (product.sellingPrice * product.quantity),
-      totalProfit: acc.totalProfit + product.profit,
-      totalQuantity: acc.totalQuantity + product.quantity,
-    }), { totalCost: 0, totalRevenue: 0, totalProfit: 0, totalQuantity: 0 });
+    const stats = offlineProducts.reduce((acc, product) => {
+      const remainingQuantity = product.quantity - product.soldQuantity;
+      const remainingCost = product.purchasePrice * remainingQuantity;
+      const remainingRevenue = product.sellingPrice * remainingQuantity;
+      const soldRevenue = product.sellingPrice * product.soldQuantity;
+      
+      return {
+        totalCost: acc.totalCost + (product.purchasePrice * product.quantity),
+        totalRemainingRevenue: acc.totalRemainingRevenue + remainingRevenue,
+        totalSoldRevenue: acc.totalSoldRevenue + soldRevenue,
+        totalProfit: acc.totalProfit + product.profit,
+        totalQuantity: acc.totalQuantity + product.quantity,
+        totalSoldQuantity: acc.totalSoldQuantity + product.soldQuantity,
+        totalRemainingQuantity: acc.totalRemainingQuantity + remainingQuantity,
+      };
+    }, { 
+      totalCost: 0, 
+      totalRemainingRevenue: 0, 
+      totalSoldRevenue: 0,
+      totalProfit: 0, 
+      totalQuantity: 0,
+      totalSoldQuantity: 0,
+      totalRemainingQuantity: 0,
+    });
 
     return NextResponse.json({
       offlineProducts,

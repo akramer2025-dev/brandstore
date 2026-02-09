@@ -64,9 +64,12 @@ interface Supplier {
 
 interface Stats {
   totalCost: number;
-  totalRevenue: number;
+  totalRemainingRevenue: number;
+  totalSoldRevenue: number;
   totalProfit: number;
   totalQuantity: number;
+  totalSoldQuantity: number;
+  totalRemainingQuantity: number;
 }
 
 export default function OfflineProductsPage() {
@@ -76,10 +79,14 @@ export default function OfflineProductsPage() {
   const [offlineProducts, setOfflineProducts] = useState<OfflineProduct[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalCost: 0,
-    totalRevenue: 0,
+    totalRemainingRevenue: 0,
+    totalSoldRevenue: 0,
     totalProfit: 0,
     totalQuantity: 0,
+    totalSoldQuantity: 0,
+    totalRemainingQuantity: 0,
   });
+  const [initialCapital, setInitialCapital] = useState(0);
   const [capitalBalance, setCapitalBalance] = useState(0);
   const [hasPermission, setHasPermission] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -124,7 +131,15 @@ export default function OfflineProductsPage() {
       if (response.ok) {
         const data = await response.json();
         setOfflineProducts(data.offlineProducts || []);
-        setStats(data.stats || { totalCost: 0, totalRevenue: 0, totalProfit: 0, totalQuantity: 0 });
+        setStats(data.stats || { 
+          totalCost: 0, 
+          totalRemainingRevenue: 0, 
+          totalSoldRevenue: 0,
+          totalProfit: 0, 
+          totalQuantity: 0,
+          totalSoldQuantity: 0,
+          totalRemainingQuantity: 0,
+        });
         setHasPermission(true);
       } else if (response.status === 403) {
         setHasPermission(false);
@@ -142,6 +157,10 @@ export default function OfflineProductsPage() {
       if (response.ok) {
         const data = await response.json();
         setCapitalBalance(data.capitalBalance || 0);
+        // حفظ رأس المال الأولي عند أول تحميل
+        if (initialCapital === 0) {
+          setInitialCapital(data.capitalBalance || 0);
+        }
       }
     } catch (error) {
       console.error('Error fetching capital:', error);
@@ -468,6 +487,8 @@ export default function OfflineProductsPage() {
             <p className="text-sm">رأس المال الجديد: {data.newBalance.toFixed(0)} ج</p>
           </div>
         );
+        // إعادة تعيين رأس المال الأولي بعد المسح
+        setInitialCapital(data.newBalance);
         fetchData();
         fetchSuppliers();
         fetchCapital();
@@ -543,19 +564,19 @@ export default function OfflineProductsPage() {
                 <p className="text-blue-200 text-sm font-bold">💰 رأس المال قبل الشراء</p>
                 <Wallet className="w-6 h-6 text-blue-400" />
               </div>
-              <p className="text-3xl font-black text-white">{(capitalBalance + stats.totalCost).toFixed(0)}</p>
-              <p className="text-xs text-blue-300 mt-1">رأس المال الأولي</p>
+              <p className="text-3xl font-black text-white">{(initialCapital || capitalBalance + stats.totalCost).toFixed(0)}</p>
+              <p className="text-xs text-blue-300 mt-1">رأس المال الأولي (ثابت)</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/5 backdrop-blur-xl border-white/10 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-purple-200 text-sm font-bold">💵 رأس المال الحالي</p>
+                <p className="text-purple-200 text-sm font-bold">💵 رأس المال بعد الشراء</p>
                 <Wallet className="w-6 h-6 text-purple-400" />
               </div>
               <p className="text-3xl font-black text-white">{capitalBalance.toFixed(0)}</p>
-              <p className="text-xs text-purple-300 mt-1">بعد شراء البضاعة</p>
+              <p className="text-xs text-purple-300 mt-1">يقل مع كل عملية شراء</p>
             </CardContent>
           </Card>
 
@@ -565,8 +586,8 @@ export default function OfflineProductsPage() {
                 <p className="text-green-200 text-sm font-bold">💎 رأس المال المتوقع</p>
                 <TrendingUp className="w-6 h-6 text-green-400" />
               </div>
-              <p className="text-3xl font-black text-white">{(capitalBalance + stats.totalRevenue).toFixed(0)}</p>
-              <p className="text-xs text-green-300 mt-1">لو اتباعت كل البضاعة</p>
+              <p className="text-3xl font-black text-white">{(capitalBalance + stats.totalRemainingRevenue).toFixed(0)}</p>
+              <p className="text-xs text-green-300 mt-1">بعد بيع البضاعة المتبقية ({stats.totalRemainingQuantity} قطعة)</p>
             </CardContent>
           </Card>
         </div>
@@ -604,11 +625,11 @@ export default function OfflineProductsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">المبيعات</p>
-                  <p className="text-2xl font-bold text-blue-400">{stats.totalRevenue.toFixed(0)}</p>
-                  <p className="text-xs text-blue-300">متوقعة من البضاعة</p>
+                  <p className="text-gray-300 text-sm">المبيعات المحصلة</p>
+                  <p className="text-2xl font-bold text-emerald-400">{stats.totalSoldRevenue.toFixed(0)}</p>
+                  <p className="text-xs text-emerald-300">{stats.totalSoldQuantity} قطعة مباعة</p>
                 </div>
-                <Receipt className="w-8 h-8 text-blue-400" />
+                <Receipt className="w-8 h-8 text-emerald-400" />
               </div>
             </CardContent>
           </Card>
@@ -617,11 +638,11 @@ export default function OfflineProductsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">الربح</p>
-                  <p className="text-2xl font-bold text-green-400">{stats.totalProfit.toFixed(0)}</p>
-                  <p className="text-xs text-green-300">متوقع بعد البيع</p>
+                  <p className="text-gray-300 text-sm">المتوقعة</p>
+                  <p className="text-2xl font-bold text-blue-400">{stats.totalRemainingRevenue.toFixed(0)}</p>
+                  <p className="text-xs text-blue-300">{stats.totalRemainingQuantity} قطعة متبقية</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-green-400" />
+                <TrendingUp className="w-8 h-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
@@ -630,7 +651,7 @@ export default function OfflineProductsPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">الكمية</p>
+                  <p className="text-gray-300 text-sm">الكمية الكلية</p>
                   <p className="text-2xl font-bold text-yellow-400">{stats.totalQuantity}</p>
                   <p className="text-xs text-yellow-300">قطعة مشتراة</p>
                 </div>
