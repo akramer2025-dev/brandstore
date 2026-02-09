@@ -499,28 +499,51 @@ export default function OfflineProductsPage() {
           <p className="text-gray-300 mt-2">تسجيل البضاعة المشتراة والمباعة خارج النظام</p>
         </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+        {/* Capital Summary */}
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <Card className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-lg border-blue-500/30">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-300 text-sm">رأس المال</p>
-                  <p className="text-2xl font-bold text-white">{capitalBalance.toFixed(0)}</p>
-                  <p className="text-xs text-gray-400">جنيه</p>
-                </div>
-                <Wallet className="w-8 h-8 text-green-400" />
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-blue-200 text-sm font-bold">💰 رأس المال قبل الشراء</p>
+                <Wallet className="w-6 h-6 text-blue-400" />
               </div>
+              <p className="text-3xl font-black text-white">{(capitalBalance + stats.totalCost).toFixed(0)}</p>
+              <p className="text-xs text-blue-300 mt-1">رأس المال الأولي</p>
             </CardContent>
           </Card>
 
+          <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-lg border-purple-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-purple-200 text-sm font-bold">💵 رأس المال الحالي</p>
+                <Wallet className="w-6 h-6 text-purple-400" />
+              </div>
+              <p className="text-3xl font-black text-white">{capitalBalance.toFixed(0)}</p>
+              <p className="text-xs text-purple-300 mt-1">بعد شراء البضاعة</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-lg border-green-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-green-200 text-sm font-bold">💎 رأس المال المتوقع</p>
+                <TrendingUp className="w-6 h-6 text-green-400" />
+              </div>
+              <p className="text-3xl font-black text-white">{(capitalBalance + stats.totalRevenue).toFixed(0)}</p>
+              <p className="text-xs text-green-300 mt-1">لو اتباعت كل البضاعة</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Statistics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-300 text-sm">التكلفة</p>
                   <p className="text-2xl font-bold text-red-400">{stats.totalCost.toFixed(0)}</p>
-                  <p className="text-xs text-gray-400">جنيه</p>
+                  <p className="text-xs text-red-300">مخصومة من رأس المال</p>
                 </div>
                 <DollarSign className="w-8 h-8 text-red-400" />
               </div>
@@ -533,7 +556,7 @@ export default function OfflineProductsPage() {
                 <div>
                   <p className="text-gray-300 text-sm">المبيعات</p>
                   <p className="text-2xl font-bold text-blue-400">{stats.totalRevenue.toFixed(0)}</p>
-                  <p className="text-xs text-gray-400">جنيه</p>
+                  <p className="text-xs text-blue-300">متوقعة من البضاعة</p>
                 </div>
                 <Receipt className="w-8 h-8 text-blue-400" />
               </div>
@@ -546,7 +569,7 @@ export default function OfflineProductsPage() {
                 <div>
                   <p className="text-gray-300 text-sm">الربح</p>
                   <p className="text-2xl font-bold text-green-400">{stats.totalProfit.toFixed(0)}</p>
-                  <p className="text-xs text-gray-400">جنيه</p>
+                  <p className="text-xs text-green-300">متوقع بعد البيع</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-green-400" />
               </div>
@@ -559,7 +582,7 @@ export default function OfflineProductsPage() {
                 <div>
                   <p className="text-gray-300 text-sm">الكمية</p>
                   <p className="text-2xl font-bold text-yellow-400">{stats.totalQuantity}</p>
-                  <p className="text-xs text-gray-400">وحدة</p>
+                  <p className="text-xs text-yellow-300">قطعة مشتراة</p>
                 </div>
                 <Package className="w-8 h-8 text-yellow-400" />
               </div>
@@ -628,17 +651,28 @@ export default function OfflineProductsPage() {
                             <span className="text-gray-400">لو اتباعت هتبقى:</span>
                             <span className="text-green-400 font-bold">{supplier.stats.remainingExpectedRevenue.toFixed(0)} ج</span>
                           </div>
+                          <div className="flex justify-between mt-1 pt-1 border-t border-yellow-500/30">
+                            <span className="text-yellow-300">ليكي عنده:</span>
+                            <span className="text-yellow-400 font-bold">{supplier.stats.remainingCost.toFixed(0)} ج بضاعة</span>
+                          </div>
                         </div>
                       </div>
                     )}
 
-                    {/* المبيعات */}
+                    {/* المبالغ المستحقة من المورد */}
                     {supplier.stats.soldRevenue > 0 && (
-                      <div className="mb-3 p-2 bg-blue-500/10 rounded border border-blue-500/30">
-                        <p className="text-blue-200 text-xs font-bold mb-1">💵 المبيعات المحصلة:</p>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-400">مبيعات المورد:</span>
-                          <span className="text-blue-400 font-bold">{supplier.stats.soldRevenue.toFixed(0)} ج</span>
+                      <div className="mb-3 p-2 bg-yellow-500/10 rounded border border-yellow-500/30">
+                        <p className="text-yellow-200 text-xs font-bold mb-1">💰 المبلغ المستحق من المورد:</p>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">باع بضاعة بمبلغ:</span>
+                            <span className="text-yellow-400 font-bold">{supplier.stats.soldRevenue.toFixed(0)} ج</span>
+                          </div>
+                          <div className="flex justify-between mt-1 pt-1 border-t border-yellow-500/30">
+                            <span className="text-yellow-300 font-bold">المورد مديون ليكي:</span>
+                            <span className="text-red-400 font-black text-sm">{supplier.stats.soldRevenue.toFixed(0)} ج</span>
+                          </div>
+                          <p className="text-yellow-300 text-[10px] mt-1">⚠️ لازم يدفعها ليكي</p>
                         </div>
                       </div>
                     )}
