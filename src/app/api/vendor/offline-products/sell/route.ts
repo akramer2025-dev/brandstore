@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     await prisma.capitalTransaction.create({
       data: {
         vendorId: vendor.id,
-        type: 'SALE',
+        type: 'SALE_PROFIT',
         amount: revenue,
         balanceBefore: vendor.capitalBalance,
         balanceAfter: updatedVendor.capitalBalance,
