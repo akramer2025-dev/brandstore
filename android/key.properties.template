@@ -1,0 +1,15 @@
+# ملف إعدادات التوقيع - Google Play Release
+# ⚠️ مهم: لا ترفع هذا الملف على Git!
+# ⚠️ ضعه في .gitignore
+
+# استبدل القيم التالية بكلمات المرور الخاصة بك:
+storePassword=YOUR_KEYSTORE_PASSWORD_HERE
+keyPassword=YOUR_KEY_PASSWORD_HERE
+keyAlias=remostore
+storeFile=keystores/remostore-release.keystore
+
+# ملاحظات:
+# 1. storePassword - كلمة مرور الـ keystore
+# 2. keyPassword - كلمة مرور المفتاح (عادة نفس storePassword)
+# 3. keyAlias - اسم المفتاح (remostore)
+# 4. storeFile - مسار ملف الـ keystore
