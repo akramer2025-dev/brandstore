@@ -14,6 +14,7 @@ import {
   ShoppingCart,
   Users,
   Download,
+  Wallet,
 } from 'lucide-react';
 import { BackButton } from '@/components/BackButton';
 
