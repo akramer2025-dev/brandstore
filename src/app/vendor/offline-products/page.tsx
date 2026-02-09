@@ -595,7 +595,7 @@ export default function OfflineProductsPage() {
                 <p className="text-purple-200 text-sm font-bold">💵 رأس المال بعد الشراء</p>
                 <Wallet className="w-6 h-6 text-purple-400" />
               </div>
-              <p className="text-3xl font-black text-white">{capitalBalance.toFixed(0)}</p>
+              <p className="text-3xl font-black text-white">{(capitalBalance - stats.totalSoldRevenue).toFixed(0)}</p>
               <p className="text-xs text-purple-300 mt-1">يقل مع كل عملية شراء</p>
             </CardContent>
           </Card>
