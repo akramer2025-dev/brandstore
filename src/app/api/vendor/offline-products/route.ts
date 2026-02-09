@@ -139,8 +139,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'غير مصرح' }, { status: 403 });
     }
 
+    // استخراج معامل supplierId من URL إذا وجد
+    const { searchParams } = new URL(request.url);
+    const supplierId = searchParams.get('supplierId');
+
+    // بناء شروط الاستعلام
+    const whereClause: any = { vendorId: vendor.id };
+    if (supplierId) {
+      whereClause.supplierId = supplierId;
+    }
+
     const offlineProducts = await prisma.offlineProduct.findMany({
-      where: { vendorId: vendor.id },
+      where: whereClause,
       include: {
         supplier: {
           select: {

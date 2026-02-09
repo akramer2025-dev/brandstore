@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -183,7 +183,7 @@ export default function OfflineProductsPage() {
     e.preventDefault();
     
     if (!supplierForm.name.trim()) {
-      toast.error('اسم المورد مطلوب');
+      toast.error('اسم الوسيط مطلوب');
       return;
     }
 
@@ -198,7 +198,7 @@ export default function OfflineProductsPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('تم إضافة المورد بنجاح');
+        toast.success('تم إضافة الوسيط بنجاح');
         setSupplierForm({ name: '', phone: '', address: '', notes: '' });
         setShowSupplierDialog(false);
         fetchSuppliers();
@@ -345,7 +345,7 @@ export default function OfflineProductsPage() {
     if (!selectedSupplier) return;
     
     if (!supplierForm.name.trim()) {
-      toast.error('اسم المورد مطلوب');
+      toast.error('اسم الوسيط مطلوب');
       return;
     }
 
@@ -360,7 +360,7 @@ export default function OfflineProductsPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('تم تعديل المورد بنجاح');
+        toast.success('تم تعديل الوسيط بنجاح');
         setSupplierForm({ name: '', phone: '', address: '', notes: '' });
         setShowEditSupplierDialog(false);
         setSelectedSupplier(null);
@@ -376,7 +376,7 @@ export default function OfflineProductsPage() {
   };
 
   const handleDeleteSupplier = async (supplier: Supplier) => {
-    if (!confirm(`هل أنت متأكد من حذف المورد "${supplier.name}"؟`)) {
+    if (!confirm(`هل أنت متأكد من حذف الوسيط "${supplier.name}"؟`)) {
       return;
     }
 
@@ -389,7 +389,7 @@ export default function OfflineProductsPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('تم حذف المورد بنجاح');
+        toast.success('تم حذف الوسيط بنجاح');
         fetchSuppliers();
       } else {
         toast.error(data.error || 'حدث خطأ');
@@ -465,7 +465,7 @@ export default function OfflineProductsPage() {
   };
 
   const handleClearAll = async () => {
-    if (!confirm('⚠️ هل أنت متأكد من مسح كل البيانات؟\n\nسيتم مسح:\n✓ جميع البضائع\n✓ جميع الموردين\n✓ جميع المدفوعات\n\n❗ سيتم إرجاع قيمة البضاعة المتبقية لرأس المال')) {
+    if (!confirm('⚠️ هل أنت متأكد من مسح كل البيانات؟\n\nسيتم مسح:\n✓ جميع البضائع\n✓ جميع الوسطاء\n✓ جميع المدفوعات\n\n❗ سيتم إرجاع قيمة البضاعة المتبقية لرأس المال')) {
       return;
     }
 
@@ -549,11 +549,22 @@ export default function OfflineProductsPage() {
         {/* Header */}
         <div className="mb-6">
           <BackButton fallbackUrl="/vendor/dashboard" className="mb-3" />
-          <h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
-            <Package className="w-8 h-8" />
-            بضاعة خارج النظام
-          </h1>
-          <p className="text-gray-300 mt-2">تسجيل البضاعة المشتراة والمباعة خارج النظام</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
+                <Package className="w-8 h-8" />
+                بضاعة خارج النظام
+              </h1>
+              <p className="text-gray-300 mt-2">تسجيل البضاعة المشتراة والمباعة خارج النظام</p>
+            </div>
+            <Button
+              onClick={() => router.push('/vendor/offline-products/reports')}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+            >
+              <Receipt className="w-4 h-4 ml-2" />
+              تقرير شامل
+            </Button>
+          </div>
         </div>
 
         {/* Capital Summary */}
@@ -667,7 +678,7 @@ export default function OfflineProductsPage() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                الموردين ({suppliers.length})
+                الوسطاء ({suppliers.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -688,7 +699,7 @@ export default function OfflineProductsPage() {
 
                     {/* المدفوعات */}
                     <div className="mb-3 p-2 bg-red-500/10 rounded border border-red-500/30">
-                      <p className="text-red-200 text-xs font-bold mb-1">💰 المدفوعات للمورد:</p>
+                      <p className="text-red-200 text-xs font-bold mb-1">💰 المدفوعات للوسيط:</p>
                       <div className="space-y-1 text-xs">
                         <div className="flex justify-between">
                           <span className="text-gray-400">إجمالي المشتريات:</span>
@@ -705,10 +716,10 @@ export default function OfflineProductsPage() {
                       </div>
                     </div>
 
-                    {/* البضاعة المتبقية عند المورد */}
+                    {/* البضاعة المتبقية عند الوسيط */}
                     {supplier.stats.remainingQuantity > 0 && (
                       <div className="mb-3 p-2 bg-yellow-500/10 rounded border border-yellow-500/30">
-                        <p className="text-yellow-200 text-xs font-bold mb-1">📦 البضاعة عند المورد:</p>
+                        <p className="text-yellow-200 text-xs font-bold mb-1">📦 البضاعة عند الوسيط:</p>
                         <div className="space-y-1 text-xs">
                           <div className="flex justify-between">
                             <span className="text-gray-400">عدد القطع المتبقية:</span>
@@ -730,17 +741,17 @@ export default function OfflineProductsPage() {
                       </div>
                     )}
 
-                    {/* المبالغ المستحقة من المورد */}
+                    {/* المبالغ المستحقة من الوسيط */}
                     {supplier.stats.soldRevenue > 0 && (
                       <div className="mb-3 p-2 bg-yellow-500/10 rounded border border-yellow-500/30">
-                        <p className="text-yellow-200 text-xs font-bold mb-1">💰 المبلغ المستحق من المورد:</p>
+                        <p className="text-yellow-200 text-xs font-bold mb-1">💰 المبلغ المستحق من الوسيط:</p>
                         <div className="space-y-1 text-xs">
                           <div className="flex justify-between">
                             <span className="text-gray-400">باع بضاعة بمبلغ:</span>
                             <span className="text-yellow-400 font-bold">{supplier.stats.soldRevenue.toFixed(0)} ج</span>
                           </div>
                           <div className="flex justify-between mt-1 pt-1 border-t border-yellow-500/30">
-                            <span className="text-yellow-300 font-bold">المورد مديون ليكي:</span>
+                            <span className="text-yellow-300 font-bold">الوسيط مديون ليكي:</span>
                             <span className="text-red-400 font-black text-sm">{supplier.stats.soldRevenue.toFixed(0)} ج</span>
                           </div>
                           <p className="text-yellow-300 text-[10px] mt-1">⚠️ لازم يدفعها ليكي</p>
@@ -857,7 +868,7 @@ export default function OfflineProductsPage() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label htmlFor="supplierId" className="text-white">
-                      المورد (اختياري)
+                      الوسيط (اختياري)
                     </Label>
                     <Button
                       type="button"
@@ -866,7 +877,7 @@ export default function OfflineProductsPage() {
                       className="bg-purple-600 hover:bg-purple-700 text-xs"
                     >
                       <Plus className="w-3 h-3 ml-1" />
-                      مورد جديد
+                      وسيط جديد
                     </Button>
                   </div>
                   <select
@@ -875,7 +886,7 @@ export default function OfflineProductsPage() {
                     onChange={(e) => setFormData({ ...formData, supplierId: e.target.value })}
                     className="w-full bg-white/5 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    <option value="" className="bg-gray-800">بدون مورد</option>
+                    <option value="" className="bg-gray-800">بدون وسيط</option>
                     {suppliers.map(supplier => (
                       <option key={supplier.id} value={supplier.id} className="bg-gray-800">
                         {supplier.name} {supplier.stats.pendingAmount > 0 && `(مستحق: ${supplier.stats.pendingAmount.toFixed(0)} ج)`}
@@ -1123,7 +1134,7 @@ export default function OfflineProductsPage() {
                 <CardTitle className="text-white flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Plus className="w-5 h-5" />
-                    إضافة مورد جديد
+                    إضافة وسيط جديد
                   </span>
                   <Button
                     type="button"
@@ -1140,7 +1151,7 @@ export default function OfflineProductsPage() {
                 <form onSubmit={handleAddSupplier} className="space-y-4">
                   <div>
                     <Label htmlFor="supplierName" className="text-white">
-                      اسم المورد *
+                      اسم الوسيط *
                     </Label>
                     <Input
                       id="supplierName"
@@ -1213,7 +1224,7 @@ export default function OfflineProductsPage() {
                           إضافة...
                         </>
                       ) : (
-                        'إضافة المورد'
+                        'إضافة الوسيط'
                       )}
                     </Button>
                   </div>
@@ -1231,7 +1242,7 @@ export default function OfflineProductsPage() {
                 <CardTitle className="text-white flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <DollarSign className="w-5 h-5" />
-                    دفع للمورد: {selectedSupplier.name}
+                    دفع للوسيط: {selectedSupplier.name}
                   </span>
                   <Button
                     type="button"
@@ -1492,7 +1503,7 @@ export default function OfflineProductsPage() {
                 <CardTitle className="text-white flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Edit className="w-5 h-5" />
-                    تعديل مورد: {selectedSupplier.name}
+                    تعديل وسيط: {selectedSupplier.name}
                   </span>
                   <Button
                     type="button"
@@ -1513,7 +1524,7 @@ export default function OfflineProductsPage() {
                 <form onSubmit={handleEditSupplier} className="space-y-4">
                   <div>
                     <Label htmlFor="editSupplierName" className="text-white">
-                      اسم المورد *
+                      اسم الوسيط *
                     </Label>
                     <Input
                       id="editSupplierName"

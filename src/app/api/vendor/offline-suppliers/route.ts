@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-// GET - جلب جميع موردين البضاعة الخارجية
+// GET - جلب جميع وسطاء البضاعة الخارجية
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       }, { status: 403 });
     }
 
-    // جلب الموردين مع إحصائياتهم
+    // جلب الوسطاء مع إحصائياتهم
     const suppliers = await prisma.offlineSupplier.findMany({
       where: { vendorId: vendor.id },
       include: {
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    // حساب الإحصائيات لكل مورد
+    // حساب الإحصائيات لكل وسيط
     const suppliersWithStats = suppliers.map(supplier => {
       const totalPurchases = supplier.offlineProducts.reduce(
         (sum, p) => sum + (p.purchasePrice * p.quantity), 
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       const totalProducts = supplier.offlineProducts.length;
       const lastPaymentDate = supplier.payments[0]?.createdAt || null;
 
-      // حساب البضاعة المتبقية عند المورد
+      // حساب البضاعة المتبقية عند الوسيط
       const remainingQuantity = supplier.offlineProducts.reduce(
         (sum, p) => sum + (p.quantity - p.soldQuantity),
         0
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - إضافة مورد جديد
+// POST - إضافة وسيط جديد
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
 
     if (!name || name.trim() === '') {
       return NextResponse.json({ 
-        error: 'اسم المورد مطلوب' 
+        error: 'اسم الوسيط مطلوب' 
       }, { status: 400 });
     }
 
@@ -171,13 +171,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       supplier,
-      message: 'تم إضافة المورد بنجاح' 
+      message: 'تم إضافة الوسيط بنجاح' 
     });
 
   } catch (error) {
     console.error('Error creating supplier:', error);
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء إضافة المورد' },
+      { error: 'حدث خطأ أثناء إضافة الوسيط' },
       { status: 500 }
     );
   }
