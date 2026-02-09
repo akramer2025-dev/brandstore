@@ -41,15 +41,16 @@ export async function GET(req: NextRequest) {
       _sum: { amount: true }
     })
 
-    // حساب الرصيد الحالي
-    const partner = await prisma.partnerCapital.findFirst({
-      where: { vendorId: vendor.id, isActive: true }
+    // جلب الرصيد الحالي من vendor.capitalBalance
+    const currentVendor = await prisma.vendor.findUnique({
+      where: { id: vendor.id },
+      select: { capitalBalance: true }
     })
 
     return NextResponse.json({
       transactions,
       summary,
-      currentBalance: partner?.capitalAmount || 0
+      currentBalance: currentVendor?.capitalBalance || 0
     })
 
   } catch (error) {
@@ -88,12 +89,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // جلب أو إنشاء رأس المال
-    let partner = await prisma.partnerCapital.findFirst({
-      where: { vendorId: vendor.id, isActive: true }
-    })
-
-    const balanceBefore = partner?.capitalAmount || 0
+    // جلب رأس المال الحالي من vendor.capitalBalance
+    const balanceBefore = vendor.capitalBalance
     let balanceAfter = balanceBefore
 
     // حساب الرصيد الجديد
@@ -111,7 +108,7 @@ export async function POST(req: NextRequest) {
       balanceAfter = amount // التعديل يحدد الرصيد الجديد مباشرة
     }
 
-    // تحديث أو إنشاء رأس المال
+    // تحديث رأس المال
     const result = await prisma.$transaction(async (tx) => {
       // إنشاء المعاملة
       const transaction = await tx.capitalTransaction.create({
@@ -127,22 +124,11 @@ export async function POST(req: NextRequest) {
         }
       })
 
-      // تحديث رأس المال
-      if (partner) {
-        await tx.partnerCapital.update({
-          where: { id: partner.id },
-          data: { capitalAmount: balanceAfter }
-        })
-      } else {
-        await tx.partnerCapital.create({
-          data: {
-            vendorId: vendor.id,
-            partnerName: session.user.name || 'الشريك الرئيسي',
-            capitalAmount: balanceAfter,
-            capitalPercent: 100
-          }
-        })
-      }
+      // تحديث vendor.capitalBalance
+      await tx.vendor.update({
+        where: { id: vendor.id },
+        data: { capitalBalance: balanceAfter }
+      })
 
       return transaction
     })
