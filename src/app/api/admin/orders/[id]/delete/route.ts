@@ -35,6 +35,31 @@ export async function DELETE(
         canDelete = true;
         vendorId = vendor.id;
       }
+    } else if (session.user.role === "PARTNER") {
+      // التحقق من أن المستخدم مرتبط بشريك
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { 
+          partnerId: true,
+          partner: {
+            select: {
+              id: true,
+              vendorId: true,
+              vendor: {
+                select: {
+                  id: true,
+                  canDeleteOrders: true
+                }
+              }
+            }
+          }
+        },
+      });
+
+      if (user?.partner?.vendor && user.partner.vendor.canDeleteOrders) {
+        canDelete = true;
+        vendorId = user.partner.vendor.id;
+      }
     }
 
     if (!canDelete) {

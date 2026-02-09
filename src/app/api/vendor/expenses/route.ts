@@ -91,10 +91,11 @@ export async function POST(request: NextRequest) {
         data: {
           vendorId: vendor.id,
           amount: parsedAmount,
-          category,
+          expenseType: category, // استخدام expenseType بدلاً من category
           description: description || `مصروف - ${category}`,
+          descriptionAr: description || `مصروف - ${category}`,
           notes: notes || null,
-          createdBy: session.user.name || session.user.email || 'Unknown',
+          paidBy: session.user.name || session.user.email || 'Unknown',
         },
       });
 
