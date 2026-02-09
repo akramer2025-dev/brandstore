@@ -87,8 +87,8 @@ export default function OfflineProductsReportsPage() {
       if (response.ok) {
         const data = await response.json();
         setCapitalInfo({
-          current: data.capitalBalance || 0,
-          initial: data.capitalBalance || 0
+          initial: data.initialCapital || 7500,
+          current: data.capitalBalance || 7500
         });
       }
     } catch (error) {
@@ -183,6 +183,9 @@ export default function OfflineProductsReportsPage() {
   const activeSupplier = suppliers.find(s => s.id === activeTab);
   const displayProducts = activeTab === 'no-supplier' ? noSupplierProducts : (activeSupplier?.products || []);
   const totals = calculateTotals(displayProducts);
+  
+  // حساب رأس المال قبل البضاعة المعروضة
+  const capitalBeforeDisplayed = capitalInfo.current + totals.totalCost - totals.soldRevenue;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 pb-20">
@@ -212,8 +215,41 @@ export default function OfflineProductsReportsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* كارت رأس المال */}
+        <Card className="mb-6 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 backdrop-blur-xl border-indigo-500/30">
+          <CardContent className="p-6">
+            <h2 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+              <Wallet className="w-6 h-6" />
+              💰 ملخص رأس المال
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white/10 p-4 rounded-lg border border-white/20">
+                <p className="text-gray-300 text-sm mb-1">رأس المال الأولي (ثابت)</p>
+                <p className="text-white text-3xl font-bold">{capitalInfo.initial.toFixed(0)}</p>
+                <p className="text-gray-400 text-xs mt-1">جنيه</p>
+              </div>
+              <div className="bg-white/10 p-4 rounded-lg border border-white/20">
+                <p className="text-gray-300 text-sm mb-1">رأس المال الحالي</p>
+                <p className="text-emerald-400 text-3xl font-bold">{capitalInfo.current.toFixed(0)}</p>
+                <p className="text-gray-400 text-xs mt-1">جنيه</p>
+              </div>
+              <div className="bg-white/10 p-4 rounded-lg border border-white/20">
+                <p className="text-gray-300 text-sm mb-1">
+                  {capitalInfo.current >= capitalInfo.initial ? 'الربح' : 'الخسارة'}
+                </p>
+                <p className={`text-3xl font-bold ${
+                  capitalInfo.current >= capitalInfo.initial ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {Math.abs(capitalInfo.current - capitalInfo.initial).toFixed(0)}
+                </p>
+                <p className="text-gray-400 text-xs mt-1">جنيه</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Tabs */}
-        <div className="mb-6 print:hidden">
+        <div className="mb-6 print:hidden">{
           <div className="flex gap-2 overflow-x-auto pb-2">
             <Button
               onClick={() => setActiveTab('all')}
@@ -262,6 +298,9 @@ export default function OfflineProductsReportsPage() {
           <div className="space-y-6">
             {suppliers.map((supplier) => {
               const supplierTotals = calculateTotals(supplier.products);
+              
+              // حساب رأس المال قبل إعطاء هذا الوسيط بضاعة
+              const capitalBeforeSupplier = capitalInfo.current + supplierTotals.totalCost - supplierTotals.soldRevenue;
               const capitalAfterSales = capitalInfo.current;
               const expectedCapital = capitalInfo.current + supplierTotals.remainingRevenue;
               
@@ -292,7 +331,7 @@ export default function OfflineProductsReportsPage() {
                         <div className="bg-white/5 p-3 rounded">
                           <p className="text-gray-400 mb-1">1️⃣ أديتله بضاعة بـ:</p>
                           <p className="text-red-400 text-xl font-bold">{supplierTotals.totalCost.toFixed(0)} ج</p>
-                          <p className="text-xs text-red-300 mt-1">من رأس المال {capitalInfo.initial.toFixed(0)} ج</p>
+                          <p className="text-xs text-red-300 mt-1">من رأس المال {capitalBeforeSupplier.toFixed(0)} ج</p>
                         </div>
                         <div className="bg-white/5 p-3 rounded">
                           <p className="text-gray-400 mb-1">2️⃣ باع بضاعة بـ:</p>
@@ -329,7 +368,7 @@ export default function OfflineProductsReportsPage() {
                         <p className="text-gray-400 text-xs">ج</p>
                       </div>
                       <div className="bg-white/5 p-4 rounded-lg">
-                        <p className="text-gray-400 text-sm">المحصل</p>
+                        <p className="text-gray-400 text-sm">مبيعات وسيط</p>
                         <p className="text-emerald-400 text-2xl font-bold">{supplierTotals.soldRevenue.toFixed(0)}</p>
                         <p className="text-gray-400 text-xs">ج</p>
                       </div>
@@ -470,7 +509,7 @@ export default function OfflineProductsReportsPage() {
                       <p className="text-gray-400 text-xs mb-2">1️⃣ أديتله بضاعة بـ</p>
                       <p className="text-red-400 text-3xl font-bold mb-1">{totals.totalCost.toFixed(0)}</p>
                       <p className="text-gray-300">جنيه</p>
-                      <p className="text-xs text-red-300 mt-2">من رأس المال {capitalInfo.initial.toFixed(0)} ج</p>
+                      <p className="text-xs text-red-300 mt-2">من رأس المال {capitalBeforeDisplayed.toFixed(0)} ج</p>
                     </div>
                     <div className="bg-white/5 p-4 rounded-lg text-center">
                       <p className="text-gray-400 text-xs mb-2">2️⃣ باع بضاعة بـ</p>
@@ -553,7 +592,7 @@ export default function OfflineProductsReportsPage() {
                         <th className="text-right p-3 text-gray-300 font-bold">سعر الشراء</th>
                         <th className="text-right p-3 text-gray-300 font-bold">سعر البيع</th>
                         <th className="text-right p-3 text-gray-300 font-bold">التكلفة</th>
-                        <th className="text-right p-3 text-gray-300 font-bold">المحصل</th>
+                        <th className="text-right p-3 text-gray-300 font-bold">مبيعات وسيط</th>
                         <th className="text-right p-3 text-gray-300 font-bold">المتوقع</th>
                         <th className="text-right p-3 text-gray-300 font-bold">الربح</th>
                       </tr>

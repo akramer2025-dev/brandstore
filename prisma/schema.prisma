@@ -138,7 +138,8 @@ model Vendor {
   yearsOfExperience  Int            @default(0)
   commissionRate     Float          @default(15)
   // رأس المال
-  capitalBalance     Float          @default(0)  // رصيد رأس المال الحالي
+  initialCapital     Float          @default(7500)  // رأس المال الأولي (ثابت)
+  capitalBalance     Float          @default(7500)  // رصيد رأس المال الحالي (متغير)
   // البيانات البنكية (اختيارية)
   bankName           String?
   accountNumber      String?

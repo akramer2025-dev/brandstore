@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
       where: { userId: session.user.id },
       select: {
         id: true,
+        initialCapital: true,
         capitalBalance: true,
       }
     });
@@ -24,7 +25,8 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ 
-      capitalBalance: vendor.capitalBalance || 0 
+      initialCapital: vendor.initialCapital || 7500,
+      capitalBalance: vendor.capitalBalance || 7500
     });
 
   } catch (error) {

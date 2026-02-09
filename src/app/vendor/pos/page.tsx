@@ -126,21 +126,20 @@ export default function POSPage() {
 
   const fetchOfflineData = async () => {
     try {
-      // جلب الصلاحية
-      const permissionRes = await fetch('/api/vendor/profile');
-      if (permissionRes.ok) {
-        const data = await permissionRes.json();
-        setCanViewOffline(data.vendor?.canAddOfflineProducts || false);
-      }
-
-      // جلب المنتجات الخارجية
+      // جلب المنتجات الخارجية (سيفشل إذا لم تكن هناك صلاحية)
       const offlineRes = await fetch('/api/vendor/offline-products');
       if (offlineRes.ok) {
         const data = await offlineRes.json();
         setOfflineProducts(data.offlineProducts || []);
+        setCanViewOffline(true); // إذا نجح الطلب = عنده صلاحية
+      } else if (offlineRes.status === 403) {
+        // ليس لديه صلاحية
+        setCanViewOffline(false);
+        setOfflineProducts([]);
       }
     } catch (error) {
       console.error('Error fetching offline data:', error);
+      setCanViewOffline(false);
     }
   };
 
