@@ -106,6 +106,7 @@ export default function OfflineProductsPage() {
     notes: '',
   });
   const [paymentForm, setPaymentForm] = useState({
+    type: 'RECEIPT', // RECEIPT = قبض، PAYMENT = صرف
     amount: '',
     paymentMethod: 'CASH',
     notes: '',
@@ -204,49 +205,6 @@ export default function OfflineProductsPage() {
         setSupplierForm({ name: '', phone: '', address: '', notes: '' });
         setShowSupplierDialog(false);
         fetchSuppliers();
-      } else {
-        toast.error(data.error || 'حدث خطأ');
-      }
-    } catch (error) {
-      toast.error('حدث خطأ في الاتصال');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePaySupplier = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedSupplier) return;
-    
-    const amount = parseFloat(paymentForm.amount);
-    if (!amount || amount <= 0) {
-      toast.error('المبلغ يجب أن يكون أكبر من صفر');
-      return;
-    }
-
-    if (amount > selectedSupplier.stats.pendingAmount) {
-      toast.error(`المبلغ أكبر من المستحق (${selectedSupplier.stats.pendingAmount.toFixed(2)} ج)`);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/vendor/offline-suppliers/${selectedSupplier.id}/pay`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentForm),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success('تم تسجيل الدفع بنجاح');
-        setPaymentForm({ amount: '', paymentMethod: 'CASH', notes: '' });
-        setShowPaymentDialog(false);
-        setSelectedSupplier(null);
-        fetchSuppliers();
-        fetchData();
       } else {
         toast.error(data.error || 'حدث خطأ');
       }
@@ -498,6 +456,51 @@ export default function OfflineProductsPage() {
         );
         // إعادة تعيين رأس المال الأولي بعد المسح
         setInitialCapital(data.newBalance);
+        fetchData();
+        fetchSuppliers();
+        fetchCapital();
+      } else {
+        toast.error(data.error || 'حدث خطأ');
+      }
+    } catch (error) {
+      toast.error('حدث خطأ في الاتصال');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedSupplier) return;
+
+    if (!paymentForm.amount || parseFloat(paymentForm.amount) <= 0) {
+      toast.error('المبلغ مطلوب ويجب أن يكون أكبر من صفر');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/vendor/offline-suppliers/${selectedSupplier.id}/payments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentForm),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const voucherType = paymentForm.type === 'RECEIPT' ? 'قبض' : 'صرف';
+        toast.success(
+          <div>
+            <p className="font-bold">تم إضافة سند {voucherType} بنجاح! ✅</p>
+            <p className="text-sm">المبلغ: {parseFloat(paymentForm.amount).toFixed(0)} ج</p>
+            <p className="text-sm">رأس المال الجديد: {data.data.newCapitalBalance.toFixed(0)} ج</p>
+          </div>
+        );
+        setPaymentForm({ type: 'RECEIPT', amount: '', paymentMethod: 'CASH', notes: '' });
+        setShowPaymentDialog(false);
+        setSelectedSupplier(null);
         fetchData();
         fetchSuppliers();
         fetchCapital();
@@ -773,18 +776,17 @@ export default function OfflineProductsPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      {supplier.stats.pendingAmount > 0 && (
-                        <Button
-                          onClick={() => {
-                            setSelectedSupplier(supplier);
-                            setShowPaymentDialog(true);
-                          }}
-                          className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-sm"
-                        >
-                          <DollarSign className="w-4 h-4 ml-1" />
-                          دفع
-                        </Button>
-                      )}
+                      <Button
+                        onClick={() => {
+                          setSelectedSupplier(supplier);
+                          setPaymentForm({ type: 'RECEIPT', amount: '', paymentMethod: 'CASH', notes: '' });
+                          setShowPaymentDialog(true);
+                        }}
+                        className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-sm"
+                      >
+                        <Receipt className="w-4 h-4 ml-1" />
+                        سند
+                      </Button>
                       <Button
                         onClick={() => {
                           setSelectedSupplier(supplier);
@@ -1266,15 +1268,15 @@ export default function OfflineProductsPage() {
               <CardHeader>
                 <CardTitle className="text-white flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5" />
-                    دفع للوسيط: {selectedSupplier.name}
+                    <Receipt className="w-5 h-5" />
+                    سند {paymentForm.type === 'RECEIPT' ? 'قبض' : 'صرف'} - {selectedSupplier.name}
                   </span>
                   <Button
                     type="button"
                     onClick={() => {
                       setShowPaymentDialog(false);
                       setSelectedSupplier(null);
-                      setPaymentForm({ amount: '', paymentMethod: 'CASH', notes: '' });
+                      setPaymentForm({ type: 'RECEIPT', amount: '', paymentMethod: 'CASH', notes: '' });
                     }}
                     size="sm"
                     variant="ghost"
@@ -1285,26 +1287,67 @@ export default function OfflineProductsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="mb-4 p-3 bg-red-500/20 rounded-lg border border-red-500/30">
-                  <p className="text-red-200 text-sm">المبلغ المستحق:</p>
-                  <p className="text-red-100 text-2xl font-bold">
-                    {selectedSupplier.stats.pendingAmount.toFixed(2)} ج
-                  </p>
-                  <p className="text-xs text-red-300 mt-1">
-                    المدفوع: {selectedSupplier.stats.totalPaid.toFixed(0)} ج من أصل {selectedSupplier.stats.totalPurchases.toFixed(0)} ج
-                  </p>
-                </div>
+                <form onSubmit={handlePayment} className="space-y-4">
+                  {/* نوع السند */}
+                  <div>
+                    <Label className="text-white mb-2 block">نوع السند *</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        type="button"
+                        onClick={() => setPaymentForm({ ...paymentForm, type: 'RECEIPT' })}
+                        className={paymentForm.type === 'RECEIPT' 
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
+                          : 'bg-white/5 text-white border-white/20'
+                        }
+                      >
+                        📥 سند قبض
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => setPaymentForm({ ...paymentForm, type: 'PAYMENT' })}
+                        className={paymentForm.type === 'PAYMENT' 
+                          ? 'bg-gradient-to-r from-red-500 to-rose-600' 
+                          : 'bg-white/5 text-white border-white/20'
+                        }
+                      >
+                        📤 سند صرف
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {paymentForm.type === 'RECEIPT' 
+                        ? '💰 قبض: تستلم فلوس من الوسيط (يزيد رأس المال)'
+                        : '💸 صرف: تدفع فلوس للوسيط (يقل رأس المال)'
+                      }
+                    </p>
+                  </div>
 
-                <form onSubmit={handlePaySupplier} className="space-y-4">
+                  {/* معلومات الوسيط */}
+                  <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                    <p className="text-blue-200 text-sm mb-2 font-bold">📊 معلومات الوسيط:</p>
+                    <div className="space-y-1 text-xs">
+                      {selectedSupplier.stats.soldRevenue > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">باع بضاعة بمبلغ:</span>
+                          <span className="text-yellow-400 font-bold">{selectedSupplier.stats.soldRevenue.toFixed(0)} ج</span>
+                        </div>
+                      )}
+                      {selectedSupplier.stats.remainingQuantity > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">عنده بضاعة بقيمة:</span>
+                          <span className="text-orange-400 font-bold">{selectedSupplier.stats.remainingCost.toFixed(0)} ج</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   <div>
                     <Label htmlFor="paymentAmount" className="text-white">
-                      المبلغ المدفوع *
+                      المبلغ *
                     </Label>
                     <Input
                       id="paymentAmount"
                       type="number"
                       step="0.01"
-                      max={selectedSupplier.stats.pendingAmount}
                       value={paymentForm.amount}
                       onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
                       className="bg-white/5 border-white/20 text-white"
@@ -1351,7 +1394,7 @@ export default function OfflineProductsPage() {
                       onClick={() => {
                         setShowPaymentDialog(false);
                         setSelectedSupplier(null);
-                        setPaymentForm({ amount: '', paymentMethod: 'CASH', notes: '' });
+                        setPaymentForm({ type: 'RECEIPT', amount: '', paymentMethod: 'CASH', notes: '' });
                       }}
                       variant="outline"
                       className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
@@ -1361,15 +1404,18 @@ export default function OfflineProductsPage() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                      className={paymentForm.type === 'RECEIPT'
+                        ? 'flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
+                        : 'flex-1 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700'
+                      }
                     >
                       {loading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          جاري الدفع...
+                          جاري الحفظ...
                         </>
                       ) : (
-                        'تأكيد الدفع'
+                        `تأكيد ${paymentForm.type === 'RECEIPT' ? 'القبض' : 'الصرف'}`
                       )}
                     </Button>
                   </div>

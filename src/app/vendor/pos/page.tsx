@@ -53,6 +53,20 @@ interface Product {
   };
 }
 
+interface OfflineProduct {
+  id: string;
+  productName?: string;
+  description: string;
+  purchasePrice: number;
+  sellingPrice: number;
+  quantity: number;
+  soldQuantity: number;
+  supplier?: {
+    id: string;
+    name: string;
+  };
+}
+
 interface CartItem {
   product: Product;
   quantity: number;
@@ -63,11 +77,14 @@ interface CartItem {
 export default function POSPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
+  const [offlineProducts, setOfflineProducts] = useState<OfflineProduct[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [showOfflineProducts, setShowOfflineProducts] = useState(false);
+  const [canViewOffline, setCanViewOffline] = useState(false);
   
   // بيانات الفاتورة المحسنة
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'DEFERRED'>('CASH');
@@ -81,6 +98,7 @@ export default function POSPage() {
   // جلب المنتجات والأصناف
   useEffect(() => {
     fetchData();
+    fetchOfflineData();
   }, []);
 
   const fetchData = async () => {
@@ -103,6 +121,26 @@ export default function POSPage() {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOfflineData = async () => {
+    try {
+      // جلب الصلاحية
+      const permissionRes = await fetch('/api/vendor/profile');
+      if (permissionRes.ok) {
+        const data = await permissionRes.json();
+        setCanViewOffline(data.vendor?.canAddOfflineProducts || false);
+      }
+
+      // جلب المنتجات الخارجية
+      const offlineRes = await fetch('/api/vendor/offline-products');
+      if (offlineRes.ok) {
+        const data = await offlineRes.json();
+        setOfflineProducts(data.offlineProducts || []);
+      }
+    } catch (error) {
+      console.error('Error fetching offline data:', error);
     }
   };
 
@@ -376,6 +414,28 @@ export default function POSPage() {
     return matchesSearch && matchesCategory && product.stock > 0;
   });
 
+  // فلترة المنتجات الخارجية
+  const filteredOfflineProducts = offlineProducts.filter(product => {
+    const remainingStock = product.quantity - product.soldQuantity;
+    const displayName = product.productName || product.description || 'بضاعة';
+    const matchesSearch = displayName.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch && remainingStock > 0;
+  });
+
+  // تحويل المنتج الخارجي إلى منتج عادي للسلة
+  const convertOfflineToProduct = (offlineProduct: OfflineProduct): Product => {
+    const remainingStock = offlineProduct.quantity - offlineProduct.soldQuantity;
+    return {
+      id: offlineProduct.id,
+      name: offlineProduct.productName || offlineProduct.description || 'بضاعة خارجية',
+      nameAr: offlineProduct.productName || offlineProduct.description || 'بضاعة خارجية',
+      price: offlineProduct.sellingPrice,
+      stock: remainingStock,
+      categoryId: 'offline',
+      productionCost: offlineProduct.purchasePrice,
+    };
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
@@ -513,49 +573,83 @@ export default function POSPage() {
                   />
                 </div>
 
-                <div className="flex gap-2 flex-wrap">
+                {/* التبديل بين المنتجات العادية والخارجية */}
+                <div className="flex gap-2">
                   <Button
-                    variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                    variant={!showOfflineProducts ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setSelectedCategory('all')}
-                    className={selectedCategory === 'all' ? 'bg-purple-600' : 'bg-white/5 text-white border-white/20'}
+                    onClick={() => setShowOfflineProducts(false)}
+                    className={!showOfflineProducts 
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 flex-1' 
+                      : 'bg-white/5 text-white border-white/20 flex-1'
+                    }
                   >
-                    الكل
+                    <Package className="w-4 h-4 ml-1" />
+                    أصناف المتجر
                   </Button>
-                  {categories.map(category => (
+                  {canViewOffline && (
                     <Button
-                      key={category.id}
-                      variant={selectedCategory === category.id ? 'default' : 'outline'}
+                      variant={showOfflineProducts ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={selectedCategory === category.id ? 'bg-purple-600' : 'bg-white/5 text-white border-white/20'}
+                      onClick={() => setShowOfflineProducts(true)}
+                      className={showOfflineProducts 
+                        ? 'bg-gradient-to-r from-orange-600 to-red-600 flex-1' 
+                        : 'bg-white/5 text-white border-white/20 flex-1'
+                      }
                     >
-                      {category.nameAr}
+                      <FileText className="w-4 h-4 ml-1" />
+                      أصناف خارج النظام
                     </Button>
-                  ))}
+                  )}
                 </div>
+
+                {!showOfflineProducts && (
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedCategory('all')}
+                      className={selectedCategory === 'all' ? 'bg-purple-600' : 'bg-white/5 text-white border-white/20'}
+                    >
+                      الكل
+                    </Button>
+                    {categories.map(category => (
+                      <Button
+                        key={category.id}
+                        variant={selectedCategory === category.id ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedCategory(category.id)}
+                        className={selectedCategory === category.id ? 'bg-purple-600' : 'bg-white/5 text-white border-white/20'}
+                      >
+                        {category.nameAr}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 md:gap-3 max-h-[calc(100vh-400px)] md:max-h-[500px] overflow-y-auto pr-1">
-                {filteredProducts.map(product => {
-                  const imageUrl = product.images?.split(',')[0] || '/placeholder.jpg';
-                  return (
-                  <Card
-                    key={product.id}
-                    className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer transition-all hover:scale-105"
-                    onClick={() => addToCart(product)}
-                  >
-                    <CardContent className="p-1.5 md:p-3">
-                      <div className="aspect-square mb-1 md:mb-2 rounded-md overflow-hidden bg-white/10">
-                        <img 
-                          src={imageUrl} 
-                          alt={product.nameAr}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/placeholder.jpg';
-                          }}
-                        />
+              {!showOfflineProducts ? (
+                // عرض المنتجات العادية
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 md:gap-3 max-h-[calc(100vh-400px)] md:max-h-[500px] overflow-y-auto pr-1">
+                  {filteredProducts.map(product => {
+                    const imageUrl = product.images?.split(',')[0] || '/placeholder.jpg';
+                    return (
+                    <Card
+                      key={product.id}
+                      className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer transition-all hover:scale-105"
+                      onClick={() => addToCart(product)}
+                    >
+                      <CardContent className="p-1.5 md:p-3">
+                        <div className="aspect-square mb-1 md:mb-2 rounded-md overflow-hidden bg-white/10">
+                          <img 
+                            src={imageUrl} 
+                            alt={product.nameAr}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                            }}
+                          />
                       </div>
                       <h3 className="font-bold text-white text-[10px] md:text-sm mb-0.5 md:mb-1 line-clamp-1 leading-tight">{product.nameAr}</h3>
                       <p className="text-[9px] md:text-xs text-gray-400 mb-1 md:mb-2 line-clamp-1">{product.category?.nameAr}</p>
@@ -569,10 +663,52 @@ export default function POSPage() {
                   </Card>
                   );
                 })}
-              </div>
-              {filteredProducts.length === 0 && (
+                </div>
+              ) : (
+                // عرض المنتجات الخارجية
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 md:gap-3 max-h-[calc(100vh-400px)] md:max-h-[500px] overflow-y-auto pr-1">
+                  {filteredOfflineProducts.map(offlineProduct => {
+                    const product = convertOfflineToProduct(offlineProduct);
+                    return (
+                      <Card
+                        key={offlineProduct.id}
+                        className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/30 hover:from-orange-500/20 hover:to-red-500/20 cursor-pointer transition-all hover:scale-105"
+                        onClick={() => addToCart(product)}
+                      >
+                        <CardContent className="p-1.5 md:p-3">
+                          <div className="aspect-square mb-1 md:mb-2 rounded-md overflow-hidden bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
+                            <FileText className="w-12 h-12 md:w-16 md:h-16 text-orange-400" />
+                          </div>
+                          <h3 className="font-bold text-white text-[10px] md:text-sm mb-0.5 md:mb-1 line-clamp-2 leading-tight">
+                            {offlineProduct.productName || offlineProduct.description || 'بضاعة'}
+                          </h3>
+                          {offlineProduct.supplier && (
+                            <p className="text-[9px] md:text-xs text-orange-400 mb-1 line-clamp-1">
+                              📦 {offlineProduct.supplier.name}
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between text-[10px] md:text-sm">
+                            <span className="text-green-400 font-bold">{offlineProduct.sellingPrice.toFixed(0)} ج</span>
+                            <Badge variant="secondary" className="text-[8px] md:text-xs px-1 py-0 h-4 bg-orange-500/30 text-orange-200">
+                              {product.stock}
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {!showOfflineProducts && filteredProducts.length === 0 && (
                 <div className="text-center py-12 text-gray-400">
                   لا توجد منتجات متاحة
+                </div>
+              )}
+              
+              {showOfflineProducts && filteredOfflineProducts.length === 0 && (
+                <div className="text-center py-12 text-gray-400">
+                  لا توجد أصناف خارج النظام متاحة
                 </div>
               )}
             </CardContent>
