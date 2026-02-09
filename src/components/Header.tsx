@@ -33,6 +33,7 @@ export function Header() {
   const { clearCart, setUserId } = useCartStore();
   const { items: wishlistItems, notifications, fetchWishlist, fetchNotifications } = useWishlist();
   const [mounted, setMounted] = useState(false);
+  const [stars, setStars] = useState<Array<{top: number; left: number; size: number; opacity: number; duration: number; delay: number}>>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestions, setSuggestions] = useState<ProductSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -147,6 +148,18 @@ export function Header() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // توليد النجوم على الكلاينت فقط
+    setStars(
+      Array.from({ length: 12 }, () => ({
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        size: Math.random() * 2.5 + 1,
+        opacity: Math.random() * 0.6 + 0.2,
+        duration: Math.random() * 2 + 1.5,
+        delay: Math.random() * 3,
+      }))
+    );
     
     // Check notification support
     if ('Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window) {
@@ -270,8 +283,27 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 backdrop-blur-sm border-b border-purple-300/20">
-      <div className="container mx-auto px-2 sm:px-4 py-1">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 backdrop-blur-sm border-b border-purple-300/20 overflow-hidden">
+      {/* نجوم متحركة */}
+      {mounted && stars.length > 0 && (
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          {stars.map((star, i) => (
+            <span
+              key={i}
+              className="absolute rounded-full bg-white"
+              style={{
+                width: `${star.size}px`,
+                height: `${star.size}px`,
+                top: `${star.top}%`,
+                left: `${star.left}%`,
+                opacity: star.opacity,
+                animation: `starTwinkle ${star.duration}s ease-in-out ${star.delay}s infinite alternate`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+      <div className="container mx-auto px-2 sm:px-4 py-1 relative z-10">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo/Brand */}
           <Link href="/" className="flex items-center gap-2 sm:gap-2.5 md:gap-3 flex-shrink-0 group">

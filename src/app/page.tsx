@@ -13,6 +13,8 @@ import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
 import SpinWheel from '@/components/SpinWheel';
 import FloatingBubbles from '@/components/FloatingBubbles';
+import FireworksEffect from '@/components/FireworksEffect';
+import RamadanBanner from '@/components/RamadanBanner';
 import PendingPrizeHandler from '@/components/PendingPrizeHandler';
 import BrandBackgroundPattern from '@/components/BrandBackgroundPattern';
 import Link from 'next/link';
@@ -136,8 +138,14 @@ export default async function HomePage() {
         {/* Splash Screen with Video - أول حاجة تظهر */}
         <SplashScreen />
 
+        {/* تأثير الصواريخ بعد الـ Splash */}
+        <FireworksEffect />
+
         {/* Main Content */}
         <div>
+
+        {/* 🌙 بانر رمضان كريم */}
+        <RamadanBanner />
         
         {/* Pending Prize Handler */}
         <PendingPrizeHandler />
