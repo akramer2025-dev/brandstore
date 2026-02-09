@@ -355,10 +355,12 @@ export default function SmartAssistant() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={showAssistant}
-        className="fixed bottom-20 left-4 z-50 bg-purple-600/80 hover:bg-purple-600 text-white p-3 rounded-full shadow-lg backdrop-blur-sm transition-all"
+        className="fixed bottom-20 left-4 md:left-6 z-40 bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white p-2.5 md:p-3 rounded-full shadow-2xl backdrop-blur-sm transition-all hover:scale-105"
         title="إظهار المساعد الذكي"
       >
-        <MessageCircle className="w-5 h-5" />
+        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-xs">
+          R
+        </div>
       </motion.button>
     )
   }
@@ -375,20 +377,20 @@ export default function SmartAssistant() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 left-4 z-50 group"
+            className="fixed bottom-20 left-4 md:left-6 z-40 group"
           >
             <div className="relative">
               {/* تأثير التوهج */}
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur-lg opacity-75 group-hover:opacity-100 animate-pulse"></div>
               
               {/* الزر الرئيسي */}
-              <div className="relative bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 rounded-full shadow-2xl flex items-center gap-2">
-                <Sparkles className="w-6 h-6" />
-                <span className="font-bold text-sm hidden sm:inline">مساعد ريمو</span>
+              <div className="relative bg-gradient-to-r from-purple-600 to-pink-600 text-white p-2.5 md:p-3.5 rounded-full shadow-2xl flex items-center gap-2">
+                {/* شعار التطبيق */}
+                <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-xs md:text-sm">
+                  R
+                </div>
+                <span className="font-bold text-xs md:text-sm hidden sm:inline">مساعد ريمو</span>
               </div>
-              
-              {/* نقطة الإشعار */}
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-bounce"></div>
             </div>
           </motion.button>
         )}
@@ -402,42 +404,42 @@ export default function SmartAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-4 left-4 right-4 sm:left-4 sm:right-auto sm:w-[400px] z-50 max-h-[80vh]"
+            className="fixed bottom-[4.5rem] left-4 right-4 sm:left-4 sm:right-auto sm:w-[400px] z-40 max-h-[65vh] md:max-h-[70vh]"
           >
-            <Card className="bg-gradient-to-br from-slate-900 via-purple-900/90 to-slate-900 border-purple-500/50 shadow-2xl overflow-hidden">
+            <Card className="bg-gradient-to-br from-slate-900 via-purple-900/90 to-slate-900 border-purple-500/50 shadow-2xl overflow-hidden rounded-2xl">
               {/* رأس النافذة */}
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-white/20 p-2 rounded-xl backdrop-blur">
-                    <Store className="w-6 h-6 text-white" />
+              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-3 md:p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 md:gap-3">
+                  {/* شعار التطبيق */}
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-white shadow-lg">
+                    R
                   </div>
                   <div>
-                    <h3 className="text-white font-bold text-lg">مساعد ريمو ستور</h3>
-                    <p className="text-purple-100 text-xs flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                      متصل الآن
+                    <h3 className="text-white font-bold text-sm md:text-lg">مساعد ريمو ستور</h3>
+                    <p className="text-purple-100 text-[10px] md:text-xs">
+                      مساعدك الذكي 🤖
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2">
                   <button
                     onClick={hideAssistant}
-                    className="text-white/70 hover:text-white p-2 hover:bg-white/10 rounded-lg transition-all"
+                    className="text-white/70 hover:text-white p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition-all"
                     title="إخفاء المساعد"
                   >
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="text-white/70 hover:text-white p-2 hover:bg-white/10 rounded-lg transition-all"
+                    className="text-white/70 hover:text-white p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition-all"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 </div>
               </div>
 
               {/* محتوى المحادثة */}
-              <CardContent className="p-4 max-h-[60vh] overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent">
+              <CardContent className="p-3 md:p-4 max-h-[50vh] md:max-h-[55vh] overflow-y-auto space-y-3 md:space-y-4 scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent">
                 {messages.map((message) => (
                   <motion.div
                     key={message.id}
@@ -446,11 +448,12 @@ export default function SmartAssistant() {
                     transition={{ duration: 0.3 }}
                   >
                     {message.type === 'assistant' && (
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                          <Sparkles className="w-4 h-4 text-white" />
+                      <div className="flex gap-2 md:gap-3">
+                        {/* شعار المساعد */}
+                        <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white shadow-md text-xs">
+                          R
                         </div>
-                        <div className="bg-slate-800/80 backdrop-blur rounded-2xl rounded-tl-sm p-4 text-white/90 text-sm whitespace-pre-line flex-1">
+                        <div className="bg-slate-800/80 backdrop-blur rounded-2xl rounded-tl-sm p-3 md:p-4 text-white/90 text-xs md:text-sm whitespace-pre-line flex-1">
                           {message.content}
                         </div>
                       </div>

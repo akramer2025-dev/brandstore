@@ -90,23 +90,72 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
-        console.log('🔐 SignIn callback - Provider:', account?.provider, 'Email:', user.email);
+        console.log('🔐 ========== SignIn Callback START ==========');
+        console.log('Provider:', account?.provider);
+        console.log('User Email:', user.email);
+        console.log('User Name:', user.name);
+        console.log('User Image:', user.image);
+        console.log('Account:', account);
+        console.log('Profile:', profile);
         
         // التحقق من وجود email
         if (!user.email) {
-          console.error('❌ No email provided');
+          console.error('❌ No email provided - BLOCKING SIGNIN');
           return false;
         }
         
         // للمستخدمين من Google
         if (account?.provider === "google") {
+          console.log('🔵 Google OAuth detected');
+          
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
-            select: { id: true, role: true, name: true }
+            include: {
+              accounts: true, // جلب الـ accounts المرتبطة
+            }
           });
           
           if (existingUser) {
-            console.log('👤 Existing user found:', existingUser.name, 'Role:', existingUser.role);
+            console.log('✅ Existing user found:', {
+              id: existingUser.id,
+              name: existingUser.name,
+              email: existingUser.email,
+              role: existingUser.role,
+              accountsCount: existingUser.accounts.length
+            });
+            
+            // 🔗 التحقق من وجود Google Account
+            const googleAccount = existingUser.accounts.find(
+              (acc) => acc.provider === "google"
+            );
+
+            if (!googleAccount && account) {
+              console.log('🔗 Google Account not linked - Linking now...');
+              // ربط الـ Google Account باليوزر الموجود
+              try {
+                await prisma.account.create({
+                  data: {
+                    userId: existingUser.id,
+                    type: account.type || "oauth",
+                    provider: account.provider,
+                    providerAccountId: account.providerAccountId,
+                    access_token: account.access_token,
+                    expires_at: account.expires_at,
+                    refresh_token: account.refresh_token,
+                    id_token: account.id_token,
+                    scope: account.scope,
+                    token_type: account.token_type,
+                  },
+                });
+                console.log('✅ Google Account linked successfully!');
+              } catch (linkError) {
+                console.error('❌ Failed to link Google Account:', linkError);
+                // لا تمنع تسجيل الدخول - NextAuth سيتعامل معه
+                return false;
+              }
+            } else if (googleAccount) {
+              console.log('✅ Google Account already linked');
+            }
             
             // إذا المستخدم موجود لكن ليس لديه role، اجعله CUSTOMER
             if (!existingUser.role) {
@@ -114,19 +163,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 where: { id: existingUser.id },
                 data: { role: "CUSTOMER" }
               });
-              console.log('✅ تم تعيين role CUSTOMER للمستخدم:', user.email);
+              console.log('🆕 تم تعيين role CUSTOMER للمستخدم:', user.email);
             }
           } else {
-            console.log('🆕 New user from Google, will be created as CUSTOMER by adapter');
+            console.log('🆕 New user from Google - will be created by PrismaAdapter');
+            console.log('Email:', user.email, 'Name:', user.name);
           }
         }
         
+        console.log('✅ SignIn callback returning TRUE - allowing signin');
+        console.log('🔐 ========== SignIn Callback END ==========');
         return true;
       } catch (error) {
-        console.error('❌ خطأ في signIn callback:', error);
-        // في حالة الخطأ، نسمح بالدخول للتجربة
-        // لكن نسجل الخطأ للتتبع
-        return true;
+        console.error('❌ ========== ERROR in signIn callback ==========');
+        console.error('Error:', error);
+        console.error('Stack:', error instanceof Error ? error.stack : 'No stack');
+        console.error('❌ ========== END ERROR ==========');
+        // في حالة الخطأ، نرفض تسجيل الدخول
+        return false;
       }
     },
     async jwt({ token, user, account, trigger }) {
@@ -196,24 +250,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async redirect({ url, baseUrl }) {
-      console.log('🔄 Redirect callback - URL:', url, 'BaseURL:', baseUrl);
+      console.log('🔄 ========== Redirect Callback START ==========');
+      console.log('URL:', url);
+      console.log('BaseURL:', baseUrl);
       
       // تجاوز أي redirect لو كان فيه "error"
       if (url.includes('error=')) {
-        console.log('⚠️ Error in redirect URL, going to home');
+        console.log('⚠️ Error detected in redirect URL:', url);
+        console.log('🏠 Redirecting to home page');
         return baseUrl;
       }
       
       // إذا كان URL يبدأ بـ baseUrl، استخدمه كما هو
       if (url.startsWith(baseUrl)) {
-        console.log('✅ Redirecting to:', url);
+        console.log('✅ URL starts with baseUrl - using as is:', url);
+        console.log('🔄 ========== Redirect Callback END ==========');
         return url;
       }
       
       // إذا كان callbackUrl محدد كمسار نسبي
       if (url.startsWith('/')) {
         const fullUrl = `${baseUrl}${url}`;
-        console.log('✅ Redirecting to relative path:', fullUrl);
+        console.log('✅ Relative path detected - converting to full URL:', fullUrl);
+        console.log('🔄 ========== Redirect Callback END ==========');
         return fullUrl;
       }
       
@@ -221,18 +280,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (url.startsWith('http')) {
         try {
           const urlObj = new URL(url);
+          console.log('🌐 External URL detected - Origin:', urlObj.origin);
           // إذا كان من نفس الـ origin
           if (urlObj.origin === baseUrl) {
-            console.log('✅ Redirecting to same origin:', url);
+            console.log('✅ Same origin - allowing redirect:', url);
+            console.log('🔄 ========== Redirect Callback END ==========');
             return url;
           }
+          console.log('⚠️ Different origin - redirecting to baseUrl instead');
         } catch (e) {
           console.error('❌ Error parsing URL:', e);
         }
       }
       
       // التوجيه الافتراضي إلى الصفحة الرئيسية
-      console.log('✅ Redirecting to baseUrl:', baseUrl);
+      console.log('🏠 Default redirect to baseUrl:', baseUrl);
+      console.log('🔄 ========== Redirect Callback END ==========');
       return baseUrl;
     },
   },

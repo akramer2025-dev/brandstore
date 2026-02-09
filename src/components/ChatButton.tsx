@@ -113,15 +113,18 @@ export default function ChatButton() {
       {/* زر المحادثة العائم */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-50 bg-teal-600 hover:bg-teal-700 text-white rounded-full p-3 md:p-4 shadow-2xl transition-all duration-300 hover:scale-110"
+        className="fixed bottom-20 left-4 md:bottom-24 md:left-6 z-40 bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-full p-2.5 md:p-4 shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
       >
         {isOpen ? (
           <X className="w-5 h-5 md:w-6 md:h-6" />
         ) : (
           <div className="relative">
-            <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
+            {/* شعار التطبيق */}
+            <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-xs md:text-sm">
+              R
+            </div>
             {unreadCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center animate-pulse font-bold">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -131,12 +134,23 @@ export default function ChatButton() {
 
       {/* نافذة المحادثة */}
       {isOpen && (
-        <div className="fixed bottom-16 left-4 md:bottom-24 md:left-6 z-50 w-[calc(100vw-2rem)] sm:w-96 bg-gradient-to-br from-gray-900 via-teal-900/50 to-gray-900 rounded-lg shadow-2xl border border-teal-700/30 flex flex-col max-h-[70vh] md:max-h-[600px]">
+        <div className="fixed bottom-[4.5rem] left-4 md:bottom-36 md:left-6 z-40 w-[calc(100vw-2rem)] sm:w-96 bg-gradient-to-br from-gray-900 via-teal-900/50 to-gray-900 rounded-2xl shadow-2xl border border-teal-700/30 flex flex-col max-h-[65vh] md:max-h-[550px]">
           {/* رأس المحادثة */}
-          <div className="p-3 md:p-4 border-b border-teal-700/30 bg-teal-900/30">
-            <h3 className="text-base md:text-lg font-bold text-white">
-              {session.user.role === 'ADMIN' ? 'محادثات العملاء' : 'تواصل مع الإدارة'}
-            </h3>
+          <div className="p-3 md:p-4 border-b border-teal-700/30 bg-gradient-to-r from-teal-900/40 to-cyan-900/40 rounded-t-2xl">
+            <div className="flex items-center gap-3">
+              {/* شعار التطبيق */}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg">
+                R
+              </div>
+              <div>
+                <h3 className="text-base md:text-lg font-bold text-white">
+                  {session.user.role === 'ADMIN' ? 'محادثات العملاء' : 'تواصل مع الإدارة'}
+                </h3>
+                <p className="text-xs text-teal-300">
+                  خدمة العملاء 💬
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* المحادثات */}
@@ -151,48 +165,60 @@ export default function ChatButton() {
               messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${
+                  className={`flex gap-2 ${
                     message.senderId === session.user.id ? 'justify-end' : 'justify-start'
                   }`}
                 >
+                  {/* أيقونة المرسل */}
+                  {message.senderId !== session.user.id && (
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center font-bold text-white text-xs shadow-md">
+                      R
+                    </div>
+                  )}
                   <div
-                    className={`max-w-[80%] sm:max-w-[70%] p-2 md:p-3 rounded-lg text-sm md:text-base ${
+                    className={`max-w-[75%] sm:max-w-[70%] p-2.5 md:p-3 rounded-2xl text-sm md:text-base ${
                       message.senderId === session.user.id
-                        ? 'bg-teal-600 text-white'
-                        : 'bg-gray-800 text-white'
+                        ? 'bg-gradient-to-br from-teal-600 to-cyan-600 text-white rounded-tr-sm'
+                        : 'bg-gray-800 text-white rounded-tl-sm border border-teal-700/30'
                     }`}
                   >
                     {message.sender.name && message.senderId !== session.user.id && (
-                      <p className="text-xs text-teal-300 mb-1">{message.sender.name}</p>
+                      <p className="text-xs text-teal-300 mb-1 font-medium">{message.sender.name}</p>
                     )}
-                    <p className="break-words">{message.content}</p>
-                    <p className="text-[10px] md:text-xs opacity-70 mt-1">
+                    <p className="break-words leading-relaxed">{message.content}</p>
+                    <p className="text-[10px] md:text-xs opacity-70 mt-1.5">
                       {new Date(message.createdAt).toLocaleTimeString('ar-EG', {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
                     </p>
                   </div>
+                  {/* أيقونة المستخدم */}
+                  {message.senderId === session.user.id && (
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white text-xs shadow-md">
+                      {session.user.name?.[0] || 'U'}
+                    </div>
+                  )}
                 </div>
               ))
             )}
           </div>
 
           {/* إرسال رسالة */}
-          <form onSubmit={handleSendMessage} className="p-3 md:p-4 border-t border-teal-700/30 bg-gray-900/30">
+          <form onSubmit={handleSendMessage} className="p-3 md:p-4 border-t border-teal-700/30 bg-gradient-to-r from-gray-900/40 to-teal-900/20 rounded-b-2xl">
             <div className="flex gap-2">
               <Input
                 type="text"
                 placeholder="اكتب رسالتك..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                className="flex-1 bg-gray-800/50 border-teal-700/50 text-white text-sm md:text-base h-9 md:h-10"
+                className="flex-1 bg-gray-800/50 border-teal-700/50 focus:border-teal-500 text-white placeholder:text-gray-400 text-sm md:text-base h-9 md:h-10 rounded-full"
                 disabled={isSending}
               />
               <Button
                 type="submit"
                 disabled={!newMessage.trim() || isSending}
-                className="bg-teal-600 hover:bg-teal-700 px-3 md:px-4 h-9 md:h-10"
+                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 px-3 md:px-4 h-9 md:h-10 rounded-full shadow-lg"
               >
                 {isSending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
