@@ -1157,9 +1157,30 @@ export default function OfflineProductsPage() {
                             </Button>
                           </>
                         ) : (
-                          <div className="flex-1 text-center py-2 bg-gray-700/50 rounded text-gray-400 text-sm">
-                            ✓ تم البيع بالكامل
-                          </div>
+                          <>
+                            <div className="flex-1 text-center py-2 bg-emerald-900/30 rounded text-emerald-400 text-sm border border-emerald-500/30">
+                              ✓ تم البيع بالكامل
+                            </div>
+                            <Button
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setFormData({
+                                  purchasePrice: product.purchasePrice.toString(),
+                                  sellingPrice: product.sellingPrice.toString(),
+                                  quantity: product.quantity.toString(),
+                                  productName: product.productName || '',
+                                  description: product.description || '',
+                                  supplierId: product.supplier?.id || '',
+                                });
+                                setShowEditProductDialog(true);
+                              }}
+                              size="sm"
+                              className="bg-blue-600 hover:bg-blue-700"
+                              title="تعديل البيانات"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
 
