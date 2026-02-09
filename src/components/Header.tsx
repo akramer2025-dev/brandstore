@@ -277,8 +277,8 @@ export function Header() {
     }
   };
 
-  // إخفاء الـ Header في صفحات الـ vendor والـ admin والـ delivery-dashboard
-  if (pathname?.startsWith('/vendor') || pathname?.startsWith('/admin') || pathname?.startsWith('/delivery-dashboard')) {
+  // إخفاء الـ Header في صفحات الـ vendor والـ admin والـ delivery-dashboard والـ developer
+  if (pathname?.startsWith('/vendor') || pathname?.startsWith('/admin') || pathname?.startsWith('/delivery-dashboard') || pathname?.startsWith('/developer')) {
     return null;
   }
 
@@ -592,6 +592,17 @@ export function Header() {
                         <Link href="/admin" className="cursor-pointer text-gray-300 hover:text-cyan-400">
                           <Settings className="w-4 h-4 mr-2" />
                           لوحة الإدارة
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {session.user?.role === 'DEVELOPER' && (
+                    <>
+                      <DropdownMenuSeparator className="bg-teal-500/20" />
+                      <DropdownMenuItem asChild>
+                        <Link href="/developer" className="cursor-pointer text-gray-300 hover:text-purple-400">
+                          <Settings className="w-4 h-4 mr-2" />
+                          👨‍💻 لوحة المطور
                         </Link>
                       </DropdownMenuItem>
                     </>
