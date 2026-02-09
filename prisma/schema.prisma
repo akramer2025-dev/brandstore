@@ -1551,6 +1551,7 @@ model OfflineProduct {
   id              String   @id @default(cuid())
   vendorId        String
   supplierId      String?  // المورد (اختياري)
+  productName     String?  // اسم المنتج (اختياري)
   description     String?  // وصف اختياري
   purchasePrice   Float    // سعر القطعة الواحدة للشراء
   sellingPrice    Float    // سعر القطعة الواحدة للبيع

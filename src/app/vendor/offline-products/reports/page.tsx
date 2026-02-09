@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
 import { 
   FileSpreadsheet,
   Loader2,
@@ -15,11 +19,14 @@ import {
   Users,
   Download,
   Wallet,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { BackButton } from '@/components/BackButton';
 
 interface OfflineProduct {
   id: string;
+  productName?: string;
   description: string;
   purchasePrice: number;
   sellingPrice: number;
@@ -59,6 +66,15 @@ export default function OfflineProductsReportsPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [noSupplierProducts, setNoSupplierProducts] = useState<OfflineProduct[]>([]);
   const [capitalInfo, setCapitalInfo] = useState<CapitalInfo>({ initial: 7500, current: 7500 });
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [supplierForm, setSupplierForm] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    notes: '',
+  });
 
   useEffect(() => {
     fetchData();
@@ -346,7 +362,7 @@ export default function OfflineProductsReportsPage() {
                               return (
                                 <tr key={product.id} className="border-b border-white/5 hover:bg-white/5">
                                   <td className="p-2 text-gray-400">{index + 1}</td>
-                                  <td className="p-2 text-white">{product.description}</td>
+                                  <td className="p-2 text-white">{product.productName || product.description || 'بضاعة'}</td>
                                   <td className="p-2 text-center text-yellow-400">{product.quantity}</td>
                                   <td className="p-2 text-center text-emerald-400">{product.soldQuantity}</td>
                                   <td className="p-2 text-center text-blue-400">{remaining}</td>
@@ -401,7 +417,7 @@ export default function OfflineProductsReportsPage() {
                           return (
                             <tr key={product.id} className="border-b border-white/5 hover:bg-white/5">
                               <td className="p-2 text-gray-400">{index + 1}</td>
-                              <td className="p-2 text-white">{product.description}</td>
+                              <td className="p-2 text-white">{product.productName || product.description || 'بضاعة'}</td>
                               <td className="p-2 text-center text-yellow-400">{product.quantity}</td>
                               <td className="p-2 text-center text-emerald-400">{product.soldQuantity}</td>
                               <td className="p-2 text-center text-blue-400">{remaining}</td>
@@ -552,7 +568,7 @@ export default function OfflineProductsReportsPage() {
                         return (
                           <tr key={product.id} className="border-b border-white/5 hover:bg-white/10 transition-colors">
                             <td className="p-3 text-gray-400 font-medium">{index + 1}</td>
-                            <td className="p-3 text-white">{product.description || 'بضاعة'}</td>
+                            <td className="p-3 text-white">{product.productName || product.description || 'بضاعة'}</td>
                             <td className="p-3 text-center">
                               <span className="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full font-bold">
                                 {product.quantity}

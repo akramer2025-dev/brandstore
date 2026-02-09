@@ -33,12 +33,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { purchasePrice, sellingPrice, quantity = 1, description, supplierId } = body;
+    const { purchasePrice, sellingPrice, quantity = 1, productName, description, supplierId } = body;
 
     // التحقق من البيانات
     if (!purchasePrice || !sellingPrice) {
       return NextResponse.json({ 
         error: 'سعر الشراء وسعر البيع مطلوبان' 
+      }, { status: 400 });
+    }
+
+    // التحقق من الوسيط
+    if (!supplierId) {
+      return NextResponse.json({ 
+        error: 'يجب اختيار الوسيط' 
       }, { status: 400 });
     }
 
@@ -69,6 +76,7 @@ export async function POST(request: NextRequest) {
       data: {
         vendorId: vendor.id,
         supplierId: supplierId || null,
+        productName: productName || null,
         description: description || `بضاعة ${new Date().toLocaleDateString('ar-EG')}`,
         purchasePrice: parsedPurchasePrice,
         sellingPrice: parsedSellingPrice,

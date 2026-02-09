@@ -24,7 +24,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { purchasePrice, sellingPrice, quantity, description, supplierId } = body;
+    const { purchasePrice, sellingPrice, quantity, productName, description, supplierId } = body;
 
     if (!purchasePrice || !sellingPrice || !quantity) {
       return NextResponse.json({ 
@@ -65,6 +65,7 @@ export async function PUT(
         purchasePrice: parsedPurchasePrice,
         sellingPrice: parsedSellingPrice,
         quantity: parsedQuantity,
+        productName: productName?.trim() || existingProduct.productName,
         description: description?.trim() || existingProduct.description,
         supplierId: supplierId || existingProduct.supplierId,
         profit,

@@ -26,6 +26,7 @@ import { BackButton } from '@/components/BackButton';
 
 interface OfflineProduct {
   id: string;
+  productName?: string;
   description: string;
   purchasePrice: number;
   sellingPrice: number;
@@ -114,6 +115,7 @@ export default function OfflineProductsPage() {
     purchasePrice: '',
     sellingPrice: '',
     quantity: '1',
+    productName: '',
     description: '',
     supplierId: '',
   });
@@ -314,6 +316,13 @@ export default function OfflineProductsPage() {
     e.preventDefault();
     setLoading(true);
 
+    // Validate supplier is selected
+    if (!formData.supplierId) {
+      toast.error('يجب اختيار الوسيط');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/vendor/offline-products', {
         method: 'POST',
@@ -325,7 +334,7 @@ export default function OfflineProductsPage() {
 
       if (response.ok) {
         toast.success('تم إضافة البضاعة بنجاح!');
-        setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', description: '', supplierId: '' });
+        setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', productName: '', description: '', supplierId: '' });
         fetchData();
         fetchCapital();
       } else {
@@ -418,7 +427,7 @@ export default function OfflineProductsPage() {
 
       if (response.ok) {
         toast.success('تم تعديل البضاعة بنجاح');
-        setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', description: '', supplierId: '' });
+        setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', productName: '', description: '', supplierId: '' });
         setShowEditProductDialog(false);
         setSelectedProduct(null);
         fetchData();
@@ -868,7 +877,7 @@ export default function OfflineProductsPage() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label htmlFor="supplierId" className="text-white">
-                      الوسيط (اختياري)
+                      الوسيط *
                     </Label>
                     <Button
                       type="button"
@@ -885,14 +894,29 @@ export default function OfflineProductsPage() {
                     value={formData.supplierId}
                     onChange={(e) => setFormData({ ...formData, supplierId: e.target.value })}
                     className="w-full bg-white/5 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
                   >
-                    <option value="" className="bg-gray-800">بدون وسيط</option>
+                    <option value="" className="bg-gray-800">اختر الوسيط</option>
                     {suppliers.map(supplier => (
                       <option key={supplier.id} value={supplier.id} className="bg-gray-800">
                         {supplier.name} {supplier.stats.pendingAmount > 0 && `(مستحق: ${supplier.stats.pendingAmount.toFixed(0)} ج)`}
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <Label htmlFor="productName" className="text-white">
+                    اسم المنتج (اختياري)
+                  </Label>
+                  <Input
+                    id="productName"
+                    type="text"
+                    value={formData.productName}
+                    onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
+                    className="bg-white/5 border-white/20 text-white"
+                    placeholder="مثال: بيجامات أطفال"
+                  />
                 </div>
 
                 <div>
@@ -1002,7 +1026,7 @@ export default function OfflineProductsPage() {
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
                           <p className="text-white font-medium">
-                            {product.description || 'بضاعة'}
+                            {product.productName || product.description || 'بضاعة'}
                           </p>
                           {product.supplier && (
                             <p className="text-xs text-purple-400 mt-1">
@@ -1092,6 +1116,7 @@ export default function OfflineProductsPage() {
                                   purchasePrice: product.purchasePrice.toString(),
                                   sellingPrice: product.sellingPrice.toString(),
                                   quantity: product.quantity.toString(),
+                                  productName: product.productName || '',
                                   description: product.description || '',
                                   supplierId: product.supplier?.id || '',
                                 });
@@ -1384,7 +1409,7 @@ export default function OfflineProductsPage() {
                   <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
                     <p className="text-blue-200 text-sm mb-1">البضاعة:</p>
                     <p className="text-white font-bold">
-                      {selectedProduct.description || 'بضاعة'}
+                      {selectedProduct.productName || selectedProduct.description || 'بضاعة'}
                     </p>
                   </div>
 
@@ -1618,7 +1643,7 @@ export default function OfflineProductsPage() {
                     onClick={() => {
                       setShowEditProductDialog(false);
                       setSelectedProduct(null);
-                      setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', description: '', supplierId: '' });
+                      setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', productName: '', description: '', supplierId: '' });
                     }}
                     size="sm"
                     variant="ghost"
@@ -1673,6 +1698,38 @@ export default function OfflineProductsPage() {
                     />
                   </div>
                   <div>
+                    <Label htmlFor="editSupplierId" className="text-white">
+                      الوسيط *
+                    </Label>
+                    <select
+                      id="editSupplierId"
+                      value={formData.supplierId}
+                      onChange={(e) => setFormData({ ...formData, supplierId: e.target.value })}
+                      className="w-full bg-white/5 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="" className="bg-gray-800">اختر الوسيط</option>
+                      {suppliers.map(supplier => (
+                        <option key={supplier.id} value={supplier.id} className="bg-gray-800">
+                          {supplier.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editProductName" className="text-white">
+                      اسم المنتج (اختياري)
+                    </Label>
+                    <Input
+                      id="editProductName"
+                      type="text"
+                      value={formData.productName}
+                      onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
+                      className="bg-white/5 border-white/20 text-white"
+                      placeholder="مثال: بيجامات أطفال"
+                    />
+                  </div>
+                  <div>
                     <Label htmlFor="editDescription" className="text-white">
                       وصف
                     </Label>
@@ -1690,7 +1747,7 @@ export default function OfflineProductsPage() {
                       onClick={() => {
                         setShowEditProductDialog(false);
                         setSelectedProduct(null);
-                        setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', description: '', supplierId: '' });
+                        setFormData({ purchasePrice: '', sellingPrice: '', quantity: '1', productName: '', description: '', supplierId: '' });
                       }}
                       variant="outline"
                       className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
