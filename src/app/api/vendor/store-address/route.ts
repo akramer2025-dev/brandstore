@@ -93,21 +93,33 @@ export async function PUT(request: NextRequest) {
       fullAddress = parts.join('، ');
     }
 
+    // التحقق من وجود سجل Vendor أولاً
+    const existingVendor = await prisma.vendor.findUnique({
+      where: { userId: session.user.id }
+    });
+
+    if (!existingVendor) {
+      return NextResponse.json(
+        { error: 'لم يتم العثور على حساب البائع' },
+        { status: 404 }
+      );
+    }
+
     const vendor = await prisma.vendor.update({
       where: { userId: session.user.id },
       data: {
         address: fullAddress,
         governorate,
         city,
-        region,
-        district,
+        region: region || null,
+        district: district || null,
         street,
-        buildingNumber,
-        floorNumber,
-        apartmentNumber,
-        landmark,
-        postalCode,
-        pickupInstructions,
+        buildingNumber: buildingNumber || null,
+        floorNumber: floorNumber || null,
+        apartmentNumber: apartmentNumber || null,
+        landmark: landmark || null,
+        postalCode: postalCode || null,
+        pickupInstructions: pickupInstructions || null,
         updatedAt: new Date(),
       },
     });
@@ -122,9 +134,14 @@ export async function PUT(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error updating store address:', error);
+    console.error('❌ Error updating store address:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: error.message || 'حدث خطأ في حفظ العنوان' },
       { status: 500 }
     );
   }

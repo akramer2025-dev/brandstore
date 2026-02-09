@@ -2,19 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-// GET - جلب جميع صور السلايدر
+// GET - جلب جميع صور السلايدر (عام للجميع لأن صفحة login تحتاجه)
 export async function GET() {
   try {
-    const session = await auth();
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const sliders = await prisma.sliderImage.findMany({
+      where: { isActive: true }, // جلب الصور النشطة فقط
       orderBy: { order: 'asc' }
     });
 
-    return NextResponse.json({ sliders });
+    return NextResponse.json({ sliderImages: sliders });
   } catch (error) {
     console.error('Error fetching sliders:', error);
     return NextResponse.json({ error: 'Failed to fetch sliders' }, { status: 500 });
