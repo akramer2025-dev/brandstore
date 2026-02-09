@@ -13,6 +13,15 @@ export async function GET(request: NextRequest) {
     const role = session.user.role;
     let notifications: any[] = [];
 
+    // ADMIN يمكنه رؤية جميع الإشعارات أو لا شيء (حسب الحاجة)
+    if (role === 'ADMIN' || role === 'DEVELOPER') {
+      // ADMIN لا يحتاج إشعارات شخصية، يمكن إرجاع array فارغ
+      return NextResponse.json({
+        success: true,
+        notifications: [],
+      });
+    }
+
     // جلب إشعارات الشركاء
     if (role === 'VENDOR') {
       const vendor = await prisma.vendor.findUnique({
@@ -37,24 +46,17 @@ export async function GET(request: NextRequest) {
     
     // جلب إشعارات العملاء
     if (role === 'CUSTOMER' || !role) {
-      const customer = await prisma.customer.findUnique({
-        where: { userId: session.user.id },
-        select: { id: true }
+      const customerNotifications = await prisma.customerNotification.findMany({
+        where: { customerId: session.user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
       });
 
-      if (customer) {
-        const customerNotifications = await prisma.customerNotification.findMany({
-          where: { customerId: customer.id },
-          orderBy: { createdAt: 'desc' },
-          take: 50,
-        });
-
-        notifications = customerNotifications.map(n => ({
-          ...n,
-          source: 'customer',
-          createdAt: n.createdAt.toISOString(),
-        }));
-      }
+      notifications = customerNotifications.map(n => ({
+        ...n,
+        source: 'customer',
+        createdAt: n.createdAt.toISOString(),
+      }));
     }
 
     // فرز الإشعارات حسب التاريخ (الأحدث أولاً)

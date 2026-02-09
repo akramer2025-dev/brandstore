@@ -451,8 +451,8 @@ export function Header() {
               <NotificationsDropdown role={session.user?.role} />
             )}
             
-            {/* Notification Bell - Push Notifications */}
-            {mounted && isNotificationSupported && (
+            {/* Notification Bell - مخفي حالياً */}
+            {false && mounted && isNotificationSupported && (
               <Button
                 variant="ghost"
                 size="icon"

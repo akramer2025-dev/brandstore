@@ -130,7 +130,7 @@ export default function CustomerAssistant() {
       {
         id: 'shipping-1',
         type: 'assistant',
-        content: '📦 معلومات الشحن والتوصيل\n\n✅ شحن مجاني للطلبات أكثر من 500 جنيه\n⏱️ التوصيل خلال 2-5 أيام عمل\n🚚 نوصل لجميع المحافظات\n📍 إمكانية التتبع اللحظي\n💰 الدفع عند الاستلام متاح',
+        content: '📦 معلومات الشحن والتوصيل\n\n✅ شحن مجاني للطلبات أكثر من 1000 جنيه\n⏱️ التوصيل خلال 2-5 أيام عمل\n🚚 نوصل لجميع المحافظات\n📍 إمكانية التتبع اللحظي\n💰 الدفع عند الاستلام متاح فقط للملابس',
       },
       {
         id: 'shipping-2',
@@ -204,14 +204,14 @@ export default function CustomerAssistant() {
       {
         id: 'contact-1',
         type: 'assistant',
-        content: '📞 تواصل مع خدمة العملاء\n\n📱 واتساب: 01000000000\n📧 البريد: support@remostore.net\n⏰ نعمل: السبت - الخميس (9 صباحاً - 6 مساءً)\n\n💬 أو استخدم المحادثة المباشرة',
+        content: '📞 تواصل مع خدمة العملاء\n\n📱 واتساب: 01555512778\n📧 البريد الإلكتروني: akram.er2025@gmail.com\n📍 العنوان: مصر - القاهرة\n⏰ نعمل: السبت - الخميس (9 صباحاً - 6 مساءً)\n\n💬 أو استخدم المحادثة المباشرة',
       },
       {
         id: 'contact-2',
         type: 'options',
         content: '',
         options: [
-          { id: 'whatsapp', icon: <MessageCircle className="w-5 h-5" />, title: 'راسلنا على واتساب', link: 'https://wa.me/201000000000' },
+          { id: 'whatsapp', icon: <MessageCircle className="w-5 h-5" />, title: 'راسلنا على واتساب', link: 'https://wa.me/201555512778' },
           { id: 'back', icon: <MessageCircle className="w-5 h-5" />, title: 'رجوع للقائمة الرئيسية', action: () => showWelcomeMessage() },
         ],
       },
@@ -250,38 +250,48 @@ export default function CustomerAssistant() {
 
   return (
     <>
-      {/* زر المساعد العائم */}
+      {/* زر المساعد العائم - تصميم محسّن احترافي */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.08, rotate: [0, -5, 5, 0] }}
+            whileTap={{ scale: 0.92 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-20 right-4 md:right-6 z-40 group"
+            className="fixed bottom-6 right-4 md:bottom-8 md:right-6 z-40 group"
+            aria-label="مساعد ريمو الذكي"
           >
             <div className="relative">
-              {/* تأثير التوهج */}
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-full blur-lg opacity-75 group-hover:opacity-100 animate-pulse"></div>
+              {/* تأثير التوهج الخارجي - النبض */}
+              <div className="absolute -inset-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 rounded-full blur-xl opacity-60 group-hover:opacity-90 animate-pulse"></div>
+              
+              {/* حلقة دوارة */}
+              <div className="absolute inset-0 rounded-full border-2 border-teal-300/40 animate-spin-slow"></div>
               
               {/* الزر الرئيسي */}
-              <div className="relative bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-2.5 md:p-3.5 rounded-full shadow-2xl flex items-center gap-2">
-                {/* شعار التطبيق */}
-                <img 
-                  src="/logo.png" 
-                  alt="Remo Store" 
-                  className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover"
-                />
-                <span className="font-bold text-xs md:text-sm hidden sm:inline">كيف نساعدك؟</span>
+              <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 text-white p-3.5 md:p-4 rounded-full shadow-2xl shadow-teal-600/50 flex items-center gap-2.5 border-2 border-white/30 backdrop-blur">
+                {/* شعار التطبيق مع توهج */}
+                <div className="relative">
+                  <div className="absolute inset-0 bg-white/40 rounded-full blur-sm"></div>
+                  <img 
+                    src="/logo.png" 
+                    alt="Remo Store" 
+                    className="relative w-7 h-7 md:w-8 md:h-8 rounded-full object-cover ring-2 ring-white/50 shadow-lg"
+                  />
+                </div>
+                <span className="font-bold text-sm md:text-base hidden sm:inline drop-shadow-lg">مساعدك الذكي 🤖</span>
               </div>
+              
+              {/* نقطة إشعار حية */}
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white shadow-lg animate-bounce"></div>
             </div>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* نافذة المساعد */}
+      {/* نافذة المساعد - تصميم محسّن احترافي */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -289,88 +299,108 @@ export default function CustomerAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-[4.5rem] right-4 left-4 sm:right-4 sm:left-auto sm:w-[400px] z-40 max-h-[65vh] md:max-h-[70vh]"
+            className="fixed bottom-20 md:bottom-24 right-4 left-4 sm:right-4 sm:left-auto sm:w-[420px] z-40 max-h-[68vh] md:max-h-[72vh]"
           >
-            <Card className="bg-gradient-to-br from-slate-900 via-teal-900/90 to-slate-900 border-teal-500/50 shadow-2xl overflow-hidden rounded-2xl">
-              {/* رأس النافذة */}
-              <div className="bg-gradient-to-r from-teal-600 to-cyan-600 p-3 md:p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2 md:gap-3">
-                  {/* شعار التطبيق */}
-                  <img 
-                    src="/logo.png" 
-                    alt="Remo Store" 
-                    className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shadow-lg"
-                  />
+            <Card className="bg-gradient-to-br from-slate-900 via-teal-900/95 to-slate-900 border-2 border-teal-400/60 shadow-[0_20px_60px_rgba(13,148,136,0.4)] overflow-hidden rounded-3xl backdrop-blur-xl">
+              {/* رأس النافذة - تصميم محسّن */}
+              <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-4 md:p-5 flex items-center justify-between overflow-hidden">
+                {/* نمط خلفية متحرك */}
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
+                
+                <div className="relative flex items-center gap-3 md:gap-4">
+                  {/* شعار التطبيق مع حلقة دوارة */}
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-white/30 animate-ping"></div>
+                    <div className="absolute inset-0 rounded-full border-2 border-white/40 animate-spin-slow"></div>
+                    <img 
+                      src="/logo.png" 
+                      alt="Remo Store" 
+                      className="relative w-10 h-10 md:w-12 md:h-12 rounded-full object-cover ring-4 ring-white/50 shadow-2xl"
+                    />
+                  </div>
                   <div>
-                    <h3 className="text-white font-bold text-sm md:text-lg">مساعد ريمو ستور</h3>
-                    <p className="text-teal-100 text-[10px] md:text-xs">
-                      خدمة العملاء 💬
-                    </p>
+                    <h3 className="text-white font-black text-base md:text-xl tracking-wide drop-shadow-lg">مساعد ريمو الذكي</h3>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                      <p className="text-teal-50 text-xs md:text-sm font-medium drop-shadow">
+                        متصل الآن - جاهز للمساعدة
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 md:gap-2">
+                
+                <div className="relative flex items-center gap-1.5 md:gap-2">
                   <button
                     onClick={hideAssistant}
-                    className="text-white/70 hover:text-white p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition-all"
+                    className="text-white/80 hover:text-white p-2 md:p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 backdrop-blur"
                     title="إخفاء المساعد"
+                    aria-label="إخفاء المساعد"
                   >
-                    <EyeOff className="w-4 h-4 md:w-5 md:h-5" />
+                    <EyeOff className="w-5 h-5 md:w-6 md:h-6 drop-shadow" />
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="text-white/70 hover:text-white p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition-all"
+                    className="text-white/80 hover:text-white p-2 md:p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 backdrop-blur"
+                    title="إغلاق"
+                    aria-label="إغلاق"
                   >
-                    <X className="w-4 h-4 md:w-5 md:h-5" />
+                    <X className="w-5 h-5 md:w-6 md:h-6 drop-shadow" />
                   </button>
                 </div>
               </div>
 
-              {/* محتوى المحادثة */}
-              <CardContent className="p-3 md:p-4 max-h-[50vh] md:max-h-[55vh] overflow-y-auto space-y-3 md:space-y-4 scrollbar-thin scrollbar-thumb-teal-500/50 scrollbar-track-transparent">
+              {/* محتوى المحادثة - تصميم محسّن */}
+              <CardContent className="p-4 md:p-5 max-h-[48vh] md:max-h-[52vh] overflow-y-auto space-y-4 md:space-y-5 scrollbar-thin scrollbar-thumb-teal-500/60 scrollbar-track-slate-800/50">
                 {messages.map((message) => (
                   <motion.div
                     key={message.id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
                   >
                     {message.type === 'assistant' && (
-                      <div className="flex gap-2 md:gap-3">
-                        {/* شعار المساعد */}
-                        <img 
-                          src="/logo.png" 
-                          alt="Remo Store" 
-                          className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full object-cover shadow-md"
-                        />
-                        <div className="bg-slate-800/80 backdrop-blur rounded-2xl rounded-tr-sm p-3 md:p-4 text-white/90 text-xs md:text-sm whitespace-pre-line flex-1 leading-relaxed">
+                      <div className="flex gap-3 md:gap-4">
+                        {/* شعار المساعد مع حلقة توهج */}
+                        <div className="flex-shrink-0 relative">
+                          <div className="absolute inset-0 bg-teal-400/30 rounded-full blur-md animate-pulse"></div>
+                          <img 
+                            src="/logo.png" 
+                            alt="Remo Store" 
+                            className="relative w-8 h-8 md:w-9 md:h-9 rounded-full object-cover ring-2 ring-teal-400/50 shadow-xl"
+                          />
+                        </div>
+                        <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 rounded-2xl rounded-tr-sm p-4 md:p-5 text-white/95 text-sm md:text-base whitespace-pre-line flex-1 leading-relaxed shadow-lg shadow-teal-900/20">
                           {message.content}
                         </div>
                       </div>
                     )}
 
                     {message.type === 'options' && message.options && (
-                      <div className="grid gap-2 mt-3">
+                      <div className="grid gap-2.5 mt-4">
                         {message.options.map((option) => {
                           // التحقق من متطلبات تسجيل الدخول
                           if (option.requireAuth && !session) {
                             return (
                               <Link key={option.id} href="/auth/login" onClick={() => setIsOpen(false)}>
                                 <motion.div
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                  className="bg-slate-800/60 hover:bg-slate-700/80 border border-teal-500/30 hover:border-teal-500/60 rounded-xl p-3 cursor-pointer transition-all group"
+                                  whileHover={{ scale: 1.03, x: 4 }}
+                                  whileTap={{ scale: 0.97 }}
+                                  className="bg-gradient-to-r from-slate-800/70 to-slate-800/50 hover:from-slate-700/90 hover:to-slate-700/70 border-2 border-teal-500/40 hover:border-teal-400/70 rounded-2xl p-4 cursor-pointer transition-all duration-300 group shadow-lg hover:shadow-teal-500/20"
                                 >
-                                  <div className="flex items-center gap-3">
-                                    <div className="bg-gradient-to-r from-teal-500/30 to-cyan-500/30 p-2 rounded-lg text-teal-300 group-hover:text-teal-200">
+                                  <div className="flex items-center gap-3.5">
+                                    <div className="bg-gradient-to-br from-teal-500/40 to-cyan-500/40 p-3 rounded-xl text-teal-300 group-hover:text-teal-200 group-hover:scale-110 transition-transform duration-200 shadow-lg">
                                       {option.icon}
                                     </div>
                                     <div className="flex-1">
-                                      <p className="text-white font-medium text-sm">{option.title}</p>
+                                      <p className="text-white font-bold text-sm md:text-base">{option.title}</p>
                                       {option.description && (
-                                        <p className="text-gray-400 text-xs">سجل دخول أولاً</p>
+                                        <p className="text-cyan-300 text-xs md:text-sm mt-1 flex items-center gap-1.5">
+                                          <span className="inline-block w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></span>
+                                          سجل دخول أولاً
+                                        </p>
                                       )}
                                     </div>
-                                    <ExternalLink className="w-4 h-4 text-teal-400" />
+                                    <ExternalLink className="w-5 h-5 text-teal-400 group-hover:text-teal-300 group-hover:translate-x-1 transition-all duration-200" />
                                   </div>
                                 </motion.div>
                               </Link>
@@ -388,21 +418,21 @@ export default function CustomerAssistant() {
                                 rel={isExternal ? 'noopener noreferrer' : undefined}
                               >
                                 <motion.div
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                  className="bg-slate-800/60 hover:bg-slate-700/80 border border-teal-500/30 hover:border-teal-500/60 rounded-xl p-3 cursor-pointer transition-all group"
+                                  whileHover={{ scale: 1.03, x: 4 }}
+                                  whileTap={{ scale: 0.97 }}
+                                  className="bg-gradient-to-r from-slate-800/70 to-slate-800/50 hover:from-slate-700/90 hover:to-slate-700/70 border-2 border-teal-500/40 hover:border-teal-400/70 rounded-2xl p-4 cursor-pointer transition-all duration-300 group shadow-lg hover:shadow-teal-500/20"
                                 >
-                                  <div className="flex items-center gap-3">
-                                    <div className="bg-gradient-to-r from-teal-500/30 to-cyan-500/30 p-2 rounded-lg text-teal-300 group-hover:text-teal-200">
+                                  <div className="flex items-center gap-3.5">
+                                    <div className="bg-gradient-to-br from-teal-500/40 to-cyan-500/40 p-3 rounded-xl text-teal-300 group-hover:text-teal-200 group-hover:scale-110 transition-transform duration-200 shadow-lg">
                                       {option.icon}
                                     </div>
                                     <div className="flex-1">
-                                      <p className="text-white font-medium text-sm">{option.title}</p>
+                                      <p className="text-white font-bold text-sm md:text-base">{option.title}</p>
                                       {option.description && (
-                                        <p className="text-gray-400 text-xs">{option.description}</p>
+                                        <p className="text-gray-400 text-xs md:text-sm mt-1">{option.description}</p>
                                       )}
                                     </div>
-                                    {isExternal && <ExternalLink className="w-4 h-4 text-teal-400" />}
+                                    {isExternal && <ExternalLink className="w-5 h-5 text-teal-400 group-hover:text-teal-300 group-hover:translate-x-1 transition-all duration-200" />}
                                   </div>
                                 </motion.div>
                               </Link>
@@ -412,19 +442,19 @@ export default function CustomerAssistant() {
                           return (
                             <motion.div
                               key={option.id}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
+                              whileHover={{ scale: 1.03, x: 4 }}
+                              whileTap={{ scale: 0.97 }}
                               onClick={option.action}
-                              className="bg-slate-800/60 hover:bg-slate-700/80 border border-teal-500/30 hover:border-teal-500/60 rounded-xl p-3 cursor-pointer transition-all group"
+                              className="bg-gradient-to-r from-slate-800/70 to-slate-800/50 hover:from-slate-700/90 hover:to-slate-700/70 border-2 border-teal-500/40 hover:border-teal-400/70 rounded-2xl p-4 cursor-pointer transition-all duration-300 group shadow-lg hover:shadow-teal-500/20"
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="bg-gradient-to-r from-teal-500/30 to-cyan-500/30 p-2 rounded-lg text-teal-300 group-hover:text-teal-200">
+                              <div className="flex items-center gap-3.5">
+                                <div className="bg-gradient-to-br from-teal-500/40 to-cyan-500/40 p-3 rounded-xl text-teal-300 group-hover:text-teal-200 group-hover:scale-110 transition-transform duration-200 shadow-lg">
                                   {option.icon}
                                 </div>
                                 <div className="flex-1">
-                                  <p className="text-white font-medium text-sm">{option.title}</p>
+                                  <p className="text-white font-bold text-sm md:text-base">{option.title}</p>
                                   {option.description && (
-                                    <p className="text-gray-400 text-xs">{option.description}</p>
+                                    <p className="text-gray-400 text-xs md:text-sm mt-1">{option.description}</p>
                                   )}
                                 </div>
                               </div>

@@ -1,13 +1,12 @@
 // src/app/api/vendor/store-address/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // GET - Fetch vendor's store address
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || session.user.role !== 'VENDOR') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -48,7 +47,7 @@ export async function GET(request: NextRequest) {
 // PUT - Update vendor's store address
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     console.log('🔵 PUT /api/vendor/store-address - Start');
     console.log('📋 Session:', session?.user ? { id: session.user.id, role: session.user.role } : 'No session');

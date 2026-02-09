@@ -110,23 +110,24 @@ export default function ChatButton() {
 
   return (
     <>
-      {/* زر المحادثة العائم */}
+      {/* زر المحادثة العائم - محسن */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-20 left-4 md:bottom-24 md:left-6 z-40 bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-full p-2.5 md:p-4 shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
+        className="fixed bottom-6 left-4 md:bottom-8 md:left-6 z-40 bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-full p-3 md:p-4 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-white/20"
+        aria-label="فتح الدردشة مع الدعم"
       >
         {isOpen ? (
-          <X className="w-5 h-5 md:w-6 md:h-6" />
+          <X className="w-6 h-6 md:w-7 md:h-7" />
         ) : (
           <div className="relative">
             {/* شعار التطبيق */}
             <img 
               src="/logo.png" 
               alt="Remo Store" 
-              className="w-6 h-6 md:w-7 md:h-7 rounded-full object-cover"
+              className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover drop-shadow-lg"
             />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center animate-pulse font-bold">
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center animate-pulse font-bold shadow-lg border-2 border-white">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -134,26 +135,32 @@ export default function ChatButton() {
         )}
       </button>
 
-      {/* نافذة المحادثة */}
+      {/* نافذة المحادثة - محسنة */}
       {isOpen && (
-        <div className="fixed bottom-[4.5rem] left-4 md:bottom-36 md:left-6 z-40 w-[calc(100vw-2rem)] sm:w-96 bg-gradient-to-br from-gray-900 via-teal-900/50 to-gray-900 rounded-2xl shadow-2xl border border-teal-700/30 flex flex-col max-h-[65vh] md:max-h-[550px]">
-          {/* رأس المحادثة */}
-          <div className="p-3 md:p-4 border-b border-teal-700/30 bg-gradient-to-r from-teal-900/40 to-cyan-900/40 rounded-t-2xl">
+        <div className="fixed bottom-24 left-4 md:bottom-28 md:left-6 z-40 w-[calc(100vw-2rem)] sm:w-96 bg-gradient-to-br from-gray-900 via-teal-900/50 to-gray-900 rounded-2xl shadow-2xl border-2 border-teal-500/40 flex flex-col max-h-[65vh] md:max-h-[550px]">
+          {/* رأس المحادثة - محسن */}
+          <div className="p-3 md:p-4 border-b border-teal-700/30 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-t-2xl shadow-lg">
             <div className="flex items-center gap-3">
               {/* شعار التطبيق */}
               <img 
                 src="/logo.png" 
                 alt="Remo Store" 
-                className="w-10 h-10 rounded-full object-cover shadow-lg"
+                className="w-10 h-10 rounded-full object-cover shadow-xl border-2 border-white/30"
               />
-              <div>
+              <div className="flex-1">
                 <h3 className="text-base md:text-lg font-bold text-white">
                   {session.user.role === 'ADMIN' ? 'محادثات العملاء' : 'تواصل مع الإدارة'}
                 </h3>
-                <p className="text-xs text-teal-300">
+                <p className="text-xs text-teal-100">
                   خدمة العملاء 💬
                 </p>
               </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1.5 hover:bg-white/10 rounded-full transition"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
           </div>
 

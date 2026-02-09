@@ -410,10 +410,10 @@ export default async function HomePage() {
         </div>
       </footer>
 
-      {/* Chat Button - Floating */}
-      <ChatButton />
+      {/* زر الدردشة مع الدعم - مخفي حالياً */}
+      {/* <ChatButton /> */}
       
-      {/* مساعد العملاء الذكي */}
+      {/* مساعد ريمو الذكي */}
       <CustomerAssistant />
       </div>
     </div>

@@ -43,6 +43,11 @@ export function NotificationsDropdown({ role }: { role?: string }) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // ADMIN و DEVELOPER لا يحتاجون إشعارات
+    if (role === 'ADMIN' || role === 'DEVELOPER') {
+      return;
+    }
+    
     fetchNotifications();
     
     // Refresh notifications every 30 seconds
@@ -51,7 +56,7 @@ export function NotificationsDropdown({ role }: { role?: string }) {
   }, [role]);
 
   const fetchNotifications = async () => {
-    if (!role) return;
+    if (!role || role === 'ADMIN' || role === 'DEVELOPER') return;
     
     try {
       setIsLoading(true);
@@ -99,6 +104,11 @@ export function NotificationsDropdown({ role }: { role?: string }) {
       console.error('Failed to mark all as read:', error);
     }
   };
+
+  // ADMIN و DEVELOPER لا يحتاجون عرض الإشعارات
+  if (role === 'ADMIN' || role === 'DEVELOPER') {
+    return null;
+  }
 
   return (
     <DropdownMenu>

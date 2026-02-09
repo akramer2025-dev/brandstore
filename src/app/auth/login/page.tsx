@@ -29,6 +29,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Slider state
   const [slides, setSlides] = useState<SliderImage[]>([]);
@@ -76,26 +77,23 @@ export default function LoginPage() {
 
   // إذا المستخدم مسجل دخول، توجيهه للصفحة المناسبة حسب دوره
   useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
+    if (status === 'authenticated' && session?.user && !isRedirecting) {
+      setIsRedirecting(true);
       console.log('✅ User is already logged in, redirecting based on role:', session.user.role);
       
-      if (session.user.role === 'ADMIN') {
-        router.replace('/admin');
-      } else if (session.user.role === 'VENDOR') {
-        router.replace('/vendor/dashboard');
-      } else if (session.user.role === 'MANUFACTURER') {
-        router.replace('/manufacturer/dashboard');
-      } else if (session.user.role === 'DELIVERY_STAFF') {
-        router.replace('/delivery-dashboard');
-      } else if (session.user.role === 'MARKETING_STAFF') {
-        router.replace('/marketing/dashboard');
-      } else if (session.user.role === 'CUSTOMER') {
-        router.replace('/');
-      } else {
-        router.replace('/');
-      }
+      const redirectPath = 
+        session.user.role === 'ADMIN' ? '/admin' :
+        session.user.role === 'VENDOR' ? '/vendor/dashboard' :
+        session.user.role === 'MANUFACTURER' ? '/manufacturer/dashboard' :
+        session.user.role === 'DELIVERY_STAFF' ? '/delivery-dashboard' :
+        session.user.role === 'MARKETING_STAFF' ? '/marketing/dashboard' :
+        session.user.role === 'DEVELOPER' ? '/developer' :
+        '/';
+      
+      // استخدام window.location بدلاً من router لتجنب loop
+      window.location.href = redirectPath;
     }
-  }, [status, session, router]);
+  }, [status, session, isRedirecting]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);

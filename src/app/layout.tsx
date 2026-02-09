@@ -69,7 +69,7 @@ export default function RootLayout({
           <Header />
           {children}
           <InstallPWA />
-          <PushNotificationManager />
+          {/* <PushNotificationManager /> */}
         </Providers>
       </body>
     </html>

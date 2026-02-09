@@ -37,7 +37,7 @@ export class BostaService {
 
   constructor() {
     this.apiKey = process.env.BUSTA_API_KEY || '';
-    this.baseUrl = process.env.BUSTA_API_URL || 'https://api.bosta.co/v1';
+    this.baseUrl = process.env.BUSTA_API_URL || 'http://app.bosta.co/api/v2';
 
     if (!this.apiKey) {
       throw new Error('Bosta API Key is missing! Check your .env file');
