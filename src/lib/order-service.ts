@@ -305,50 +305,133 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
       paymentStatus = 'PAID';
       orderStatus = 'DELIVERED';
 
-      // إنشاء سجلات مستحقات الموردين للمنتجات الوسيط
-      for (const item of order.items) {
-        if (item.product.productSource === 'CONSIGNMENT' && item.product.supplierCost) {
-          // إنشاء سجل مستحقات للمورد
-          const profit = (item.price - item.product.supplierCost) * item.quantity;
-          const amountDue = item.product.supplierCost * item.quantity;
+      // الحصول على vendor للطلب
+      const firstProduct = order.items[0]?.product;
+      const vendorId = firstProduct?.vendorId;
 
-          await prisma.supplierPayment.create({
-            data: {
-              vendorId: item.product.vendorId!,
-              productId: item.product.id,
-              orderId: order.id,
-              supplierName: item.product.supplierName || 'مورد غير محدد',
-              supplierPhone: item.product.supplierPhone,
-              amountDue: amountDue,
-              amountPaid: 0,
-              profit: profit,
-              saleDate: new Date(),
-              status: 'PENDING',
-              notes: `من طلب #${order.orderNumber} - ${item.quantity} قطعة`,
-            },
-          });
+      // **تحديث رأس المال فقط للـ COD (النقدي عند التوصيل)**
+      // التحويلات البنكية/المحفظة تم تحصيلها عند قبول الطلب
+      if (vendorId && order.paymentStatus !== 'PAID') {
+        // جلب رصيد رأس المال الحالي
+        const vendor = await prisma.vendor.findUnique({
+          where: { id: vendorId },
+          select: { capitalBalance: true }
+        });
 
-          // إنشاء معاملة ربح الوسيط في رأس المال
-          // نحصل أولاً على آخر رصيد
-          const lastTransaction = await prisma.capitalTransaction.findFirst({
-            where: { vendorId: item.product.vendorId! },
-            orderBy: { createdAt: 'desc' },
-          });
-          const currentBalance = lastTransaction?.balanceAfter || 0;
+        let currentBalance = vendor?.capitalBalance || 0;
 
-          await prisma.capitalTransaction.create({
-            data: {
-              vendorId: item.product.vendorId!,
-              type: 'CONSIGNMENT_PROFIT',
-              amount: profit,
-              balanceBefore: currentBalance,
-              balanceAfter: currentBalance + profit,
-              description: `Profit from consignment sale - Order #${order.orderNumber}`,
-              descriptionAr: `ربح من بيع وسيط - طلب #${order.orderNumber}`,
-              orderId: order.id,
-            },
-          });
+        // معالجة كل منتج في الطلب
+        for (const item of order.items) {
+          const product = item.product;
+          const productRevenue = item.price * item.quantity;
+          
+          // **1. معالجة المنتجات المملوكة (OWNED)**
+          if (product.productSource === 'OWNED') {
+            const productCost = (product.supplierCost || product.productionCost || 0) * item.quantity;
+            const profit = productRevenue - productCost;
+
+            // تحديث رأس المال
+            currentBalance += profit;
+
+            // تسجيل معاملة رأس المال
+            await prisma.capitalTransaction.create({
+              data: {
+                vendorId: vendorId,
+                type: 'SALE_PROFIT',
+                amount: profit,
+                balanceBefore: currentBalance - profit,
+                balanceAfter: currentBalance,
+                description: `COD Payment - Order #${order.orderNumber}`,
+                descriptionAr: `دفع نقدي عند التوصيل - طلب #${order.orderNumber} (${item.quantity} × ${product.nameAr})`,
+                orderId: order.id,
+              },
+            });
+
+            // تسجيل في Sale model
+            await prisma.sale.create({
+              data: {
+                vendorId: vendorId,
+                productName: product.name,
+                productNameAr: product.nameAr,
+                quantity: item.quantity,
+                unitPrice: item.price,
+                totalAmount: productRevenue,
+                costPrice: product.supplierCost || product.productionCost,
+                profit: profit,
+                saleDate: new Date(),
+                customerName: order.customer?.name,
+                customerPhone: order.deliveryPhone,
+                invoiceNumber: order.orderNumber,
+                notes: `دفع نقدي عند التوصيل (COD)`,
+              },
+            });
+          }
+          
+          // **2. معالجة منتجات الوسيط (CONSIGNMENT)**
+          else if (product.productSource === 'CONSIGNMENT' && product.supplierCost) {
+            const amountDue = product.supplierCost * item.quantity;
+            const profit = productRevenue - amountDue;
+
+            // إنشاء سجل مستحقات للمورد
+            await prisma.supplierPayment.create({
+              data: {
+                vendorId: vendorId,
+                productId: product.id,
+                orderId: order.id,
+                supplierName: product.supplierName || 'مورد غير محدد',
+                supplierPhone: product.supplierPhone,
+                amountDue: amountDue,
+                amountPaid: 0,
+                profit: profit,
+                saleDate: new Date(),
+                status: 'PENDING',
+                notes: `من طلب #${order.orderNumber} - ${item.quantity} قطعة`,
+              },
+            });
+
+            // تحديث رأس المال بالربح
+            currentBalance += profit;
+
+            // تسجيل معاملة ربح الوسيط في رأس المال
+            await prisma.capitalTransaction.create({
+              data: {
+                vendorId: vendorId,
+                type: 'CONSIGNMENT_PROFIT',
+                amount: profit,
+                balanceBefore: currentBalance - profit,
+                balanceAfter: currentBalance,
+                description: `COD - Consignment profit - Order #${order.orderNumber}`,
+                descriptionAr: `نقدي عند التوصيل - ربح وسيط - طلب #${order.orderNumber} (${item.quantity} × ${product.nameAr})`,
+                orderId: order.id,
+              },
+            });
+
+            // تسجيل في Sale model
+            await prisma.sale.create({
+              data: {
+                vendorId: vendorId,
+                productName: product.name,
+                productNameAr: product.nameAr,
+                quantity: item.quantity,
+                unitPrice: item.price,
+                totalAmount: productRevenue,
+                costPrice: product.supplierCost,
+                profit: profit,
+                saleDate: new Date(),
+                customerName: order.customer?.name,
+                customerPhone: order.deliveryPhone,
+                invoiceNumber: order.orderNumber,
+                notes: `دفع نقدي عند التوصيل (COD) | وسيط: ${product.supplierName}`,
+              },
+            });
+          }
         }
+
+        // تحديث رصيد رأس المال النهائي للـ vendor
+        await prisma.vendor.update({
+          where: { id: vendorId },
+          data: { capitalBalance: currentBalance },
+        });
       }
 
       // تحديث إحصائيات موظف التوصيل

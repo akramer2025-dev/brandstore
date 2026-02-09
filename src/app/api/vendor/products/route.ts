@@ -72,15 +72,14 @@ export async function POST(req: NextRequest) {
     const purchasePrice = productionCost ? parseFloat(productionCost) : 0;
     const totalCost = purchasePrice * parseInt(stock);
     
-    // ⚠️ القيود على رأس المال معطلة مؤقتاً للاختبار
     // التحقق من رأس المال إذا كان المنتج مملوك (ليس وسيط)
-    // if (productSource === 'OWNED' && totalCost > 0) {
-    //   if ((vendor.capitalBalance || 0) < totalCost) {
-    //     return NextResponse.json({
-    //       error: `رأس المال غير كافٍ! المتاح: ${vendor.capitalBalance?.toLocaleString() || 0} ج، المطلوب: ${totalCost.toLocaleString()} ج`
-    //     }, { status: 400 });
-    //   }
-    // }
+    if (productSource === 'OWNED' && totalCost > 0) {
+      if ((vendor.capitalBalance || 0) < totalCost) {
+        return NextResponse.json({
+          error: `رأس المال غير كافٍ! المتاح: ${(vendor.capitalBalance || 0).toLocaleString()} ج، المطلوب: ${totalCost.toLocaleString()} ج`
+        }, { status: 400 });
+      }
+    }
 
     // إنشاء المنتج وخصم التكلفة من رأس المال
     const result = await prisma.$transaction(async (tx) => {

@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     const cost = parsedSoldQuantity * product.purchasePrice;
     const profitFromSale = revenue - cost;
 
-    // تحديث البضاعة
+    // تحديث البضاعة فقط (بدون تحديث رأس المال)
     const updatedProduct = await prisma.offlineProduct.update({
       where: { id: productId },
       data: {
@@ -82,42 +82,23 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // إضافة المبلغ لرأس المال
-    const updatedVendor = await prisma.vendor.update({
-      where: { id: vendor.id },
-      data: {
-        capitalBalance: {
-          increment: revenue,
-        },
-      },
-    });
-
-    // تسجيل المعاملة
-    await prisma.capitalTransaction.create({
-      data: {
-        vendorId: vendor.id,
-        type: 'SALE_PROFIT',
-        amount: revenue,
-        balanceBefore: vendor.capitalBalance,
-        balanceAfter: updatedVendor.capitalBalance,
-        description: `بيع بضاعة خارج النظام - ${parsedSoldQuantity} قطعة`,
-        descriptionAr: `بيع بضاعة خارج النظام - ${parsedSoldQuantity} قطعة (ربح: ${profitFromSale.toFixed(2)} ج)`,
-      },
-    });
+    // ⚠️ ملاحظة مهمة: 
+    // رأس المال لا يتحدث هنا!
+    // سيتم تحديث رأس المال فقط عند عمل سند قبض من الوسيط
 
     // حساب القطع المتبقية الجديدة
     const newRemainingQuantity = product.quantity - updatedProduct.soldQuantity;
 
     return NextResponse.json({
       success: true,
-      message: `تم تسجيل بيع ${parsedSoldQuantity} قطعة بنجاح`,
+      message: `تم تسجيل بيع ${parsedSoldQuantity} قطعة بنجاح (لم يتم تحديث رأس المال، استخدم سند القبض لاستلام المبلغ)`,
       data: {
         soldQuantity: parsedSoldQuantity,
         revenue,
         profitFromSale,
         totalSold: updatedProduct.soldQuantity,
         remainingQuantity: newRemainingQuantity,
-        capitalBalance: updatedVendor.capitalBalance,
+        capitalBalance: vendor.capitalBalance, // الرصيد لم يتغير
       },
     });
   } catch (error) {
