@@ -249,7 +249,7 @@ export default function OfflineProductsReportsPage() {
         </Card>
 
         {/* Tabs */}
-        <div className="mb-6 print:hidden">{
+        <div className="mb-6 print:hidden">
           <div className="flex gap-2 overflow-x-auto pb-2">
             <Button
               onClick={() => setActiveTab('all')}
