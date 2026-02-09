@@ -89,6 +89,9 @@ export default function OfflineProductsPage() {
   });
   const [initialCapital, setInitialCapital] = useState(0);
   const [capitalBalance, setCapitalBalance] = useState(0);
+  const [ownedProductsCost, setOwnedProductsCost] = useState(0);
+  const [offlineStockCost, setOfflineStockCost] = useState(0);
+  const [offlineSoldPending, setOfflineSoldPending] = useState(0);
   const [hasPermission, setHasPermission] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [showSupplierDialog, setShowSupplierDialog] = useState(false);
@@ -159,10 +162,12 @@ export default function OfflineProductsPage() {
       const response = await fetch('/api/vendor/capital');
       if (response.ok) {
         const data = await response.json();
+        setInitialCapital(data.initialCapital || 7500);
         setCapitalBalance(data.capitalBalance || 0);
-        // حفظ رأس المال الأولي عند أول تحميل
-        if (initialCapital === 0) {
-          setInitialCapital(data.capitalBalance || 0);
+        if (data.breakdown) {
+          setOwnedProductsCost(data.breakdown.ownedProductsCost || 0);
+          setOfflineStockCost(data.breakdown.offlineStockCost || 0);
+          setOfflineSoldPending(data.breakdown.offlineSoldPending || 0);
         }
       }
     } catch (error) {
@@ -587,7 +592,7 @@ export default function OfflineProductsPage() {
                 <p className="text-blue-200 text-sm font-bold">💰 رأس المال قبل الشراء</p>
                 <Wallet className="w-6 h-6 text-blue-400" />
               </div>
-              <p className="text-3xl font-black text-white">{(capitalBalance + stats.totalCost - stats.totalSoldRevenue).toFixed(0)}</p>
+              <p className="text-3xl font-black text-white">{(initialCapital - ownedProductsCost).toFixed(0)}</p>
               <p className="text-xs text-blue-300 mt-1">رأس المال الأولي (ثابت)</p>
             </CardContent>
           </Card>
@@ -598,7 +603,7 @@ export default function OfflineProductsPage() {
                 <p className="text-purple-200 text-sm font-bold">💵 رأس المال بعد الشراء</p>
                 <Wallet className="w-6 h-6 text-purple-400" />
               </div>
-              <p className="text-3xl font-black text-white">{(capitalBalance - stats.totalSoldRevenue).toFixed(0)}</p>
+              <p className="text-3xl font-black text-white">{capitalBalance.toFixed(0)}</p>
               <p className="text-xs text-purple-300 mt-1">يقل مع كل عملية شراء</p>
             </CardContent>
           </Card>
@@ -609,8 +614,8 @@ export default function OfflineProductsPage() {
                 <p className="text-green-200 text-sm font-bold">💎 رأس المال المتوقع</p>
                 <TrendingUp className="w-6 h-6 text-green-400" />
               </div>
-              <p className="text-3xl font-black text-white">{(capitalBalance + stats.totalRemainingRevenue).toFixed(0)}</p>
-              <p className="text-xs text-green-300 mt-1">بعد بيع البضاعة المتبقية ({stats.totalRemainingQuantity} قطعة)</p>
+              <p className="text-3xl font-black text-white">{(capitalBalance + offlineSoldPending + offlineStockCost).toFixed(0)}</p>
+              <p className="text-xs text-green-300 mt-1">بعد بيع البضاعة الخارجية المتبقية ({stats.totalRemainingQuantity} قطعة)</p>
             </CardContent>
           </Card>
         </div>

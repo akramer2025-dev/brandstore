@@ -66,6 +66,11 @@ export default function OfflineProductsReportsPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [noSupplierProducts, setNoSupplierProducts] = useState<OfflineProduct[]>([]);
   const [capitalInfo, setCapitalInfo] = useState<CapitalInfo>({ initial: 7500, current: 7500 });
+  const [capitalBreakdown, setCapitalBreakdown] = useState({
+    ownedProductsCost: 0,
+    offlineStockCost: 0,
+    offlineSoldPending: 0
+  });
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -90,6 +95,9 @@ export default function OfflineProductsReportsPage() {
           initial: data.initialCapital || 7500,
           current: data.capitalBalance || 7500
         });
+        if (data.breakdown) {
+          setCapitalBreakdown(data.breakdown);
+        }
       }
     } catch (error) {
       console.error('Error fetching capital:', error);
@@ -216,33 +224,37 @@ export default function OfflineProductsReportsPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* كارت رأس المال */}
-        <Card className="mb-6 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 backdrop-blur-xl border-indigo-500/30">
+        <Card className="mb-6 bg-transparent backdrop-blur-sm border-white/10">
           <CardContent className="p-6">
             <h2 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
               <Wallet className="w-6 h-6" />
               💰 ملخص رأس المال
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="bg-white/10 p-4 rounded-lg border border-white/20">
-                <p className="text-gray-300 text-sm mb-1">رأس المال الأولي (ثابت)</p>
+                <p className="text-gray-300 text-sm mb-1">رأس المال الأولي</p>
                 <p className="text-white text-3xl font-bold">{capitalInfo.initial.toFixed(0)}</p>
                 <p className="text-gray-400 text-xs mt-1">جنيه</p>
               </div>
-              <div className="bg-white/10 p-4 rounded-lg border border-white/20">
-                <p className="text-gray-300 text-sm mb-1">رأس المال الحالي</p>
-                <p className="text-emerald-400 text-3xl font-bold">{capitalInfo.current.toFixed(0)}</p>
-                <p className="text-gray-400 text-xs mt-1">جنيه</p>
+              <div className="bg-white/10 p-4 rounded-lg border border-amber-500/30">
+                <p className="text-gray-300 text-sm mb-1">بضاعة مملوكة</p>
+                <p className="text-amber-400 text-2xl font-bold">{capitalBreakdown.ownedProductsCost.toFixed(0)}</p>
+                <p className="text-gray-400 text-xs mt-1">جنيه (مخزن)</p>
               </div>
-              <div className="bg-white/10 p-4 rounded-lg border border-white/20">
-                <p className="text-gray-300 text-sm mb-1">
-                  {capitalInfo.current >= capitalInfo.initial ? 'الربح' : 'الخسارة'}
-                </p>
-                <p className={`text-3xl font-bold ${
-                  capitalInfo.current >= capitalInfo.initial ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {Math.abs(capitalInfo.current - capitalInfo.initial).toFixed(0)}
-                </p>
-                <p className="text-gray-400 text-xs mt-1">جنيه</p>
+              <div className="bg-white/10 p-4 rounded-lg border border-blue-500/30">
+                <p className="text-gray-300 text-sm mb-1">بضاعة خارجية</p>
+                <p className="text-blue-400 text-2xl font-bold">{capitalBreakdown.offlineStockCost.toFixed(0)}</p>
+                <p className="text-gray-400 text-xs mt-1">جنيه (مخزن)</p>
+              </div>
+              <div className="bg-white/10 p-4 rounded-lg border border-orange-500/30">
+                <p className="text-gray-300 text-sm mb-1">مبيعات معلقة</p>
+                <p className="text-orange-400 text-2xl font-bold">{capitalBreakdown.offlineSoldPending.toFixed(0)}</p>
+                <p className="text-gray-400 text-xs mt-1">جنيه (منتظر)</p>
+              </div>
+              <div className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 p-4 rounded-lg border-2 border-emerald-400/50">
+                <p className="text-emerald-300 text-sm mb-1 font-semibold">رأس المال المتاح</p>
+                <p className="text-emerald-300 text-3xl font-bold">{capitalInfo.current.toFixed(0)}</p>
+                <p className="text-emerald-400 text-xs mt-1">جنيه ✅</p>
               </div>
             </div>
           </CardContent>

@@ -24,9 +24,51 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'لم يتم العثور على الشريك' }, { status: 404 });
     }
 
+    // حساب بضاعة مملوكة (OWNED products)
+    const ownedProducts = await prisma.product.findMany({
+      where: {
+        vendorId: vendor.id,
+        productSource: 'OWNED'
+      },
+      select: {
+        productionCost: true,
+        stock: true
+      }
+    });
+    const ownedProductsCost = ownedProducts.reduce((sum, p) => {
+      const cost = p.productionCost || 0;
+      return sum + (cost * p.stock);
+    }, 0);
+
+    // حساب بضاعة خارجية (Offline products)
+    const offlineProducts = await prisma.offlineProduct.findMany({
+      where: {
+        vendorId: vendor.id
+      },
+      select: {
+        purchasePrice: true,
+        quantity: true,
+        soldQuantity: true
+      }
+    });
+    
+    const offlineStockCost = offlineProducts.reduce((sum, p) => {
+      const remaining = p.quantity - p.soldQuantity;
+      return sum + (p.purchasePrice * remaining);
+    }, 0);
+    
+    const offlineSoldPending = offlineProducts.reduce((sum, p) => {
+      return sum + (p.purchasePrice * p.soldQuantity);
+    }, 0);
+
     return NextResponse.json({ 
       initialCapital: vendor.initialCapital || 7500,
-      capitalBalance: vendor.capitalBalance || 7500
+      capitalBalance: vendor.capitalBalance || 7500,
+      breakdown: {
+        ownedProductsCost: Number(ownedProductsCost.toFixed(2)),
+        offlineStockCost: Number(offlineStockCost.toFixed(2)),
+        offlineSoldPending: Number(offlineSoldPending.toFixed(2))
+      }
     });
 
   } catch (error) {

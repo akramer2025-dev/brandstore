@@ -90,6 +90,7 @@ export default function POSPage() {
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'DEFERRED'>('CASH');
   const [discountType, setDiscountType] = useState<'NONE' | 'PERCENTAGE' | 'FIXED'>('NONE');
   const [discountValue, setDiscountValue] = useState<number>(0);
+  const [downPayment, setDownPayment] = useState<number>(0);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [notes, setNotes] = useState('');
@@ -274,9 +275,20 @@ export default function POSPage() {
       return;
     }
 
+    // التحقق من الدفعة الأولى للقسط
+    if (paymentMethod === 'DEFERRED' && downPayment <= 0) {
+      toast.error('⚠️ يجب إدخال الدفعة الأولى للقسط!');
+      return;
+    }
+
+    if (paymentMethod === 'DEFERRED' && downPayment > total) {
+      toast.error('⚠️ الدفعة الأولى لا يمكن أن تكون أكبر من الإجمالي!');
+      return;
+    }
+
     // التأكيد
-    const paymentMethodText = paymentMethod === 'CASH' ? 'نقدي' : paymentMethod === 'CARD' ? 'بطاقة' : 'آجل';
-    const confirmMessage = `إتمام عملية البيع؟\n\n💵 الإجمالي: ${total.toFixed(2)} ج\n${discount > 0 ? `💰 الخصم: ${discount.toFixed(2)} ج\n` : ''}💰 الربح: ${totalProfit.toFixed(2)} ج\n💳 طريقة الدفع: ${paymentMethodText}${customerName ? `\n👤 العميل: ${customerName}` : ''}`;
+    const paymentMethodText = paymentMethod === 'CASH' ? 'نقدي' : paymentMethod === 'CARD' ? 'بطاقة' : 'قسط';
+    const confirmMessage = `إتمام عملية البيع؟\n\n💵 الإجمالي: ${total.toFixed(2)} ج\n${discount > 0 ? `💰 الخصم: ${discount.toFixed(2)} ج\n` : ''}💰 الربح: ${totalProfit.toFixed(2)} ج\n💳 طريقة الدفع: ${paymentMethodText}${paymentMethod === 'DEFERRED' ? `\n💵 الدفعة الأولى: ${downPayment.toFixed(2)} ج\n💰 المتبقي: ${(total - downPayment).toFixed(2)} ج` : ''}${customerName ? `\n👤 العميل: ${customerName}` : ''}`;
     
     if (!confirm(confirmMessage)) return;
 
@@ -297,6 +309,7 @@ export default function POSPage() {
           discountType: discountType !== 'NONE' ? discountType : undefined,
           discountValue: discountValue > 0 ? discountValue : undefined,
           paymentMethod,
+          downPayment: paymentMethod === 'DEFERRED' ? downPayment : undefined,
           customerName: customerName || undefined,
           customerPhone: customerPhone || undefined,
           notes: notes || undefined
@@ -313,6 +326,7 @@ export default function POSPage() {
         setCart([]);
         setDiscountType('NONE');
         setDiscountValue(0);
+        setDownPayment(0);
         setCustomerName('');
         setCustomerPhone('');
         setNotes('');
@@ -479,59 +493,6 @@ export default function POSPage() {
             </Button>
           </div>
         </div>
-
-        {/* الإحصائيات السريعة */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-4">
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-2 md:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-300 text-[10px] md:text-sm">المنتجات</p>
-                  <p className="text-lg md:text-2xl font-bold text-white">{products.length}</p>
-                </div>
-                <Package className="w-5 h-5 md:w-8 md:h-8 text-purple-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-2 md:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-300 text-[10px] md:text-sm">السلة</p>
-                  <p className="text-lg md:text-2xl font-bold text-white">{itemsCount}</p>
-                </div>
-                <ShoppingCart className="w-5 h-5 md:w-8 md:h-8 text-green-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-2 md:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-300 text-[10px] md:text-sm">الإجمالي</p>
-                  <p className="text-base md:text-2xl font-bold text-white">{total.toFixed(0)} ج</p>
-                </div>
-                <DollarSign className="w-5 h-5 md:w-8 md:h-8 text-yellow-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-2 md:p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-300 text-[10px] md:text-sm">الربح</p>
-                  <p className={`text-base md:text-2xl font-bold ${totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {totalProfit.toFixed(0)} ج
-                  </p>
-                </div>
-                <Calculator className="w-5 h-5 md:w-8 md:h-8 text-green-400" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
@@ -592,7 +553,7 @@ export default function POSPage() {
                       size="sm"
                       onClick={() => setShowOfflineProducts(true)}
                       className={showOfflineProducts 
-                        ? 'bg-gradient-to-r from-orange-600 to-red-600 flex-1' 
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 flex-1' 
                         : 'bg-white/5 text-white border-white/20 flex-1'
                       }
                     >
@@ -634,34 +595,34 @@ export default function POSPage() {
                   {filteredProducts.map(product => {
                     const imageUrl = product.images?.split(',')[0] || '/placeholder.jpg';
                     return (
-                    <Card
-                      key={product.id}
-                      className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer transition-all hover:scale-105"
-                      onClick={() => addToCart(product)}
-                    >
-                      <CardContent className="p-1.5 md:p-3">
-                        <div className="aspect-square mb-1 md:mb-2 rounded-md overflow-hidden bg-white/10">
-                          <img 
-                            src={imageUrl} 
-                            alt={product.nameAr}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/placeholder.jpg';
-                            }}
-                          />
-                      </div>
-                      <h3 className="font-bold text-white text-[10px] md:text-sm mb-0.5 md:mb-1 line-clamp-1 leading-tight">{product.nameAr}</h3>
-                      <p className="text-[9px] md:text-xs text-gray-400 mb-1 md:mb-2 line-clamp-1">{product.category?.nameAr}</p>
-                      <div className="flex items-center justify-between text-[10px] md:text-sm">
-                        <span className="text-green-400 font-bold">{product.price} ج</span>
-                        <Badge variant={product.stock > 10 ? 'default' : 'destructive'} className="text-[8px] md:text-xs px-1 py-0 h-4">
-                          {product.stock}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  );
-                })}
+                      <Card
+                        key={product.id}
+                        className="bg-white/5 border-white/10 hover:bg-white/10 cursor-pointer transition-all hover:scale-105"
+                        onClick={() => addToCart(product)}
+                      >
+                        <CardContent className="p-1.5 md:p-3">
+                          <div className="aspect-square mb-1 md:mb-2 rounded-md overflow-hidden bg-white/10">
+                            <img 
+                              src={imageUrl} 
+                              alt={product.nameAr}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                              }}
+                            />
+                        </div>
+                        <h3 className="font-bold text-white text-[10px] md:text-sm mb-0.5 md:mb-1 line-clamp-1 leading-tight">{product.nameAr}</h3>
+                        <p className="text-[9px] md:text-xs text-gray-400 mb-1 md:mb-2 line-clamp-1">{product.category?.nameAr}</p>
+                        <div className="flex items-center justify-between text-[10px] md:text-sm">
+                          <span className="text-green-400 font-bold">{product.price} ج</span>
+                          <Badge variant={product.stock > 10 ? 'default' : 'destructive'} className="text-[8px] md:text-xs px-1 py-0 h-4">
+                            {product.stock}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    );
+                  })}
                 </div>
               ) : (
                 // عرض المنتجات الخارجية
@@ -671,24 +632,28 @@ export default function POSPage() {
                     return (
                       <Card
                         key={offlineProduct.id}
-                        className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/30 hover:from-orange-500/20 hover:to-red-500/20 cursor-pointer transition-all hover:scale-105"
+                        className="bg-transparent border-purple-500/40 hover:bg-purple-500/10 cursor-pointer transition-all hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
                         onClick={() => addToCart(product)}
                       >
                         <CardContent className="p-1.5 md:p-3">
-                          <div className="aspect-square mb-1 md:mb-2 rounded-md overflow-hidden bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
-                            <FileText className="w-12 h-12 md:w-16 md:h-16 text-orange-400" />
+                          <div className="aspect-square mb-1 md:mb-2 rounded-md overflow-hidden bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center border border-purple-500/20">
+                            <img 
+                              src="/logo.png" 
+                              alt={offlineProduct.productName || 'بضاعة'}
+                              className="w-full h-full object-contain p-2"
+                            />
                           </div>
-                          <h3 className="font-bold text-white text-[10px] md:text-sm mb-0.5 md:mb-1 line-clamp-2 leading-tight">
+                          <h3 className="font-bold text-purple-200 text-[10px] md:text-sm mb-0.5 md:mb-1 line-clamp-2 leading-tight">
                             {offlineProduct.productName || offlineProduct.description || 'بضاعة'}
                           </h3>
                           {offlineProduct.supplier && (
-                            <p className="text-[9px] md:text-xs text-orange-400 mb-1 line-clamp-1">
+                            <p className="text-[9px] md:text-xs text-purple-300 mb-1 line-clamp-1 font-medium">
                               📦 {offlineProduct.supplier.name}
                             </p>
                           )}
                           <div className="flex items-center justify-between text-[10px] md:text-sm">
                             <span className="text-green-400 font-bold">{offlineProduct.sellingPrice.toFixed(0)} ج</span>
-                            <Badge variant="secondary" className="text-[8px] md:text-xs px-1 py-0 h-4 bg-orange-500/30 text-orange-200">
+                            <Badge variant="secondary" className="text-[8px] md:text-xs px-1 py-0 h-4 bg-purple-500/40 text-purple-100 border border-purple-400/30">
                               {product.stock}
                             </Badge>
                           </div>
@@ -840,12 +805,34 @@ export default function POSPage() {
                           <SelectItem value="DEFERRED">
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4" />
-                              آجل
+                              قسط
                             </div>
                           </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* الدفعة الأولى للتقسيط */}
+                    {paymentMethod === 'DEFERRED' && (
+                      <div className="space-y-2 bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/30">
+                        <Label className="text-yellow-300 text-xs flex items-center gap-2 font-bold">
+                          <DollarSign className="w-3 h-3" />
+                          الدفعة الأولى (إجباري)
+                        </Label>
+                        <Input
+                          type="number"
+                          value={downPayment}
+                          onChange={(e) => setDownPayment(parseFloat(e.target.value) || 0)}
+                          placeholder="أدخل الدفعة الأولى"
+                          className="bg-white/10 border-yellow-500/50 text-white text-xs"
+                          min="0"
+                          max={total}
+                        />
+                        <p className="text-[10px] text-yellow-300">
+                          💡 المتبقي: {(total - downPayment).toFixed(2)} ج
+                        </p>
+                      </div>
+                    )}
 
                     {/* الخصم */}
                     <div className="space-y-2">
