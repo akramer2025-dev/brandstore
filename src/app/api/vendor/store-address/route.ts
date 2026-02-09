@@ -50,11 +50,17 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
+    console.log('🔵 PUT /api/vendor/store-address - Start');
+    console.log('📋 Session:', session?.user ? { id: session.user.id, role: session.user.role } : 'No session');
+
     if (!session || session.user.role !== 'VENDOR') {
+      console.log('❌ Unauthorized: No session or not VENDOR role');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
+    console.log('📦 Request body:', body);
+
     const {
       address,
       governorate,
@@ -72,6 +78,7 @@ export async function PUT(request: NextRequest) {
 
     // Validate required fields
     if (!governorate || !city || !street) {
+      console.log('❌ Validation failed - Missing required fields:', { governorate, city, street });
       return NextResponse.json(
         { error: 'المحافظة والمدينة واسم الشارع مطلوبة' },
         { status: 400 }
@@ -93,18 +100,25 @@ export async function PUT(request: NextRequest) {
       fullAddress = parts.join('، ');
     }
 
+    console.log('📍 Full address generated:', fullAddress);
+
     // التحقق من وجود سجل Vendor أولاً
+    console.log('🔍 Checking for existing vendor with userId:', session.user.id);
     const existingVendor = await prisma.vendor.findUnique({
       where: { userId: session.user.id }
     });
 
+    console.log('👤 Existing vendor found?', existingVendor ? 'Yes' : 'No');
+
     if (!existingVendor) {
+      console.log('❌ Vendor not found for userId:', session.user.id);
       return NextResponse.json(
         { error: 'لم يتم العثور على حساب البائع' },
         { status: 404 }
       );
     }
 
+    console.log('💾 Updating vendor record...');
     const vendor = await prisma.vendor.update({
       where: { userId: session.user.id },
       data: {
@@ -124,6 +138,7 @@ export async function PUT(request: NextRequest) {
       },
     });
 
+    console.log('✅ Vendor updated successfully');
     return NextResponse.json({
       success: true,
       message: 'تم حفظ عنوان المتجر بنجاح',
