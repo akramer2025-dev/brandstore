@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin } from "lucide-react";
+import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -243,7 +243,14 @@ export default async function AdminDashboard() {
             color="text-teal-600"
           />
           <ActionCard
-            title="🚚 شحنات بوسطة"
+            title="� إدارة الإشعارات"
+            description="إرسال إشعارات للعملاء مباشرة على أجهزتهم"
+            href="/admin/push-notifications"
+            icon={<Bell className="w-12 h-12" />}
+            color="text-purple-600"
+          />
+          <ActionCard
+            title="�🚚 شحنات بوسطة"
             description="إدارة ومتابعة شحنات شركة بوسطة"
             href="/admin/shipping"
             icon={<Truck className="w-12 h-12" />}

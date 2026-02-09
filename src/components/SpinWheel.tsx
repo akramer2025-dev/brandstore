@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Gift, Sparkles, CheckCircle2, Loader2, AlertCircle, Copy, Check } from 'lucide-react';
+import { X, Gift, Sparkles, CheckCircle2, Loader2, AlertCircle, Copy, Check, Bell, BellOff } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -17,6 +17,20 @@ const prizes = [
   { id: 7, text: '120 جنيه', subtext: 'على 400', color: '#FCBAD3', value: 120, minPurchase: 400, percentage: 30 },
   { id: 8, text: '150 جنيه', subtext: 'على 500', color: '#A8E6CF', value: 150, minPurchase: 500, percentage: 30 },
 ];
+
+// Helper function لتحويل VAPID public key
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 
 export default function SpinWheel() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +52,9 @@ export default function SpinWheel() {
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
   const [showLoginMessage, setShowLoginMessage] = useState(false);
+  const [showNotificationMessage, setShowNotificationMessage] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [isCheckingNotifications, setIsCheckingNotifications] = useState(false);
   const [usedPrizes, setUsedPrizes] = useState<number[]>([]);
   const wheelRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -255,23 +272,37 @@ export default function SpinWheel() {
   };
 
   const handleClaim = async () => {
-    // التحقق من تسجيل الدخول
+    // 1️⃣ التحقق من تسجيل الدخول أولاً
     if (!session?.user) {
-      // حفظ الجائزة وعرض رسالة بدلاً من التوجيه
       localStorage.setItem('pendingPrize', JSON.stringify(selectedPrize));
       setShowLoginMessage(true);
-      
-      // إخفاء العجلة بعد 4 ثوان
       setTimeout(() => {
         setIsOpen(false);
       }, 4000);
       return;
     }
 
+    // 2️⃣ التحقق من تفعيل الإشعارات ثانياً
+    setIsCheckingNotifications(true);
+    try {
+      const notifResponse = await fetch('/api/user/check-notification');
+      const notifData = await notifResponse.json();
+      
+      if (!notifData.enabled) {
+        setShowNotificationMessage(true);
+        setIsCheckingNotifications(false);
+        return;
+      }
+    } catch (error) {
+      console.error('❌ Error checking notifications:', error);
+      // في حالة الخطأ، نكمل العملية
+    }
+    setIsCheckingNotifications(false);
+
+    // 3️⃣ المستخدم مسجل دخول والإشعارات مفعلة - احفظ الكوبون
     setIsClaiming(true);
 
     try {
-      // حفظ الكوبون في قاعدة البيانات
       const response = await fetch('/api/coupons/save', {
         method: 'POST',
         headers: {
@@ -287,16 +318,14 @@ export default function SpinWheel() {
       if (response.ok) {
         const data = await response.json();
         setClaimSuccess(true);
-        setCouponCode(data.coupon?.code || ''); // حفظ الكود
+        setCouponCode(data.coupon?.code || '');
         
         console.log('✅ تم حفظ الكوبون بنجاح:', data);
         
-        // تسجيل أن المستخدم حصل على الجائزة وعدم إظهار العجلة مرة أخرى
         localStorage.setItem('hasVisitedBefore', 'true');
         localStorage.setItem('prizeClaimed', 'true');
         localStorage.setItem('prizeClaimedDate', new Date().toISOString());
         
-        // انتظار 6 ثوانٍ لإعطاء الوقت لنسخ الكود
         setTimeout(() => {
           setIsOpen(false);
         }, 6000);
@@ -419,7 +448,7 @@ export default function SpinWheel() {
         </div>
 
         {/* Result Display - يظهر فقط بعد توقف العجلة */}
-        {selectedPrize && hasSpun && !claimSuccess && !showLoginMessage && (
+        {selectedPrize && hasSpun && !claimSuccess && !showLoginMessage && !showNotificationMessage && (
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-4 animate-fade-in border-2 border-yellow-400/50">
             <p className="text-center text-white font-bold text-lg mb-2">
               🎊 مبروك! ربحت:
@@ -453,6 +482,69 @@ export default function SpinWheel() {
             <p className="text-center text-white/80 text-xs mt-2">
               سجل دخول الآن لإضافة الخصم لحسابك
             </p>
+          </div>
+        )}
+
+        {/* Notification Message - يظهر بعد تسجيل الدخول */}
+        {showNotificationMessage && !showLoginMessage && (
+          <div className="bg-gradient-to-r from-orange-500 to-amber-600 rounded-2xl p-6 mb-4 animate-scale-in border-2 border-orange-300">
+            <div className="flex items-center justify-center mb-3">
+              <Bell className="w-16 h-16 text-white animate-bounce" />
+            </div>
+            <p className="text-center text-white font-black text-xl mb-2">
+              🔔 فعّل الإشعارات للحصول على الجائزة!
+            </p>
+            <p className="text-center text-white/90 text-sm mb-3">
+              خصم {selectedPrize?.value} جنيه بانتظارك!
+            </p>
+            <p className="text-center text-white/80 text-xs mb-4">
+              فعّل الإشعارات الآن ليصلك إشعار بالجائزة وجميع العروض الحصرية 🎁
+            </p>
+            
+            {/* زر تفعيل الإشعارات */}
+            <button
+              onClick={async () => {
+                try {
+                  // طلب إذن الإشعارات
+                  const permission = await Notification.requestPermission();
+                  if (permission === 'granted') {
+                    // تسجيل Service Worker
+                    const registration = await navigator.serviceWorker.register('/push-sw.js');
+                    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+                    const subscription = await registration.pushManager.subscribe({
+                      userVisibleOnly: true,
+                      applicationServerKey: vapidPublicKey ? urlBase64ToUint8Array(vapidPublicKey) : undefined
+                    });
+                    
+                    // حفظ الاشتراك في قاعدة البيانات
+                    await fetch('/api/push/subscribe', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'subscribe',
+                        subscription: subscription.toJSON(),
+                        userAgent: navigator.userAgent
+                      })
+                    });
+                    
+                    setNotificationsEnabled(true);
+                    setShowNotificationMessage(false);
+                    
+                    // الآن يمكن المطالبة بالجائزة
+                    setTimeout(() => {
+                      handleClaim();
+                    }, 500);
+                  }
+                } catch (error) {
+                  console.error('❌ Error enabling notifications:', error);
+                  alert('حدث خطأ في تفعيل الإشعارات');
+                }
+              }}
+              className="w-full bg-white text-orange-600 font-black text-lg py-4 rounded-xl hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2"
+            >
+              <Bell className="w-6 h-6" />
+              فعّل الإشعارات الآن
+            </button>
           </div>
         )}
 
@@ -515,16 +607,16 @@ export default function SpinWheel() {
             >
               {isSpinning ? '🎡 جاري الدوران...' : '🎯 جرب حظك!'}
             </button>
-          ) : !claimSuccess && !showLoginMessage ? (
+          ) : !claimSuccess && !showLoginMessage && !showNotificationMessage ? (
             <button
               onClick={handleClaim}
-              disabled={isClaiming}
+              disabled={isClaiming || isCheckingNotifications}
               className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black text-lg py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-70 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
             >
-              {isClaiming ? (
+              {isClaiming || isCheckingNotifications ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  جاري الحفظ...
+                  {isCheckingNotifications ? 'جاري التحقق...' : 'جاري الحفظ...'}
                 </>
               ) : (
                 <>

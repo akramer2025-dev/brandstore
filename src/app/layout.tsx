@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import InstallPWA from "@/components/InstallPWA";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import VisitorTracker from "@/components/VisitorTracker";
+import { PushNotificationManager } from "@/components/PushNotificationManager";
 
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
@@ -68,6 +69,7 @@ export default function RootLayout({
           <Header />
           {children}
           <InstallPWA />
+          <PushNotificationManager />
         </Providers>
       </body>
     </html>

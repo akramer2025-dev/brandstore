@@ -120,9 +120,11 @@ export default function ChatButton() {
         ) : (
           <div className="relative">
             {/* شعار التطبيق */}
-            <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-xs md:text-sm">
-              R
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Remo Store" 
+              className="w-6 h-6 md:w-7 md:h-7 rounded-full object-cover"
+            />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center animate-pulse font-bold">
                 {unreadCount > 9 ? '9+' : unreadCount}
@@ -139,9 +141,11 @@ export default function ChatButton() {
           <div className="p-3 md:p-4 border-b border-teal-700/30 bg-gradient-to-r from-teal-900/40 to-cyan-900/40 rounded-t-2xl">
             <div className="flex items-center gap-3">
               {/* شعار التطبيق */}
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg">
-                R
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="Remo Store" 
+                className="w-10 h-10 rounded-full object-cover shadow-lg"
+              />
               <div>
                 <h3 className="text-base md:text-lg font-bold text-white">
                   {session.user.role === 'ADMIN' ? 'محادثات العملاء' : 'تواصل مع الإدارة'}
@@ -171,9 +175,11 @@ export default function ChatButton() {
                 >
                   {/* أيقونة المرسل */}
                   {message.senderId !== session.user.id && (
-                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center font-bold text-white text-xs shadow-md">
-                      R
-                    </div>
+                    <img 
+                      src="/logo.png" 
+                      alt="Remo Store" 
+                      className="flex-shrink-0 w-7 h-7 rounded-full object-cover shadow-md"
+                    />
                   )}
                   <div
                     className={`max-w-[75%] sm:max-w-[70%] p-2.5 md:p-3 rounded-2xl text-sm md:text-base ${

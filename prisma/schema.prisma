@@ -35,6 +35,7 @@ model User {
   wishlistItems    WishlistItem[]
   savedAddresses   SavedAddress[] // العناوين المحفوظة
   pointTransactions PointTransaction[] // سجل حركة النقاط
+  pushSubscriptions PushSubscription[] // Push notification subscriptions
   partner          PartnerCapital? @relation(fields: [partnerId], references: [id])
 
   @@map("users")
@@ -1416,22 +1417,6 @@ model VendorShippingCompany {
   @@index([vendorId])
 }
 
-// ============ اشتراكات الإشعارات Push ============
-model PushSubscription {
-  id           String   @id @default(cuid())
-  userId       String   // معرف المستخدم (Vendor أو Customer)
-  endpoint     String   @unique // Push endpoint URL
-  p256dh       String   // Public key for encryption
-  auth         String   // Authentication secret
-  userAgent    String?  // نوع المتصفح/الجهاز
-  isActive     Boolean  @default(true) // هل الاشتراك نشط
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@map("push_subscriptions")
-  @@index([userId, isActive])
-}
-
 // ============ استعادة كلمة المرور ============
 model PasswordResetToken {
   id        String   @id @default(cuid())
@@ -1610,5 +1595,51 @@ model OfflineSupplierPayment {
   @@map("offline_supplier_payments")
   @@index([vendorId])
   @@index([supplierId])
+  @@index([createdAt])
+}
+
+// Push Notifications - Device Subscriptions
+model PushSubscription {
+  id            String   @id @default(cuid())
+  userId        String?  // optional - للزوار الغير مسجلين
+  endpoint      String   @unique // The push service URL
+  p256dh        String   // Public key for encryption
+  auth          String   // Authentication secret
+  userAgent     String?  // Browser/device info
+  deviceType    String?  // mobile, desktop, tablet
+  createdAt     DateTime @default(now())
+  lastUsedAt    DateTime @default(now())
+  
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("push_subscriptions")
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Push Notifications - Sent Messages
+model PushNotification {
+  id              String   @id @default(cuid())
+  title           String   // عنوان الإشعار
+  body            String   // محتوى الإشعار
+  icon            String?  // أيقونة الإشعار
+  image           String?  // صورة الإشعار
+  badge           String?  // Badge icon
+  url             String?  // الرابط عند الضغط على الإشعار
+  tag             String?  // Tag to group notifications
+  requireInteraction Boolean @default(false) // الإشعار يبقى ظاهر لحد ما المستخدم يتفاعل
+  silent          Boolean  @default(false)
+  vibrate         Json?    // Vibration pattern [200, 100, 200]
+  actions         Json?    // Notification actions as JSON
+  data            Json?    // Additional data
+  sentBy          String   // ID المستخدم اللي أرسل
+  sentToAll       Boolean  @default(false) // إرسال لكل المستخدمين
+  recipientCount  Int      @default(0) // عدد المستلمين
+  successCount    Int      @default(0) // عدد الإشعارات اللي تم إرسالها بنجاح
+  failedCount     Int      @default(0) // عدد الإشعارات اللي فشلت
+  createdAt       DateTime @default(now())
+  
+  @@map("push_notifications")
+  @@index([sentBy])
   @@index([createdAt])
 }

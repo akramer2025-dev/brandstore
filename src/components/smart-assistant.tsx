@@ -358,9 +358,11 @@ export default function SmartAssistant() {
         className="fixed bottom-20 left-4 md:left-6 z-40 bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white p-2.5 md:p-3 rounded-full shadow-2xl backdrop-blur-sm transition-all hover:scale-105"
         title="إظهار المساعد الذكي"
       >
-        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-xs">
-          R
-        </div>
+        <img 
+          src="/logo.png" 
+          alt="Remo Store" 
+          className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover"
+        />
       </motion.button>
     )
   }
@@ -386,9 +388,11 @@ export default function SmartAssistant() {
               {/* الزر الرئيسي */}
               <div className="relative bg-gradient-to-r from-purple-600 to-pink-600 text-white p-2.5 md:p-3.5 rounded-full shadow-2xl flex items-center gap-2">
                 {/* شعار التطبيق */}
-                <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-xs md:text-sm">
-                  R
-                </div>
+                <img 
+                  src="/logo.png" 
+                  alt="Remo Store" 
+                  className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover"
+                />
                 <span className="font-bold text-xs md:text-sm hidden sm:inline">مساعد ريمو</span>
               </div>
             </div>
@@ -411,9 +415,11 @@ export default function SmartAssistant() {
               <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-3 md:p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 md:gap-3">
                   {/* شعار التطبيق */}
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-white shadow-lg">
-                    R
-                  </div>
+                  <img 
+                    src="/logo.png" 
+                    alt="Remo Store" 
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shadow-lg"
+                  />
                   <div>
                     <h3 className="text-white font-bold text-sm md:text-lg">مساعد ريمو ستور</h3>
                     <p className="text-purple-100 text-[10px] md:text-xs">
@@ -450,9 +456,11 @@ export default function SmartAssistant() {
                     {message.type === 'assistant' && (
                       <div className="flex gap-2 md:gap-3">
                         {/* شعار المساعد */}
-                        <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white shadow-md text-xs">
-                          R
-                        </div>
+                        <img 
+                          src="/logo.png" 
+                          alt="Remo Store" 
+                          className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full object-cover shadow-md"
+                        />
                         <div className="bg-slate-800/80 backdrop-blur rounded-2xl rounded-tl-sm p-3 md:p-4 text-white/90 text-xs md:text-sm whitespace-pre-line flex-1">
                           {message.content}
                         </div>

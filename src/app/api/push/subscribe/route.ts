@@ -46,14 +46,15 @@ export async function POST(req: NextRequest) {
           p256dh: subscription.keys.p256dh,
           auth: subscription.keys.auth,
           userAgent,
-          isActive: true,
+          deviceType: 'unknown',
+          lastUsedAt: new Date(),
         },
         update: {
           userId: session.user.id,
           p256dh: subscription.keys.p256dh,
           auth: subscription.keys.auth,
           userAgent,
-          isActive: true,
+          lastUsedAt: new Date(),
         },
       });
 
@@ -87,13 +88,12 @@ export async function POST(req: NextRequest) {
         }, { status: 400 });
       }
 
-      // إلغاء تفعيل الاشتراك بدلاً من حذفه
-      await prisma.pushSubscription.updateMany({
+      // حذف الاشتراك
+      await prisma.pushSubscription.deleteMany({
         where: { 
           endpoint,
           userId: session.user.id 
         },
-        data: { isActive: false },
       });
 
       return NextResponse.json({ 
@@ -126,9 +126,8 @@ export async function PUT(req: NextRequest) {
     // جلب جميع subscriptions النشطة للمستخدم
     const subscriptions = await prisma.pushSubscription.findMany({
       where: { 
-        userId,
-        isActive: true 
-      },
+        userId
+      }
     });
 
     if (subscriptions.length === 0) {
@@ -161,12 +160,11 @@ export async function PUT(req: NextRequest) {
           );
           return { success: true, endpoint: sub.endpoint };
         } catch (error: any) {
-          // إذا كان الاشتراك منتهي أو invalid، قم بإلغاء تفعيله
+          // إذا كان الاشتراك منتهي أو invalid، قم بحذفه
           if (error.statusCode === 410 || error.statusCode === 404) {
-            await prisma.pushSubscription.update({
+            await prisma.pushSubscription.delete({
               where: { id: sub.id },
-              data: { isActive: false },
-            });
+            }).catch(() => {});
           }
           throw error;
         }

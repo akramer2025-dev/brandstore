@@ -9,6 +9,7 @@ import { LogoBanner } from '@/components/LogoBanner';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { InfiniteProductCarousel } from '@/components/InfiniteProductCarousel';
 import ChatButton from '@/components/ChatButton';
+import CustomerAssistant from '@/components/customer-assistant';
 import FlashDeals from '@/components/FlashDeals';
 import SplashScreen from '@/components/SplashScreen';
 import SpinWheel from '@/components/SpinWheel';
@@ -411,6 +412,9 @@ export default async function HomePage() {
 
       {/* Chat Button - Floating */}
       <ChatButton />
+      
+      {/* مساعد العملاء الذكي */}
+      <CustomerAssistant />
       </div>
     </div>
       </>
