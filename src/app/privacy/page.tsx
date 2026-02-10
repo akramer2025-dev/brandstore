@@ -1,4 +1,6 @@
 import { Metadata } from 'next'
+import BrandBackgroundPattern from '@/components/BrandBackgroundPattern'
+import { Shield, Lock, Eye, FileText } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'سياسة الخصوصية | ريمو ستور',
@@ -7,18 +9,24 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              سياسة الخصوصية
-            </h1>
-            <p className="text-gray-600">
-              آخر تحديث: 10 فبراير 2026
-            </p>
-          </div>
+    <div className="min-h-screen relative overflow-hidden">
+      <BrandBackgroundPattern />
+      <div className="relative z-10 py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-12 border border-primary/10">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-pink-500 rounded-full mb-6">
+                <Shield className="w-10 h-10 text-white" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-pink-500 to-primary bg-clip-text text-transparent mb-4">
+                سياسة الخصوصية
+              </h1>
+              <p className="text-gray-600 flex items-center justify-center gap-2">
+                <FileText className="w-4 h-4" />
+                آخر تحديث: 10 فبراير 2026
+              </p>
+            </div>
 
           {/* Content */}
           <div className="prose prose-lg max-w-none text-right" dir="rtl">
@@ -205,6 +213,7 @@ export default function PrivacyPolicyPage() {
               </p>
             </div>
 
+          </div>
           </div>
         </div>
       </div>
