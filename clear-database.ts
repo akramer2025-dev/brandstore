@@ -1,9 +1,28 @@
 import { PrismaClient } from '@prisma/client';
+import { requirePasswordBeforeDelete, createBackupBeforeDelete, confirmDeletion } from './safe-delete-protection';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🗑️ بدء حذف جميع البيانات...');
+  console.log('🗑️ بدء حذف جميع البيانات...\n');
+
+  // 🔒 طلب الباسورد
+  if (!(await requirePasswordBeforeDelete('حذف كل البيانات من القاعدة'))) {
+    console.log('❌ العملية ملغية!');
+    process.exit(1);
+  }
+
+  // 💾 عمل backup إجباري
+  await createBackupBeforeDelete('حذف كامل للقاعدة');
+
+  // ✅ تأكيد نهائي
+  const totalCount = await prisma.product.count() + await prisma.user.count();
+  if (!(await confirmDeletion(totalCount, 'سجل (كل البيانات)'))) {
+    console.log('❌ العملية ملغية!');
+    process.exit(1);
+  }
+
+  console.log('\n⚠️  جاري الحذف...\n');
 
   // حذف كل شيء بالترتيب الصحيح
   await prisma.review.deleteMany({});

@@ -1,0 +1,42 @@
+name: Daily Database Backup
+
+on:
+  schedule:
+    # كل يوم الساعة 3 صباحاً بتوقيت UTC (5 صباحاً بتوقيت مصر)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # يسمح بالتشغيل اليدوي
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm install --production=false
+        
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          
+      - name: Run backup
+        run: npx tsx backup-all-data.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          
+      - name: Commit and push backup
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions Bot"
+          git add backups/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🔄 Auto backup: $(date +'%Y-%m-%d %H:%M:%S')" && git push)

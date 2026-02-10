@@ -1,9 +1,19 @@
 import { PrismaClient } from '@prisma/client'
+import { requirePasswordBeforeDelete, createBackupBeforeDelete, confirmDeletion } from './safe-delete-protection';
 
 const prisma = new PrismaClient()
 
 async function deleteFakeCustomers() {
   console.log('🧹 بدء حذف العملاء الوهميين...\n')
+
+  // 🔒 طلب الباسورد
+  if (!(await requirePasswordBeforeDelete('حذف العملاء الوهميين'))) {
+    console.log('❌ العملية ملغية!');
+    process.exit(1);
+  }
+
+  // 💾 عمل backup إجباري
+  await createBackupBeforeDelete('حذف عملاء وهميين');
   
   try {
     // عرض العملاء الوهميين قبل الحذف
