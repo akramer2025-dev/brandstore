@@ -1,13 +1,21 @@
-// 💬 Messenger Auto Reply System
-// نظام الرد التلقائي على ماسنجر
+// 💬 Messenger AI-Powered Bot
+// بوت ماسنجر ذكي بالذكاء الاصطناعي
 
 import { NextRequest, NextResponse } from 'next/server'
+import Groq from 'groq-sdk'
+import { PrismaClient } from '@prisma/client'
 
 // Verify Token (اختاره بنفسك - للأمان)
 const VERIFY_TOKEN = process.env.MESSENGER_VERIFY_TOKEN || 'remostore_messenger_2026'
 const PAGE_ACCESS_TOKEN = process.env.MESSENGER_PAGE_ACCESS_TOKEN
 
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+const prisma = new PrismaClient()
+
 export const dynamic = 'force-dynamic'
+
+// تخزين سياق المحادثة (في ذاكرة مؤقتة)
+const conversationHistory = new Map<string, Array<{ role: string; content: string }>>()
 
 // Webhook Verification (Facebook يتحقق من الـ endpoint)
 export async function GET(request: NextRequest) {
@@ -58,58 +66,201 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// معالجة الرسائل والرد التلقائي
+// معالجة الرسائل بالذكاء الاصطناعي
 async function handleMessage(senderId: string, messageText: string) {
-  let replyText = ''
-  let quickReplies = null
-
-  // الردود الذكية حسب محتوى الرسالة
-  if (messageText.includes('السلام') || messageText.includes('مرحبا') || messageText.includes('هاي') || messageText.includes('hi') || messageText.includes('hello')) {
-    replyText = `مرحباً بك في ريمو ستور! 👋\n\nكيف يمكنني مساعدتك اليوم؟\n\n🛍️ تسوق المنتجات\n📦 تتبع الطلبات\n💰 الأسعار والعروض\n📞 التواصل مع خدمة العملاء`
+  try {
+    // الحصول على بيانات من قاعدة البيانات
+    const contextData = await getContextData(messageText)
     
-    quickReplies = [
+    // الحصول على سياق المحادثة السابق
+    let history = conversationHistory.get(senderId) || []
+    
+    // إضافة رسالة المستخدم الجديدة
+    history.push({ role: 'user', content: messageText })
+    
+    // إبقاء آخر 10 رسائل فقط لتوفير الذاكرة
+    if (history.length > 10) {
+      history = history.slice(-10)
+    }
+    
+    // تجهيز رسالة النظام مع البيانات الحقيقية
+    const systemMessage = {
+      role: 'system',
+      content: `أنت موظف خدمة عملاء محترف في ريمو ستور (Remo Store) - متجر إلكتروني للملابس.
+      
+معلومات المتجر:
+- الاسم: ريمو ستور Remo Store
+- الموقع: www.remostore.net
+- الهاتف/واتساب: 01555512778
+- البريد: akram.er2025@gmail.com
+- العنوان: مصر - القاهرة
+- أوقات العمل: السبت - الخميس (9 صباحاً - 6 مساءً)
+
+سياسات الشحن والدفع:
+- شحن مجاني للطلبات أكثر من 1000 جنيه
+- التوصيل خلال 2-5 أيام
+- الدفع عند الاستلام متاح
+- نوصل لجميع المحافظات
+
+معلومات حقيقية من قاعدة البيانات:
+${contextData}
+
+الأسلوب المطلوب:
+- تحدث بطريقة ودودة واحترافية
+- استخدم اللغة العربية المصرية بشكل أساسي
+- اذكر الأسعار والمنتجات الحقيقية من البيانات أعلاه
+- إذا سأل عن منتج غير متوفر، اقترح بدائل مشابهة
+- كن مساعداً ومهتماً بحل مشاكل العميل
+- استخدم الإيموجي بشكل مناسب لجعل المحادثة ودودة
+- إذا كانت المعلومات غير كافية، اسأل العميل أسئلة توضيحية
+- لا تذكر أنك روبوت أو AI، تصرف كموظف حقيقي
+
+إذا سأل عن:
+- المنتجات: اعرض المنتجات المتاحة مع الأسعار الحقيقية من البيانات
+- الطلبات: اطلب رقم الطلب أو تفاصيل للمساعدة
+- الأسعار: قدم الأسعار الفعلية من قاعدة البيانات
+- العروض: اذكر المنتجات ذات الخصومات إن وجدت`
+    }
+
+    // استدعاء Groq AI للحصول على رد ذكي
+    const completion = await groq.chat.completions.create({
+      messages: [systemMessage, ...history] as any,
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
+      max_tokens: 500,
+      stream: false,
+    })
+
+    const aiResponse = completion.choices[0]?.message?.content || 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.'
+
+    // إضافة رد AI للتاريخ
+    history.push({ role: 'assistant', content: aiResponse })
+    conversationHistory.set(senderId, history)
+
+    // Quick replies للتفاعل السريع
+    const quickReplies = [
       { content_type: 'text', title: '🛍️ المنتجات', payload: 'PRODUCTS' },
       { content_type: 'text', title: '📦 طلباتي', payload: 'ORDERS' },
       { content_type: 'text', title: '💰 العروض', payload: 'OFFERS' },
       { content_type: 'text', title: '📞 اتصل بنا', payload: 'CONTACT' }
     ]
-  }
-  
-  else if (messageText.includes('منتج') || messageText.includes('product') || messageText.includes('ملابس')) {
-    replyText = `🛍️ تسوق أحدث منتجاتنا!\n\n✨ ملابس عصرية\n👔 أزياء راقية\n👗 تشكيلة متنوعة\n\nزور موقعنا: www.remostore.net\nأو حمّل التطبيق من Google Play!\n\n💬 عايز تشوف منتج معين؟`
-  }
-  
-  else if (messageText.includes('طلب') || messageText.includes('order') || messageText.includes('شحن') || messageText.includes('توصيل')) {
-    replyText = `📦 معلومات الطلبات والشحن:\n\n✅ شحن مجاني للطلبات +1000 جنيه\n🚚 التوصيل خلال 2-5 أيام\n💰 الدفع عند الاستلام متاح للملابس\n📍 نوصل لجميع المحافظات\n\n🔍 تتبع طلبك من التطبيق أو الموقع\n\nعايز تتبع طلب معين؟ ابعتلي رقم الطلب`
-  }
-  
-  else if (messageText.includes('سعر') || messageText.includes('price') || messageText.includes('كام') || messageText.includes('تكلفة')) {
-    replyText = `💰 الأسعار والعروض:\n\n🔥 خصومات تصل لـ 50%\n🎁 عروض يومية\n💳 أسعار منافسة\n📱 عروض حصرية عبر التطبيق\n\nشوف العروض على: www.remostore.net\n\nعايز تعرف سعر منتج معين؟`
-  }
-  
-  else if (messageText.includes('تواصل') || messageText.includes('contact') || messageText.includes('phone') || messageText.includes('رقم')) {
-    replyText = `📞 تواصل معنا:\n\n📱 واتساب: 01555512778\n📧 البريد: akram.er2025@gmail.com\n🌐 الموقع: www.remostore.net\n📍 العنوان: مصر - القاهرة\n\n⏰ نعمل: السبت - الخميس (9 صباحاً - 6 مساءً)\n\n💬 أو تكلم معنا هنا مباشرة!`
-  }
-  
-  else if (messageText.includes('مساعدة') || messageText.includes('help') || messageText.includes('ساعدني')) {
-    replyText = `❓ كيف يمكنني مساعدتك؟\n\n📝 يمكنك سؤالي عن:\n\n• المنتجات والأسعار\n• الطلبات والشحن\n• طرق الدفع\n• العروض الخاصة\n• معلومات التواصل\n• أي استفسار آخر!\n\nاكتب سؤالك وأنا هرد عليك فوراً 😊`
-  }
-  
-  else if (messageText.includes('شكرا') || messageText.includes('thanks') || messageText.includes('تسلم')) {
-    replyText = `العفو! 😊\n\nسعداء بخدمتك دائماً 💚\n\nمحتاج أي مساعدة تانية؟`
-  }
-  
-  else if (messageText.includes('تطبيق') || messageText.includes('app') || messageText.includes('download')) {
-    replyText = `📱 حمّل تطبيق ريمو ستور!\n\n✨ تسوق أسهل وأسرع\n🔔 إشعارات بالعروض\n📦 تتبع طلباتك\n💰 عروض حصرية\n\n📥 حمّله الآن من Google Play:\nقريباً متاح للتحميل!\n\nأو زور موقعنا: www.remostore.net`
-  }
-  
-  else {
-    // رد افتراضي لأي رسالة أخرى
-    replyText = `شكراً لرسالتك! 😊\n\nأنا البوت الذكي لريمو ستور، أنا هنا لمساعدتك!\n\n💬 يمكنك سؤالي عن:\n• المنتجات\n• الطلبات\n• الأسعار\n• التواصل\n\nأو اكتب "مساعدة" لمعرفة المزيد!`
-  }
 
-  // إرسال الرد
-  await sendMessage(senderId, replyText, quickReplies)
+    // إرسال الرد
+    await sendMessage(senderId, aiResponse, quickReplies)
+
+  } catch (error) {
+    console.error('❌ خطأ في معالجة الرسالة بالـ AI:', error)
+    
+    // رد احتياطي في حالة الخطأ
+    const fallbackMessage = `عذراً، حدث خطأ مؤقت 😔\n\nيمكنك التواصل معنا مباشرة:\n📱 واتساب: 01555512778\n📧 البريد: akram.er2025@gmail.com\n\nأو حاول مرة أخرى بعد قليل`
+    
+    await sendMessage(senderId, fallbackMessage)
+  }
+}
+
+// جلب البيانات من قاعدة البيانات حسب سياق السؤال
+async function getContextData(messageText: string): Promise<string> {
+  try {
+    const lowerText = messageText.toLowerCase()
+    let contextData = ''
+
+    // البحث عن منتجات
+    if (lowerText.includes('منتج') || lowerText.includes('ملابس') || lowerText.includes('سعر') || 
+        lowerText.includes('كام') || lowerText.includes('عايز') || lowerText.includes('product')) {
+      
+      // جلب أحدث المنتجات المتاحة
+      const products = await prisma.product.findMany({
+        where: {
+          isAvailable: true,
+          quantity: { gt: 0 }
+        },
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          fakePrice: true,
+          quantity: true,
+          category: true,
+        }
+      })
+
+      if (products.length > 0) {
+        contextData += '\n\n📦 المنتجات المتاحة حالياً:\n'
+        products.forEach((product, index) => {
+          const discount = product.fakePrice && product.fakePrice > product.price 
+            ? Math.round(((product.fakePrice - product.price) / product.fakePrice) * 100)
+            : 0
+          
+          contextData += `\n${index + 1}. ${product.name}`
+          contextData += `\n   💰 السعر: ${product.price} جنيه`
+          
+          if (discount > 0) {
+            contextData += ` (قبل الخصم: ${product.fakePrice} جنيه - خصم ${discount}%)`
+          }
+          
+          contextData += `\n   📊 الكمية المتاحة: ${product.quantity}`
+          
+          if (product.category) {
+            contextData += `\n   🏷️ الفئة: ${product.category}`
+          }
+          contextData += '\n'
+        })
+      }
+
+      // معلومات إضافية عن الفئات
+      const categories = await prisma.product.findMany({
+        where: { isAvailable: true },
+        distinct: ['category'],
+        select: { category: true }
+      })
+
+      if (categories.length > 0) {
+        contextData += '\n\n🏷️ الفئات المتوفرة: '
+        contextData += categories.map(c => c.category).filter(Boolean).join(', ')
+      }
+    }
+
+    // البحث عن طلبات
+    if (lowerText.includes('طلب') || lowerText.includes('order') || lowerText.includes('تتبع')) {
+      const recentOrders = await prisma.order.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          status: true,
+          total: true,
+          createdAt: true,
+        }
+      })
+
+      if (recentOrders.length > 0) {
+        contextData += '\n\n📊 معلومات عن حالة الطلبات:\n'
+        contextData += `- عدد الطلبات الأخيرة: ${recentOrders.length}\n`
+        contextData += `- حالات الطلبات المتاحة: قيد المعالجة، تم الشحن، تم التسليم، ملغي\n`
+        contextData += '- لتتبع طلب معين، نحتاج رقم الطلب أو معلومات العميل\n'
+      }
+    }
+
+    // إحصائيات عامة
+    if (!contextData) {
+      const [productCount, orderCount] = await Promise.all([
+        prisma.product.count({ where: { isAvailable: true } }),
+        prisma.order.count()
+      ])
+
+      contextData += '\n\n📊 معلومات عامة عن المتجر:\n'
+      contextData += `- عدد المنتجات المتاحة: ${productCount}\n`
+      contextData += `- إجمالي الطلبات: ${orderCount}\n`
+    }
+
+    return contextData || 'لا توجد بيانات إضافية حالياً'
+
+  } catch (error) {
+    console.error('❌ خطأ في جلب البيانات:', error)
+    return 'حدث خطأ في جلب البيانات من قاعدة البيانات'
+  }
 }
 
 // إرسال رسالة للمستخدم
