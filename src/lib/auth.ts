@@ -128,7 +128,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               role: existingUser.role,
               accountsCount: existingUser.accounts.length
             });
-          console.log('ℹ️  User will keep existing role:', existingUser.role);
+            console.log('ℹ️  User will keep existing role:', existingUser.role);
+            
+            // 🔗 التحقق من وجود Google Account
+            const googleAccount = existingUser.accounts.find(
+              (acc) => acc.provider === "google"
+            );
+
+            if (!googleAccount && account) {
+              console.log('🔗 Google Account not linked - Linking now...');
               // ربط الـ Google Account باليوزر الموجود
               try {
                 await prisma.account.create({
