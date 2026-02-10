@@ -558,8 +558,6 @@ export async function POST(request: NextRequest) {
         }))
       }
     }
-      }))
-    }
 
     // حفظ رد المساعد في قاعدة البيانات
     if (conversationId) {
