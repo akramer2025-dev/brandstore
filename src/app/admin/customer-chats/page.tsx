@@ -60,8 +60,15 @@ export default function CustomerChatsPage() {
       }
       
       // التحقق من صلاحيات الإشعارات
-      if ('Notification' in window && Notification.permission === 'granted') {
-        setNotificationsEnabled(true)
+      if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+          setNotificationsEnabled(true)
+          console.log('✅ الإشعارات مفعلة بالفعل')
+        } else {
+          console.log('⏳ الإشعارات محتاجة تفعيل')
+        }
+      } else {
+        console.log('❌ المتصفح لا يدعم الإشعارات')
       }
     }
   }, [])
@@ -172,20 +179,38 @@ export default function CustomerChatsPage() {
 
   const requestNotificationPermission = async () => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
-      const permission = await Notification.requestPermission()
-      if (permission === 'granted') {
-        setNotificationsEnabled(true)
-        alert('✅ تم تفعيل الإشعارات! هتوصلك إشعارات مع صوت عند أي رسالة جديدة')
+      try {
+        console.log('📱 جاري طلب إذن الإشعارات...')
+        const permission = await Notification.requestPermission()
+        console.log('🔔 إذن الإشعارات:', permission)
         
-        // اختبار الإشعار
-        new Notification('🎉 تم التفعيل بنجاح!', {
-          body: 'الإشعارات شغالة دلوقتي. هتسمع صوت مع كل رسالة جديدة 🔔',
-          icon: '/logo.png'
-        })
-        playNotificationSound()
-      } else {
-        alert('❌ لم يتم تفعيل الإشعارات. يرجى السماح بالإشعارات في إعدادات المتصفح')
+        if (permission === 'granted') {
+          setNotificationsEnabled(true)
+          console.log('✅ تم تفعيل الإشعارات بنجاح')
+          alert('✅ تم تفعيل الإشعارات! هتوصلك إشعارات مع صوت عند أي رسالة جديدة')
+          
+          // اختبار الإشعار
+          new Notification('🎉 تم التفعيل بنجاح!', {
+            body: 'الإشعارات شغالة دلوقتي. هتسمع صوت مع كل رسالة جديدة 🔔',
+            icon: '/logo.png',
+            tag: 'test-notification',
+            requireInteraction: false
+          })
+          playNotificationSound()
+        } else if (permission === 'denied') {
+          console.error('❌ المستخدم رفض الإشعارات')
+          alert('❌ تم رفض الإشعارات. لو عايز تفعلها، روح إعدادات المتصفح → الإشعارات → اسمح لـ remostore.net')
+        } else {
+          console.warn('⚠️ المستخدم أجل قرار الإشعارات')
+          alert('⚠️ محتاج تسمح بالإشعارات عشان تستقبل التنبيهات')
+        }
+      } catch (error) {
+        console.error('❌ خطأ في طلب إذن الإشعارات:', error)
+        alert('❌ حصل خطأ في تفعيل الإشعارات. جرب تاني أو تأكد من إعدادات المتصفح')
       }
+    } else {
+      console.error('❌ المتصفح لا يدعم Notification API')
+      alert('❌ المتصفح بتاعك مش بيدعم الإشعارات. جرب متصفح تاني زي Chrome أو Firefox')
     }
   }
 
@@ -268,14 +293,14 @@ export default function CustomerChatsPage() {
     <div className="container mx-auto p-6" dir="rtl">
       <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
         <div className="flex items-center gap-3">
-          <MessageCircle className="w-10 h-10 text-purple-600" />
+          <MessageCircle className="w-10 h-10 text-[#7c3aed]" />
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold" style={{ color: '#7c3aed' }}>
               💬 رسائل العملاء من المساعد الذكي
             </h1>
             <div className="flex items-center gap-4 mt-1 text-sm">
               <span className="text-gray-600">
-                📊 إجمالي المحادثات: <span className="font-bold text-purple-600">{conversations.length}</span>
+                📊 إجمالي المحادثات: <span className="font-bold" style={{ color: '#7c3aed' }}>{conversations.length}</span>
               </span>
               {unreadCount > 0 && (
                 <span className="bg-red-500 text-white px-3 py-1 rounded-full font-bold animate-pulse">
@@ -291,7 +316,7 @@ export default function CustomerChatsPage() {
               onClick={() => setSoundEnabled(!soundEnabled)} 
               variant={soundEnabled ? "default" : "outline"} 
               size="sm"
-              className={soundEnabled ? "bg-green-600 hover:bg-green-700" : ""}
+              style={soundEnabled ? { backgroundColor: '#10b981', color: 'white' } : {}}
             >
               <Volume2 className="w-4 h-4 ml-2" />
               {soundEnabled ? '🔊 الصوت مفعّل' : '🔇 الصوت موقوف'}
@@ -301,7 +326,7 @@ export default function CustomerChatsPage() {
             onClick={requestNotificationPermission} 
             variant={notificationsEnabled ? "default" : "outline"} 
             size="sm"
-            className={notificationsEnabled ? "bg-blue-600 hover:bg-blue-700" : ""}
+            style={notificationsEnabled ? { backgroundColor: '#7c3aed', color: 'white' } : {}}
           >
             <Bell className="w-4 h-4 ml-2" />
             {notificationsEnabled ? '🔔 الإشعارات مفعلة' : '🔕 تفعيل الإشعارات'}
@@ -315,9 +340,9 @@ export default function CustomerChatsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Conversations List */}
-        <Card className="lg:col-span-1 shadow-xl border-purple-300 border-2">
-          <CardHeader className="bg-gradient-to-r from-purple-100 to-pink-100">
-            <CardTitle className="flex items-center justify-between text-purple-900">
+        <Card className="lg:col-span-1 shadow-xl border-2" style={{ borderColor: '#7c3aed' }}>
+          <CardHeader style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)' }}>
+            <CardTitle className="flex items-center justify-between" style={{ color: '#7c3aed' }}>
               <div className="flex items-center gap-2">
                 📋 قائمة المحادثات
                 {unreadCount > 0 && (
@@ -343,16 +368,20 @@ export default function CustomerChatsPage() {
                   className={`
                     p-4 border-b cursor-pointer transition-all duration-300
                     ${selectedConv === conv.id 
-                      ? 'bg-gradient-to-r from-purple-200 to-pink-200 border-l-4 border-purple-700 shadow-lg' 
-                      : 'hover:bg-purple-50 hover:shadow-md'
+                      ? 'shadow-lg' 
+                      : 'hover:shadow-md'
                     }
                     ${conv.lastMessageRole === 'user' ? 'border-r-4 border-red-400' : ''}
                   `}
+                  style={selectedConv === conv.id ? {
+                    background: 'linear-gradient(to right, #ddd6fe, #fbcfe8)',
+                    borderLeft: '4px solid #7c3aed'
+                  } : {}}
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
                       {getSourceIcon(conv.source)}
-                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                      <Badge variant="secondary" className="text-xs" style={{ backgroundColor: '#ede9fe', color: '#7c3aed' }}>
                         {getSourceLabel(conv.source)}
                       </Badge>
                     </div>
@@ -391,13 +420,13 @@ export default function CustomerChatsPage() {
         </Card>
 
         {/* Messages Display */}
-        <Card className="lg:col-span-2 shadow-xl border-purple-300 border-2">
-          <CardHeader className="bg-gradient-to-r from-purple-100 to-pink-100 border-b-2 border-purple-200">
+        <Card className="lg:col-span-2 shadow-xl border-2" style={{ borderColor: '#7c3aed' }}>
+          <CardHeader className="border-b-2" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)', borderColor: '#c4b5fd' }}>
             <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-purple-900 font-bold">
+              <span className="flex items-center gap-2 font-bold" style={{ color: '#7c3aed' }}>
                 💬 المحادثة
                 {selectedConv && chatMessages.length > 0 && (
-                  <Badge className="bg-purple-600">{chatMessages.length} رسالة</Badge>
+                  <Badge style={{ backgroundColor: '#7c3aed' }}>{chatMessages.length} رسالة</Badge>
                 )}
               </span>
               {selectedConv && (
@@ -408,7 +437,7 @@ export default function CustomerChatsPage() {
                   }}
                   variant="ghost"
                   size="sm"
-                  className="hover:bg-purple-200"
+                  className="hover:bg-[#ede9fe]"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   رجوع
@@ -425,11 +454,11 @@ export default function CustomerChatsPage() {
               </div>
             ) : isLoadingMessages ? (
               <div className="flex items-center justify-center h-[60vh]">
-                <Loader2 className="w-10 h-10 animate-spin text-purple-600" />
+                <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#7c3aed' }} />
                 <span className="mr-3 text-lg font-medium">⏳ جاري تحميل الرسائل...</span>
               </div>
             ) : (
-              <div className="h-[60vh] overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-purple-50/30 via-white to-pink-50/30">
+              <div className="h-[60vh] overflow-y-auto p-6 space-y-4" style={{ background: 'linear-gradient(to bottom, #faf5ff, #ffffff, #fce7f3)' }}>
                 {chatMessages.map((msg, idx) => (
                   <div
                     key={msg.id}
@@ -440,15 +469,17 @@ export default function CustomerChatsPage() {
                       className={`
                         max-w-[75%] p-5 rounded-2xl shadow-lg transition-transform hover:scale-105
                         ${msg.role === 'user' 
-                          ? 'bg-white border-2 border-purple-300 text-gray-900' 
-                          : 'bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 text-white'
+                          ? 'bg-white text-gray-900' 
+                          : 'text-white'
                         }
+                      `}
+                      style={msg.role === 'user' ? { border: '2px solid #c4b5fd' } : { background: 'linear-gradient(to right, #7c3aed, #a855f7, #ec4899)' }}
                       `}
                     >
                       <div className="flex items-center gap-2 mb-2">
                         {msg.role === 'user' ? (
-                          <div className="w-7 h-7 rounded-full bg-purple-200 flex items-center justify-center">
-                            <User className="w-4 h-4 text-purple-700" />
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: '#ddd6fe' }}>
+                            <User className="w-4 h-4" style={{ color: '#7c3aed' }} />
                           </div>
                         ) : (
                           <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
@@ -467,7 +498,7 @@ export default function CustomerChatsPage() {
                       </div>
                       <p className="whitespace-pre-wrap leading-relaxed text-base">{msg.content}</p>
                       {msg.productIds && (
-                        <div className={`mt-3 pt-3 ${msg.role === 'user' ? 'border-t border-purple-200' : 'border-t border-white/30'}`}>
+                        <div className={`mt-3 pt-3 ${msg.role === 'user' ? 'border-t' : 'border-t border-white/30'}`} style={msg.role === 'user' ? { borderColor: '#c4b5fd' } : {}}>
                           <span className="text-sm font-semibold">
                             🛍️ عرض {msg.productIds.split(',').length} منتج
                           </span>
