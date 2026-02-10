@@ -25,6 +25,7 @@
     "@capacitor/android": "^8.0.2",
     "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",
+    "@capacitor/push-notifications": "^8.0.0",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^6.19.1",
     "@radix-ui/react-alert-dialog": "^1.1.15",

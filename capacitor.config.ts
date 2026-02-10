@@ -9,6 +9,11 @@ const config: CapacitorConfig = {
     url: 'https://www.remostore.net',
     cleartext: true
   },
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert']
+    }
+  },
   android: {
     buildOptions: {
       releaseType: 'APK'
