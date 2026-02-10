@@ -13,35 +13,54 @@ export async function GET(request: NextRequest) {
 
     console.log('📊 جلب جميع الشركاء للمدير...');
 
-    // جلب جميع الشركاء من جميع الـ vendors
-    const partners = await prisma.partnerCapital.findMany({
+    // جلب جميع الشركاء من Vendor (المستخدمين الذين لديهم role = VENDOR)
+    const vendors = await prisma.vendor.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
-        vendor: {
+        user: {
           select: {
             id: true,
-            userId: true,
-            user: true,
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            createdAt: true,
           },
         },
+        partners: true, // جلب PartnerCapital records إن وجدت
       },
     });
 
-    console.log(`✅ تم جلب ${partners.length} شريك من قاعدة البيانات`);
+    console.log(`✅ تم جلب ${vendors.length} شريك من قاعدة البيانات`);
 
-    // تنسيق البيانات لتجنب مشاكل null
-    const formattedPartners = partners.map(partner => ({
-      ...partner,
-      vendor: partner.vendor ? {
-        id: partner.vendor.id,
-        userId: partner.vendor.userId,
-        user: partner.vendor.user ? {
-          id: partner.vendor.user.id,
-          name: partner.vendor.user.name,
-          email: partner.vendor.user.email,
-        } : null,
-      } : null,
-    }));
+    // تنسيق البيانات بشكل متوافق مع واجهة Partner
+    const formattedPartners = vendors.map(vendor => {
+      // إذا كان هناك partner capital record، استخدمه
+      const partnerCapital = vendor.partners?.[0];
+      
+      return {
+        id: vendor.id,
+        partnerName: vendor.storeName || vendor.user?.name || 'غير محدد',
+        partnerType: partnerCapital?.partnerType || 'VENDOR',
+        capitalAmount: vendor.capitalBalance || 0,
+        initialAmount: vendor.capitalBalance || 0,
+        currentAmount: vendor.capitalBalance || 0,
+        capitalPercent: vendor.commissionRate || 15,
+        joinDate: vendor.createdAt.toISOString(),
+        isActive: vendor.isActive,
+        notes: vendor.description || null,
+        createdAt: vendor.createdAt.toISOString(),
+        vendor: {
+          id: vendor.id,
+          userId: vendor.userId,
+          user: vendor.user ? {
+            id: vendor.user.id,
+            name: vendor.user.name,
+            email: vendor.user.email,
+          } : null,
+        },
+      };
+    });
 
     return NextResponse.json({ partners: formattedPartners });
   } catch (error) {
