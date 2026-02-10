@@ -277,8 +277,8 @@ export function Header() {
     }
   };
 
-  // إخفاء الـ Header في صفحات الـ vendor والـ admin والـ delivery-dashboard والـ developer
-  if (pathname?.startsWith('/vendor') || pathname?.startsWith('/admin') || pathname?.startsWith('/delivery-dashboard') || pathname?.startsWith('/developer')) {
+  // إخفاء الـ Header في صفحات الـ vendor والـ admin والـ delivery-dashboard والـ developer والـ chat
+  if (pathname?.startsWith('/vendor') || pathname?.startsWith('/admin') || pathname?.startsWith('/delivery-dashboard') || pathname?.startsWith('/developer') || pathname?.startsWith('/chat')) {
     return null;
   }
 
