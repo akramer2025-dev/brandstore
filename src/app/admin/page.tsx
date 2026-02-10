@@ -25,10 +25,10 @@ export default async function AdminDashboard() {
     totalUsers,
     totalCustomers,
   ] = await Promise.all([
-    prisma.product.count(),
+    prisma.product.count({ where: { isActive: true } }), // عد المنتجات النشطة فقط
     prisma.order.count(),
     prisma.order.count({ where: { status: "PENDING" } }),
-    prisma.product.count({ where: { stock: { lte: 10 } } }),
+    prisma.product.count({ where: { stock: { lte: 10 }, isActive: true } }), // منتجات قليلة المخزون والنشطة
     prisma.deliveryStaff.count(),
     prisma.user.count(),
     prisma.user.count({ where: { role: "CUSTOMER" } }),
