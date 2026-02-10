@@ -27,9 +27,20 @@ import { useSession } from 'next-auth/react'
 
 interface Message {
   id: string
-  type: 'assistant' | 'user' | 'options'
+  type: 'assistant' | 'user' | 'options' | 'products'
   content: string
   options?: Option[]
+  products?: ProductCard[]
+}
+
+interface ProductCard {
+  id: string
+  name: string
+  price: number
+  originalPrice?: number | null
+  imageUrl: string | null
+  category: string | null
+  link: string
 }
 
 interface Option {
@@ -119,6 +130,18 @@ export default function CustomerAssistant() {
           content: data.reply
         }
         setMessages(prev => [...prev, aiMessage])
+        
+        // عرض كروت المنتجات إذا وجدت
+        if (data.products && data.products.length > 0) {
+          const productsMessage: Message = {
+            id: (Date.now() + 2).toString(),
+            type: 'products',
+            content: '',
+            products: data.products,
+          }
+          setMessages(prev => [...prev, productsMessage])
+        }
+        
         setConversationHistory(data.conversationHistory || [])
       } else {
         throw new Error(data.error || 'فشل في الحصول على رد')
@@ -464,6 +487,72 @@ export default function CustomerAssistant() {
                         </div>
                         <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 rounded-2xl rounded-tr-sm p-4 md:p-5 text-white/95 text-sm md:text-base whitespace-pre-line flex-1 leading-relaxed shadow-lg shadow-teal-900/20">
                           {message.content}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* كروت المنتجات */}
+                    {message.type === 'products' && message.products && message.products.length > 0 && (
+                      <div className="mt-3">
+                        <div className="flex gap-3 md:gap-4 mb-2">
+                          <div className="flex-shrink-0 relative">
+                            <div className="absolute inset-0 bg-teal-400/30 rounded-full blur-md animate-pulse"></div>
+                            <img 
+                              src="/logo.png" 
+                              alt="Remo Store" 
+                              className="relative w-8 h-8 md:w-9 md:h-9 rounded-full object-cover ring-2 ring-teal-400/50 shadow-xl"
+                            />
+                          </div>
+                          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 rounded-2xl rounded-tr-sm p-3 text-white/90 text-sm">
+                            🛍️ إليك المنتجات المتاحة - اضغط على أي منتج لمشاهدته:
+                          </div>
+                        </div>
+                        <div className="grid gap-2.5 pr-11">
+                          {message.products.map((product) => (
+                            <Link
+                              key={product.id}
+                              href={product.link}
+                              onClick={() => setIsOpen(false)}
+                            >
+                              <motion.div
+                                whileHover={{ scale: 1.02, x: 4 }}
+                                whileTap={{ scale: 0.97 }}
+                                className="bg-gradient-to-r from-slate-800/80 to-slate-800/50 hover:from-slate-700/90 hover:to-slate-700/70 border-2 border-teal-500/30 hover:border-teal-400/60 rounded-2xl p-3 cursor-pointer transition-all duration-300 group shadow-lg hover:shadow-teal-500/20"
+                              >
+                                <div className="flex items-center gap-3">
+                                  {/* صورة المنتج */}
+                                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-700/50 border border-teal-500/20">
+                                    {product.imageUrl ? (
+                                      <img
+                                        src={product.imageUrl}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center">
+                                        <ShoppingCart className="w-6 h-6 text-teal-500/50" />
+                                      </div>
+                                    )}
+                                  </div>
+                                  {/* تفاصيل المنتج */}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white font-bold text-sm md:text-base truncate">{product.name}</p>
+                                    {product.category && (
+                                      <p className="text-teal-400/80 text-xs mt-0.5">{product.category}</p>
+                                    )}
+                                    <div className="flex items-center gap-2 mt-1.5">
+                                      <span className="text-emerald-400 font-black text-base md:text-lg">{product.price} ج.م</span>
+                                      {product.originalPrice && product.originalPrice > product.price && (
+                                        <span className="text-gray-500 line-through text-xs">{product.originalPrice} ج.م</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {/* سهم */}
+                                  <ExternalLink className="w-5 h-5 text-teal-400 group-hover:text-teal-300 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
+                                </div>
+                              </motion.div>
+                            </Link>
+                          ))}
                         </div>
                       </div>
                     )}

@@ -20,10 +20,21 @@ interface Message {
   content: string
 }
 
+interface ProductInfo {
+  id: string
+  name: string
+  price: number
+  originalPrice?: number | null
+  category: string | null
+  brand: string | null
+  stock: number
+  imageUrl: string | null
+}
+
 // جلب بيانات من قاعدة البيانات لسياق المحادثة
 async function getContextData() {
   try {
-    // جلب بعض المنتجات المميزة
+    // جلب المنتجات المتاحة مع الصور
     const featuredProducts = await prisma.product.findMany({
       where: { 
         status: 'ACTIVE',
@@ -34,11 +45,13 @@ async function getContextData() {
         id: true,
         name: true,
         price: true,
+        originalPrice: true,
         category: true,
         brand: true,
         stock: true,
+        images: true,
       },
-      take: 10,
+      take: 30,
       orderBy: { createdAt: 'desc' }
     })
 
@@ -62,19 +75,78 @@ async function getContextData() {
       distinct: ['brand'],
     })
 
+    // تنسيق المنتجات مع أول صورة
+    const products: ProductInfo[] = featuredProducts.map(p => {
+      let imageUrl: string | null = null
+      if (p.images) {
+        try {
+          const imgs = JSON.parse(p.images)
+          imageUrl = Array.isArray(imgs) && imgs.length > 0 ? imgs[0] : p.images
+        } catch {
+          imageUrl = p.images.split(',')[0]?.trim() || null
+        }
+      }
+      return {
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        originalPrice: p.originalPrice,
+        category: p.category,
+        brand: p.brand,
+        stock: p.stock,
+        imageUrl,
+      }
+    })
+
     return {
-      products: featuredProducts,
+      products,
       categories: categories.map(c => c.category),
       brands: brands.map(b => b.brand).filter(Boolean),
     }
   } catch (error) {
     console.error('Error fetching context data:', error)
     return {
-      products: [],
+      products: [] as ProductInfo[],
       categories: [],
       brands: [],
     }
   }
+}
+
+// البحث عن منتجات مطابقة لسؤال العميل
+function findMatchingProducts(message: string, products: ProductInfo[]): ProductInfo[] {
+  const query = message.toLowerCase()
+  
+  // كلمات عامة نتجاهلها
+  const stopWords = ['عاوز', 'عايز', 'عندكم', 'فين', 'ايه', 'عن', 'في', 'من', 'على', 'ال', 'ده', 'دي', 'هل', 'كم', 'سعر', 'اسعار', 'منتج', 'منتجات', 'حاجة', 'حاجات', 'ابغى', 'ابي', 'وش', 'شو']
+  
+  const scored = products.map(p => {
+    let score = 0
+    const productName = p.name.toLowerCase()
+    const productCategory = (p.category || '').toLowerCase()
+    const productBrand = (p.brand || '').toLowerCase()
+    
+    // تطابق مع اسم المنتج
+    if (productName.includes(query) || query.includes(productName)) {
+      score += 10
+    }
+    
+    // تطابق كلمات مفتاحية
+    const queryWords = query.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w))
+    for (const word of queryWords) {
+      if (productName.includes(word)) score += 3
+      if (productCategory.includes(word)) score += 2
+      if (productBrand.includes(word)) score += 2
+    }
+    
+    return { product: p, score }
+  })
+  
+  return scored
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(s => s.product)
 }
 
 // التعليمات الأساسية للمساعد الذكي
@@ -115,11 +187,14 @@ const SYSTEM_INSTRUCTIONS = `أنت مساعد ذكي لمتجر "ريمو ست�
 {PRODUCTS}
 
 ملاحظات مهمة:
-- إذا سأل العميل عن منتج معين، ابحث في قائمة المنتجات المتاحة
+- إذا سأل العميل عن منتج معين، ابحث في قائمة المنتجات المتاحة وقدم معلومات عنه
+- المنتجات المطابقة لسؤال العميل (إن وجدت) ستُعرض تلقائياً ككروت منتجات تحت ردك
+- لا تكتب روابط المنتجات في ردك النصي - الكروت ستظهر تلقائياً
 - إذا كان المنتج غير متوفر في القائمة، أخبر العميل أنك ستتحقق وتنصحه بالتواصل
 - رد بإيموجي مناسبة لتحسين تجربة المحادثة 😊
 - كن مختصراً وواضحاً، لا تكتب أكثر من 3-4 جمل في الرد الواحد
 - إذا كان السؤال معقد أو يحتاج تدخل بشري، وجه العميل لخدمة العملاء
+- عند ذكر منتج في ردك النصي، اذكر اسمه وسعره فقط
 
 أسلوب الرد:
 - ابدأ بتحية لطيفة
@@ -148,7 +223,7 @@ export async function POST(request: NextRequest) {
     // تنسيق البيانات للإضافة للتعليمات
     const productsInfo = contextData.products.length > 0
       ? contextData.products.map(p => 
-          `- ${p.name} (${p.category || 'عام'}): ${p.price} جنيه - ${p.stock > 10 ? 'متوفر' : 'كمية محدودة'}`
+          `- [${p.id}] ${p.name} (${p.category || 'عام'}): ${p.price} جنيه${p.originalPrice && p.originalPrice > p.price ? ` (بدل ${p.originalPrice} جنيه)` : ''} - ${p.stock > 10 ? 'متوفر' : 'كمية محدودة'}`
         ).join('\n')
       : 'لا توجد منتجات متاحة حالياً'
 
@@ -189,9 +264,24 @@ export async function POST(request: NextRequest) {
 
     console.log('[Assistant API] AI Response:', reply)
 
+    // البحث عن منتجات مطابقة للسؤال
+    const matchingProducts = findMatchingProducts(message, contextData.products)
+    
+    // تنسيق المنتجات المطابقة للإرسال للعميل
+    const productCards = matchingProducts.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      originalPrice: p.originalPrice,
+      imageUrl: p.imageUrl,
+      category: p.category,
+      link: `/products/${p.id}`,
+    }))
+
     return NextResponse.json({
       success: true,
       reply,
+      products: productCards,
       conversationHistory: [
         ...conversationHistory.slice(-6),
         { role: 'user', content: message },
