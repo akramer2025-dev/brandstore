@@ -9,7 +9,15 @@ import { PrismaClient } from '@prisma/client'
 const VERIFY_TOKEN = process.env.MESSENGER_VERIFY_TOKEN || 'remostore_messenger_2026'
 const PAGE_ACCESS_TOKEN = process.env.MESSENGER_PAGE_ACCESS_TOKEN
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+// Lazy initialization for Groq to avoid build-time errors
+let groqInstance: Groq | null = null
+function getGroq() {
+  if (!groqInstance && process.env.GROQ_API_KEY) {
+    groqInstance = new Groq({ apiKey: process.env.GROQ_API_KEY })
+  }
+  return groqInstance
+}
+
 const prisma = new PrismaClient()
 
 export const dynamic = 'force-dynamic'
@@ -123,6 +131,11 @@ ${contextData}
     }
 
     // استدعاء Groq AI للحصول على رد ذكي
+    const groq = getGroq()
+    if (!groq) {
+      throw new Error('Groq API is not configured')
+    }
+    
     const completion = await groq.chat.completions.create({
       messages: [systemMessage, ...history] as any,
       model: 'llama-3.3-70b-versatile',
