@@ -180,7 +180,7 @@ function levenshteinDistance(str1: string, str2: string): number {
   return matrix[str2.length][str1.length]
 }
 
-// البحث عن منتجات مطابقة لسؤال العميل مع دعم الأخطاء الإملائية
+// البحث عن منتجات مطابقة لسؤال العميل مع دقة عالية
 function findMatchingProducts(message: string, products: ProductInfo[]): ProductInfo[] {
   const query = message.toLowerCase()
   
@@ -192,7 +192,6 @@ function findMatchingProducts(message: string, products: ProductInfo[]): Product
     const productName = p.name.toLowerCase()
     const productNameAr = p.nameAr.toLowerCase()
     const productCategory = (p.category || '').toLowerCase()
-    const productDesc = (p.descriptionAr || p.description || '').toLowerCase()
     
     // تطابق كامل مع اسم المنتج - أعلى نقاط
     if (productName === query || productNameAr === query) score += 100
@@ -204,58 +203,68 @@ function findMatchingProducts(message: string, products: ProductInfo[]): Product
     // تطابق كلمات مفتاحية
     const queryWords = query.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w))
     
-    // إذا كان هناك كلمات قليلة فقط، زود الدقة
-    const isShortQuery = queryWords.length <= 2
-    
     for (const word of queryWords) {
-      if (word.length < 3) continue // تجاهل الكلمات القصيرة جداً
+      if (word.length < 2) continue // تجاهل الكلمات القصيرة جداً
       
-      // تطابق دقيق (Exact Match) - أعلى نقاط
-      if (productName.includes(word)) score += 15
-      if (productNameAr.includes(word)) score += 15
-      if (productCategory.includes(word)) score += 10 // زود نقاط الكاتيجوري
-      if (productDesc.includes(word)) score += 1 // قلل نقاط الوصف
-      
-      // Fuzzy matching للأخطاء الإملائية (مسموح بحرف واحد فقط)
-      const nameWords = productNameAr.split(/\s+/)
-      for (const nameWord of nameWords) {
-        if (nameWord.length < 3) continue
-        const distance = levenshteinDistance(word, nameWord)
+      // **قاعدة جديدة: للكلمات أكتر من 3 حروف، لازم exact match**
+      if (word.length > 3) {
+        // لو الكلمة في اسم المنتج أو الكاتيجوري → نقاط عالية
+        if (productName.includes(word)) score += 30
+        if (productNameAr.includes(word)) score += 30
+        if (productCategory.includes(word)) score += 20
         
-        // مسموح بحرف واحد غلط فقط (بدل 2)
-        if (distance === 1) {
-          score += 4
+        // **ممنوع fuzzy matching للكلمات الطويلة** - لازم يكون exact match
+        // لو مفيش exact match، المنتج ده مش related
+        
+      } else {
+        // للكلمات القصيرة (≤3 حروف)، نسمح بـ exact match فقط
+        if (productName.includes(word)) score += 15
+        if (productNameAr.includes(word)) score += 15
+        if (productCategory.includes(word)) score += 10
+        
+        // Fuzzy matching للكلمات القصيرة فقط (مسموح بحرف واحد غلط)
+        const nameWords = productNameAr.split(/\s+/)
+        for (const nameWord of nameWords) {
+          if (nameWord.length >= 2 && nameWord.length <= 3) {
+            const distance = levenshteinDistance(word, nameWord)
+            if (distance === 1) {
+              score += 3
+            }
+          }
         }
       }
     }
     
-    // إذا كان السؤال قصير، عاقب المنتجات اللي مش related
-    if (isShortQuery && queryWords.length > 0) {
-      let hasAnyMatch = false
+    // إذا كان السؤال يحتوي على كلمات طويلة (>3 حروف)، نعاقب المنتجات اللي مفيهاش exact match
+    const hasLongWords = queryWords.some(w => w.length > 3)
+    if (hasLongWords) {
+      let hasExactMatch = false
       for (const word of queryWords) {
-        if (productNameAr.includes(word) || productName.includes(word) || productCategory.includes(word)) {
-          hasAnyMatch = true
-          break
+        if (word.length > 3) {
+          if (productNameAr.includes(word) || productName.includes(word) || productCategory.includes(word)) {
+            hasExactMatch = true
+            break
+          }
         }
       }
-      if (!hasAnyMatch) score = Math.max(0, score - 10) // عاقب المنتجات اللي مش related
+      // لو مفيش exact match للكلمات الطويلة، عاقب المنتج جداً
+      if (!hasExactMatch) {
+        score = Math.max(0, score - 50)
+      }
     }
     
     return { product: p, score }
   })
   
-  // عرض فقط المنتجات اللي عندها score أكبر من 10 (بدل 0)، مرتبة من الأعلى للأقل
+  // عرض فقط المنتجات اللي عندها score أكبر من 15 (زودنا من 10)
   const filtered = scored
-    .filter(s => s.score > 10) // زود الـ threshold من 0 لـ 10
+    .filter(s => s.score > 15)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 15) // عرض 15 منتج بحد أقصى
+    .slice(0, 8) // عرض 8 منتجات بحد أقصى
   
-  // إذا لم يكن هناك منتجات matching، ارجع أرقى 6 منتجات
+  // لو مفيش منتجات matching كويسة، ارجع empty array (مش منتجات random)
   if (filtered.length === 0) {
-    return scored
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 6)
-      .map(s => s.product)
+    return []
   }
   
   return filtered.map(s => s.product)
@@ -502,31 +511,26 @@ export async function POST(request: NextRequest) {
       
       // إذا كان السؤال يحتوي على كلمات عامة فقط، لا تعرض منتجات
       for (const word of generalQuestions) {
-        if (query.includes(word) && !query.includes('منتج') && !query.includes('عرض') && 
-            !query.includes('عايز') && !query.includes('عاوز') && !query.includes('ابغى')) {
+        if (query.includes(word)) {
           return false
         }
       }
       
-      // كلمات تدل على طلب منتجات
-      const productKeywords = [
-        'عايز', 'عاوز', 'عاوزة', 'عاوزه', 'ابغى', 'ابي',
-        'منتج', 'منتجات', 'فيه', 'عندكم', 'عرض', 'اعرض',
-        'بنطلون', 'قميص', 'فستان', 'حذاء', 'جاكيت', 'بلوزة',
-        'شورت', 'تيشيرت', 'جيبة', 'اكسسوار', 'حقيبة', 'نظارة',
-        'ورينى', 'وريني', 'جيبلي', 'جيبلى', 'ابحث', 'دور',
-        'احسن', 'اروع', 'اجمل', 'افضل', 'ارخص',
-        'كاتالوج', 'كتالوج', 'معرض', 'شنط', 'احذية',
-      ]
+      // **قاعدة جديدة**: نعرض المنتجات فقط لو في كلمة محددة أكثر من 3 حروف
+      // استخراج الكلمات من السؤال
+      const stopWords = ['عاوز', 'عايز', 'عاوزة', 'عاوزه', 'عاوزين', 'عندكم', 'فين', 'ايه', 'عن', 'في', 'من', 'على', 'ال', 'ده', 'دي', 'هل', 'كم', 'سعر', 'اسعار', 'منتج', 'منتجات', 'حاجة', 'حاجات', 'ابغى', 'ابي', 'وش', 'شو', 'بكام', 'كام', 'قد', 'ايش', 'شنو', 'يا', 'لو', 'ممكن', 'عرض', 'اعرض', 'ورينى', 'وريني', 'ورينا', 'فيه', 'جيبلي', 'جيبلى', 'اجيب', 'احسن', 'اروع', 'اجمل', 'ابحث', 'دور', 'دوري', 'ابحثلي']
       
-      // إذا كان يحتوي على أي كلمة من كلمات المنتجات
-      for (const keyword of productKeywords) {
-        if (query.includes(keyword)) {
-          return true
-        }
+      const words = query.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w))
+      
+      // نشوف لو فيه كلمة أطول من 3 حروف (اسم منتج محتمل)
+      const hasProductName = words.some(w => w.length > 3)
+      
+      // لو مفيش كلمات طويلة، ميعرضش منتجات
+      if (!hasProductName) {
+        return false
       }
       
-      return false
+      return true
     }
 
     // البحث عن منتجات مطابقة فقط إذا كان السؤال يتطلب ذلك
@@ -536,19 +540,24 @@ export async function POST(request: NextRequest) {
     if (shouldShowProducts(message)) {
       matchingProducts = findMatchingProducts(message, contextData.products)
       
-      // عرض أفضل 6-8 منتجات فقط (مش 15)
-      const limitedProducts = matchingProducts.slice(0, 8)
-      
-      // تنسيق المنتجات المطابقة للإرسال للعميل مع روابط كاملة
-      productCards = limitedProducts.map(p => ({
-        id: p.id,
-        name: p.nameAr || p.name,
-        price: p.price,
-        originalPrice: p.originalPrice,
-        imageUrl: p.imageUrl,
-        category: p.category,
-        stock: p.stock,
-        link: `https://www.remostore.net/products/${p.id}`,
+      // **عرض المنتجات فقط لو لقينا منتجات فعلاً matching**
+      if (matchingProducts.length > 0) {
+        // عرض أفضل 6-8 منتجات فقط (مش 15)
+        const limitedProducts = matchingProducts.slice(0, 8)
+        
+        // تنسيق المنتجات المطابقة للإرسال للعميل مع روابط كاملة
+        productCards = limitedProducts.map(p => ({
+          id: p.id,
+          name: p.nameAr || p.name,
+          price: p.price,
+          originalPrice: p.originalPrice,
+          imageUrl: p.imageUrl,
+          category: p.category,
+          stock: p.stock,
+          link: `https://www.remostore.net/products/${p.id}`,
+        }))
+      }
+    }
       }))
     }
 
