@@ -180,12 +180,12 @@ function levenshteinDistance(str1: string, str2: string): number {
   return matrix[str2.length][str1.length]
 }
 
-// البحث عن منتجات مطابقة لسؤال العميل مع دقة عالية
+// البحث عن منتجات مطابقة لسؤال العميل
 function findMatchingProducts(message: string, products: ProductInfo[]): ProductInfo[] {
   const query = message.toLowerCase()
   
   // كلمات عامة نتجاهلها
-  const stopWords = ['عاوز', 'عايز', 'عاوزة', 'عاوزه', 'عاوزين', 'عندكم', 'فين', 'ايه', 'عن', 'في', 'من', 'على', 'ال', 'ده', 'دي', 'هل', 'كم', 'سعر', 'اسعار', 'منتج', 'منتجات', 'حاجة', 'حاجات', 'ابغى', 'ابي', 'وش', 'شو', 'بكام', 'كام', 'قد', 'ايش', 'شنو', 'يا', 'لو', 'ممكن', 'عرض', 'اعرض', 'ورينى', 'وريني', 'ورينا', 'فيه', 'جيبلي', 'جيبلى', 'اجيب', 'احسن', 'اروع', 'اجمل', 'ابحث', 'دور', 'دوري', 'ابحثلي']
+  const stopWords = ['عاوز', 'عايز', 'عاوزة', 'عاوزه', 'عاوزين', 'عندكم', 'فين', 'ايه', 'عن', 'في', 'من', 'على', 'ال', 'ده', 'دي', 'هل', 'كم', 'سعر', 'اسعار', 'منتج', 'منتجات', 'حاجة', 'حاجات', 'ابغى', 'ابي', 'وش', 'شو', 'بكام', 'كام', 'قد', 'ايش', 'شنو', 'يا', 'لو', 'ممكن']
   
   const scored = products.map(p => {
     let score = 0
@@ -200,72 +200,42 @@ function findMatchingProducts(message: string, products: ProductInfo[]): Product
     if (productName.includes(query) || query.includes(productName)) score += 50
     if (productNameAr.includes(query) || query.includes(productNameAr)) score += 50
     
+    // تطابق الكاتيجوري
+    if (productCategory.includes(query) || query.includes(productCategory)) score += 40
+    
     // تطابق كلمات مفتاحية
     const queryWords = query.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w))
     
     for (const word of queryWords) {
-      if (word.length < 2) continue // تجاهل الكلمات القصيرة جداً
+      if (word.length < 2) continue
       
-      // **قاعدة جديدة: للكلمات أكتر من 3 حروف، لازم exact match**
+      // Exact matching
+      if (productName.includes(word)) score += 20
+      if (productNameAr.includes(word)) score += 20
+      if (productCategory.includes(word)) score += 15
+      
+      // Fuzzy matching للكلمات الطويلة (مسموح بحرفين غلط)
       if (word.length > 3) {
-        // لو الكلمة في اسم المنتج أو الكاتيجوري → نقاط عالية
-        if (productName.includes(word)) score += 30
-        if (productNameAr.includes(word)) score += 30
-        if (productCategory.includes(word)) score += 20
-        
-        // **ممنوع fuzzy matching للكلمات الطويلة** - لازم يكون exact match
-        // لو مفيش exact match، المنتج ده مش related
-        
-      } else {
-        // للكلمات القصيرة (≤3 حروف)، نسمح بـ exact match فقط
-        if (productName.includes(word)) score += 15
-        if (productNameAr.includes(word)) score += 15
-        if (productCategory.includes(word)) score += 10
-        
-        // Fuzzy matching للكلمات القصيرة فقط (مسموح بحرف واحد غلط)
         const nameWords = productNameAr.split(/\s+/)
         for (const nameWord of nameWords) {
-          if (nameWord.length >= 2 && nameWord.length <= 3) {
+          if (nameWord.length >= 3) {
             const distance = levenshteinDistance(word, nameWord)
-            if (distance === 1) {
-              score += 3
+            if (distance <= 2) {
+              score += Math.max(5, 10 - distance * 2)
             }
           }
         }
       }
     }
     
-    // إذا كان السؤال يحتوي على كلمات طويلة (>3 حروف)، نعاقب المنتجات اللي مفيهاش exact match
-    const hasLongWords = queryWords.some(w => w.length > 3)
-    if (hasLongWords) {
-      let hasExactMatch = false
-      for (const word of queryWords) {
-        if (word.length > 3) {
-          if (productNameAr.includes(word) || productName.includes(word) || productCategory.includes(word)) {
-            hasExactMatch = true
-            break
-          }
-        }
-      }
-      // لو مفيش exact match للكلمات الطويلة، عاقب المنتج جداً
-      if (!hasExactMatch) {
-        score = Math.max(0, score - 50)
-      }
-    }
-    
     return { product: p, score }
   })
   
-  // عرض فقط المنتجات اللي عندها score أكبر من 15 (زودنا من 10)
+  // عرض فقط المنتجات اللي عندها score أكبر من 8
   const filtered = scored
-    .filter(s => s.score > 15)
+    .filter(s => s.score > 8)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 8) // عرض 8 منتجات بحد أقصى
-  
-  // لو مفيش منتجات matching كويسة، ارجع empty array (مش منتجات random)
-  if (filtered.length === 0) {
-    return []
-  }
+    .slice(0, 8)
   
   return filtered.map(s => s.product)
 }
@@ -494,43 +464,51 @@ export async function POST(request: NextRequest) {
     const shouldShowProducts = (msg: string): boolean => {
       const query = msg.toLowerCase()
       
-      // أسئلة عامة لا تحتاج منتجات
+      // أسئلة عامة جداً لا تحتاج منتجات (تحيات وأسئلة إدارية فقط)
       const generalQuestions = [
         'صباح', 'مساء', 'ازيك', 'ازيكم', 'كيفك', 'اخبارك', 'الحمد لله',
         'شكرا', 'شكراً', 'مشكور', 'تسلم', 'يسلمو',
-        'الشحن', 'التوصيل', 'بتوصلوا', 'كام الشحن', 'مدة التوصيل',
-        'دفع', 'الدفع', 'كاش', 'فيزا', 'طريقة الدفع',
-        'ارجاع', 'الإرجاع', 'الاستبدال', 'استرجاع',
-        'رقم', 'تليفون', 'واتساب', 'موبايل', 'اتصال',
-        'عنوان', 'مكان', 'موقع', 'فين المتجر',
-        'ساعات العمل', 'مواعيد', 'متى',
-        'مرحبا', 'هلا', 'اهلا', 'السلام',
-        'طلبي', 'اوردر', 'تتبع', 'فين طلبي',
-        'حساب', 'اكونت', 'تسجيل',
+        'بتوصلوا فين', 'كام الشحن ل', 'مدة التوصيل',
+        'طريقة الدفع', 'فيزا ولا كاش',
+        'سياسة الإرجاع', 'ينفع ارجع',
+        'رقمكم', 'تليفونكم', 'واتساب',
+        'عنوانكم', 'مكانكم', 'فين المتجر',
+        'ساعات العمل', 'بتفتحوا امتى',
+        'مرحبا', 'هلا', 'اهلا', 'السلام عليكم',
+        'فين طلبي', 'اوردر بتاعي',
+        'ازاي اسجل', 'عمل اكونت',
       ]
       
-      // إذا كان السؤال يحتوي على كلمات عامة فقط، لا تعرض منتجات
+      // لو السؤال تحية أو سؤال إداري بحت، ما نعرضش منتجات
       for (const word of generalQuestions) {
-        if (query.includes(word)) {
+        if (query === word || query.startsWith(word + ' ') || query.endsWith(' ' + word)) {
           return false
         }
       }
       
-      // **قاعدة جديدة**: نعرض المنتجات فقط لو في كلمة محددة أكثر من 3 حروف
-      // استخراج الكلمات من السؤال
-      const stopWords = ['عاوز', 'عايز', 'عاوزة', 'عاوزه', 'عاوزين', 'عندكم', 'فين', 'ايه', 'عن', 'في', 'من', 'على', 'ال', 'ده', 'دي', 'هل', 'كم', 'سعر', 'اسعار', 'منتج', 'منتجات', 'حاجة', 'حاجات', 'ابغى', 'ابي', 'وش', 'شو', 'بكام', 'كام', 'قد', 'ايش', 'شنو', 'يا', 'لو', 'ممكن', 'عرض', 'اعرض', 'ورينى', 'وريني', 'ورينا', 'فيه', 'جيبلي', 'جيبلى', 'اجيب', 'احسن', 'اروع', 'اجمل', 'ابحث', 'دور', 'دوري', 'ابحثلي']
+      // كلمات تدل على البحث عن منتجات - نعرض منتجات
+      const productKeywords = [
+        'عاوز', 'عايز', 'عندكم', 'فيه', 'في', 'موجود', 'متوفر',
+        'عرض', 'ورينى', 'وريني', 'ورينا', 'اعرض', 'جيبلي', 'جيبلى',
+        'ابغى', 'ابي', 'احسن', 'اروع', 'اجمل', 'ابحث', 'دور',
+        'بكام', 'سعر', 'اسعار', 'كام',
+      ]
       
-      const words = query.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w))
-      
-      // نشوف لو فيه كلمة أطول من 3 حروف (اسم منتج محتمل)
-      const hasProductName = words.some(w => w.length > 3)
-      
-      // لو مفيش كلمات طويلة، ميعرضش منتجات
-      if (!hasProductName) {
-        return false
+      for (const keyword of productKeywords) {
+        if (query.includes(keyword)) {
+          return true
+        }
       }
       
-      return true
+      // لو فيه اسم كاتيجوري معروف، عرض منتجات
+      const categories = ['فستان', 'بنطلون', 'قميص', 'بلوزة', 'جاكيت', 'حذاء', 'شنطة', 'اكسسوار', 'ساعة', 'نظارة', 'ايشادو', 'مكياج', 'بريمر', 'بلاشر', 'اسدال', 'طرحة', 'حجاب']
+      for (const cat of categories) {
+        if (query.includes(cat)) {
+          return true
+        }
+      }
+      
+      return false
     }
 
     // البحث عن منتجات مطابقة فقط إذا كان السؤال يتطلب ذلك
