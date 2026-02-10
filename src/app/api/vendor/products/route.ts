@@ -72,18 +72,26 @@ export async function POST(req: NextRequest) {
     const purchasePrice = productionCost ? parseFloat(productionCost) : 0;
     const totalCost = purchasePrice * parseInt(stock);
     
+    // متغير لتتبع إذا تم الخصم أو لا
+    let willDeduct = false;
+    let warningMessage = '';
+    
     // التحقق من سعر الشراء والرأس المال إذا كان المنتج مملوك (ليس وسيط)
     if (productSource === 'OWNED' && totalCost > 0) {
       // التأكد من إدخال سعر الشراء
       if (!productionCost || parseFloat(productionCost) <= 0) {
         console.warn('⚠️ تحذير: لم يتم إدخال سعر الشراء - لن يتم خصم من رأس المال');
-        // نسمح بالإضافة بدون خصم كتجربة مؤقتة
+        warningMessage = '\n⚠️ لم يتم إدخال سعر الشراء';
       } else {
         // التحقق من كفاية رأس المال
-        if ((vendor.capitalBalance || 0) < totalCost) {
-          return NextResponse.json({
-            error: `❌ رأس المال غير كافٍ!\n💰 المتاح: ${(vendor.capitalBalance || 0).toLocaleString()} ج\n🛒 المطلوب: ${totalCost.toLocaleString()} ج (${stock} قطعة × ${purchasePrice.toLocaleString()} ج)`
-          }, { status: 400 });
+        const currentBalance = vendor.capitalBalance || 0;
+        if (currentBalance < totalCost) {
+          // نسمح بالإضافة بس منخصمش من رأس المال
+          console.warn(`⚠️ رأس المال غير كافٍ (${currentBalance} < ${totalCost}) - سيتم إضافة المنتج بدون خصم`);
+          warningMessage = `\n⚠️ رأس المال غير كافٍ! المتاح: ${currentBalance.toLocaleString()} ج، المطلوب: ${totalCost.toLocaleString()} ج\n💡 تم إضافة المنتج بدون خصم من رأس المال`;
+        } else {
+          // رأس المال كافي - سيتم الخصم
+          willDeduct = true;
         }
       }
     }
@@ -124,9 +132,8 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      // خصم التكلفة من رأس المال إذا كان المنتج مملوك
-      // ⚠️ ملاحظة: قد يسبب رصيد سالب أثناء الاختبار (تم تعطيل التحقق من الرصيد)
-      if (productSource === 'OWNED' && totalCost > 0) {
+      // خصم التكلفة من رأس المال إذا كان المنتج مملوك ورأس المال كافي
+      if (productSource === 'OWNED' && totalCost > 0 && willDeduct) {
         const balanceBefore = vendor.capitalBalance || 0;
         const balanceAfter = balanceBefore - totalCost;
         
@@ -156,14 +163,25 @@ export async function POST(req: NextRequest) {
       return product;
     });
 
+    // إعداد رسالة النجاح
+    let successMessage = '✅ تم إضافة المنتج بنجاح!';
+    
+    if (productSource === 'OWNED' && totalCost > 0) {
+      if (willDeduct) {
+        // تم الخصم من رأس المال
+        const newBalance = (vendor.capitalBalance || 0) - totalCost;
+        successMessage = `✅ تم إضافة المنتج بنجاح!\n💸 تم خصم ${totalCost.toLocaleString()} ج من رأس المال (${stock} × ${purchasePrice.toLocaleString()} ج)\n💰 الرصيد المتبقي: ${newBalance.toLocaleString()} ج`;
+      } else {
+        // لم يتم الخصم
+        successMessage = `✅ تم إضافة المنتج بنجاح!${warningMessage}`;
+      }
+    }
 
     return NextResponse.json({ 
-      message: productSource === 'OWNED' && totalCost > 0 
-        ? `✅ تم إضافة المنتج بنجاح!\n💸 تم خصم ${totalCost.toLocaleString()} ج من رأس المال (${stock} × ${purchasePrice.toLocaleString()} ج)\n💰 الرصيد المتبقي: ${((vendor.capitalBalance || 0) - totalCost).toLocaleString()} ج`
-        : 'تم إضافة المنتج بنجاح',
+      message: successMessage,
       product: result,
-      deducted: totalCost,
-      capitalBalance: productSource === 'OWNED' ? (vendor.capitalBalance || 0) - totalCost : vendor.capitalBalance
+      deducted: willDeduct ? totalCost : 0,
+      capitalBalance: willDeduct ? (vendor.capitalBalance || 0) - totalCost : vendor.capitalBalance
     }, { status: 201 });
 
   } catch (error) {
