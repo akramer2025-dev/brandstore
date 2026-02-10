@@ -14,16 +14,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   events: {
     async createUser({ user }) {
       try {
-        console.log('🆕 Event: createUser -', user.email);
+        console.log('🆕 ========== CREATE USER EVENT ==========');
+        console.log('Email:', user.email);
+        console.log('Name:', user.name);
+        console.log('Current Role:', user.role);
         
-        // إذا المستخدم جديد، اجعله CUSTOMER افتراضياً
+        // ⚠️ IMPORTANT: المستخدمين الجدد من Google يكونوا CUSTOMER دائماً
+        // فقط المطور يقدر يعمل VENDOR accounts يدوياً
         if (user.id && !user.role) {
           await prisma.user.update({
             where: { id: user.id },
             data: { role: 'CUSTOMER' }
           });
-          console.log('✅ Assigned CUSTOMER role to new user:', user.email);
+          console.log('✅ New user assigned CUSTOMER role:', user.email);
         }
+        console.log('🆕 ========== END CREATE USER ==========\n');
       } catch (error) {
         console.error('❌ Error in createUser event:', error);
       }
@@ -123,14 +128,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               role: existingUser.role,
               accountsCount: existingUser.accounts.length
             });
-            
-            // 🔗 التحقق من وجود Google Account
-            const googleAccount = existingUser.accounts.find(
-              (acc) => acc.provider === "google"
-            );
-
-            if (!googleAccount && account) {
-              console.log('🔗 Google Account not linked - Linking now...');
+          console.log('ℹ️  User will keep existing role:', existingUser.role);
               // ربط الـ Google Account باليوزر الموجود
               try {
                 await prisma.account.create({
@@ -163,11 +161,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 where: { id: existingUser.id },
                 data: { role: "CUSTOMER" }
               });
-              console.log('🆕 تم تعيين role CUSTOMER للمستخدم:', user.email);
+              console.log('🆕 Assigned CUSTOMER role to existing user without role:', user.email);
             }
           } else {
-            console.log('🆕 New user from Google - will be created by PrismaAdapter');
-            console.log('Email:', user.email, 'Name:', user.name);
+            console.log('🆕 ========== NEW GOOGLE USER ==========');
+            console.log('Email:', user.email);
+            console.log('Name:', user.name);
+            console.log('⚠️  Will be created by PrismaAdapter → createUser event → CUSTOMER role');
+            console.log('ℹ️  Only developer can manually create VENDOR accounts');
+            console.log('🆕 ========== END NEW GOOGLE USER ==========');
           }
         }
         
@@ -205,14 +207,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.role = dbUser.role;
             console.log('✅ JWT updated from DB - User:', dbUser.name, 'Role:', dbUser.role);
             
-            // إذا المستخدم جديد من Google وليس لديه role، اجعله CUSTOMER
+            // ⚠️ PROTECTION: إذا المستخدم من Google وليس لديه role، اجعله CUSTOMER
             if (!dbUser.role && account?.provider === "google") {
               await prisma.user.update({
                 where: { id: token.id as string },
                 data: { role: "CUSTOMER" }
               });
               token.role = "CUSTOMER";
-              console.log('🆕 New Google user assigned CUSTOMER role');
+              console.log('🛡️  PROTECTION: New Google user forced to CUSTOMER role');
+            } else if (dbUser.role) {
+              console.log('✅ User has existing role:', dbUser.role, '- Keeping it');
             }
           }
         } catch (error) {
