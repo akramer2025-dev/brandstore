@@ -53,7 +53,7 @@ export default async function VendorProductsPage({
       vendorId: vendor.id,
       type: 'PURCHASE'
     }
-  });
+  }).catch(() => []);
 
   // جلب إجمالي الإيداعات
   const depositTransactions = await prisma.capitalTransaction.findMany({
@@ -61,26 +61,37 @@ export default async function VendorProductsPage({
       vendorId: vendor.id,
       type: 'DEPOSIT'
     }
-  });
+  }).catch(() => []);
 
-  // إجمالي رأس المال المودع
-  const totalDeposits = depositTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+  // إجمالي رأس المال المودع (مع التحقق من وجود البيانات)
+  const totalDeposits = Array.isArray(depositTransactions) 
+    ? depositTransactions.reduce((sum, tx) => sum + (tx?.amount || 0), 0) 
+    : 0;
   
   // إجمالي المشتريات (المخصومة من رأس المال)
-  const totalPurchases = purchaseTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+  const totalPurchases = Array.isArray(purchaseTransactions)
+    ? purchaseTransactions.reduce((sum, tx) => sum + (tx?.amount || 0), 0)
+    : 0;
   
   // الرصيد الحالي (من الـ vendor مباشرة)
-  const currentBalance = vendor.capitalBalance || 0;
+  const currentBalance = Number(vendor.capitalBalance) || 0;
   
   // قيمة المخزون الحالي (سعر الشراء × الكمية المتبقية)
-  const currentStockValue = products.reduce((sum, product) => {
-    const purchasePrice = product.productionCost || 0;
-    return sum + (purchasePrice * product.stock);
-  }, 0);
+  const currentStockValue = Array.isArray(products)
+    ? products.reduce((sum, product) => {
+        const purchasePrice = Number(product.productionCost) || 0;
+        const stock = Number(product.stock) || 0;
+        return sum + (purchasePrice * stock);
+      }, 0)
+    : 0;
 
   // حساب عدد كل نوع من المنتجات
-  const ownedCount = products.filter(p => p.productSource === 'OWNED').length;
-  const consignmentCount = products.filter(p => p.productSource === 'CONSIGNMENT').length;
+  const ownedCount = Array.isArray(products)
+    ? products.filter(p => p.productSource === 'OWNED').length
+    : 0;
+  const consignmentCount = Array.isArray(products)
+    ? products.filter(p => p.productSource === 'CONSIGNMENT').length
+    : 0;
 
   // تحديد العنوان بناءً على نوع الفلتر
   const pageTitle = searchParams.type === 'owned' 
@@ -241,31 +252,31 @@ export default async function VendorProductsPage({
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
             <CardContent className="p-6">
               <p className="text-gray-300 text-sm mb-2">إجمالي المنتجات</p>
-              <p className="text-3xl font-bold text-white">{products.length}</p>
+              <p className="text-3xl font-bold text-white">{products?.length || 0}</p>
             </CardContent>
           </Card>
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
             <CardContent className="p-6">
               <p className="text-gray-300 text-sm mb-2">متوفر</p>
-              <p className="text-3xl font-bold text-green-400">{products.filter(p => p.stock > 10).length}</p>
+              <p className="text-3xl font-bold text-green-400">{products?.filter(p => (p.stock || 0) > 10).length || 0}</p>
             </CardContent>
           </Card>
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
             <CardContent className="p-6">
               <p className="text-gray-300 text-sm mb-2">مخزون منخفض</p>
-              <p className="text-3xl font-bold text-orange-400">{products.filter(p => p.stock <= 10 && p.stock > 0).length}</p>
+              <p className="text-3xl font-bold text-orange-400">{products?.filter(p => (p.stock || 0) <= 10 && (p.stock || 0) > 0).length || 0}</p>
             </CardContent>
           </Card>
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-lg">
             <CardContent className="p-6">
               <p className="text-gray-300 text-sm mb-2">نفذ من المخزن</p>
-              <p className="text-3xl font-bold text-red-400">{products.filter(p => p.stock === 0).length}</p>
+              <p className="text-3xl font-bold text-red-400">{products?.filter(p => (p.stock || 0) === 0).length || 0}</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Products Grid */}
-        {products.length === 0 ? (
+        {!products || products.length === 0 ? (
           <Card className="bg-white/5 backdrop-blur-sm border-white/10">
             <CardContent className="py-16 text-center">
               <Package className="h-16 w-16 mx-auto text-gray-500 mb-4" />
@@ -287,7 +298,7 @@ export default async function VendorProductsPage({
                   {product.images ? (
                     <Image
                       src={product.images.split(',')[0]}
-                      alt={product.nameAr}
+                      alt={product.nameAr || product.name || 'منتج'}
                       fill
                       className="object-cover"
                     />
@@ -299,12 +310,12 @@ export default async function VendorProductsPage({
                   
                   {/* Stock Badge */}
                   <div className="absolute top-3 right-3">
-                    {product.stock === 0 ? (
+                    {(product.stock || 0) === 0 ? (
                       <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                         <AlertTriangle className="h-3 w-3" />
                         نفذ
                       </div>
-                    ) : product.stock <= 10 ? (
+                    ) : (product.stock || 0) <= 10 ? (
                       <div className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">
                         مخزون منخفض
                       </div>
@@ -318,27 +329,27 @@ export default async function VendorProductsPage({
 
                 <CardContent className="p-4">
                   <div className="mb-3">
-                    <h3 className="text-white font-bold text-lg mb-1">{product.nameAr}</h3>
-                    <p className="text-gray-400 text-sm">{product.category?.nameAr}</p>
+                    <h3 className="text-white font-bold text-lg mb-1">{product.nameAr || product.name || 'منتج'}</h3>
+                    <p className="text-gray-400 text-sm">{product.category?.nameAr || product.category?.name || 'بدون فئة'}</p>
                   </div>
 
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-purple-400 font-bold text-xl">{product.price} ج.م</p>
+                      <p className="text-purple-400 font-bold text-xl">{Number(product.price).toLocaleString() || 0} ج.م</p>
                       {product.originalPrice && (
-                        <p className="text-gray-500 line-through text-sm">{product.originalPrice} ج.م</p>
+                        <p className="text-gray-500 line-through text-sm">{Number(product.originalPrice).toLocaleString()} ج.م</p>
                       )}
                     </div>
                     <div className="text-left">
                       <p className="text-gray-400 text-sm">الكمية</p>
-                      <p className="text-white font-bold text-lg">{product.stock}</p>
+                      <p className="text-white font-bold text-lg">{product.stock || 0}</p>
                     </div>
                   </div>
 
                   <div className="flex gap-2">
                     <ProductActions 
                       productId={product.id} 
-                      productName={product.nameAr}
+                      productName={product.nameAr || product.name || 'منتج'}
                       productImage={product.images ? product.images.split(',')[0] : undefined}
                     />
                   </div>
