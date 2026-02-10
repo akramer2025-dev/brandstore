@@ -54,16 +54,88 @@ interface Option {
 }
 
 const ASSISTANT_HIDDEN_KEY = 'remo_customer_assistant_hidden'
+const SESSION_ID_KEY = 'remo_chat_session'
+const CHAT_DATA_KEY = 'remo_chat_data'
+const SESSION_TTL = 3 * 60 * 1000 // 3 دقايق بالميلي ثانية
 
-// توليد معرف جلسة فريد
-function generateSessionId() {
-  if (typeof window === 'undefined') return ''
-  let id = sessionStorage.getItem('remo_chat_session')
-  if (!id) {
-    id = 'cs_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9)
-    sessionStorage.setItem('remo_chat_session', id)
+interface StoredChatData {
+  sessionId: string
+  messages: Message[]
+  conversationHistory: any[]
+  lastActivity: number
+}
+
+// توليد معرف جلسة فريد أو استرجاع الجلسة القديمة (إذا لم تنته)
+function getOrCreateSessionId(): { sessionId: string; isNew: boolean } {
+  if (typeof window === 'undefined') return { sessionId: '', isNew: true }
+  
+  // محاولة استرجاع الجلسة القديمة
+  const storedData = localStorage.getItem(CHAT_DATA_KEY)
+  if (storedData) {
+    try {
+      const data: StoredChatData = JSON.parse(storedData)
+      const now = Date.now()
+      
+      // إذا لم يمر 3 دقايق على آخر نشاط، استرجع الجلسة
+      if (now - data.lastActivity < SESSION_TTL) {
+        return { sessionId: data.sessionId, isNew: false }
+      } else {
+        // انتهت صلاحية الجلسة، امسحها
+        localStorage.removeItem(CHAT_DATA_KEY)
+      }
+    } catch (error) {
+      console.error('Error parsing stored chat data:', error)
+      localStorage.removeItem(CHAT_DATA_KEY)
+    }
   }
-  return id
+  
+  // إنشاء جلسة جديدة
+  const newSessionId = 'cs_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9)
+  return { sessionId: newSessionId, isNew: true }
+}
+
+// حفظ بيانات المحادثة في localStorage
+function saveChatData(sessionId: string, messages: Message[], conversationHistory: any[]) {
+  if (typeof window === 'undefined') return
+  
+  const data: StoredChatData = {
+    sessionId,
+    messages,
+    conversationHistory,
+    lastActivity: Date.now()
+  }
+  
+  try {
+    localStorage.setItem(CHAT_DATA_KEY, JSON.stringify(data))
+  } catch (error) {
+    console.error('Error saving chat data:', error)
+  }
+}
+
+// تحميل بيانات المحادثة من localStorage
+function loadChatData(): StoredChatData | null {
+  if (typeof window === 'undefined') return null
+  
+  const storedData = localStorage.getItem(CHAT_DATA_KEY)
+  if (!storedData) return null
+  
+  try {
+    const data: StoredChatData = JSON.parse(storedData)
+    const now = Date.now()
+    
+    // تحقق من صلاحية الجلسة
+    if (now - data.lastActivity < SESSION_TTL) {
+      return data
+    } else {
+      // انتهت صلاحية الجلسة
+      localStorage.removeItem(CHAT_DATA_KEY)
+      return null
+    }
+  } catch (error) {
+    console.error('Error loading chat data:', error)
+    localStorage.removeItem(CHAT_DATA_KEY)
+    return null
+  }
 }
 
 export default function CustomerAssistant() {
@@ -74,7 +146,8 @@ export default function CustomerAssistant() {
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [conversationHistory, setConversationHistory] = useState<any[]>([])
-  const [sessionId] = useState(() => generateSessionId())
+  const [sessionId, setSessionId] = useState('')
+  const [isRestoringSession, setIsRestoringSession] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -94,20 +167,42 @@ export default function CustomerAssistant() {
     }
   }, [isOpen])
 
-  // تحميل حالة الإخفاء من localStorage
+  // تحميل حالة الإخفاء من localStorage واسترجاع الجلسة
   useEffect(() => {
     const hidden = localStorage.getItem(ASSISTANT_HIDDEN_KEY)
     if (hidden === 'true') {
       setIsHidden(true)
     }
+    
+    // محاولة استرجاع الجلسة القديمة
+    const { sessionId: sid, isNew } = getOrCreateSessionId()
+    setSessionId(sid)
+    
+    if (!isNew) {
+      // استرجاع المحادثة القديمة
+      const chatData = loadChatData()
+      if (chatData) {
+        setMessages(chatData.messages)
+        setConversationHistory(chatData.conversationHistory)
+      }
+    }
+    
+    setIsRestoringSession(false)
   }, [])
 
-  // رسالة الترحيب عند الفتح
+  // رسالة الترحيب عند الفتح (فقط للجلسات الجديدة)
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && messages.length === 0 && !isRestoringSession) {
       showWelcomeMessage()
     }
-  }, [isOpen])
+  }, [isOpen, isRestoringSession])
+  
+  // حفظ المحادثة تلقائياً عند أي تحديث
+  useEffect(() => {
+    if (sessionId && messages.length > 0) {
+      saveChatData(sessionId, messages, conversationHistory)
+    }
+  }, [messages, conversationHistory, sessionId])
 
   // إرسال رسالة للمساعد الذكي (AI)
   const sendMessageToAI = async (messageText: string) => {
@@ -325,7 +420,7 @@ export default function CustomerAssistant() {
       {
         id: 'contact-1',
         type: 'assistant',
-        content: '📞 تواصل مع خدمة العملاء\n\n📱 واتساب: 01555512778\n📧 البريد الإلكتروني: remostore.egy@gmail.com\n📍 العنوان: مصر - القاهرة\n⏰ نعمل: السبت - الخميس (9 صباحاً - 6 مساءً)\n\n💬 أو استخدم المحادثة المباشرة',
+        content: '📞 تواصل مع خدمة العملاء\n\n📱 واتساب: https://wa.me/201555512778\n📧 البريد الإلكتروني: remostore.egy@gmail.com\n📍 العنوان: مصر - القاهرة\n⏰ نعمل: السبت - الخميس (9 صباحاً - 6 مساءً)\n\n💬 اضغط على رقم الواتساب للتواصل المباشر',
       },
       {
         id: 'contact-2',
@@ -419,59 +514,59 @@ export default function CustomerAssistant() {
             initial={{ opacity: 0, y: 100, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-20 md:bottom-24 left-4 right-4 sm:left-4 sm:right-auto sm:w-[420px] z-40 max-h-[68vh] md:max-h-[72vh]"
+            transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+            className="fixed bottom-16 md:bottom-20 left-2 right-2 sm:left-4 sm:right-auto sm:w-[min(95vw,440px)] z-40"
           >
-            <Card className="bg-gradient-to-br from-slate-900 via-teal-900/95 to-slate-900 border-2 border-teal-400/60 shadow-[0_20px_60px_rgba(13,148,136,0.4)] overflow-hidden rounded-3xl backdrop-blur-xl">
-              {/* رأس النافذة - تصميم محسّن */}
-              <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-4 md:p-5 flex items-center justify-between overflow-hidden">
+            <Card className="bg-gradient-to-br from-slate-900 via-teal-900/95 to-slate-900 border-2 border-teal-400/60 shadow-[0_20px_60px_rgba(13,148,136,0.4)] overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-xl max-h-[75vh] md:max-h-[80vh] flex flex-col">
+              {/* رأس النافذة - محسّن للموبايل */}
+              <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-3 md:p-5 flex items-center justify-between overflow-hidden flex-shrink-0">
                 {/* نمط خلفية متحرك */}
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
                 
-                <div className="relative flex items-center gap-3 md:gap-4">
+                <div className="relative flex items-center gap-2 md:gap-4 flex-1 min-w-0">
                   {/* شعار التطبيق مع حلقة دوارة */}
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 rounded-full bg-white/30 animate-ping"></div>
                     <div className="absolute inset-0 rounded-full border-2 border-white/40 animate-spin-slow"></div>
                     <img 
                       src="/logo.png" 
                       alt="Remo Store" 
-                      className="relative w-10 h-10 md:w-12 md:h-12 rounded-full object-cover ring-4 ring-white/50 shadow-2xl"
+                      className="relative w-9 h-9 md:w-12 md:h-12 rounded-full object-cover ring-2 md:ring-4 ring-white/50 shadow-2xl"
                     />
                   </div>
-                  <div>
-                    <h3 className="text-white font-black text-base md:text-xl tracking-wide drop-shadow-lg">مساعد ريمو الذكي</h3>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                      <p className="text-teal-50 text-xs md:text-sm font-medium drop-shadow">
-                        متصل الآن - جاهز للمساعدة
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-black text-sm md:text-xl tracking-wide drop-shadow-lg truncate">مساعد ريمو الذكي</h3>
+                    <div className="flex items-center gap-1.5 md:gap-2 mt-0.5">
+                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                      <p className="text-teal-50 text-[10px] md:text-sm font-medium drop-shadow truncate">
+                        متصل الآن
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="relative flex items-center gap-1.5 md:gap-2">
+                <div className="relative flex items-center gap-1 md:gap-2 flex-shrink-0">
                   <button
                     onClick={hideAssistant}
-                    className="text-white/80 hover:text-white p-2 md:p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 backdrop-blur"
+                    className="text-white/80 hover:text-white p-1.5 md:p-2.5 hover:bg-white/20 rounded-lg md:rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 backdrop-blur"
                     title="إخفاء المساعد"
                     aria-label="إخفاء المساعد"
                   >
-                    <EyeOff className="w-5 h-5 md:w-6 md:h-6 drop-shadow" />
+                    <EyeOff className="w-4 h-4 md:w-6 md:h-6 drop-shadow" />
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="text-white/80 hover:text-white p-2 md:p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 backdrop-blur"
+                    className="text-white/80 hover:text-white p-1.5 md:p-2.5 hover:bg-white/20 rounded-lg md:rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 backdrop-blur"
                     title="إغلاق"
                     aria-label="إغلاق"
                   >
-                    <X className="w-5 h-5 md:w-6 md:h-6 drop-shadow" />
+                    <X className="w-4 h-4 md:w-6 md:h-6 drop-shadow" />
                   </button>
                 </div>
               </div>
 
-              {/* محتوى المحادثة - تصميم محسّن */}
-              <CardContent className="p-4 md:p-5 max-h-[48vh] md:max-h-[52vh] overflow-y-auto space-y-4 md:space-y-5 scrollbar-thin scrollbar-thumb-teal-500/60 scrollbar-track-slate-800/50">
+              {/* محتوى المحادثة - محسّن لارتفاع ديناميكي */}
+              <CardContent className="p-3 md:p-5 flex-1 overflow-y-auto space-y-3 md:space-y-5 scrollbar-thin scrollbar-thumb-teal-500/60 scrollbar-track-slate-800/50 min-h-0">
                 {messages.map((message) => (
                   <motion.div
                     key={message.id}
@@ -480,61 +575,63 @@ export default function CustomerAssistant() {
                     transition={{ duration: 0.4, ease: 'easeOut' }}
                   >
                     {message.type === 'user' && (
-                      <div className="flex gap-3 md:gap-4 justify-end">
-                        <div className="bg-gradient-to-br from-teal-600 to-cyan-600 backdrop-blur-sm border border-teal-400/30 rounded-2xl rounded-tl-sm p-4 md:p-5 text-white text-sm md:text-base whitespace-pre-line max-w-[85%] leading-relaxed shadow-lg shadow-teal-900/30">
+                      <div className="flex gap-2 md:gap-4 justify-end">
+                        <div className="bg-gradient-to-br from-teal-600 to-cyan-600 backdrop-blur-sm border border-teal-400/30 rounded-xl md:rounded-2xl rounded-tl-sm p-3 md:p-5 text-white text-xs md:text-base whitespace-pre-line max-w-[85%] leading-relaxed shadow-lg shadow-teal-900/30">
                           {message.content}
                         </div>
                       </div>
                     )}
 
                     {message.type === 'assistant' && (
-                      <div className="flex gap-3 md:gap-4">
+                      <div className="flex gap-2 md:gap-4">
                         {/* شعار المساعد مع حلقة توهج */}
                         <div className="flex-shrink-0 relative">
                           <div className="absolute inset-0 bg-teal-400/30 rounded-full blur-md animate-pulse"></div>
                           <img 
                             src="/logo.png" 
                             alt="Remo Store" 
-                            className="relative w-8 h-8 md:w-9 md:h-9 rounded-full object-cover ring-2 ring-teal-400/50 shadow-xl"
+                            className="relative w-7 h-7 md:w-9 md:h-9 rounded-full object-cover ring-2 ring-teal-400/50 shadow-xl"
                           />
                         </div>
-                        <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 rounded-2xl rounded-tr-sm p-4 md:p-5 text-white/95 text-sm md:text-base whitespace-pre-line flex-1 leading-relaxed shadow-lg shadow-teal-900/20">
+                        <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 rounded-xl md:rounded-2xl rounded-tr-sm p-3 md:p-5 text-white/95 text-xs md:text-base whitespace-pre-line flex-1 leading-relaxed shadow-lg shadow-teal-900/20">
                           {message.content}
                         </div>
                       </div>
                     )}
 
-                    {/* كروت المنتجات */}
+                    {/* كروت المنتجات - محسّنة للموبايل */}
                     {message.type === 'products' && message.products && message.products.length > 0 && (
-                      <div className="mt-3">
-                        <div className="flex gap-3 md:gap-4 mb-2">
+                      <div className="mt-3 w-full">
+                        <div className="flex gap-2 md:gap-4 mb-3">
                           <div className="flex-shrink-0 relative">
                             <div className="absolute inset-0 bg-teal-400/30 rounded-full blur-md animate-pulse"></div>
                             <img 
                               src="/logo.png" 
                               alt="Remo Store" 
-                              className="relative w-8 h-8 md:w-9 md:h-9 rounded-full object-cover ring-2 ring-teal-400/50 shadow-xl"
+                              className="relative w-7 h-7 md:w-9 md:h-9 rounded-full object-cover ring-2 ring-teal-400/50 shadow-xl"
                             />
                           </div>
-                          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 rounded-2xl rounded-tr-sm p-3 text-white/90 text-sm">
-                            🛍️ إليك المنتجات المتاحة - اضغط على أي منتج لمشاهدته:
+                          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 rounded-2xl rounded-tr-sm p-2.5 md:p-3 text-white/90 text-xs md:text-sm flex-1">
+                            🛍️ إليك المنتجات المتاحة:
                           </div>
                         </div>
-                        <div className="grid gap-2.5 pr-11">
+                        {/* Grid للمنتجات - responsive */}
+                        <div className="grid gap-2 pr-0 md:pr-11 w-full">
                           {message.products.map((product) => (
                             <Link
                               key={product.id}
                               href={product.link}
                               onClick={() => setIsOpen(false)}
+                              className="w-full"
                             >
                               <motion.div
-                                whileHover={{ scale: 1.02, x: 4 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="bg-gradient-to-r from-slate-800/80 to-slate-800/50 hover:from-slate-700/90 hover:to-slate-700/70 border-2 border-teal-500/30 hover:border-teal-400/60 rounded-2xl p-3 cursor-pointer transition-all duration-300 group shadow-lg hover:shadow-teal-500/20"
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="bg-gradient-to-r from-slate-800/80 to-slate-800/50 hover:from-slate-700/90 hover:to-slate-700/70 border-2 border-teal-500/30 hover:border-teal-400/60 rounded-xl md:rounded-2xl p-2.5 md:p-3 cursor-pointer transition-all duration-300 group shadow-lg hover:shadow-teal-500/20 w-full"
                               >
-                                <div className="flex items-center gap-3">
-                                  {/* صورة المنتج */}
-                                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-700/50 border border-teal-500/20">
+                                <div className="flex items-start gap-2 md:gap-3 w-full">
+                                  {/* صورة المنتج - أصغر على الموبايل */}
+                                  <div className="w-14 h-14 md:w-20 md:h-20 rounded-lg md:rounded-xl overflow-hidden flex-shrink-0 bg-slate-700/50 border border-teal-500/20">
                                     {product.imageUrl ? (
                                       <img
                                         src={product.imageUrl}
@@ -543,25 +640,28 @@ export default function CustomerAssistant() {
                                       />
                                     ) : (
                                       <div className="w-full h-full flex items-center justify-center">
-                                        <ShoppingCart className="w-6 h-6 text-teal-500/50" />
+                                        <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 text-teal-500/50" />
                                       </div>
                                     )}
                                   </div>
-                                  {/* تفاصيل المنتج */}
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-white font-bold text-sm md:text-base truncate">{product.name}</p>
-                                    {product.category && (
-                                      <p className="text-teal-400/80 text-xs mt-0.5">{product.category}</p>
-                                    )}
-                                    <div className="flex items-center gap-2 mt-1.5">
-                                      <span className="text-emerald-400 font-black text-base md:text-lg">{product.price} ج.م</span>
-                                      {product.originalPrice && product.originalPrice > product.price && (
-                                        <span className="text-gray-500 line-through text-xs">{product.originalPrice} ج.م</span>
+                                  {/* تفاصيل المنتج - محسّنة للموبايل */}
+                                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                                    <div className="w-full">
+                                      <p className="text-white font-bold text-xs md:text-base line-clamp-2 leading-tight">{product.name}</p>
+                                      {product.category && (
+                                        <p className="text-teal-400/80 text-[10px] md:text-xs mt-0.5 truncate">{product.category}</p>
                                       )}
                                     </div>
+                                    <div className="flex items-center justify-between gap-2 mt-1 md:mt-1.5 w-full">
+                                      <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+                                        <span className="text-emerald-400 font-black text-sm md:text-lg whitespace-nowrap">{product.price} ج.م</span>
+                                        {product.originalPrice && product.originalPrice > product.price && (
+                                          <span className="text-gray-500 line-through text-[10px] md:text-xs whitespace-nowrap">{product.originalPrice} ج.م</span>
+                                        )}
+                                      </div>
+                                      <ExternalLink className="w-4 h-4 md:w-5 md:h-5 text-teal-400 group-hover:text-teal-300 group-hover:translate-x-0.5 transition-all duration-200 flex-shrink-0" />
+                                    </div>
                                   </div>
-                                  {/* سهم */}
-                                  <ExternalLink className="w-5 h-5 text-teal-400 group-hover:text-teal-300 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
                                 </div>
                               </motion.div>
                             </Link>
