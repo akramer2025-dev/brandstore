@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell } from "lucide-react";
+import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell, Bot } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -241,6 +241,13 @@ export default async function AdminDashboard() {
             href="/admin/messages"
             icon={<MessageCircle className="w-12 h-12" />}
             color="text-teal-600"
+          />
+          <ActionCard
+            title="🤖 بوت Messenger"
+            description="رد تلقائي ذكي 24/7 على رسائل Facebook Messenger"
+            href="/admin/messenger-bot"
+            icon={<Bot className="w-12 h-12" />}
+            color="text-blue-600"
           />
           <ActionCard
             title="� إدارة الإشعارات"
