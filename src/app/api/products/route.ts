@@ -15,8 +15,11 @@ export async function GET(request: Request) {
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
 
-    // Build where clause
-    const where: any = { isActive: true };
+    // Build where clause - المنتجات النشطة والظاهرة فقط
+    const where: any = { 
+      isActive: true,
+      isVisible: true, // عرض المنتجات الظاهرة فقط للعملاء
+    };
 
     // Search filter
     if (search) {
