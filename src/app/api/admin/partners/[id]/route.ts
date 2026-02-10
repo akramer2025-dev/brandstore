@@ -16,24 +16,23 @@ export async function GET(
 
     const { id } = await params;
 
-    const partner = await prisma.partnerCapital.findUnique({
+    // جلب الـ Vendor بدلاً من PartnerCapital
+    const vendor = await prisma.vendor.findUnique({
       where: { id },
       include: {
-        vendor: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                name: true,
-              },
-            },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            phone: true,
           },
         },
+        partners: true, // PartnerCapital records إن وجدت
       },
     });
 
-    if (!partner) {
+    if (!vendor) {
       return NextResponse.json(
         { error: 'الشريك غير موجود' },
         { status: 404 }
@@ -43,7 +42,7 @@ export async function GET(
     // جلب المنتجات
     const products = await prisma.product.findMany({
       where: {
-        vendorId: partner.vendorId
+        vendorId: vendor.id
       },
       select: {
         id: true,
@@ -62,7 +61,7 @@ export async function GET(
     // حساب إحصائيات الطلبات
     const orderStats = await prisma.order.aggregate({
       where: {
-        vendorId: partner.vendorId,
+        vendorId: vendor.id,
         status: {
           in: ['DELIVERED']
         }
@@ -76,7 +75,7 @@ export async function GET(
     // جلب آخر الطلبات
     const recentOrders = await prisma.order.findMany({
       where: {
-        vendorId: partner.vendorId
+        vendorId: vendor.id
       },
       select: {
         id: true,
@@ -93,13 +92,13 @@ export async function GET(
 
     const totalRevenue = orderStats._sum?.totalAmount || 0;
     const totalOrders = orderStats._count || 0;
-    const totalProfit = totalRevenue * (partner.capitalPercent / 100);
+    const capitalPercent = vendor.commissionRate || 15;
+    const totalProfit = totalRevenue * (capitalPercent / 100);
 
-    // جلب المعاملات المالية
+    // جلب المعاملات المالية إن وجدت
     const transactions = await prisma.capitalTransaction.findMany({
       where: {
-        vendorId: partner.vendorId,
-        partnerId: partner.id
+        vendorId: vendor.id,
       },
       orderBy: {
         createdAt: 'desc'
@@ -107,28 +106,31 @@ export async function GET(
       take: 50
     });
 
+    // استخدام بيانات PartnerCapital إن وجدت، وإلا استخدم بيانات Vendor
+    const partnerCapital = vendor.partners?.[0];
+
     return NextResponse.json({
-      id: partner.id,
-      partnerName: partner.partnerName,
-      partnerType: partner.partnerType,
-      capitalAmount: partner.capitalAmount,
-      initialAmount: partner.initialAmount,
-      currentAmount: partner.currentAmount,
-      capitalPercent: partner.capitalPercent,
-      joinDate: partner.joinDate,
-      isActive: partner.isActive,
-      notes: partner.notes,
-      email: partner.vendor?.user?.email || '',
-      phone: partner.vendor?.phone || '',
-      user: partner.vendor?.user ? {
-        email: partner.vendor.user.email || '',
-        name: partner.vendor.user.name || ''
+      id: vendor.id,
+      partnerName: vendor.storeName || vendor.user?.name || 'غير محدد',
+      partnerType: partnerCapital?.partnerType || 'VENDOR',
+      capitalAmount: vendor.capitalBalance || 0,
+      initialAmount: vendor.capitalBalance || 0,
+      currentAmount: vendor.capitalBalance || 0,
+      capitalPercent: capitalPercent,
+      joinDate: vendor.createdAt.toISOString(),
+      isActive: vendor.isActive,
+      notes: vendor.description || null,
+      email: vendor.user?.email || '',
+      phone: vendor.user?.phone || vendor.phone || '',
+      user: vendor.user ? {
+        email: vendor.user.email || '',
+        name: vendor.user.name || ''
       } : null,
-      hasAccount: !!partner.vendor?.user,
-      userId: partner.vendor?.user?.id,
-      canDeleteOrders: partner.vendor?.canDeleteOrders || false,
-      canUploadShein: partner.vendor?.canUploadShein || false,
-      canAddOfflineProducts: partner.vendor?.canAddOfflineProducts || false,
+      hasAccount: !!vendor.user,
+      userId: vendor.user?.id,
+      canDeleteOrders: vendor.canDeleteOrders || false,
+      canUploadShein: vendor.canUploadShein || false,
+      canAddOfflineProducts: vendor.canAddOfflineProducts || false,
       // إحصائيات
       totalProducts: products.length,
       totalOrders,
@@ -182,19 +184,19 @@ export async function PATCH(
       canAddOfflineProducts,
     } = body;
 
-    // التحقق من وجود الشريك
-    const existingPartner = await prisma.partnerCapital.findUnique({
+    // التحقق من وجود الـ Vendor
+    const existingVendor = await prisma.vendor.findUnique({
       where: { id },
       include: {
-        vendor: {
+        user: {
           select: {
-            userId: true,
+            id: true,
           },
         },
       },
     });
 
-    if (!existingPartner) {
+    if (!existingVendor) {
       return NextResponse.json(
         { error: 'الشريك غير موجود' },
         { status: 404 }
@@ -204,102 +206,75 @@ export async function PATCH(
     // تحضير البيانات للتحديث
     const updateData: any = {};
 
-    if (partnerName !== undefined) updateData.partnerName = partnerName;
-    if (partnerType !== undefined) updateData.partnerType = partnerType;
-    if (notes !== undefined) updateData.notes = notes;
+    // تحديث اسم المتجر
+    if (partnerName !== undefined) {
+      updateData.storeName = partnerName;
+      updateData.storeNameAr = partnerName;
+    }
+
+    // تحديث الملاحظات
+    if (notes !== undefined) updateData.description = notes;
+    
+    // تحديث الحالة
     if (isActive !== undefined) updateData.isActive = isActive;
 
     // تحديث رأس المال إذا تغير
-    if (capitalAmount !== undefined && parseFloat(capitalAmount) !== existingPartner.capitalAmount) {
-      const oldAmount = existingPartner.capitalAmount;
+    if (capitalAmount !== undefined && parseFloat(capitalAmount) !== existingVendor.capitalBalance) {
+      const oldAmount = existingVendor.capitalBalance;
       const newAmount = parseFloat(capitalAmount);
       const difference = newAmount - oldAmount;
 
-      updateData.capitalAmount = newAmount;
-      updateData.currentAmount = existingPartner.currentAmount + difference;
-
-      // تحديث رأس مال الـ vendor
-      await prisma.vendor.update({
-        where: { id: existingPartner.vendorId },
-        data: {
-          capitalBalance: {
-            increment: difference,
-          },
-        },
-      });
+      updateData.capitalBalance = newAmount;
 
       // إنشاء معاملة
       await prisma.capitalTransaction.create({
         data: {
-          vendorId: existingPartner.vendorId,
-          partnerId: id,
+          vendorId: existingVendor.id,
           type: difference > 0 ? 'DEPOSIT' : 'WITHDRAWAL',
           amount: Math.abs(difference),
           balanceBefore: oldAmount,
           balanceAfter: newAmount,
-          description: `تعديل رأس مال الشريك: ${partnerName || existingPartner.partnerName}`,
-          descriptionAr: `تعديل رأس مال الشريك: ${partnerName || existingPartner.partnerName}`,
+          description: `تعديل رأس مال الشريك: ${partnerName || existingVendor.storeName}`,
+          descriptionAr: `تعديل رأس مال الشريك: ${partnerName || existingVendor.storeName}`,
         },
       });
     }
 
-    // تحديث النسبة إذا تغيرت
+    // تحديث نسبة العمولة إذا تغيرت
     if (capitalPercent !== undefined) {
-      updateData.capitalPercent = parseFloat(capitalPercent);
+      updateData.commissionRate = parseFloat(capitalPercent);
     }
 
-    // تغيير كلمة المرور إذا طُلِب
-    if (changePassword && newPassword && existingPartner.vendor?.userId) {
-      const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      
-      await prisma.user.update({
-        where: { id: existingPartner.vendor.userId },
-        data: { password: hashedPassword },
-      });
+    // تحديث الصلاحيات
+    if (canDeleteOrders !== undefined) updateData.canDeleteOrders = canDeleteOrders;
+    if (canUploadShein !== undefined) updateData.canUploadShein = canUploadShein;
+    if (canAddOfflineProducts !== undefined) updateData.canAddOfflineProducts = canAddOfflineProducts;
 
-      console.log('✅ تم تغيير كلمة المرور للشريك:', partnerName || existingPartner.partnerName);
-    }
-
-    // تحديث صلاحية حذف الطلبات للـ Vendor إذا كان موجوداً
-    if (existingPartner.vendorId && canDeleteOrders !== undefined) {
-      await prisma.vendor.update({
-        where: { id: existingPartner.vendorId },
-        data: { canDeleteOrders },
-      });
-      console.log('✅ تم تحديث صلاحية حذف الطلبات:', canDeleteOrders);
-    }
-
-    // تحديث صلاحية رفع منتجات شي إن
-    if (existingPartner.vendorId && canUploadShein !== undefined) {
-      await prisma.vendor.update({
-        where: { id: existingPartner.vendorId },
-        data: { canUploadShein },
-      });
-      console.log('✅ تم تحديث صلاحية رفع منتجات شي إن:', canUploadShein);
-    }
-
-    // تحديث صلاحية إضافة بضاعة خارج النظام
-    if (existingPartner.vendorId && canAddOfflineProducts !== undefined) {
-      await prisma.vendor.update({
-        where: { id: existingPartner.vendorId },
-        data: { canAddOfflineProducts },
-      });
-      console.log('✅ تم تحديث صلاحية البضاعة الخارجية:', canAddOfflineProducts);
-    }
-
-    // تحديث الشريك
-    const updatedPartner = await prisma.partnerCapital.update({
+    // تحديث الـ Vendor
+    const updatedVendor = await prisma.vendor.update({
       where: { id },
       data: updateData,
     });
 
-    console.log('✅ تم تحديث بيانات الشريك:', updatedPartner.partnerName);
+    // تغيير كلمة المرور إذا طُلِب
+    if (changePassword && newPassword && existingVendor.user?.id) {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      await prisma.user.update({
+        where: { id: existingVendor.user.id },
+        data: { password: hashedPassword },
+      });
+
+      console.log('✅ تم تغيير كلمة المرور للشريك:', partnerName || existingVendor.storeName);
+    }
+
+    console.log('✅ تم تحديث بيانات الشريك:', updatedVendor.storeName);
 
     return NextResponse.json({
       success: true,
       message: 'تم تحديث بيانات الشريك بنجاح',
-      partner: updatedPartner,
+      partner: updatedVendor,
     });
   } catch (error) {
     console.error('Error updating partner:', error);
@@ -324,38 +299,45 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // التحقق من وجود الشريك
-    const partner = await prisma.partnerCapital.findUnique({
+    // التحقق من وجود الـ Vendor
+    const vendor = await prisma.vendor.findUnique({
       where: { id },
+      include: {
+        user: true,
+      },
     });
 
-    if (!partner) {
+    if (!vendor) {
       return NextResponse.json(
         { error: 'الشريك غير موجود' },
         { status: 404 }
       );
     }
 
-    // تحديث رأس مال الـ vendor (طرح رأس مال الشريك)
+    // إيقاف الـ Vendor بدلاً من حذفه (soft delete)
     await prisma.vendor.update({
-      where: { id: partner.vendorId },
+      where: { id },
       data: {
-        capitalBalance: {
-          decrement: partner.currentAmount,
-        },
+        isActive: false,
+        isApproved: false,
       },
     });
 
-    // حذف الشريك
-    await prisma.partnerCapital.delete({
-      where: { id },
-    });
+    // إيقاف حساب المستخدم أيضاً إن وجد
+    if (vendor.user) {
+      await prisma.user.update({
+        where: { id: vendor.user.id },
+        data: {
+          isActive: false,
+        },
+      });
+    }
 
-    console.log('✅ تم حذف الشريك:', partner.partnerName);
+    console.log('✅ تم إيقاف الشريك:', vendor.storeName);
 
     return NextResponse.json({
       success: true,
-      message: 'تم حذف الشريك بنجاح',
+      message: 'تم إيقاف الشريك بنجاح',
     });
   } catch (error) {
     console.error('Error deleting partner:', error);
