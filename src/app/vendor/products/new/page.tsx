@@ -165,15 +165,16 @@ export default function NewProductPage() {
   // رفع الصور مع شريط التقدم
   const uploadImages = async (files: File[]) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 4 * 1024 * 1024; // 4 MB (Vercel limit is 4.5 MB)
 
     for (let file of files) {
       if (!allowedTypes.includes(file.type)) {
-        alert(`❌ نوع الملف غير مسموح: ${file.name}`);
+        alert(`❌ نوع الملف غير مسموح: ${file.name}\n✅ الأنواع المسموحة: JPG, PNG, WEBP`);
         return;
       }
       if (file.size > maxSize) {
-        alert(`❌ حجم الملف كبير جداً: ${file.name}`);
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        alert(`❌ حجم الصورة كبير جداً: ${file.name}\n📊 الحجم: ${fileSizeMB} MB\n✅ الحد الأقصى: 4 MB\n\n💡 نصيحة: ضغط الصورة قبل الرفع`);
         return;
       }
     }
@@ -198,6 +199,8 @@ export default function NewProductPage() {
         if (xhr.status === 200) {
           const data = JSON.parse(xhr.responseText);
           setImages(prev => [...prev, ...data.urls]);
+        } else if (xhr.status === 413) {
+          alert('❌ الصورة كبيرة جداً!\n✅ الحد الأقصى: 4 MB\n💡 استخدم أداة ضغط الصور أولاً');
         } else {
           alert('❌ فشل رفع الصور');
         }
@@ -696,7 +699,11 @@ export default function NewProductPage() {
                   placeholder="50.00"
                   required
                 />
-                <p className="text-xs text-gray-400 mt-1">السعر اللي اشتريت بيه المنتج</p>
+                <div className="mt-1 p-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                  <p className="text-xs text-amber-300">
+                    ⚠️ <strong>مهم:</strong> سعر الشراء × الكمية = سيتم خصمه من رأس المال ({formData.purchasePrice && formData.stock ? `${(parseFloat(formData.purchasePrice) * parseInt(formData.stock)).toLocaleString()} ج` : '---'})
+                  </p>
+                </div>
                 
                 {/* عرض الربح المتوقع */}
                 {formData.price && formData.purchasePrice && (

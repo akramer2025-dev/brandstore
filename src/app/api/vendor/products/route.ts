@@ -73,19 +73,18 @@ export async function POST(req: NextRequest) {
     const totalCost = purchasePrice * parseInt(stock);
     
     // التحقق من سعر الشراء والرأس المال إذا كان المنتج مملوك (ليس وسيط)
-    if (productSource === 'OWNED') {
+    if (productSource === 'OWNED' && totalCost > 0) {
       // التأكد من إدخال سعر الشراء
       if (!productionCost || parseFloat(productionCost) <= 0) {
-        return NextResponse.json({
-          error: '⚠️ يجب إدخال سعر الشراء للمنتجات المملوكة!'
-        }, { status: 400 });
-      }
-
-      // التحقق من كفاية رأس المال
-      if ((vendor.capitalBalance || 0) < totalCost) {
-        return NextResponse.json({
-          error: `❌ رأس المال غير كافٍ!\n💰 المتاح: ${(vendor.capitalBalance || 0).toLocaleString()} ج\n🛒 المطلوب: ${totalCost.toLocaleString()} ج (${stock} × ${purchasePrice.toLocaleString()} ج)`
-        }, { status: 400 });
+        console.warn('⚠️ تحذير: لم يتم إدخال سعر الشراء - لن يتم خصم من رأس المال');
+        // نسمح بالإضافة بدون خصم كتجربة مؤقتة
+      } else {
+        // التحقق من كفاية رأس المال
+        if ((vendor.capitalBalance || 0) < totalCost) {
+          return NextResponse.json({
+            error: `❌ رأس المال غير كافٍ!\n💰 المتاح: ${(vendor.capitalBalance || 0).toLocaleString()} ج\n🛒 المطلوب: ${totalCost.toLocaleString()} ج (${stock} قطعة × ${purchasePrice.toLocaleString()} ج)`
+          }, { status: 400 });
+        }
       }
     }
 

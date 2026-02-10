@@ -251,6 +251,53 @@ export default function CustomerAssistant() {
           setMessages(prev => [...prev, productsMessage])
         }
         
+        // إضافة زر واتساب احترافي إذا كان الرد يحتوي على دعوة للتواصل
+        const needsWhatsAppButton = 
+          data.reply.includes('راسلنا') || 
+          data.reply.includes('تواصل') || 
+          data.reply.includes('واتساب') ||
+          data.reply.includes('للمساعدة') ||
+          data.reply.includes('للتواصل')
+        
+        const needsDeveloperButton = 
+          data.reply.includes('المطور') || 
+          data.reply.includes('مستر أكرم') || 
+          data.reply.includes('Mr. Akram') ||
+          data.reply.includes('للتعاقد') ||
+          data.reply.includes('الشراكات')
+        
+        if (needsWhatsAppButton || needsDeveloperButton) {
+          const buttons: Option[] = []
+          
+          if (needsWhatsAppButton) {
+            buttons.push({ 
+              id: 'whatsapp-cs', 
+              icon: <MessageCircle className="w-5 h-5" />, 
+              title: '💬 راسلنا على الواتساب', 
+              description: 'خدمة العملاء - رد سريع',
+              link: 'https://wa.me/201555512778' 
+            })
+          }
+          
+          if (needsDeveloperButton) {
+            buttons.push({ 
+              id: 'whatsapp-dev', 
+              icon: <Phone className="w-5 h-5" />, 
+              title: '👨‍💻 تواصل مع المطور', 
+              description: 'مستر أكرم - للتعاقدات والشراكات',
+              link: 'https://wa.me/966559902557' 
+            })
+          }
+          
+          const whatsappButtonMessage: Message = {
+            id: (Date.now() + 3).toString(),
+            type: 'options',
+            content: '',
+            options: buttons,
+          }
+          setMessages(prev => [...prev, whatsappButtonMessage])
+        }
+        
         setConversationHistory(data.conversationHistory || [])
       } else {
         throw new Error(data.error || 'فشل في الحصول على رد')
@@ -260,9 +307,26 @@ export default function CustomerAssistant() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى أو التواصل معنا مباشرة على واتساب 01555512778 📱'
+        content: 'عذراً، حدث خطأ في الاتصال. جرب تاني أو تواصل معانا على الواتساب للمساعدة 📱'
       }
       setMessages(prev => [...prev, errorMessage])
+      
+      // إضافة زر واتساب للأخطاء
+      const whatsappErrorButton: Message = {
+        id: (Date.now() + 2).toString(),
+        type: 'options',
+        content: '',
+        options: [
+          { 
+            id: 'whatsapp-error', 
+            icon: <MessageCircle className="w-5 h-5" />, 
+            title: '💬 راسلنا على الواتساب', 
+            description: 'خدمة العملاء - رد سريع',
+            link: 'https://wa.me/201555512778' 
+          },
+        ],
+      }
+      setMessages(prev => [...prev, whatsappErrorButton])
     } finally {
       setIsLoading(false)
     }
