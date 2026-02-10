@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Capacitor } from '@capacitor/core'
-import NotificationManager from '@/lib/notification-manager'
 
 /**
  * مكون إدارة الإشعارات للتطبيق
@@ -11,21 +9,30 @@ import NotificationManager from '@/lib/notification-manager'
 export default function MobileNotifications() {
   
   useEffect(() => {
-    // تحقق إذا كنا على موبايل
-    if (Capacitor.isNativePlatform()) {
-      console.log('📱 التطبيق يعمل على موبايل - تهيئة الإشعارات...')
-      
-      // تهيئة الإشعارات
-      NotificationManager.initialize()
-        .then(() => {
+    // Dynamic import لتجنب SSR issues
+    const initNotifications = async () => {
+      try {
+        // تحقق من وجود Capacitor
+        const { Capacitor } = await import('@capacitor/core')
+        
+        // تحقق إذا كنا على موبايل
+        if (Capacitor.isNativePlatform()) {
+          console.log('📱 التطبيق يعمل على موبايل - تهيئة الإشعارات...')
+          
+          // تهيئة الإشعارات
+          const NotificationManager = (await import('@/lib/notification-manager')).default
+          
+          await NotificationManager.initialize()
           console.log('✅ تم تهيئة نظام الإشعارات بنجاح')
-        })
-        .catch((error) => {
-          console.error('❌ فشلت تهيئة الإشعارات:', error)
-        })
-    } else {
-      console.log('🌐 التطبيق يعمل على متصفح - الإشعارات غير مفعلة')
+        } else {
+          console.log('🌐 التطبيق يعمل على متصفح - الإشعارات غير مفعلة')
+        }
+      } catch (error) {
+        console.error('❌ فشلت تهيئة الإشعارات:', error)
+      }
     }
+    
+    initNotifications()
     
     // تنظيف عند إلغاء التحميل
     return () => {
