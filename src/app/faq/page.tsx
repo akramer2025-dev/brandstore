@@ -3,7 +3,7 @@ import BrandBackgroundPattern from '@/components/BrandBackgroundPattern'
 import { HelpCircle, Package, Truck, CreditCard, RotateCcw, Phone, MessageCircle, Clock } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'الأسئلة الشائعة | ريمو ستور',
+  title: 'الأسئلة الشائعة | ريمو ستور - Remo Store FAQ',
   description: 'إجابات على أكثر الأسئلة شيوعاً حول التسوق، الشحن، الدفع، والإرجاع في ريمو ستور',
 }
 
