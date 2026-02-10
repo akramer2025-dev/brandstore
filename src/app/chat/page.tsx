@@ -80,12 +80,6 @@ export default function ChatPage() {
           type: 'assistant',
           content: 'نورتنا 😊 معاك ريمو ستور، هرد على كل استفساراتك.\nقولى اقدر اساعدك ازاى؟',
         },
-        {
-          id: '2',
-          type: 'suggestions',
-          content: '',
-          suggestions: QUICK_SUGGESTIONS,
-        },
       ])
       setShowWelcome(false)
     }, 800)
