@@ -393,7 +393,7 @@ export default async function HomePage() {
               <h4 className="font-semibold mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">تواصل معنا</h4>
               <div className="flex flex-col gap-2 text-sm text-gray-400">
                 <p className="flex items-center gap-2">📱 01555512778</p>
-                <p className="flex items-center gap-2">📧 akram.er2025@gmail.com</p>
+                <p className="flex items-center gap-2">📧 remostore.egy@gmail.com</p>
                 <p className="flex items-center gap-2">📍 مصر - القاهرة</p>
               </div>
             </div>

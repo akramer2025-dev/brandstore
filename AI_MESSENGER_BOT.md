@@ -220,7 +220,7 @@ npx prisma migrate deploy
 ```
 
 ## 📞 الدعم
-- 📧 akram.er2025@gmail.com
+- 📧 remostore.egy@gmail.com
 - 📱 01555512778
 
 ---

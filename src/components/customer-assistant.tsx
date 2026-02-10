@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -18,6 +18,9 @@ import {
   Clock,
   EyeOff,
   ExternalLink,
+  Send,
+  Bot,
+  Loader2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
@@ -46,6 +49,27 @@ export default function CustomerAssistant() {
   const [isOpen, setIsOpen] = useState(false)
   const [isHidden, setIsHidden] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
+  const [inputMessage, setInputMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [conversationHistory, setConversationHistory] = useState<any[]>([])
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // التمرير التلقائي لآخر رسالة
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  // تركيز على input عند الفتح
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isOpen])
 
   // تحميل حالة الإخفاء من localStorage
   useEffect(() => {
@@ -62,13 +86,71 @@ export default function CustomerAssistant() {
     }
   }, [isOpen])
 
+  // إرسال رسالة للمساعد الذكي (AI)
+  const sendMessageToAI = async (messageText: string) => {
+    if (!messageText.trim() || isLoading) return
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: messageText
+    }
+
+    setMessages(prev => [...prev, userMessage])
+    setInputMessage('')
+    setIsLoading(true)
+
+    try {
+      const response = await fetch('/api/assistant/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: messageText,
+          conversationHistory
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant',
+          content: data.reply
+        }
+        setMessages(prev => [...prev, aiMessage])
+        setConversationHistory(data.conversationHistory || [])
+      } else {
+        throw new Error(data.error || 'فشل في الحصول على رد')
+      }
+    } catch (error) {
+      console.error('Error sending message:', error)
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: 'عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى أو التواصل معنا مباشرة على واتساب 01555512778 📱'
+      }
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // معالجة إرسال الرسالة
+  const handleSendMessage = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    if (inputMessage.trim() && !isLoading) {
+      sendMessageToAI(inputMessage)
+    }
+  }
+
   const showWelcomeMessage = () => {
     const userName = session?.user?.name || 'عميلنا العزيز'
     setMessages([
       {
         id: '1',
         type: 'assistant',
-        content: `أهلاً ${userName}! 👋\n\nأنا مساعدك الذكي في ريمو ستور\n\nكيف يمكنني مساعدتك اليوم؟`,
+        content: `أهلاً ${userName}! 👋\n\nأنا مساعدك الذكي في ريمو ستور 🤖\n\nيمكنك:\n• سؤالي عن أي منتج أو سعر\n• الاستفسار عن الشحن والدفع\n• طلب مساعدة في اختيار ملابس\n• أي سؤال عن المتجر\n\nاكتب رسالتك أو اختر من الخيارات السريعة:`,
       },
       {
         id: '2',
@@ -80,6 +162,16 @@ export default function CustomerAssistant() {
   }
 
   const getMainOptions = (): Option[] => [
+    {
+      id: 'ask-ai',
+      icon: <Bot className="w-5 h-5" />,
+      title: 'اسأل المساعد الذكي',
+      description: 'اكتب سؤالك مباشرة',
+      action: () => {
+        // تركيز على input
+        inputRef.current?.focus()
+      },
+    },
     {
       id: 'track-order',
       icon: <Package className="w-5 h-5" />,
@@ -108,13 +200,6 @@ export default function CustomerAssistant() {
       title: 'الإرجاع والاستبدال',
       description: 'سياسة الإرجاع',
       action: () => showReturnPolicy(),
-    },
-    {
-      id: 'help',
-      icon: <HelpCircle className="w-5 h-5" />,
-      title: 'الأسئلة الشائعة',
-      description: 'إجابات سريعة',
-      action: () => showFAQ(),
     },
     {
       id: 'contact',
@@ -204,7 +289,7 @@ export default function CustomerAssistant() {
       {
         id: 'contact-1',
         type: 'assistant',
-        content: '📞 تواصل مع خدمة العملاء\n\n📱 واتساب: 01555512778\n📧 البريد الإلكتروني: akram.er2025@gmail.com\n📍 العنوان: مصر - القاهرة\n⏰ نعمل: السبت - الخميس (9 صباحاً - 6 مساءً)\n\n💬 أو استخدم المحادثة المباشرة',
+        content: '📞 تواصل مع خدمة العملاء\n\n📱 واتساب: 01555512778\n📧 البريد الإلكتروني: remostore.egy@gmail.com\n📍 العنوان: مصر - القاهرة\n⏰ نعمل: السبت - الخميس (9 صباحاً - 6 مساءً)\n\n💬 أو استخدم المحادثة المباشرة',
       },
       {
         id: 'contact-2',
@@ -358,6 +443,14 @@ export default function CustomerAssistant() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
                   >
+                    {message.type === 'user' && (
+                      <div className="flex gap-3 md:gap-4 justify-end">
+                        <div className="bg-gradient-to-br from-teal-600 to-cyan-600 backdrop-blur-sm border border-teal-400/30 rounded-2xl rounded-tl-sm p-4 md:p-5 text-white text-sm md:text-base whitespace-pre-line max-w-[85%] leading-relaxed shadow-lg shadow-teal-900/30">
+                          {message.content}
+                        </div>
+                      </div>
+                    )}
+
                     {message.type === 'assistant' && (
                       <div className="flex gap-3 md:gap-4">
                         {/* شعار المساعد مع حلقة توهج */}
@@ -465,7 +558,57 @@ export default function CustomerAssistant() {
                     )}
                   </motion.div>
                 ))}
+
+                {/* مؤشر التحميل */}
+                {isLoading && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-3 md:gap-4"
+                  >
+                    <div className="flex-shrink-0 relative">
+                      <div className="absolute inset-0 bg-teal-400/30 rounded-full blur-md animate-pulse"></div>
+                      <img 
+                        src="/logo.png" 
+                        alt="Remo Store" 
+                        className="relative w-8 h-8 md:w-9 md:h-9 rounded-full object-cover ring-2 ring-teal-400/50 shadow-xl"
+                      />
+                    </div>
+                    <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 rounded-2xl rounded-tr-sm p-4 md:p-5 text-white/95 flex gap-2 items-center shadow-lg">
+                      <Loader2 className="w-5 h-5 animate-spin text-teal-400" />
+                      <span className="text-sm">جاري التفكير...</span>
+                    </div>
+                  </motion.div>
+                )}
+
+                <div ref={messagesEndRef} />
               </CardContent>
+
+              {/* حقل إدخال الرسالة */}
+              <div className="p-4 border-t border-teal-500/20 bg-slate-900/50">
+                <form onSubmit={handleSendMessage} className="flex gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    placeholder="اكتب سؤالك هنا..."
+                    disabled={isLoading}
+                    className="flex-1 bg-slate-800/50 border border-teal-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isLoading || !inputMessage.trim()}
+                    className="bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white p-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg hover:shadow-teal-500/50"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                  </button>
+                </form>
+              </div>
             </Card>
           </motion.div>
         )}

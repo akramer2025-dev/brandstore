@@ -490,7 +490,7 @@ export default async function TestDesignPage() {
                 <h4 className="font-semibold mb-3 text-pink-300">تواصل معنا</h4>
                 <div className="flex flex-col gap-2 text-sm text-pink-100">
                   <p>📱 01555512778</p>
-                  <p>📧 akram.er2025@gmail.com</p>
+                  <p>📧 remostore.egy@gmail.com</p>
                   <p>📍 مصر - القاهرة</p>
                 </div>
               </div>

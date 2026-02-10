@@ -61,6 +61,7 @@ export default {
   		},
   		animation: {
   			'slide-up': 'slide-up 0.5s ease-out',
+  			'spin-slow': 'spin 3s linear infinite',
   		}
   	}
   },

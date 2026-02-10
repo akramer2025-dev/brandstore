@@ -265,7 +265,7 @@ export default function TermsPage() {
                   <strong>ريمو ستور - Remo Store</strong>
                 </p>
                 <p className="text-gray-700 mb-2">
-                  📧 البريد الإلكتروني: <a href="mailto:akram.er2025@gmail.com" className="text-blue-600 hover:underline">akram.er2025@gmail.com</a>
+                  📧 البريد الإلكتروني: <a href="mailto:remostore.egy@gmail.com" className="text-blue-600 hover:underline">remostore.egy@gmail.com</a>
                 </p>
                 <p className="text-gray-700 mb-2">
                   📱 واتساب/هاتف: <a href="tel:+201555512778" className="text-blue-600 hover:underline">01555512778</a>
