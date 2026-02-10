@@ -243,6 +243,13 @@ export default async function AdminDashboard() {
             color="text-teal-600"
           />
           <ActionCard
+            title="🤖 رسائل المساعد الذكي"
+            description="جميع محادثات العملاء مع المساعد الذكي AI"
+            href="/admin/customer-chats"
+            icon={<Bot className="w-12 h-12" />}
+            color="text-pink-600"
+          />
+          <ActionCard
             title="🤖 بوت Messenger"
             description="رد تلقائي ذكي 24/7 على رسائل Facebook Messenger"
             href="/admin/messenger-bot"

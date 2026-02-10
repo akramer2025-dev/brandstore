@@ -41,12 +41,24 @@ const QUICK_SUGGESTIONS = [
   '🔄 سياسة الإرجاع',
 ]
 
+// توليد معرف جلسة فريد
+function generateSessionId() {
+  if (typeof window === 'undefined') return ''
+  let id = sessionStorage.getItem('remo_chat_page_session')
+  if (!id) {
+    id = 'cp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9)
+    sessionStorage.setItem('remo_chat_page_session', id)
+  }
+  return id
+}
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [conversationHistory, setConversationHistory] = useState<any[]>([])
   const [showWelcome, setShowWelcome] = useState(true)
+  const [sessionId] = useState(() => generateSessionId())
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -66,7 +78,7 @@ export default function ChatPage() {
         {
           id: '1',
           type: 'assistant',
-          content: 'أهلاً بيك في ريمو ستور! 👋✨\n\nأنا مساعدك الذكي، هنا عشان أساعدك في كل حاجة:\n\n🛍️ تصفح المنتجات والأسعار\n📦 تتبع طلباتك\n🚚 معلومات الشحن والتوصيل\n💳 طرق الدفع\n🔄 الإرجاع والاستبدال\n\nإسألني أي سؤال أو اختار من الأسئلة السريعة! 👇',
+          content: 'نورتنا 😊 معاك ريمو ستور، هرد على كل استفساراتك.\nقولى اقدر اساعدك ازاى؟',
         },
         {
           id: '2',
@@ -100,6 +112,8 @@ export default function ChatPage() {
         body: JSON.stringify({
           message: messageText,
           conversationHistory,
+          sessionId,
+          source: 'chat-page'
         }),
       })
 

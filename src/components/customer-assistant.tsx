@@ -55,6 +55,17 @@ interface Option {
 
 const ASSISTANT_HIDDEN_KEY = 'remo_customer_assistant_hidden'
 
+// توليد معرف جلسة فريد
+function generateSessionId() {
+  if (typeof window === 'undefined') return ''
+  let id = sessionStorage.getItem('remo_chat_session')
+  if (!id) {
+    id = 'cs_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9)
+    sessionStorage.setItem('remo_chat_session', id)
+  }
+  return id
+}
+
 export default function CustomerAssistant() {
   const { data: session } = useSession()
   const [isOpen, setIsOpen] = useState(false)
@@ -63,6 +74,7 @@ export default function CustomerAssistant() {
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [conversationHistory, setConversationHistory] = useState<any[]>([])
+  const [sessionId] = useState(() => generateSessionId())
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -117,7 +129,9 @@ export default function CustomerAssistant() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: messageText,
-          conversationHistory
+          conversationHistory,
+          sessionId,
+          source: 'website'
         })
       })
 
@@ -168,12 +182,11 @@ export default function CustomerAssistant() {
   }
 
   const showWelcomeMessage = () => {
-    const userName = session?.user?.name || 'عميلنا العزيز'
     setMessages([
       {
         id: '1',
         type: 'assistant',
-        content: `أهلاً ${userName}! 👋\n\nأنا مساعدك الذكي في ريمو ستور 🤖\n\nيمكنك:\n• سؤالي عن أي منتج أو سعر\n• الاستفسار عن الشحن والدفع\n• طلب مساعدة في اختيار ملابس\n• أي سؤال عن المتجر\n\nاكتب رسالتك أو اختر من الخيارات السريعة:`,
+        content: 'نورتنا 😊 معاك ريمو ستور، هرد على كل استفساراتك.\nقولى اقدر اساعدك ازاى؟',
       },
       {
         id: '2',

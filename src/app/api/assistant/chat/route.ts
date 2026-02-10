@@ -23,60 +23,58 @@ interface Message {
 interface ProductInfo {
   id: string
   name: string
+  nameAr: string
+  description: string | null
+  descriptionAr: string | null
   price: number
   originalPrice?: number | null
   category: string | null
-  brand: string | null
   stock: number
   imageUrl: string | null
+  sizes: string | null
+  colors: string | null
+  allowCashOnDelivery: boolean
 }
 
 // جلب بيانات من قاعدة البيانات لسياق المحادثة
 async function getContextData() {
   try {
-    // جلب المنتجات المتاحة مع الصور
-    const featuredProducts = await prisma.product.findMany({
+    // جلب كل المنتجات المتاحة مع كل التفاصيل
+    const allProducts = await prisma.product.findMany({
       where: { 
-        status: 'ACTIVE',
-        isAvailable: true,
-        stock: { gt: 0 }
+        isActive: true,
+        isVisible: true,
       },
       select: {
         id: true,
         name: true,
+        nameAr: true,
+        description: true,
+        descriptionAr: true,
         price: true,
         originalPrice: true,
-        category: true,
-        brand: true,
         stock: true,
         images: true,
+        sizes: true,
+        colors: true,
+        allowCashOnDelivery: true,
+        category: {
+          select: {
+            name: true,
+            nameAr: true,
+          }
+        },
       },
-      take: 30,
       orderBy: { createdAt: 'desc' }
     })
 
     // جلب الفئات المتاحة
-    const categories = await prisma.product.findMany({
-      where: { 
-        status: 'ACTIVE',
-        isAvailable: true 
-      },
-      select: { category: true },
-      distinct: ['category'],
-    })
-
-    // جلب الماركات المتاحة
-    const brands = await prisma.product.findMany({
-      where: { 
-        status: 'ACTIVE',
-        isAvailable: true 
-      },
-      select: { brand: true },
-      distinct: ['brand'],
+    const categories = await prisma.category.findMany({
+      select: { name: true, nameAr: true },
     })
 
     // تنسيق المنتجات مع أول صورة
-    const products: ProductInfo[] = featuredProducts.map(p => {
+    const products: ProductInfo[] = allProducts.map(p => {
       let imageUrl: string | null = null
       if (p.images) {
         try {
@@ -89,19 +87,25 @@ async function getContextData() {
       return {
         id: p.id,
         name: p.name,
+        nameAr: p.nameAr,
+        description: p.description,
+        descriptionAr: p.descriptionAr,
         price: p.price,
         originalPrice: p.originalPrice,
-        category: p.category,
-        brand: p.brand,
+        category: p.category?.nameAr || p.category?.name || null,
         stock: p.stock,
         imageUrl,
+        sizes: p.sizes,
+        colors: p.colors,
+        allowCashOnDelivery: p.allowCashOnDelivery,
       }
     })
 
     return {
       products,
-      categories: categories.map(c => c.category),
-      brands: brands.map(b => b.brand).filter(Boolean),
+      categories: categories.map(c => c.nameAr || c.name),
+      brands: [] as string[],
+      totalProducts: allProducts.length,
     }
   } catch (error) {
     console.error('Error fetching context data:', error)
@@ -109,6 +113,7 @@ async function getContextData() {
       products: [] as ProductInfo[],
       categories: [],
       brands: [],
+      totalProducts: 0,
     }
   }
 }
@@ -118,25 +123,26 @@ function findMatchingProducts(message: string, products: ProductInfo[]): Product
   const query = message.toLowerCase()
   
   // كلمات عامة نتجاهلها
-  const stopWords = ['عاوز', 'عايز', 'عندكم', 'فين', 'ايه', 'عن', 'في', 'من', 'على', 'ال', 'ده', 'دي', 'هل', 'كم', 'سعر', 'اسعار', 'منتج', 'منتجات', 'حاجة', 'حاجات', 'ابغى', 'ابي', 'وش', 'شو']
+  const stopWords = ['عاوز', 'عايز', 'عندكم', 'فين', 'ايه', 'عن', 'في', 'من', 'على', 'ال', 'ده', 'دي', 'هل', 'كم', 'سعر', 'اسعار', 'منتج', 'منتجات', 'حاجة', 'حاجات', 'ابغى', 'ابي', 'وش', 'شو', 'بكام', 'كام', 'قد', 'ايش', 'شنو', 'يا', 'لو', 'ممكن', 'عرض', 'اعرض', 'ورينى', 'وريني', 'فيه']
   
   const scored = products.map(p => {
     let score = 0
     const productName = p.name.toLowerCase()
+    const productNameAr = p.nameAr.toLowerCase()
     const productCategory = (p.category || '').toLowerCase()
-    const productBrand = (p.brand || '').toLowerCase()
+    const productDesc = (p.descriptionAr || p.description || '').toLowerCase()
     
-    // تطابق مع اسم المنتج
-    if (productName.includes(query) || query.includes(productName)) {
-      score += 10
-    }
+    // تطابق كامل مع اسم المنتج
+    if (productName.includes(query) || query.includes(productName)) score += 15
+    if (productNameAr.includes(query) || query.includes(productNameAr)) score += 15
     
     // تطابق كلمات مفتاحية
     const queryWords = query.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w))
     for (const word of queryWords) {
-      if (productName.includes(word)) score += 3
-      if (productCategory.includes(word)) score += 2
-      if (productBrand.includes(word)) score += 2
+      if (productName.includes(word)) score += 5
+      if (productNameAr.includes(word)) score += 5
+      if (productCategory.includes(word)) score += 3
+      if (productDesc.includes(word)) score += 2
     }
     
     return { product: p, score }
@@ -145,19 +151,37 @@ function findMatchingProducts(message: string, products: ProductInfo[]): Product
   return scored
     .filter(s => s.score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
+    .slice(0, 6)
     .map(s => s.product)
 }
 
 // التعليمات الأساسية للمساعد الذكي
-const SYSTEM_INSTRUCTIONS = `أنت مساعد ذكي لمتجر "ريمو ستور" (Remo Store) - متجر إلكتروني متخصص في بيع الملابس والأحذية والاكسسوارات النسائية في مصر.
+const SYSTEM_INSTRUCTIONS = `أنت موظف خدمة عملاء محترف في متجر "ريمو ستور" (Remo Store) - متجر إلكتروني متخصص في بيع الملابس والأحذية والاكسسوارات النسائية في مصر.
 
-دورك:
-- رد على استفسارات العملاء بطريقة احترافية ودودة
-- استخدم اللغة العربية الفصحى مع لمسة من العامية المصرية المحببة
-- قدم معلومات دقيقة عن المنتجات والأسعار من البيانات المتوفرة
-- ساعد العملاء في اختيار المنتجات المناسبة لهم
-- أجب على الأسئلة عن الشحن والدفع والإرجاع
+شخصيتك:
+- اسمك "ريمو" - موظف خدمة عملاء في ريمو ستور
+- بترد بالعامية المصرية بشكل طبيعي ومحترف زي موظف حقيقي
+- ودود ومحترف، بتحسسي العميلة إنها مهمة
+- بتستخدم إيموجي باعتدال 😊
+
+أسلوب الرد:
+- رد بالعامية المصرية (مثال: "أيوه طبعاً"، "تحت أمرك"، "اتفضلي")
+- خلي الرد قصير ومباشر (3-4 جمل بالكتير)
+- لما حد يسأل عن سعر، قولي السعر فوراً وواضح
+- لما حد يسأل عن الخامة، اشرحيلها من الوصف الموجود
+- لو سأل عن عرض لأكتر من قطعة، قولي "السعر ثابت يا قمر لكن ممكن تستفيدي من الشحن المجاني للطلبات فوق 500 جنيه 🚚"
+- لو طلب خصم أو تخفيض، قولي "الأسعار دي أحسن أسعار والله يا قمر، وكمان الجودة هتعجبك جداً ✨ لو عايزة حاجة تانية أنا تحت أمرك"
+- متديش خصم أو تغيري في السعر أبداً - الأسعار ثابتة
+- لو المنتج عليه خصم أصلاً (سعر أصلي أعلى)، وضحي كده: "ده كمان عليه خصم من [السعر الأصلي] لـ [السعر الحالي] 🔥"
+
+التعامل مع الأسئلة الشائعة:
+- "السعر النهائي كام؟" → قولي السعر + مصاريف الشحن حسب المحافظة
+- "الخامة ايه؟" → اشرحي من وصف المنتج لو موجود، أو قولي "خامة ممتازة وجودة عالية"
+- "لو هاخد 2 أو 3 قطع؟" → "السعر ثابت يا قمر لكل قطعة، بس لو المجموع فوق 500 جنيه الشحن مجاني 🚚"
+- "فيه مقاسات تانية؟" → اعرضي المقاسات المتاحة من البيانات
+- "فيه ألوان تانية؟" → اعرضي الألوان المتاحة من البيانات
+- "بيوصل امتى؟" → "من 2 لـ 5 أيام عمل حسب المحافظة 📦"
+- "ينفع أجرب وأرجع؟" → "طبعاً! عندنا سياسة إرجاع 14 يوم من تاريخ الاستلام 🔄"
 
 معلومات عن المتجر:
 - الاسم: ريمو ستور (Remo Store)
@@ -175,38 +199,26 @@ const SYSTEM_INSTRUCTIONS = `أنت مساعد ذكي لمتجر "ريمو ست�
   * واتساب: 01555512778
   * البريد: remostore.egy@gmail.com
   * الموقع: www.remostore.net
-  * فيسبوك ماسنجر: m.me/remostore.egy
 
 الفئات المتاحة:
 {CATEGORIES}
 
-الماركات المتاحة:
-{BRANDS}
-
-بعض المنتجات المميزة:
+كتالوج المنتجات الكامل:
 {PRODUCTS}
 
 ملاحظات مهمة:
-- إذا سأل العميل عن منتج معين، ابحث في قائمة المنتجات المتاحة وقدم معلومات عنه
-- المنتجات المطابقة لسؤال العميل (إن وجدت) ستُعرض تلقائياً ككروت منتجات تحت ردك
-- لا تكتب روابط المنتجات في ردك النصي - الكروت ستظهر تلقائياً
-- إذا كان المنتج غير متوفر في القائمة، أخبر العميل أنك ستتحقق وتنصحه بالتواصل
-- رد بإيموجي مناسبة لتحسين تجربة المحادثة 😊
-- كن مختصراً وواضحاً، لا تكتب أكثر من 3-4 جمل في الرد الواحد
-- إذا كان السؤال معقد أو يحتاج تدخل بشري، وجه العميل لخدمة العملاء
-- عند ذكر منتج في ردك النصي، اذكر اسمه وسعره فقط
-
-أسلوب الرد:
-- ابدأ بتحية لطيفة
-- كن محترفاً وودوداً
-- استخدم الإيموجي باعتدال
-- أعط معلومات محددة (أسعار، مواصفات)
-- اختم باستعداد للمساعدة أكثر`
+- لديك كتالوج المنتجات الكامل ({TOTAL_PRODUCTS} منتج) بكل التفاصيل
+- إذا سألت العميلة عن منتج معين، ابحثي في القائمة وقدمي معلومات كاملة (السعر، المقاسات، الألوان، الوصف)
+- المنتجات المطابقة هتظهر تلقائياً ككروت تحت ردك - متكتبيش روابط
+- إذا سألت عن مقاس أو لون معين، تحققي من بيانات المنتج
+- لو المنتج مش موجود، قولي "للأسف مش متوفر حالياً بس تقدري تتواصلي معانا على واتساب 01555512778 وهنوفرهولك إن شاء الله 💪"
+- متديش أي خصم إضافي - الأسعار نهائية
+- لو السؤال معقد أو محتاج تدخل بشري، وجهي العميلة لواتساب خدمة العملاء`
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { message, conversationHistory = [] } = body
+    const { message, conversationHistory = [], sessionId, source = 'website' } = body
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -217,29 +229,65 @@ export async function POST(request: NextRequest) {
 
     console.log('[Assistant API] New message:', message)
 
+    // إنشاء أو جلب المحادثة
+    let conversationId: string | null = null
+    if (sessionId) {
+      try {
+        const conversation = await prisma.chatConversation.upsert({
+          where: { sessionId },
+          create: {
+            sessionId,
+            source,
+            customerIP: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
+          },
+          update: {
+            lastMessageAt: new Date(),
+          },
+        })
+        conversationId = conversation.id
+
+        // حفظ رسالة العميل
+        await prisma.chatMessage.create({
+          data: {
+            conversationId: conversation.id,
+            role: 'user',
+            content: message,
+          },
+        })
+      } catch (dbError) {
+        console.error('[Assistant API] DB save error (user msg):', dbError)
+      }
+    }
+
     // جلب بيانات السياق من قاعدة البيانات
     const contextData = await getContextData()
     
-    // تنسيق البيانات للإضافة للتعليمات
+    // تنسيق البيانات للإضافة للتعليمات - بيانات كاملة
     const productsInfo = contextData.products.length > 0
-      ? contextData.products.map(p => 
-          `- [${p.id}] ${p.name} (${p.category || 'عام'}): ${p.price} جنيه${p.originalPrice && p.originalPrice > p.price ? ` (بدل ${p.originalPrice} جنيه)` : ''} - ${p.stock > 10 ? 'متوفر' : 'كمية محدودة'}`
-        ).join('\n')
+      ? contextData.products.map(p => {
+          let info = `- [${p.id}] ${p.nameAr || p.name} (${p.category || 'عام'}): ${p.price} جنيه`
+          if (p.originalPrice && p.originalPrice > p.price) {
+            const discount = Math.round((1 - p.price / p.originalPrice) * 100)
+            info += ` (بدل ${p.originalPrice} جنيه - خصم ${discount}%)`
+          }
+          if (p.descriptionAr || p.description) info += ` | الوصف: ${p.descriptionAr || p.description}`
+          if (p.sizes && p.sizes.length > 0) info += ` | المقاسات: ${p.sizes}`
+          if (p.colors && p.colors.length > 0) info += ` | الألوان: ${p.colors}`
+          info += ` | ${p.allowCashOnDelivery ? 'دفع عند الاستلام متاح' : 'الدفع أونلاين فقط'}`
+          info += ` | المخزون: ${p.stock > 10 ? 'متوفر' : p.stock > 0 ? 'كمية محدودة' : 'نفذ'}`
+          return info
+        }).join('\n')
       : 'لا توجد منتجات متاحة حالياً'
 
     const categoriesInfo = contextData.categories.length > 0
       ? contextData.categories.join(', ')
       : 'جاري التحديث'
 
-    const brandsInfo = contextData.brands.length > 0
-      ? contextData.brands.join(', ')
-      : 'متنوعة'
-
     // إعداد التعليمات مع البيانات الحقيقية
     const systemPrompt = SYSTEM_INSTRUCTIONS
       .replace('{PRODUCTS}', productsInfo)
       .replace('{CATEGORIES}', categoriesInfo)
-      .replace('{BRANDS}', brandsInfo)
+      .replace('{TOTAL_PRODUCTS}', String(contextData.totalProducts))
 
     // بناء تاريخ المحادثة
     const messages: Message[] = [
@@ -270,13 +318,29 @@ export async function POST(request: NextRequest) {
     // تنسيق المنتجات المطابقة للإرسال للعميل
     const productCards = matchingProducts.map(p => ({
       id: p.id,
-      name: p.name,
+      name: p.nameAr || p.name,
       price: p.price,
       originalPrice: p.originalPrice,
       imageUrl: p.imageUrl,
       category: p.category,
       link: `/products/${p.id}`,
     }))
+
+    // حفظ رد المساعد في قاعدة البيانات
+    if (conversationId) {
+      try {
+        await prisma.chatMessage.create({
+          data: {
+            conversationId,
+            role: 'assistant',
+            content: reply,
+            productIds: matchingProducts.length > 0 ? matchingProducts.map(p => p.id).join(',') : null,
+          },
+        })
+      } catch (dbError) {
+        console.error('[Assistant API] DB save error (assistant msg):', dbError)
+      }
+    }
 
     return NextResponse.json({
       success: true,
