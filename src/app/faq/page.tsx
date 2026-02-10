@@ -144,69 +144,69 @@ export default function FAQPage() {
   ]
 
   return (
-    <div className=\"min-h-screen relative overflow-hidden\">
+    <div className="min-h-screen relative overflow-hidden">
       <BrandBackgroundPattern />
-      <div className=\"relative z-10 py-12 px-4\">
-        <div className=\"max-w-6xl mx-auto\">
+      <div className="relative z-10 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className=\"text-center mb-16\">
-            <div className=\"inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-pink-500 rounded-full mb-6\">
-              <HelpCircle className=\"w-10 h-10 text-white\" />
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-pink-500 rounded-full mb-6">
+              <HelpCircle className="w-10 h-10 text-white" />
             </div>
-            <h1 className=\"text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-pink-500 to-primary bg-clip-text text-transparent mb-4\">
+            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-pink-500 to-primary bg-clip-text text-transparent mb-4">
               الأسئلة الشائعة
             </h1>
-            <p className=\"text-gray-600 text-lg max-w-2xl mx-auto\">
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               إجابات سريعة على أكثر الأسئلة شيوعاً. مالقيتش اللي تدور عليه؟ تكلم معنا!
             </p>
           </div>
 
           {/* Quick Contact CTA */}
-          <div className=\"bg-gradient-to-r from-primary to-pink-500 rounded-3xl p-8 mb-12 text-white text-center\">
-            <h2 className=\"text-2xl font-bold mb-4\">محتاج مساعدة فورية؟ 🤖</h2>
-            <p className=\"mb-6\">تكلم مع البوت الذكي على الماسنجر - بيرد 24/7!</p>
-            <div className=\"flex flex-wrap gap-4 justify-center\">
+          <div className="bg-gradient-to-r from-primary to-pink-500 rounded-3xl p-8 mb-12 text-white text-center">
+            <h2 className="text-2xl font-bold mb-4">محتاج مساعدة فورية؟ 🤖</h2>
+            <p className="mb-6">تكلم مع البوت الذكي على الماسنجر - بيرد 24/7!</p>
+            <div className="flex flex-wrap gap-4 justify-center">
               <a 
-                href=\"https://m.me/103042954595602\" 
-                target=\"_blank\"
-                className=\"bg-white text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2\"
+                href="https://m.me/103042954595602" 
+                target="_blank"
+                className="bg-white text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2"
               >
-                <MessageCircle className=\"w-5 h-5\" />
+                <MessageCircle className="w-5 h-5" />
                 Messenger
               </a>
               <a 
-                href=\"tel:01555512778\" 
-                className=\"bg-white text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2\"
+                href="tel:01555512778" 
+                className="bg-white text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2"
               >
-                <Phone className=\"w-5 h-5\" />
+                <Phone className="w-5 h-5" />
                 01555512778
               </a>
             </div>
           </div>
 
           {/* FAQ Categories */}
-          <div className=\"space-y-8\">
+          <div className="space-y-8">
             {faqs.map((category, categoryIndex) => {
               const Icon = category.icon
               return (
-                <div key={categoryIndex} className=\"bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-6 md:p-8 border border-primary/10\">
+                <div key={categoryIndex} className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-6 md:p-8 border border-primary/10">
                   {/* Category Header */}
-                  <div className=\"flex items-center gap-3 mb-6 pb-4 border-b border-primary/20\">
-                    <div className=\"w-12 h-12 bg-gradient-to-br from-primary to-pink-500 rounded-xl flex items-center justify-center\">
-                      <Icon className=\"w-6 h-6 text-white\" />
+                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-primary/20">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-pink-500 rounded-xl flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <h2 className=\"text-2xl font-bold text-gray-900\">{category.category}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">{category.category}</h2>
                   </div>
 
                   {/* Questions */}
-                  <div className=\"space-y-6\">
+                  <div className="space-y-6">
                     {category.questions.map((item, index) => (
-                      <div key={index} className=\"group\">
-                        <h3 className=\"text-lg font-bold text-gray-900 mb-2 flex items-start gap-2\">
-                          <span className=\"text-primary mt-1\">❓</span>
-                          <span className=\"flex-1\">{item.q}</span>
+                      <div key={index} className="group">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-start gap-2">
+                          <span className="text-primary mt-1">❓</span>
+                          <span className="flex-1">{item.q}</span>
                         </h3>
-                        <p className=\"text-gray-700 leading-relaxed pr-7\">
+                        <p className="text-gray-700 leading-relaxed pr-7">
                           {item.a}
                         </p>
                       </div>
@@ -218,31 +218,31 @@ export default function FAQPage() {
           </div>
 
           {/* Still Have Questions */}
-          <div className=\"mt-12 bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-8 text-center border border-primary/10\">
-            <Clock className=\"w-12 h-12 text-primary mx-auto mb-4\" />
-            <h2 className=\"text-2xl font-bold text-gray-900 mb-4\">لسه عندك أسئلة تانية؟</h2>
-            <p className=\"text-gray-600 mb-6\">
+          <div className="mt-12 bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-8 text-center border border-primary/10">
+            <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">لسه عندك أسئلة تانية؟</h2>
+            <p className="text-gray-600 mb-6">
               فريقنا جاهز لمساعدتك! تواصل معنا بأي وسيلة تناسبك
             </p>
-            <div className=\"flex flex-wrap gap-4 justify-center\">
+            <div className="flex flex-wrap gap-4 justify-center">
               <a 
-                href=\"https://m.me/103042954595602\" 
-                target=\"_blank\"
-                className=\"bg-gradient-to-r from-primary to-pink-500 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2\"
+                href="https://m.me/103042954595602" 
+                target="_blank"
+                className="bg-gradient-to-r from-primary to-pink-500 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2"
               >
-                <MessageCircle className=\"w-5 h-5\" />
+                <MessageCircle className="w-5 h-5" />
                 ابعتلنا على Messenger
               </a>
               <a 
-                href=\"tel:01555512778\" 
-                className=\"border-2 border-primary text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2\"
+                href="tel:01555512778" 
+                className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2"
               >
-                <Phone className=\"w-5 h-5\" />
+                <Phone className="w-5 h-5" />
                 اتصل بنا
               </a>
               <a 
-                href=\"mailto:akram.er2025@gmail.com\" 
-                className=\"border-2 border-primary text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2\"
+                href="mailto:remostore.egy@gmail.com" 
+                className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2"
               >
                 📧 ابعتلنا إيميل
               </a>
