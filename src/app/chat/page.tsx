@@ -176,11 +176,11 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-to-br from-purple-50 via-purple-100 to-indigo-50">
       {/* Sidebar - ظاهر على Desktop بس */}
       <div className={`
         hidden lg:flex
-        w-20 bg-white border-l border-gray-200 shadow-lg
+        w-20 bg-gradient-to-b from-white to-purple-50 border-l border-purple-100 shadow-lg
         flex-col h-full py-4
       `}>
         <div className="flex flex-col h-full">
@@ -207,7 +207,7 @@ export default function ChatPage() {
             {/* الرئيسية */}
             <Link
               href="/"
-              className="w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 transition-all hover:scale-110"
+              className="w-12 h-12 rounded-full bg-purple-100 hover:bg-purple-200 flex items-center justify-center text-purple-700 transition-all hover:scale-110"
               title="الرئيسية"
             >
               <Home className="w-5 h-5" />
@@ -216,7 +216,7 @@ export default function ChatPage() {
             {/* السلة */}
             <Link
               href="/cart"
-              className="w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 transition-all hover:scale-110"
+              className="w-12 h-12 rounded-full bg-purple-100 hover:bg-purple-200 flex items-center justify-center text-purple-700 transition-all hover:scale-110"
               title="السلة"
             >
               <ShoppingCart className="w-5 h-5" />
@@ -236,7 +236,7 @@ export default function ChatPage() {
           {/* Settings at bottom */}
           <div className="flex flex-col items-center gap-3">
             <button
-              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-all"
+              className="w-10 h-10 rounded-full bg-purple-100 hover:bg-purple-200 flex items-center justify-center text-purple-600 transition-all"
               title="الإعدادات"
             >
               <Settings className="w-5 h-5" />
@@ -290,6 +290,12 @@ export default function ChatPage() {
       <div
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%)
+          `
+        }}
       >
         {/* Welcome Animation */}
         <AnimatePresence>
@@ -448,7 +454,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area - بسيط زي Messenger */}
-      <div className="border-t border-gray-200 bg-white px-4 py-3">
+      <div className="border-t border-purple-200 bg-white/95 backdrop-blur-sm px-4 py-3 shadow-lg">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -457,7 +463,7 @@ export default function ChatPage() {
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="اكتب رسالة..."
             disabled={isLoading}
-            className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-gray-200 disabled:opacity-50 text-sm transition-all"
+            className="flex-1 bg-purple-50/50 border border-purple-100 rounded-full px-4 py-2.5 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-purple-100/50 focus:border-purple-300 disabled:opacity-50 text-sm transition-all"
             autoFocus
           />
           <button
@@ -475,7 +481,7 @@ export default function ChatPage() {
         
         {/* Powered by */}
         <div className="text-center mt-2">
-          <Link href="/" className="text-gray-400 hover:text-gray-600 text-[10px] transition-colors">
+          <Link href="/" className="text-purple-400 hover:text-purple-600 text-[10px] transition-colors">
             Powered by Remo Store
           </Link>
         </div>
