@@ -18,6 +18,8 @@ interface OrderActionsProps {
   currentStatus: string;
   deliveryStaffList: DeliveryStaff[];
   currentDeliveryStaffId: string | null;
+  rejectedByRole?: string | null;
+  vendorName?: string | null;
 }
 
 export function OrderActions({
@@ -25,6 +27,8 @@ export function OrderActions({
   currentStatus,
   deliveryStaffList,
   currentDeliveryStaffId,
+  rejectedByRole,
+  vendorName,
 }: OrderActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -158,7 +162,16 @@ export function OrderActions({
 
         {currentStatus === "REJECTED" && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-            <p className="text-red-800 font-medium">❌ تم رفض الطلب من قبل العميل</p>
+            <p className="text-red-800 font-medium">
+              ❌ تم رفض الطلب من قبل{" "}
+              {rejectedByRole === "VENDOR" 
+                ? `التاجر${vendorName ? ` (${vendorName})` : ""}`
+                : rejectedByRole === "ADMIN"
+                ? "الإدارة"
+                : rejectedByRole === "DEVELOPER"
+                ? "المطور"
+                : "العميل"}
+            </p>
           </div>
         )}
 

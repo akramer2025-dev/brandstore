@@ -30,7 +30,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   const resolvedParams = await params;
 
-  const order = await prisma.order.findUnique({
+  const orderData = await prisma.order.findUnique({
     where: { id: resolvedParams.id },
     include: {
       customer: true,
@@ -40,12 +40,32 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         },
       },
       deliveryStaff: true,
+      vendor: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
 
-  if (!order) {
+  if (!orderData) {
     redirect("/admin/orders");
   }
+
+  // Type assertion to include receipt fields
+  const order = orderData as typeof orderData & {
+    wePayReceipt?: string | null;
+    eWalletReceipt?: string | null;
+    bankTransferReceipt?: string | null;
+  };
+
+  // Fetch rejection log if order is rejected
+  const rejectionLog = order.status === "REJECTED" 
+    ? await prisma.orderRejectionLog.findFirst({
+        where: { orderId: order.id },
+        orderBy: { createdAt: "desc" },
+      })
+    : null;
 
   const deliveryStaffList = await prisma.deliveryStaff.findMany({
     where: { isActive: true },
@@ -160,6 +180,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   currentStatus={order.status}
                   deliveryStaffList={staffList}
                   currentDeliveryStaffId={order.deliveryStaffId}
+                  rejectedByRole={rejectionLog?.rejectedByRole}
+                  vendorName={order.vendor?.user?.name || order.vendor?.businessName}
                 />
               </CardContent>
             </Card>
