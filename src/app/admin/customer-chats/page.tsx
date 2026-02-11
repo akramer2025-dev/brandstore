@@ -43,9 +43,61 @@ export default function CustomerChatsPage() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [soundEnabled, setSoundEnabled] = useState(true)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [isInstallable, setIsInstallable] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const previousConversationsRef = useRef<Conversation[]>([])
+
+  // إعداد PWA للتثبيت
+  useEffect(() => {
+    // إضافة manifest link
+    const manifestLink = document.createElement('link')
+    manifestLink.rel = 'manifest'
+    manifestLink.href = '/chat-manifest.json'
+    document.head.appendChild(manifestLink)
+
+    // استماع لحدث beforeinstallprompt
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+      setIsInstallable(true)
+      console.log('✅ التطبيق جاهز للتثبيت')
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+
+    // التحقق من التثبيت السابق
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      console.log('📱 التطبيق يعمل في وضع standalone')
+      setIsInstallable(false)
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      document.head.removeChild(manifestLink)
+    }
+  }, [])
+
+  // تثبيت التطبيق
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      alert('⚠️ التطبيق غير قابل للتثبيت الآن. جرب من متصفح آخر (Chrome, Edge)')
+      return
+    }
+
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    console.log(`👤 قرار المستخدم: ${outcome}`)
+
+    if (outcome === 'accepted') {
+      console.log('✅ تم تثبيت التطبيق')
+      alert('✅ تم تثبيت التطبيق بنجاح! ابحث عن أيقونة "رسائل العملاء" على سطح المكتب أو الموبايل')
+    }
+
+    setDeferredPrompt(null)
+    setIsInstallable(false)
+  }
 
   // إنشاء صوت الإشعار (صوت واتساب)
   useEffect(() => {
@@ -337,6 +389,17 @@ export default function CustomerChatsPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          {isInstallable && (
+            <Button 
+              onClick={handleInstallClick} 
+              variant="default"
+              size="sm"
+              style={{ backgroundColor: '#7c3aed', color: 'white' }}
+              className="font-bold"
+            >
+              📱 تثبيت التطبيق
+            </Button>
+          )}
           {notificationsEnabled && (
             <Button 
               onClick={() => setSoundEnabled(!soundEnabled)} 

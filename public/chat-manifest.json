@@ -1,0 +1,46 @@
+{
+  "name": "ريمو ستور - رسائل العملاء",
+  "short_name": "رسائل العملاء",
+  "description": "تطبيق مراقبة ومتابعة رسائل العملاء من المساعد الذكي",
+  "start_url": "/admin/customer-chats",
+  "display": "standalone",
+  "background_color": "#7c3aed",
+  "theme_color": "#7c3aed",
+  "orientation": "any",
+  "categories": ["business", "productivity"],
+  "dir": "rtl",
+  "lang": "ar",
+  "scope": "/admin/customer-chats",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/logo.png",
+      "sizes": "540x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "رسائل جديدة",
+      "short_name": "جديد",
+      "description": "عرض الرسائل الجديدة",
+      "url": "/admin/customer-chats",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
