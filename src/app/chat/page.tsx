@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Send,
@@ -15,6 +15,15 @@ import {
   Settings,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+
+interface SliderImage {
+  id: string
+  titleAr: string
+  subtitleAr: string | null
+  imageUrl: string
+  isActive: boolean
+}
 
 interface ChatMessage {
   id: string
@@ -65,6 +74,12 @@ export default function ChatPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
+  // Slider state
+  const [slides, setSlides] = useState<SliderImage[]>([])
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [nextSlide, setNextSlide] = useState(1)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -72,6 +87,44 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // جلب صور السلايدر
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const res = await fetch('/api/admin/slider')
+        if (res.ok) {
+          const data = await res.json()
+          const activeSlides = (data.sliderImages || data || []).filter((s: SliderImage) => s.isActive)
+          if (activeSlides.length > 0) {
+            setSlides(activeSlides)
+          }
+        }
+      } catch (err) {
+        console.log('Could not fetch slider images')
+      }
+    }
+    fetchSlides()
+  }, [])
+
+  // تحريك السلايدر تلقائياً
+  const advanceSlide = useCallback(() => {
+    if (slides.length <= 1) return
+    setIsTransitioning(true)
+    const next = (currentSlide + 1) % slides.length
+    setNextSlide(next)
+    
+    setTimeout(() => {
+      setCurrentSlide(next)
+      setIsTransitioning(false)
+    }, 1500)
+  }, [currentSlide, slides.length])
+
+  useEffect(() => {
+    if (slides.length <= 1) return
+    const interval = setInterval(advanceSlide, 6000)
+    return () => clearInterval(interval)
+  }, [advanceSlide, slides.length])
 
   // حقن manifest للشات
   useEffect(() => {
@@ -182,10 +235,59 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+    <div className="flex h-screen relative overflow-hidden">
+      {/* خلفية السلايدر المتحرك */}
+      <div className="absolute inset-0 z-0">
+        {slides.length > 0 ? (
+          <>
+            {/* الصور المتحركة */}
+            {slides.map((slide, index) => (
+              <div
+                key={slide.id}
+                className="absolute inset-0 transition-all duration-[1500ms] ease-in-out"
+                style={{
+                  opacity: index === currentSlide ? 1 : (isTransitioning && index === nextSlide ? 1 : 0),
+                  zIndex: index === currentSlide ? 1 : (isTransitioning && index === nextSlide ? 2 : 0),
+                }}
+              >
+                <Image
+                  src={slide.imageUrl}
+                  alt={slide.titleAr || 'Background'}
+                  fill
+                  sizes="100vw"
+                  className={`object-cover transition-transform duration-[8000ms] ease-out ${
+                    index === currentSlide ? 'scale-110' : 'scale-100'
+                  }`}
+                  priority={index === 0}
+                />
+              </div>
+            ))}
+          </>
+        ) : (
+          /* خلفية بديلة إذا لم توجد صور */
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+            <div className="absolute inset-0">
+              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+              <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-pink-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+            </div>
+          </div>
+        )}
+
+        {/* طبقة تعتيم احترافية */}
+        <div className="absolute inset-0 z-[3]" style={{
+          background: 'linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.7) 100%)'
+        }}></div>
+
+        {/* نمط شبكي خفيف */}
+        <div className="absolute inset-0 z-[4] opacity-10" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }}></div>
+      </div>
       {/* Sidebar - ظاهر على Desktop بس */}
       <div className={`
-        hidden lg:flex
+        hidden lg:flex relative z-10
         w-20 bg-gradient-to-b from-purple-950/50 to-indigo-950/50 border-l border-purple-700/30 shadow-lg
         flex-col h-full py-4
       `}>
@@ -252,7 +354,7 @@ export default function ChatPage() {
       </div>
 
       {/* Main Chat Area - كامل الشاشة على المحمول */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative z-10">
         {/* Chat Header - بنفس ألوان الموقع */}
         <div className="bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 px-4 py-3 shadow-lg">
           <div className="flex items-center justify-between">
