@@ -327,6 +327,7 @@ model Order {
   eWalletType      String?           // نوع المحفظة: etisalat_cash, vodafone_cash, we_pay
   bankTransferReceipt String?        // صورة إيصال التحويل البنكي (Cloudinary URL)
   eWalletReceipt   String?           // صورة إيصال تحويل المحفظة الإلكترونية (Cloudinary URL)
+  wePayReceipt     String?           // صورة إيصال تحويل وي باي (Cloudinary URL)
   totalAmount      Float
   deliveryFee      Float             @default(0)
   finalAmount      Float
@@ -852,10 +853,13 @@ enum PaymentMethod {
   CASH_ON_DELIVERY
   BANK_TRANSFER
   E_WALLET_TRANSFER
+  WE_PAY
   INSTALLMENT_4
   INSTALLMENT_6
   INSTALLMENT_12
   INSTALLMENT_24
+  PARTIAL_PAYMENT_50
+  FULL_PAYMENT
 }
 
 enum InstallmentStatus {

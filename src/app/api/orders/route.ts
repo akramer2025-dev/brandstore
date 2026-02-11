@@ -23,6 +23,7 @@ export async function POST(request: Request) {
       eWalletType: body.eWalletType,
       bankTransferReceipt: body.bankTransferReceipt,
       eWalletReceipt: body.eWalletReceipt,
+      wePayReceipt: body.wePayReceipt,
       deliveryMethod: body.deliveryMethod,
       governorate: body.governorate,
       pickupLocation: body.pickupLocation,

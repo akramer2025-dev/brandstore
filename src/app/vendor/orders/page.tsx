@@ -24,11 +24,14 @@ export default async function VendorOrdersPage() {
     redirect("/");
   }
 
-  // جلب الطلبات الخاصة بهذا الشريك (فقط الطلبات غير المحذوفة)
+  // جلب الطلبات الخاصة بهذا الشريك (فقط الطلبات غير المحذوفة والغير مرفوضة)
   const orders = await prisma.order.findMany({
     where: {
       vendorId: vendor.id,
       deletedAt: null, // فقط الطلبات الموجودة (غير محذوفة)
+      status: {
+        not: 'REJECTED', // استبعاد الطلبات المرفوضة (تظهر في تقرير الطلبات المرفوضة فقط)
+      },
     },
     include: {
       customer: true,

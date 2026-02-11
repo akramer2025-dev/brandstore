@@ -14,7 +14,7 @@ import InstallmentCalculator from "@/components/InstallmentCalculator";
 import AddressSelector from "@/components/AddressSelector";
 import AddressForm from "@/components/AddressForm";
 
-type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24' | 'PARTIAL_PAYMENT_50' | 'FULL_PAYMENT';
+type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'WE_PAY' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24' | 'PARTIAL_PAYMENT_50' | 'FULL_PAYMENT';
 type EWalletType = 'etisalat_cash' | 'vodafone_cash' | 'we_pay';
 type DeliveryMethod = 'HOME_DELIVERY' | 'STORE_PICKUP';
 
@@ -88,6 +88,11 @@ export default function CheckoutPage() {
   const [eWalletReceipt, setEWalletReceipt] = useState<File | null>(null);
   const [eWalletReceiptPreview, setEWalletReceiptPreview] = useState<string | null>(null);
   const [uploadingEWalletReceipt, setUploadingEWalletReceipt] = useState(false);
+  
+  // WE Pay Receipt states
+  const [wePayReceipt, setWePayReceipt] = useState<File | null>(null);
+  const [wePayReceiptPreview, setWePayReceiptPreview] = useState<string | null>(null);
+  const [uploadingWePayReceipt, setUploadingWePayReceipt] = useState(false);
   
   const { items, getTotalPrice, clearCart } = useCartStore();
 
@@ -480,6 +485,33 @@ export default function CheckoutPage() {
     }
   };
 
+  // WE Pay Receipt handler
+  const handleWePayReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB max
+        toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        toast.error("يرجى اختيار صورة فقط");
+        return;
+      }
+
+      setWePayReceipt(file);
+      
+      // إنشاء معاينة للصورة
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setWePayReceiptPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      toast.success("تم اختيار صورة إيصال وي باي بنجاح");
+    }
+  };
+
   // رفع صورة الإيصال إلى Cloudinary
   const uploadReceiptToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
@@ -569,6 +601,12 @@ export default function CheckoutPage() {
       return;
     }
 
+    // التحقق من رفع صورة إيصال التحويل لمحفظة وي باي
+    if (paymentMethod === 'WE_PAY' && !wePayReceipt) {
+      toast.error("يرجى رفع صورة إيصال التحويل من وي باي");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -607,6 +645,23 @@ export default function CheckoutPage() {
           return;
         }
         setUploadingEWalletReceipt(false);
+      }
+
+      // رفع صورة إيصال التحويل من وي باي إلى Cloudinary
+      let wePayReceiptUrl: string | undefined;
+      if (paymentMethod === 'WE_PAY' && wePayReceipt) {
+        setUploadingWePayReceipt(true);
+        toast.loading("جاري رفع صورة إيصال وي باي...", { id: 'uploading-wepay-receipt' });
+        try {
+          wePayReceiptUrl = await uploadReceiptToCloudinary(wePayReceipt);
+          toast.success("تم رفع صورة إيصال وي باي بنجاح", { id: 'uploading-wepay-receipt' });
+        } catch (error) {
+          toast.error("فشل رفع صورة الإيصال. يرجى المحاولة مرة أخرى", { id: 'uploading-wepay-receipt' });
+          setIsSubmitting(false);
+          setUploadingWePayReceipt(false);
+          return;
+        }
+        setUploadingWePayReceipt(false);
       }
 
       // تجميع العنوان الكامل للتوصيل المنزلي
@@ -648,6 +703,9 @@ export default function CheckoutPage() {
         ...(paymentMethod === 'E_WALLET_TRANSFER' && { 
           eWalletType,
           ...(eWalletReceiptUrl && { eWalletReceipt: eWalletReceiptUrl })
+        }),
+        ...(paymentMethod === 'WE_PAY' && {
+          ...(wePayReceiptUrl && { wePayReceipt: wePayReceiptUrl })
         }),
         ...(paymentMethod === 'BANK_TRANSFER' && receiptUrl && { bankTransferReceipt: receiptUrl }),
       };
@@ -1000,9 +1058,66 @@ export default function CheckoutPage() {
                       <div className="flex items-start gap-2">
                         <div className="text-yellow-200 mt-0.5">💡</div>
                         <p className="text-yellow-100 text-sm">
-                          قم بتحويل المبلغ على الرقم أعلاه ثم اكتب رقم التحويل والمحفظة في ملاحظات الطلبء
+                          قم بتحويل المبلغ على الرقم أعلاه ثم ارفع صورة إيصال التحويل أدناه
                         </p>
                       </div>
+                    </div>
+
+                    {/* رفع صورة إيصال وي باي */}
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Package className="w-5 h-5 text-white" />
+                        <span className="text-white font-semibold">
+                          ارفع صورة إيصال التحويل <span className="text-red-400">*</span>
+                        </span>
+                      </div>
+                      
+                      {wePayReceiptPreview ? (
+                        <div className="relative">
+                          <img 
+                            src={wePayReceiptPreview} 
+                            alt="معاينة إيصال وي باي" 
+                            className="w-full h-48 object-cover rounded-lg border-2 border-green-500"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setWePayReceipt(null);
+                              setWePayReceiptPreview(null);
+                            }}
+                          >
+                            حذف
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <input
+                            type="file"
+                            id="wepay-receipt"
+                            accept="image/*"
+                            onChange={handleWePayReceiptChange}
+                            className="hidden"
+                          />
+                          <label
+                            htmlFor="wepay-receipt"
+                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/40 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                          >
+                            <Package className="w-8 h-8 text-white/80 mb-2" />
+                            <span className="text-sm text-white/90">اضغط لاختيار صورة الإيصال</span>
+                            <span className="text-xs text-white/60 mt-1">PNG, JPG أو JPEG - حد أقصى 5MB</span>
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-4 bg-blue-900/30 border border-blue-500/30 rounded-lg p-3">
+                      <p className="text-blue-300 text-sm">
+                        <strong>ملحوظة:</strong> بعد إتمام الطلب، سيتم مراجعة الإيصال وتأكيد الطلب في أسرع وقت
+                      </p>
                     </div>
                   </div>
 

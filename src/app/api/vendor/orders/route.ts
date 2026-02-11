@@ -22,7 +22,12 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const status = searchParams.get('status');
 
-    const where: any = { vendorId: vendor.id };
+    const where: any = { 
+      vendorId: vendor.id,
+      deletedAt: null, // فقط الطلبات غير المحذوفة
+      status: { not: 'REJECTED' } // استبعاد الطلبات المرفوضة
+    };
+    
     if (status) {
       where.status = status;
     }

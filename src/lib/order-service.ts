@@ -26,10 +26,11 @@ export class OrderService {
     deliveryPhone: string;
     customerNotes?: string;
     deliveryFee?: number;
-    paymentMethod?: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
+    paymentMethod?: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'WE_PAY' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24' | 'PARTIAL_PAYMENT_50' | 'FULL_PAYMENT';
     eWalletType?: string;
     bankTransferReceipt?: string;
     eWalletReceipt?: string;
+    wePayReceipt?: string;
     deliveryMethod?: 'HOME_DELIVERY' | 'STORE_PICKUP';
     governorate?: string;
     pickupLocation?: string;
@@ -113,6 +114,7 @@ export class OrderService {
         eWalletType: data.eWalletType,
         bankTransferReceipt: data.bankTransferReceipt,
         eWalletReceipt: data.eWalletReceipt,
+        wePayReceipt: data.wePayReceipt,
         deliveryMethod,
         governorate: data.governorate,
         pickupLocation: data.pickupLocation,
