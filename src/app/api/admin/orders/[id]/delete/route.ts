@@ -31,7 +31,7 @@ export async function DELETE(
         select: { id: true, canDeleteOrders: true },
       });
 
-      if (vendor && vendor.canDeleteOrders) {
+      if (vendor?.canDeleteOrders) {
         canDelete = true;
         vendorId = vendor.id;
       }
@@ -40,25 +40,34 @@ export async function DELETE(
       const user = await prisma.user.findUnique({
         where: { id: session.user.id },
         select: { 
-          partnerId: true,
-          partner: {
-            select: {
-              id: true,
-              vendorId: true,
-              vendor: {
-                select: {
-                  id: true,
-                  canDeleteOrders: true
-                }
-              }
-            }
-          }
+          partnerId: true
         },
       });
 
-      if (user?.partner?.vendor && user.partner.vendor.canDeleteOrders) {
-        canDelete = true;
-        vendorId = user.partner.vendor.id;
+      if (user?.partnerId) {
+        // جلب بيانات الشريك Partner ثم Vendor
+        const partner = await prisma.partnerCapital.findUnique({
+          where: { id: user.partnerId },
+          select: { 
+            vendorId: true
+          }
+        });
+
+        if (partner?.vendorId) {
+          // جلب بيانات Vendor للتحقق من الصلاحيات
+          const vendor = await prisma.vendor.findUnique({
+            where: { id: partner.vendorId },
+            select: {
+              id: true,
+              canDeleteOrders: true
+            }
+          });
+
+          if (vendor?.canDeleteOrders) {
+            canDelete = true;
+            vendorId = vendor.id;
+          }
+        }
       }
     }
 
