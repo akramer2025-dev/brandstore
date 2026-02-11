@@ -84,6 +84,11 @@ export default function CheckoutPage() {
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
   
+  // E-Wallet Transfer Receipt states
+  const [eWalletReceipt, setEWalletReceipt] = useState<File | null>(null);
+  const [eWalletReceiptPreview, setEWalletReceiptPreview] = useState<string | null>(null);
+  const [uploadingEWalletReceipt, setUploadingEWalletReceipt] = useState(false);
+  
   const { items, getTotalPrice, clearCart } = useCartStore();
 
   // Check if all items are clothing (COD only for clothing)
@@ -448,6 +453,33 @@ export default function CheckoutPage() {
     }
   };
 
+  // رفع صورة إيصال المحفظة
+  const handleEWalletReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB max
+        toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        toast.error("يرجى اختيار صورة فقط");
+        return;
+      }
+
+      setEWalletReceipt(file);
+      
+      // إنشاء معاينة للصورة
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEWalletReceiptPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      toast.success("تم اختيار صورة إيصال المحفظة بنجاح");
+    }
+  };
+
   // رفع صورة الإيصال إلى Cloudinary
   const uploadReceiptToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
@@ -525,9 +557,15 @@ export default function CheckoutPage() {
       return;
     }
 
-    // التحقق من رفع صورة إيصال التحويل للتحويل البنكي
+    //  التحقق من رفع صورة إيصال التحويل للتحويل البنكي
     if (paymentMethod === 'BANK_TRANSFER' && !bankTransferReceipt) {
       toast.error("يرجى رفع صورة إيصال التحويل البنكي");
+      return;
+    }
+
+    // التحقق من رفع صورة إيصال التحويل للمحفظة الإلكترونية
+    if (paymentMethod === 'E_WALLET_TRANSFER' && !eWalletReceipt) {
+      toast.error("يرجى رفع صورة إيصال التحويل من المحفظة");
       return;
     }
 
@@ -552,6 +590,23 @@ export default function CheckoutPage() {
           return;
         }
         setUploadingReceipt(false);
+      }
+
+      // رفع صورة إيصال التحويل من المحفظة إلى Cloudinary
+      let eWalletReceiptUrl: string | undefined;
+      if (paymentMethod === 'E_WALLET_TRANSFER' && eWalletReceipt) {
+        setUploadingEWalletReceipt(true);
+        toast.loading("جاري رفع صورة إيصال المحفظة...", { id: 'uploading-ewallet-receipt' });
+        try {
+          eWalletReceiptUrl = await uploadReceiptToCloudinary(eWalletReceipt);
+          toast.success("تم رفع صورة إيصال المحفظة بنجاح", { id: 'uploading-ewallet-receipt' });
+        } catch (error) {
+          toast.error("فشل رفع صورة الإيصال. يرجى المحاولة مرة أخرى", { id: 'uploading-ewallet-receipt' });
+          setIsSubmitting(false);
+          setUploadingEWalletReceipt(false);
+          return;
+        }
+        setUploadingEWalletReceipt(false);
       }
 
       // تجميع العنوان الكامل للتوصيل المنزلي
@@ -590,7 +645,10 @@ export default function CheckoutPage() {
           remainingAmount: remainingAmount,
           isPartialPayment: paymentMethod === 'PARTIAL_PAYMENT_50'
         }),
-        ...(paymentMethod === 'E_WALLET_TRANSFER' && { eWalletType }),
+        ...(paymentMethod === 'E_WALLET_TRANSFER' && { 
+          eWalletType,
+          ...(eWalletReceiptUrl && { eWalletReceipt: eWalletReceiptUrl })
+        }),
         ...(paymentMethod === 'BANK_TRANSFER' && receiptUrl && { bankTransferReceipt: receiptUrl }),
       };
 
@@ -1380,8 +1438,58 @@ export default function CheckoutPage() {
                               </div>
                             </div>
 
-                            <div className="bg-yellow-900/30 border border-yellow-500/30 rounded p-2 text-xs text-yellow-300">
-                              💡 حول على الرقم أعلاه واكتب المبلغ والمحفظة المستخدمة في ملاحظات الطلب
+                            <div className="bg-yellow-900/30 border border-yellow-500/30 rounded p-2 text-xs text-yellow-300 mb-3">
+                              💡 حول على الرقم أعلاه وارفع صورة إيصال التحويل
+                            </div>
+
+                            {/* رفع صورة إيصال المحفظة */}
+                            <div className="space-y-2">
+                              <Label htmlFor="ewallet-receipt" className="text-white font-semibold">
+                                إرفاق صورة إيصال التحويل <span className="text-red-400">*</span>
+                              </Label>
+                              
+                              {eWalletReceiptPreview ? (
+                                <div className="relative">
+                                  <img 
+                                    src={eWalletReceiptPreview} 
+                                    alt="معاينة إيصال المحفظة" 
+                                    className="w-full h-48 object-cover rounded-lg border-2 border-green-500"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    className="absolute top-2 right-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEWalletReceipt(null);
+                                      setEWalletReceiptPreview(null);
+                                    }}
+                                  >
+                                    حذف
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="relative">
+                                  <input
+                                    type="file"
+                                    id="ewallet-receipt"
+                                    accept="image/*"
+                                    onChange={handleEWalletReceiptChange}
+                                    className="hidden"
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                  <label
+                                    htmlFor="ewallet-receipt"
+                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-green-500 rounded-lg cursor-pointer hover:bg-green-900/20 transition-colors"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Package className="w-8 h-8 text-green-400 mb-2" />
+                                    <span className="text-sm text-green-300">اضغط لاختيار صورة إيصال المحفظة</span>
+                                    <span className="text-xs text-gray-400 mt-1">PNG, JPG أو JPEG - حد أقصى 5MB</span>
+                                  </label>
+                                </div>
+                              )}
                             </div>
                             </div>
                           </div>

@@ -22,6 +22,7 @@ export async function POST(request: Request) {
       paymentMethod: body.paymentMethod || 'CASH_ON_DELIVERY',
       eWalletType: body.eWalletType,
       bankTransferReceipt: body.bankTransferReceipt,
+      eWalletReceipt: body.eWalletReceipt,
       deliveryMethod: body.deliveryMethod,
       governorate: body.governorate,
       pickupLocation: body.pickupLocation,

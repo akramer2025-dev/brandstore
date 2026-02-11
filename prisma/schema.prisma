@@ -326,6 +326,7 @@ model Order {
   paymentMethod    PaymentMethod     @default(CASH_ON_DELIVERY)
   eWalletType      String?           // نوع المحفظة: etisalat_cash, vodafone_cash, we_pay
   bankTransferReceipt String?        // صورة إيصال التحويل البنكي (Cloudinary URL)
+  eWalletReceipt   String?           // صورة إيصال تحويل المحفظة الإلكترونية (Cloudinary URL)
   totalAmount      Float
   deliveryFee      Float             @default(0)
   finalAmount      Float

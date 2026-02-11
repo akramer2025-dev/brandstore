@@ -29,6 +29,7 @@ export class OrderService {
     paymentMethod?: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24';
     eWalletType?: string;
     bankTransferReceipt?: string;
+    eWalletReceipt?: string;
     deliveryMethod?: 'HOME_DELIVERY' | 'STORE_PICKUP';
     governorate?: string;
     pickupLocation?: string;
@@ -111,6 +112,7 @@ export class OrderService {
         paymentMethod,
         eWalletType: data.eWalletType,
         bankTransferReceipt: data.bankTransferReceipt,
+        eWalletReceipt: data.eWalletReceipt,
         deliveryMethod,
         governorate: data.governorate,
         pickupLocation: data.pickupLocation,

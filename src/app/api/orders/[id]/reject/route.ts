@@ -45,8 +45,18 @@ export async function PATCH(
 
     // التحقق من الصلاحيات
     if (session.user.role === 'VENDOR') {
+      // جلب بيانات التاجر من userId
+      const vendor = await prisma.vendor.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true }
+      });
+
+      if (!vendor) {
+        return NextResponse.json({ error: 'لم يتم العثور على بيانات التاجر' }, { status: 404 });
+      }
+
       // الشريك يمكنه رفض طلباته فقط
-      if (order.vendorId !== session.user.id) {
+      if (order.vendorId !== vendor.id) {
         return NextResponse.json({ error: 'غير مصرح لك برفض هذا الطلب' }, { status: 403 });
       }
     }
