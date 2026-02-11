@@ -437,7 +437,7 @@ export default function CustomerChatsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 h-[calc(100vh-180px)]">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-6 h-[calc(100vh-180px)]">
         {/* Conversations List - على اليسار */}
         <Card className="sm:col-span-1 shadow-xl border-2 flex flex-col overflow-hidden" style={{ borderColor: '#7c3aed' }}>
           <CardHeader className="flex-shrink-0" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)' }}>
@@ -519,7 +519,7 @@ export default function CustomerChatsPage() {
         </Card>
 
         {/* Messages Display - على اليمين */}
-        <Card className="sm:col-span-2 shadow-xl border-2 flex flex-col overflow-hidden" style={{ borderColor: '#7c3aed' }}>
+        <Card className="sm:col-span-3 shadow-xl border-2 flex flex-col overflow-hidden" style={{ borderColor: '#7c3aed' }}>
           <CardHeader className="border-b-2 flex-shrink-0" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)', borderColor: '#c4b5fd' }}>
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2 font-bold" style={{ color: '#7c3aed' }}>
