@@ -156,10 +156,10 @@ export default function LoginPage() {
   // عرض loading أثناء التحقق من session
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
         <div className="text-center text-white">
-          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-purple-400" />
-          <p className="text-lg">جاري التحقق من تسجيل الدخول...</p>
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-purple-200" />
+          <p className="text-lg text-purple-100">جاري التحقق من تسجيل الدخول...</p>
         </div>
       </div>
     );
@@ -168,103 +168,29 @@ export default function LoginPage() {
   // إذا المستخدم مسجل بالفعل
   if (status === 'authenticated') {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
         <div className="text-center text-white">
-          <Sparkles className="w-12 h-12 mx-auto mb-4 animate-pulse text-purple-400" />
-          <p className="text-lg">تم تسجيل الدخول بنجاح! جاري التوجيه...</p>
+          <Sparkles className="w-12 h-12 mx-auto mb-4 animate-pulse text-purple-200" />
+          <p className="text-lg text-purple-100">تم تسجيل الدخول بنجاح! جاري التوجيه...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex relative overflow-hidden" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex relative overflow-hidden" dir="rtl">
       
-      {/* ============ الخلفية المتحركة - السلايدر ============ */}
+      {/* ============ الخلفية الاحترافية مع تأثيرات متحركة ============ */}
       <div className="absolute inset-0 z-0">
-        {slides.length > 0 ? (
-          <>
-            {/* الصورة الحالية */}
-            {slides.map((slide, index) => (
-              <div
-                key={slide.id}
-                className="absolute inset-0 transition-all duration-[1500ms] ease-in-out"
-                style={{
-                  opacity: index === currentSlide ? 1 : (isTransitioning && index === nextSlide ? 1 : 0),
-                  zIndex: index === currentSlide ? 1 : (isTransitioning && index === nextSlide ? 2 : 0),
-                }}
-              >
-                <Image
-                  src={slide.imageUrl}
-                  alt={slide.titleAr || 'Slider'}
-                  fill
-                  sizes="100vw"
-                  className={`object-cover transition-transform duration-[8000ms] ease-out ${
-                    index === currentSlide ? 'scale-110' : 'scale-100'
-                  }`}
-                  priority={index === 0}
-                />
-              </div>
-            ))}
-
-            {/* نص السلايدر المتحرك - يظهر فقط على الشاشات الكبيرة */}
-            <div className="absolute bottom-12 right-12 z-10 hidden lg:block max-w-md">
-              <div className="transition-all duration-700 ease-out">
-                {slides[currentSlide] && (
-                  <div key={slides[currentSlide].id} className="animate-fade-in-up">
-                    <h2 className="text-3xl xl:text-4xl font-black text-white mb-3 drop-shadow-2xl leading-tight">
-                      {slides[currentSlide].titleAr}
-                    </h2>
-                    {slides[currentSlide].subtitleAr && (
-                      <p className="text-lg text-gray-200 drop-shadow-lg">
-                        {slides[currentSlide].subtitleAr}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* مؤشرات السلايدر */}
-            <div className="absolute bottom-6 right-1/2 translate-x-1/2 lg:right-12 lg:translate-x-0 z-10 flex gap-2">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setIsTransitioning(true);
-                    setNextSlide(index);
-                    setTimeout(() => {
-                      setCurrentSlide(index);
-                      setIsTransitioning(false);
-                    }, 1500);
-                  }}
-                  className={`transition-all duration-500 rounded-full ${
-                    index === currentSlide
-                      ? 'w-8 h-3 bg-white shadow-lg shadow-white/30'
-                      : 'w-3 h-3 bg-white/40 hover:bg-white/60'
-                  }`}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          /* خلفية بديلة متحركة في حالة عدم وجود صور */
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-gray-900 to-pink-900">
-            <div className="absolute inset-0">
-              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-              <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-orange-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
-            </div>
-          </div>
-        )}
-
-        {/* طبقة التعتيم الاحترافية */}
-        <div className="absolute inset-0 z-[3]" style={{
-          background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.6) 100%)'
-        }}></div>
+        {/* دوائر مضيئة متحركة */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-pink-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+        </div>
         
         {/* نمط شبكي خفيف */}
-        <div className="absolute inset-0 z-[4] opacity-10" style={{
+        <div className="absolute inset-0 opacity-5" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
           backgroundSize: '40px 40px'
         }}></div>

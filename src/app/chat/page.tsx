@@ -361,15 +361,12 @@ export default function ChatPage() {
             {/* كروت المنتجات - بسيطة */}
             {msg.type === 'products' && msg.products && msg.products.length > 0 && (
               <div className="mr-9">
-                {console.log('[Chat UI] Rendering products:', msg.products)}
                 <p className="text-purple-200 text-xs mb-2 flex items-center gap-1">
                   <ShoppingCart className="w-3.5 h-3.5" />
                   اضغط على أي منتج لمشاهدته 👇
                 </p>
                 <div className="grid gap-2">
-                  {msg.products.map((product) => {
-                    console.log('[Chat UI] Rendering product:', product.name, 'Image:', product.imageUrl)
-                    return (
+                  {msg.products.map((product) => (
                     <Link key={product.id} href={product.link}>
                       <motion.div
                         whileHover={{ scale: 1.01 }}
