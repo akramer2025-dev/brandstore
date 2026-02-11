@@ -474,7 +474,6 @@ export default function CustomerChatsPage() {
                         }
                       `}
                       style={msg.role === 'user' ? { border: '2px solid #c4b5fd' } : { background: 'linear-gradient(to right, #7c3aed, #a855f7, #ec4899)' }}
-                      `}
                     >
                       <div className="flex items-center gap-2 mb-2">
                         {msg.role === 'user' ? (
