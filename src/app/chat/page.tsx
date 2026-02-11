@@ -403,7 +403,7 @@ export default function ChatPage() {
                         </div>
                       </motion.div>
                     </Link>
-                  )})}
+                  ))}
                 </div>
               </div>
             )}
