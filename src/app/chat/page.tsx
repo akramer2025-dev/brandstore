@@ -76,6 +76,23 @@ export default function ChatPage() {
     scrollToBottom()
   }, [messages])
 
+  // حقن manifest للشات
+  useEffect(() => {
+    // إضافة manifest للصفحة
+    const manifestLink = document.createElement('link')
+    manifestLink.rel = 'manifest'
+    manifestLink.href = '/customer-chat-manifest.json'
+    document.head.appendChild(manifestLink)
+
+    // تنظيف عند unmount
+    return () => {
+      const existingLink = document.querySelector('link[href="/customer-chat-manifest.json"]')
+      if (existingLink) {
+        document.head.removeChild(existingLink)
+      }
+    }
+  }, [])
+
   // رسالة ترحيب أولية
   useEffect(() => {
     const timer = setTimeout(() => {
