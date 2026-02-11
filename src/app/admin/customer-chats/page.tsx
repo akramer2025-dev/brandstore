@@ -284,39 +284,97 @@ export default function CustomerChatsPage() {
   }
 
   const requestNotificationPermission = async () => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      try {
-        console.log('📱 جاري طلب إذن الإشعارات...')
-        const permission = await Notification.requestPermission()
-        console.log('🔔 إذن الإشعارات:', permission)
-        
-        if (permission === 'granted') {
-          setNotificationsEnabled(true)
-          console.log('✅ تم تفعيل الإشعارات بنجاح')
-          alert('✅ تم تفعيل الإشعارات! هتوصلك إشعارات مع صوت عند أي رسالة جديدة')
-          
-          // اختبار الإشعار
-          new Notification('🎉 تم التفعيل بنجاح!', {
-            body: 'الإشعارات شغالة دلوقتي. هتسمع صوت مع كل رسالة جديدة 🔔',
-            icon: '/logo.png',
-            tag: 'test-notification',
-            requireInteraction: false
-          })
-          playNotificationSound()
-        } else if (permission === 'denied') {
-          console.error('❌ المستخدم رفض الإشعارات')
-          alert('❌ تم رفض الإشعارات. لو عايز تفعلها، روح إعدادات المتصفح → الإشعارات → اسمح لـ remostore.net')
-        } else {
-          console.warn('⚠️ المستخدم أجل قرار الإشعارات')
-          alert('⚠️ محتاج تسمح بالإشعارات عشان تستقبل التنبيهات')
-        }
-      } catch (error) {
-        console.error('❌ خطأ في طلب إذن الإشعارات:', error)
-        alert('❌ حصل خطأ في تفعيل الإشعارات. جرب تاني أو تأكد من إعدادات المتصفح')
-      }
-    } else {
+    console.log('📱 بداية طلب الإشعارات...')
+    
+    // التحقق من دعم الإشعارات
+    if (typeof window === 'undefined' || !('Notification' in window)) {
       console.error('❌ المتصفح لا يدعم Notification API')
       alert('❌ المتصفح بتاعك مش بيدعم الإشعارات. جرب متصفح تاني زي Chrome أو Firefox')
+      return
+    }
+    
+    // التحقق من الصلاحية الحالية
+    const currentPermission = Notification.permission
+    console.log('🔍 الصلاحية الحالية:', currentPermission)
+    
+    if (currentPermission === 'granted') {
+      setNotificationsEnabled(true)
+      console.log('✅ الإشعارات مفعلة بالفعل')
+      alert('✅ الإشعارات مفعلة بالفعل!')
+      
+      try {
+        // اختبار الإشعار
+        const notification = new Notification('🎉 الإشعارات شغالة!', {
+          body: 'هتوصلك إشعارات مع صوت عند أي رسالة جديدة 🔔',
+          icon: '/icon-192x192.png',
+          badge: '/icon-192x192.png',
+          tag: 'test-notification',
+          requireInteraction: false,
+          vibrate: [200, 100, 200]
+        })
+        console.log('✅ تم إرسال إشعار تجريبي')
+        playNotificationSound()
+      } catch (notifError) {
+        console.error('⚠️ خطأ في إرسال الإشعار التجريبي:', notifError)
+      }
+      return
+    }
+    
+    if (currentPermission === 'denied') {
+      console.error('❌ الإشعارات محظورة')
+      alert('❌ الإشعارات محظورة. لتفعيلها:\n\n📱 على الموبايل:\n1. اضغط على أيقونة 🔒 جنب الرابط\n2. اختر "إعدادات الموقع"\n3. فعّل "الإشعارات"\n\n💻 على الكمبيوتر:\n1. اضغط على 🔒 في شريط العنوان\n2. اختر "Site settings"\n3. غيّر Notifications إلى Allow')
+      return
+    }
+    
+    // طلب الإذن
+    try {
+      console.log('🔔 جاري طلب إذن الإشعارات...')
+      
+      const permission = await Notification.requestPermission()
+      console.log('📢 النتيجة:', permission)
+      
+      if (permission === 'granted') {
+        setNotificationsEnabled(true)
+        console.log('✅ تم تفعيل الإشعارات بنجاح')
+        alert('✅ تم تفعيل الإشعارات بنجاح! 🎉\n\nهتوصلك إشعارات مع صوت عند أي رسالة جديدة')
+        
+        try {
+          // اختبار الإشعار
+          const notification = new Notification('🎉 تم التفعيل بنجاح!', {
+            body: 'الإشعارات شغالة دلوقتي. هتسمع صوت مع كل رسالة جديدة 🔔',
+            icon: '/icon-192x192.png',
+            badge: '/icon-192x192.png',
+            tag: 'test-notification',
+            requireInteraction: false,
+            vibrate: [200, 100, 200]
+          })
+          console.log('✅ تم إرسال إشعار تجريبي')
+          
+          // تشغيل الصوت بعد الإشعار
+          setTimeout(() => {
+            try {
+              playNotificationSound()
+            } catch (soundError) {
+              console.warn('⚠️ خطأ في تشغيل الصوت:', soundError)
+            }
+          }, 500)
+        } catch (notifError) {
+          console.error('⚠️ خطأ في إرسال الإشعار التجريبي:', notifError)
+        }
+      } else if (permission === 'denied') {
+        console.error('❌ المستخدم رفض الإشعارات')
+        alert('❌ تم رفض الإشعارات.\n\nلو غيّرت رأيك، اضغط على أيقونة 🔒 جنب الرابط وفعّل الإشعارات')
+      } else {
+        console.warn('⚠️ المستخدم أجل قرار الإشعارات')
+        alert('⚠️ محتاج تسمح بالإشعارات عشان تستقبل التنبيهات')
+      }
+    } catch (error) {
+      console.error('❌ خطأ في طلب إذن الإشعارات:', error)
+      console.error('تفاصيل الخطأ:', JSON.stringify(error, null, 2))
+      
+      // رسالة خطأ أوضح
+      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف'
+      alert(`❌ حصل خطأ:\n${errorMessage}\n\nجرب:\n• افتح الصفحة في Chrome أو Firefox\n• تأكد إنك مش في وضع Incognito\n• امسح الـ Cache وجرب تاني`)
     }
   }
 
