@@ -132,7 +132,7 @@ export default async function AdminReportsPage() {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">إجمالي الإيرادات</p>
                     <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                      {totalRevenue} جنيه
+                      {(totalRevenue._sum.totalAmount ?? 0).toFixed(0)} جنيه
                     </p>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
