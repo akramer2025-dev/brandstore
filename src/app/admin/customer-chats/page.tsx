@@ -368,61 +368,71 @@ export default function CustomerChatsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6" dir="rtl">
-      <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
-        <div className="flex items-center gap-3">
-          <MessageCircle className="w-10 h-10 text-[#7c3aed]" />
+    <div className="container mx-auto p-3 sm:p-6" dir="rtl">
+      <div className="flex flex-wrap justify-between items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-[#7c3aed]" />
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#7c3aed' }}>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold" style={{ color: '#7c3aed' }}>
               💬 رسائل العملاء من المساعد الذكي
             </h1>
-            <div className="flex items-center gap-4 mt-1 text-sm">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-xs sm:text-sm">
               <span className="text-gray-600">
                 📊 إجمالي المحادثات: <span className="font-bold" style={{ color: '#7c3aed' }}>{conversations.length}</span>
               </span>
               {unreadCount > 0 && (
-                <span className="bg-red-500 text-white px-3 py-1 rounded-full font-bold animate-pulse">
+                <span className="bg-red-500 text-white px-2 sm:px-3 py-1 rounded-full font-bold animate-pulse text-xs sm:text-sm">
                   🔴 {unreadCount} رسالة غير مقروءة
                 </span>
               )}
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {isInstallable && (
             <Button 
               onClick={handleInstallClick} 
               variant="default"
-              size="sm"
+              size="default"
               style={{ backgroundColor: '#7c3aed', color: 'white' }}
-              className="font-bold"
+              className="font-bold text-sm sm:text-base flex-1 sm:flex-none touch-manipulation min-h-[44px]"
             >
-              📱 تثبيت التطبيق
+              📱 <span className="hidden sm:inline">تثبيت التطبيق</span><span className="sm:hidden">تثبيت</span>
             </Button>
           )}
           {notificationsEnabled && (
             <Button 
               onClick={() => setSoundEnabled(!soundEnabled)} 
               variant={soundEnabled ? "default" : "outline"} 
-              size="sm"
+              size="default"
               style={soundEnabled ? { backgroundColor: '#10b981', color: 'white' } : {}}
+              className="text-sm sm:text-base flex-1 sm:flex-none touch-manipulation min-h-[44px]"
             >
-              <Volume2 className="w-4 h-4 ml-2" />
-              {soundEnabled ? '🔊 الصوت مفعّل' : '🔇 الصوت موقوف'}
+              <Volume2 className="w-4 h-4 ml-1 sm:ml-2" />
+              <span className="hidden sm:inline">{soundEnabled ? '🔊 الصوت مفعّل' : '🔇 الصوت موقوف'}</span>
+              <span className="sm:hidden">{soundEnabled ? '🔊' : '🔇'}</span>
             </Button>
           )}
           <Button 
             onClick={requestNotificationPermission} 
             variant={notificationsEnabled ? "default" : "outline"} 
-            size="sm"
+            size="default"
             style={notificationsEnabled ? { backgroundColor: '#7c3aed', color: 'white' } : {}}
+            className="text-sm sm:text-base flex-1 sm:flex-none touch-manipulation min-h-[44px]"
           >
-            <Bell className="w-4 h-4 ml-2" />
-            {notificationsEnabled ? '🔔 الإشعارات مفعلة' : '🔕 تفعيل الإشعارات'}
+            <Bell className="w-4 h-4 ml-1 sm:ml-2" />
+            <span className="hidden sm:inline">{notificationsEnabled ? '🔔 الإشعارات مفعلة' : '🔕 تفعيل الإشعارات'}</span>
+            <span className="sm:hidden">{notificationsEnabled ? '🔔' : '🔕'}</span>
           </Button>
-          <Button onClick={fetchConversations} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 ml-2" />
-            🔄 تحديث
+          <Button 
+            onClick={fetchConversations} 
+            variant="outline" 
+            size="default"
+            className="text-sm sm:text-base flex-1 sm:flex-none touch-manipulation min-h-[44px]"
+          >
+            <RefreshCw className="w-4 h-4 ml-1 sm:ml-2" />
+            <span className="hidden sm:inline">🔄 تحديث</span>
+            <span className="sm:hidden">🔄</span>
           </Button>
         </div>
       </div>
@@ -442,12 +452,12 @@ export default function CustomerChatsPage() {
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0 max-h-[70vh] overflow-y-auto">
+          <CardContent className="p-0 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
             {conversations.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-xl">😴 لا توجد محادثات بعد</p>
-                <p className="text-sm mt-2">ستظهر هنا عندما يتحدث العملاء مع المساعد الذكي</p>
+              <div className="p-6 sm:p-8 text-center text-gray-500">
+                <MessageCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 opacity-30" />
+                <p className="text-lg sm:text-xl">😴 لا توجد محادثات بعد</p>
+                <p className="text-xs sm:text-sm mt-2">ستظهر هنا عندما يتحدث العملاء مع المساعد الذكي</p>
               </div>
             ) : (
               conversations.map((conv) => (
@@ -455,10 +465,10 @@ export default function CustomerChatsPage() {
                   key={conv.id}
                   onClick={() => fetchMessages(conv.id)}
                   className={`
-                    p-4 border-b cursor-pointer transition-all duration-300
+                    p-3 sm:p-4 border-b cursor-pointer transition-all duration-300 touch-manipulation
                     ${selectedConv === conv.id 
                       ? 'shadow-lg' 
-                      : 'hover:shadow-md'
+                      : 'hover:shadow-md active:shadow-lg'
                     }
                     ${conv.lastMessageRole === 'user' ? 'border-r-4 border-red-400' : ''}
                   `}
@@ -468,7 +478,7 @@ export default function CustomerChatsPage() {
                   } : {}}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {getSourceIcon(conv.source)}
                       <Badge variant="secondary" className="text-xs" style={{ backgroundColor: '#ede9fe', color: '#7c3aed' }}>
                         {getSourceLabel(conv.source)}
@@ -484,7 +494,7 @@ export default function CustomerChatsPage() {
                     </div>
                   </div>
                   
-                  <p className="text-sm text-gray-800 font-medium line-clamp-2 mb-2">
+                  <p className="text-xs sm:text-sm text-gray-800 font-medium line-clamp-2 mb-2">
                     {conv.lastMessageRole === 'user' ? '👤' : '🤖'} {conv.lastMessage}
                   </p>
                   
@@ -536,18 +546,18 @@ export default function CustomerChatsPage() {
           </CardHeader>
           <CardContent className="p-0">
             {!selectedConv ? (
-              <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
-                <MessageCircle className="w-32 h-32 mb-4 opacity-10 animate-pulse" />
-                <p className="text-2xl font-bold">👈 اختر محادثة من القائمة</p>
-                <p className="text-sm mt- text-gray-500">لعرض الرسائل</p>
+              <div className="flex flex-col items-center justify-center h-[50vh] sm:h-[60vh] text-gray-400 px-4">
+                <MessageCircle className="w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4 opacity-10 animate-pulse" />
+                <p className="text-lg sm:text-2xl font-bold text-center">👈 اختر محادثة من القائمة</p>
+                <p className="text-xs sm:text-sm mt-1 text-gray-500">لعرض الرسائل</p>
               </div>
             ) : isLoadingMessages ? (
-              <div className="flex items-center justify-center h-[60vh]">
-                <Loader2 className="w-10 h-10 animate-spin" style={{ color: '#7c3aed' }} />
-                <span className="mr-3 text-lg font-medium">⏳ جاري تحميل الرسائل...</span>
+              <div className="flex items-center justify-center h-[50vh] sm:h-[60vh]">
+                <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 animate-spin" style={{ color: '#7c3aed' }} />
+                <span className="mr-2 sm:mr-3 text-base sm:text-lg font-medium">⏳ جاري تحميل الرسائل...</span>
               </div>
             ) : (
-              <div className="h-[60vh] overflow-y-auto p-6 space-y-4" style={{ background: 'linear-gradient(to bottom, #faf5ff, #ffffff, #fce7f3)' }}>
+              <div className="h-[50vh] sm:h-[60vh] overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4" style={{ background: 'linear-gradient(to bottom, #faf5ff, #ffffff, #fce7f3)' }}>
                 {chatMessages.map((msg, idx) => (
                   <div
                     key={msg.id}
@@ -556,7 +566,7 @@ export default function CustomerChatsPage() {
                   >
                     <div
                       className={`
-                        max-w-[75%] p-5 rounded-2xl shadow-lg transition-transform hover:scale-105
+                        max-w-[85%] sm:max-w-[75%] p-3 sm:p-5 rounded-2xl shadow-lg transition-transform active:scale-95 sm:hover:scale-105
                         ${msg.role === 'user' 
                           ? 'bg-white text-gray-900' 
                           : 'text-white'
@@ -564,17 +574,17 @@ export default function CustomerChatsPage() {
                       `}
                       style={msg.role === 'user' ? { border: '2px solid #c4b5fd' } : { background: 'linear-gradient(to right, #7c3aed, #a855f7, #ec4899)' }}
                     >
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                         {msg.role === 'user' ? (
-                          <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: '#ddd6fe' }}>
-                            <User className="w-4 h-4" style={{ color: '#7c3aed' }} />
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: '#ddd6fe' }}>
+                            <User className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: '#7c3aed' }} />
                           </div>
                         ) : (
-                          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                            <Bot className="w-4 h-4" />
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/20 flex items-center justify-center">
+                            <Bot className="w-3 h-3 sm:w-4 sm:h-4" />
                           </div>
                         )}
-                        <span className="text-sm font-bold">
+                        <span className="text-xs sm:text-sm font-bold">
                           {msg.role === 'user' ? '👤 العميل' : '🤖 ريمو'}
                         </span>
                         <span className={`text-xs ${msg.role === 'user' ? 'text-gray-500' : 'text-white/70'}`}>
@@ -584,10 +594,10 @@ export default function CustomerChatsPage() {
                           })}
                         </span>
                       </div>
-                      <p className="whitespace-pre-wrap leading-relaxed text-base">{msg.content}</p>
+                      <p className="whitespace-pre-wrap leading-relaxed text-sm sm:text-base">{msg.content}</p>
                       {msg.productIds && (
-                        <div className={`mt-3 pt-3 ${msg.role === 'user' ? 'border-t' : 'border-t border-white/30'}`} style={msg.role === 'user' ? { borderColor: '#c4b5fd' } : {}}>
-                          <span className="text-sm font-semibold">
+                        <div className={`mt-2 sm:mt-3 pt-2 sm:pt-3 ${msg.role === 'user' ? 'border-t' : 'border-t border-white/30'}`} style={msg.role === 'user' ? { borderColor: '#c4b5fd' } : {}}>
+                          <span className="text-xs sm:text-sm font-semibold">
                             🛍️ عرض {msg.productIds.split(',').length} منتج
                           </span>
                         </div>

@@ -4,9 +4,9 @@
   "description": "تطبيق مراقبة ومتابعة رسائل العملاء من المساعد الذكي",
   "start_url": "/admin/customer-chats",
   "display": "standalone",
-  "background_color": "#7c3aed",
+  "background_color": "#ffffff",
   "theme_color": "#7c3aed",
-  "orientation": "any",
+  "orientation": "portrait",
   "categories": ["business", "productivity"],
   "dir": "rtl",
   "lang": "ar",
@@ -14,9 +14,51 @@
   "icons": [
     {
       "src": "/logo.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/logo.png",
