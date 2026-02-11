@@ -122,6 +122,12 @@ async function getContextData() {
           imageUrl = p.images.split(',')[0]?.trim() || null
         }
       }
+      
+      // لو مفيش صورة، استخدم صورة افتراضية
+      if (!imageUrl) {
+        console.warn(`⚠️ المنتج "${p.nameAr || p.name}" (ID: ${p.id}) مفيهوش صورة`)
+      }
+      
       return {
         id: p.id,
         name: p.name,
@@ -497,9 +503,12 @@ export async function POST(request: NextRequest) {
         link: `https://www.remostore.net/products/${p.id}`,
       }))
       
-      console.log(`[Assistant API] Returning ${productCards.length} product cards`)
+      console.log(`[Assistant API] 📦 إرجاع ${productCards.length} منتج:`)
+      productCards.forEach(p => {
+        console.log(`  - ${p.name} (${p.price} ج.م) - صورة: ${p.imageUrl ? '✅' : '❌'}`)
+      })
     } else {
-      console.log('[Assistant API] No matching products found')
+      console.log('[Assistant API] ❌ مفيش منتجات مطابقة')
     }
 
     // حفظ رد المساعد في قاعدة البيانات

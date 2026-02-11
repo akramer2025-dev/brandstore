@@ -92,35 +92,42 @@ export default function CustomerChatsPage() {
 
   // تشغيل صوت الإشعار
   const playNotificationSound = () => {
-    if (!soundEnabled) return
+    if (!soundEnabled) {
+      console.log('🔇 الصوت موقوف')
+      return
+    }
+    
+    console.log('🔊 جاري تشغيل صوت الإشعار...')
     
     try {
-      // محاولة تشغيل الصوت المخصص
-      if (audioRef.current) {
-        audioRef.current.play().catch(() => {
-          // إذا فشل، استخدم beep بسيط
-          const AudioContext = window.AudioContext || (window as any).webkitAudioContext
-          if (AudioContext) {
-            const audioContext = new AudioContext()
-            const oscillator = audioContext.createOscillator()
-            const gainNode = audioContext.createGain()
-            
-            oscillator.connect(gainNode)
-            gainNode.connect(audioContext.destination)
-            
-            oscillator.frequency.value = 800
-            oscillator.type = 'sine'
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
-            
-            oscillator.start(audioContext.currentTime)
-            oscillator.stop(audioContext.currentTime + 0.5)
-          }
-        })
+      // استخدام Web Audio API لإنشاء صوت تنبيه
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioContext) {
+        console.error('❌ Web Audio API غير مدعوم')
+        return
       }
+      
+      const audioContext = new AudioContext()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      
+      // صوت تنبيه عالي (مثل الواتساب)
+      oscillator.frequency.value = 1000 // تردد أعلى
+      oscillator.type = 'sine'
+      
+      // صوت أعلى وأوضح
+      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+      
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.3)
+      
+      console.log('✅ تم تشغيل الصوت بنجاح')
     } catch (error) {
-      console.error('Error playing sound:', error)
+      console.error('❌ خطأ في تشغيل الصوت:', error)
     }
   }
 
@@ -130,25 +137,40 @@ export default function CustomerChatsPage() {
       if (res.ok) {
         const data: Conversation[] = await res.json()
         
+        console.log(`📊 عدد المحادثات: ${data.length}`)
+        
         // التحقق من وجود رسائل جديدة
         const previousConvs = previousConversationsRef.current
+        
+        console.log(`📝 المحادثات السابقة: ${previousConvs.length}`)
+        
         const newMessages = data.filter((conv) => {
           const oldConv = previousConvs.find(c => c.id === conv.id)
-          return (
-            conv.lastMessageRole === 'user' && 
+          const isNewMessage = conv.lastMessageRole === 'user' && 
             (!oldConv || new Date(conv.lastMessageAt) > new Date(oldConv.lastMessageAt))
-          )
+          
+          if (isNewMessage) {
+            console.log(`🆕 رسالة جديدة من: ${conv.sessionId}`)
+          }
+          
+          return isNewMessage
         })
 
-        // إذا كان فيه رسائل جديدة
-        if (newMessages.length > 0 && previousConvs.length > 0) {
-          console.log('🔔 رسائل جديدة:', newMessages.length)
+        // إذا كان فيه رسائل جديدة وليست أول مرة
+        if (newMessages.length > 0) {
+          console.log(`🔔 ${newMessages.length} رسالة جديدة!`)
           
-          // تشغيل الصوت
-          playNotificationSound()
+          // تشغيل الصوت (حتى لو أول مرة)
+          if (previousConvs.length > 0) {
+            console.log('🔊 تشغيل الصوت...')
+            playNotificationSound()
+          } else {
+            console.log('⏭️ تخطي الصوت (أول مرة)')
+          }
           
           // عرض إشعار
           if (notificationsEnabled && typeof window !== 'undefined' && 'Notification' in window) {
+            console.log('📢 عرض الإشعارات...')
             newMessages.forEach((conv) => {
               new Notification('💬 رسالة جديدة من عميل!', {
                 body: conv.lastMessage.substring(0, 100) + (conv.lastMessage.length > 100 ? '...' : ''),
@@ -159,6 +181,8 @@ export default function CustomerChatsPage() {
                 vibrate: [200, 100, 200]
               })
             })
+          } else {
+            console.log('⚠️ الإشعارات غير مفعلة')
           }
         }
 
@@ -166,12 +190,14 @@ export default function CustomerChatsPage() {
         const unread = data.filter(c => c.lastMessageRole === 'user').length
         setUnreadCount(unread)
         
+        console.log(`📬 رسائل غير مقروءة: ${unread}`)
+        
         // تحديث القائمة
         setConversations(data)
         previousConversationsRef.current = data
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('❌ خطأ:', error)
     } finally {
       setIsLoading(false)
     }
