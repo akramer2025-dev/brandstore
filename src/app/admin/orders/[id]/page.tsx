@@ -302,6 +302,97 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </CardContent>
             </Card>
 
+            {/* عرض صور الإيصالات */}
+            {(order.bankTransferReceipt || order.wePayReceipt || order.eWalletReceipt) && (
+              <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-6 h-6 text-teal-600" />
+                    إيصالات التحويل
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {order.wePayReceipt && (
+                    <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                      <p className="text-purple-900 font-semibold mb-2 flex items-center gap-2">
+                        <span className="text-lg">💳</span> إيصال تحويل وي باي
+                      </p>
+                      <a 
+                        href={order.wePayReceipt} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block relative group"
+                      >
+                        <Image
+                          src={order.wePayReceipt}
+                          alt="إيصال وي باي"
+                          width={400}
+                          height={400}
+                          className="w-full rounded-lg border-2 border-purple-400 hover:border-purple-600 transition-all cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all rounded-lg flex items-center justify-center">
+                          <Navigation className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </a>
+                      <p className="text-xs text-gray-600 mt-2 text-center">اضغط للعرض بالحجم الكامل</p>
+                    </div>
+                  )}
+
+                  {order.bankTransferReceipt && (
+                    <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                      <p className="text-blue-900 font-semibold mb-2 flex items-center gap-2">
+                        <span className="text-lg">🏦</span> إيصال التحويل البنكي
+                      </p>
+                      <a 
+                        href={order.bankTransferReceipt} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block relative group"
+                      >
+                        <Image
+                          src={order.bankTransferReceipt}
+                          alt="إيصال التحويل البنكي"
+                          width={400}
+                          height={400}
+                          className="w-full rounded-lg border-2 border-blue-400 hover:border-blue-600 transition-all cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all rounded-lg flex items-center justify-center">
+                          <Navigation className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </a>
+                      <p className="text-xs text-gray-600 mt-2 text-center">اضغط للعرض بالحجم الكامل</p>
+                    </div>
+                  )}
+
+                  {order.eWalletReceipt && (
+                    <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
+                      <p className="text-green-900 font-semibold mb-2 flex items-center gap-2">
+                        <span className="text-lg">💱</span> إيصال المحفظة الإلكترونية
+                      </p>
+                      <a 
+                        href={order.eWalletReceipt} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block relative group"
+                      >
+                        <Image
+                          src={order.eWalletReceipt}
+                          alt="إيصال المحفظة"
+                          width={400}
+                          height={400}
+                          className="w-full rounded-lg border-2 border-green-400 hover:border-green-600 transition-all cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all rounded-lg flex items-center justify-center">
+                          <Navigation className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </a>
+                      <p className="text-xs text-gray-600 mt-2 text-center">اضغط للعرض بالحجم الكامل</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Delivery Info */}
             <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl">
               <CardHeader>

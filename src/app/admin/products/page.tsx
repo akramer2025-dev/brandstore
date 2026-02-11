@@ -112,14 +112,20 @@ export default async function AdminProductsPage() {
                 <CardTitle className="text-xl">{product.name}</CardTitle>
                 <p className="text-sm text-gray-500">{product.category.name}</p>
                 {product.vendor ? (
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="px-3 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-xs font-semibold">
-                      {product.vendor.user?.name || product.vendor.businessName}
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-500 mb-1">التاجر:</p>
+                    <div className="flex items-center gap-2">
+                      <div className="px-3 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg text-sm font-semibold shadow-md flex items-center gap-2">
+                        <span className="text-base">👤</span>
+                        {product.vendor.user?.name || product.vendor.businessName}
+                      </div>
                     </div>
                   </div>
                 ) : (
                   <div className="mt-2">
-                    <div className="px-3 py-1 bg-gray-300 text-gray-700 rounded-full text-xs font-semibold inline-block">
+                    <p className="text-xs text-gray-500 mb-1">التاجر:</p>
+                    <div className="px-3 py-1.5 bg-gray-300 text-gray-700 rounded-lg text-sm font-semibold inline-flex items-center gap-2">
+                      <span className="text-base">⚠️</span>
                       غير مسند لشريك
                     </div>
                   </div>
