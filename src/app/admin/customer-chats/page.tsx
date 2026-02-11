@@ -235,18 +235,27 @@ export default function CustomerChatsPage() {
           return isNewMessage
         })
 
-        // إذا كان فيه رسائل جديدة وليست أول مرة
-        if (newMessages.length > 0) {
+        // إذا كان فيه رسائل جديدة
+        if (newMessages.length > 0 && previousConvs.length > 0) {
           console.log(`🔔 ${newMessages.length} رسالة جديدة!`)
           
-          // تشغيل الصوت (حتى لو أول مرة)
-          if (previousConvs.length > 0) {
-            console.log('🔊 تشغيل الصوت...')
+          // تشغيل الصوت والإشعار
+          console.log('🔊 تشغيل الصوت...')
+          try {
             playNotificationSound()
-            showBrowserNotification('💬 رسالة عميل جديد', `لديك ${newConvs.length} محادثة جديدة من العملاء`)
-          } else {
-            console.log('⏭️ تخطي الصوت (أول مرة)')
+            console.log('✅ تم تشغيل الصوت بنجاح')
+          } catch (soundError) {
+            console.error('❌ خطأ في تشغيل الصوت:', soundError)
           }
+          
+          try {
+            showBrowserNotification('💬 رسالة عميل جديد', `لديك ${newMessages.length} رسالة جديدة من العملاء`)
+            console.log('✅ تم إرسال إشعار المتصفح')
+          } catch (notifError) {
+            console.error('❌ خطأ في إشعار المتصفح:', notifError)
+          }
+        } else if (newMessages.length > 0) {
+          console.log('⏭️ تخطي الصوت (أول تحميل)')
           
           // عرض إشعار
           if (notificationsEnabled && typeof window !== 'undefined' && 'Notification' in window) {

@@ -132,6 +132,9 @@ export default function ChatPage() {
 
       const data = await response.json()
 
+      console.log('[Chat] API Response:', data)
+      console.log('[Chat] Products received:', data.products)
+
       if (data.success) {
         const aiMsg: ChatMessage = {
           id: (Date.now() + 1).toString(),
@@ -142,6 +145,7 @@ export default function ChatPage() {
 
         // عرض كروت المنتجات
         if (data.products && data.products.length > 0) {
+          console.log('[Chat] Adding products message:', data.products.length, 'products')
           const productsMsg: ChatMessage = {
             id: (Date.now() + 2).toString(),
             type: 'products',
@@ -149,6 +153,8 @@ export default function ChatPage() {
             products: data.products,
           }
           setMessages((prev) => [...prev, productsMsg])
+        } else {
+          console.log('[Chat] No products to display')
         }
 
         setConversationHistory(data.conversationHistory || [])
@@ -176,11 +182,11 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-purple-50 via-purple-100 to-indigo-50">
+    <div className="flex h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
       {/* Sidebar - ظاهر على Desktop بس */}
       <div className={`
         hidden lg:flex
-        w-20 bg-gradient-to-b from-white to-purple-50 border-l border-purple-100 shadow-lg
+        w-20 bg-gradient-to-b from-purple-950/50 to-indigo-950/50 border-l border-purple-700/30 shadow-lg
         flex-col h-full py-4
       `}>
         <div className="flex flex-col h-full">
@@ -207,7 +213,7 @@ export default function ChatPage() {
             {/* الرئيسية */}
             <Link
               href="/"
-              className="w-12 h-12 rounded-full bg-purple-100 hover:bg-purple-200 flex items-center justify-center text-purple-700 transition-all hover:scale-110"
+              className="w-12 h-12 rounded-full bg-purple-800/50 hover:bg-purple-700/50 flex items-center justify-center text-purple-200 transition-all hover:scale-110"
               title="الرئيسية"
             >
               <Home className="w-5 h-5" />
@@ -216,7 +222,7 @@ export default function ChatPage() {
             {/* السلة */}
             <Link
               href="/cart"
-              className="w-12 h-12 rounded-full bg-purple-100 hover:bg-purple-200 flex items-center justify-center text-purple-700 transition-all hover:scale-110"
+              className="w-12 h-12 rounded-full bg-purple-800/50 hover:bg-purple-700/50 flex items-center justify-center text-purple-200 transition-all hover:scale-110"
               title="السلة"
             >
               <ShoppingCart className="w-5 h-5" />
@@ -226,7 +232,7 @@ export default function ChatPage() {
             <a
               href="https://wa.me/201555512778"
               target="_blank"
-              className="w-12 h-12 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center text-green-700 transition-all hover:scale-110"
+              className="w-12 h-12 rounded-full bg-green-800/50 hover:bg-green-700/50 flex items-center justify-center text-green-200 transition-all hover:scale-110"
               title="واتساب"
             >
               <Phone className="w-5 h-5" />
@@ -236,7 +242,7 @@ export default function ChatPage() {
           {/* Settings at bottom */}
           <div className="flex flex-col items-center gap-3">
             <button
-              className="w-10 h-10 rounded-full bg-purple-100 hover:bg-purple-200 flex items-center justify-center text-purple-600 transition-all"
+              className="w-10 h-10 rounded-full bg-purple-800/50 hover:bg-purple-700/50 flex items-center justify-center text-purple-200 transition-all"
               title="الإعدادات"
             >
               <Settings className="w-5 h-5" />
@@ -312,11 +318,11 @@ export default function ChatPage() {
                 className="w-20 h-20 rounded-full object-cover shadow-lg"
               />
               <div className="flex gap-1">
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
-              <p className="text-gray-500 text-sm">جاري تحميل المساعد الذكي...</p>
+              <p className="text-purple-200 text-sm">جاري تحميل المساعد الذكي...</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -355,12 +361,15 @@ export default function ChatPage() {
             {/* كروت المنتجات - بسيطة */}
             {msg.type === 'products' && msg.products && msg.products.length > 0 && (
               <div className="mr-9">
-                <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
+                {console.log('[Chat UI] Rendering products:', msg.products)}
+                <p className="text-purple-200 text-xs mb-2 flex items-center gap-1">
                   <ShoppingCart className="w-3.5 h-3.5" />
                   اضغط على أي منتج لمشاهدته 👇
                 </p>
                 <div className="grid gap-2">
-                  {msg.products.map((product) => (
+                  {msg.products.map((product) => {
+                    console.log('[Chat UI] Rendering product:', product.name, 'Image:', product.imageUrl)
+                    return (
                     <Link key={product.id} href={product.link}>
                       <motion.div
                         whileHover={{ scale: 1.01 }}
@@ -397,7 +406,7 @@ export default function ChatPage() {
                         </div>
                       </motion.div>
                     </Link>
-                  ))}
+                  )})}
                 </div>
               </div>
             )}
@@ -454,7 +463,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area - بسيط زي Messenger */}
-      <div className="border-t border-purple-200 bg-white/95 backdrop-blur-sm px-4 py-3 shadow-lg">
+      <div className="border-t border-purple-700/50 bg-gradient-to-r from-purple-900/95 via-purple-800/95 to-indigo-900/95 backdrop-blur-sm px-4 py-3 shadow-lg">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -463,7 +472,7 @@ export default function ChatPage() {
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="اكتب رسالة..."
             disabled={isLoading}
-            className="flex-1 bg-purple-50/50 border border-purple-100 rounded-full px-4 py-2.5 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-purple-100/50 focus:border-purple-300 disabled:opacity-50 text-sm transition-all"
+            className="flex-1 bg-purple-950/30 border border-purple-700/50 rounded-full px-4 py-2.5 text-white placeholder:text-purple-300 focus:outline-none focus:bg-purple-950/50 focus:border-purple-500 disabled:opacity-50 text-sm transition-all"
             autoFocus
           />
           <button
@@ -481,7 +490,7 @@ export default function ChatPage() {
         
         {/* Powered by */}
         <div className="text-center mt-2">
-          <Link href="/" className="text-purple-400 hover:text-purple-600 text-[10px] transition-colors">
+          <Link href="/" className="text-purple-300 hover:text-purple-100 text-[10px] transition-colors">
             Powered by Remo Store
           </Link>
         </div>
