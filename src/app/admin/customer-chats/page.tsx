@@ -45,6 +45,7 @@ export default function CustomerChatsPage() {
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [isInstallable, setIsInstallable] = useState(false)
+  const [isListMinimized, setIsListMinimized] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const previousConversationsRef = useRef<Conversation[]>([])
@@ -142,7 +143,25 @@ export default function CustomerChatsPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMessages])
 
-  // تشغيل صوت الإشعار
+  // إظهار إشعار المتصفح
+  const showBrowserNotification = (title: string, body: string) => {
+    if (!notificationsEnabled || !('Notification' in window)) {
+      return
+    }
+    
+    if (Notification.permission === 'granted') {
+      new Notification(title, {
+        body: body,
+        icon: '/icon-192x192.png',
+        badge: '/icon-192x192.png',
+        tag: 'customer-message',
+        requireInteraction: true,
+        vibrate: [200, 100, 200]
+      })
+    }
+  }
+
+  // تشغيل صوت الإشعار - طويل وواضح
   const playNotificationSound = () => {
     if (!soundEnabled) {
       console.log('🔇 الصوت موقوف')
@@ -152,7 +171,6 @@ export default function CustomerChatsPage() {
     console.log('🔊 جاري تشغيل صوت الإشعار...')
     
     try {
-      // استخدام Web Audio API لإنشاء صوت تنبيه
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext
       if (!AudioContext) {
         console.error('❌ Web Audio API غير مدعوم')
@@ -160,22 +178,31 @@ export default function CustomerChatsPage() {
       }
       
       const audioContext = new AudioContext()
-      const oscillator = audioContext.createOscillator()
-      const gainNode = audioContext.createGain()
       
-      oscillator.connect(gainNode)
-      gainNode.connect(audioContext.destination)
+      // تشغيل 3 نغمات متتالية (أطول وأوضح)
+      const playBeep = (startTime: number, frequency: number) => {
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+        
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+        
+        oscillator.frequency.value = frequency
+        oscillator.type = 'sine'
+        
+        // صوت أعلى وأطول
+        gainNode.gain.setValueAtTime(0.6, startTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4)
+        
+        oscillator.start(startTime)
+        oscillator.stop(startTime + 0.4)
+      }
       
-      // صوت تنبيه عالي (مثل الواتساب)
-      oscillator.frequency.value = 1000 // تردد أعلى
-      oscillator.type = 'sine'
-      
-      // صوت أعلى وأوضح
-      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime)
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
-      
-      oscillator.start(audioContext.currentTime)
-      oscillator.stop(audioContext.currentTime + 0.3)
+      // 3 نغمات: عالية، متوسطة، عالية
+      const now = audioContext.currentTime
+      playBeep(now, 1200)       // نغمة 1
+      playBeep(now + 0.5, 900)  // نغمة 2
+      playBeep(now + 1.0, 1200) // نغمة 3
       
       console.log('✅ تم تشغيل الصوت بنجاح')
     } catch (error) {
@@ -216,6 +243,7 @@ export default function CustomerChatsPage() {
           if (previousConvs.length > 0) {
             console.log('🔊 تشغيل الصوت...')
             playNotificationSound()
+            showBrowserNotification('💬 رسالة عميل جديد', `لديك ${newConvs.length} محادثة جديدة من العملاء`)
           } else {
             console.log('⏭️ تخطي الصوت (أول مرة)')
           }
@@ -295,6 +323,7 @@ export default function CustomerChatsPage() {
   const fetchMessages = async (convId: string) => {
     setIsLoadingMessages(true)
     setSelectedConv(convId)
+    setIsListMinimized(true)
     try {
       const res = await fetch(`/api/admin/chat-conversations?id=${convId}`)
       if (res.ok) {
@@ -317,6 +346,7 @@ export default function CustomerChatsPage() {
         if (selectedConv === convId) {
           setSelectedConv(null)
           setChatMessages([])
+          setIsListMinimized(false)
         }
       }
     } catch (error) {
@@ -360,25 +390,26 @@ export default function CustomerChatsPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-        <span className="mr-3 text-lg">⏳ جاري التحميل...</span>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-200" />
+        <span className="mr-3 text-lg text-white">⏳ جاري التحميل...</span>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto p-3 sm:p-6" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900" dir="rtl">
+    <div className="container mx-auto p-3 sm:p-6">
       <div className="flex flex-wrap justify-between items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-3">
-          <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-[#7c3aed]" />
+          <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-purple-200" />
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold" style={{ color: '#7c3aed' }}>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
               💬 رسائل العملاء من المساعد الذكي
             </h1>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-xs sm:text-sm">
-              <span className="text-gray-600">
-                📊 إجمالي المحادثات: <span className="font-bold" style={{ color: '#7c3aed' }}>{conversations.length}</span>
+              <span className="text-purple-200">
+                📊 إجمالي المحادثات: <span className="font-bold text-white">{conversations.length}</span>
               </span>
               {unreadCount > 0 && (
                 <span className="bg-red-500 text-white px-2 sm:px-3 py-1 rounded-full font-bold animate-pulse text-xs sm:text-sm">
@@ -434,16 +465,26 @@ export default function CustomerChatsPage() {
             <span className="hidden sm:inline">🔄 تحديث</span>
             <span className="sm:hidden">🔄</span>
           </Button>
+          <Button 
+            onClick={() => window.open('/admin/test-notifications', '_blank')}
+            variant="outline" 
+            size="default"
+            className="text-sm sm:text-base flex-1 sm:flex-none touch-manipulation min-h-[44px] border-yellow-400 hover:bg-yellow-50"
+          >
+            <Volume2 className="w-4 h-4 ml-1 sm:ml-2 text-yellow-600" />
+            <span className="hidden sm:inline text-yellow-600">🧪 اختبار الصوت</span>
+            <span className="sm:hidden text-yellow-600">🧪</span>
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-6 h-[calc(100vh-180px)]">
+      <div className={`grid ${isListMinimized ? 'grid-cols-10' : 'grid-cols-5'} gap-3 sm:gap-6 h-[calc(100vh-180px)]`}>
         {/* Conversations List - على اليسار */}
-        <Card className="sm:col-span-1 shadow-xl border-2 flex flex-col overflow-hidden" style={{ borderColor: '#7c3aed' }}>
-          <CardHeader className="flex-shrink-0" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)' }}>
+        <Card className={`${isListMinimized ? 'col-span-1' : 'col-span-2'} shadow-xl border-2 flex flex-col overflow-hidden transition-all duration-300`} style={{ borderColor: '#7c3aed' }}>
+          <CardHeader className="flex-shrink-0 cursor-pointer" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)' }} onClick={() => setIsListMinimized(!isListMinimized)}>
             <CardTitle className="flex items-center justify-between" style={{ color: '#7c3aed' }}>
               <div className="flex items-center gap-2">
-                📋 قائمة المحادثات
+                {isListMinimized ? '📝' : '📋 قائمة المحادثات'}
                 {unreadCount > 0 && (
                   <Badge className="bg-red-600 text-white animate-bounce">
                     {unreadCount}
@@ -452,6 +493,7 @@ export default function CustomerChatsPage() {
               </div>
             </CardTitle>
           </CardHeader>
+          {!isListMinimized && (
           <CardContent className="p-0 flex-1 overflow-y-auto">
             {conversations.length === 0 ? (
               <div className="p-6 sm:p-8 text-center text-gray-500">
@@ -516,10 +558,11 @@ export default function CustomerChatsPage() {
               ))
             )}
           </CardContent>
+          )}
         </Card>
 
         {/* Messages Display - على اليمين */}
-        <Card className="sm:col-span-3 shadow-xl border-2 flex flex-col overflow-hidden" style={{ borderColor: '#7c3aed' }}>
+        <Card className={`${isListMinimized ? 'col-span-9' : 'col-span-3'} shadow-xl border-2 flex flex-col overflow-hidden transition-all duration-300`} style={{ borderColor: '#7c3aed' }}>
           <CardHeader className="border-b-2 flex-shrink-0" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)', borderColor: '#c4b5fd' }}>
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2 font-bold" style={{ color: '#7c3aed' }}>
@@ -528,20 +571,6 @@ export default function CustomerChatsPage() {
                   <Badge style={{ backgroundColor: '#7c3aed' }}>{chatMessages.length} رسالة</Badge>
                 )}
               </span>
-              {selectedConv && (
-                <Button
-                  onClick={() => {
-                    setSelectedConv(null)
-                    setChatMessages([])
-                  }}
-                  variant="ghost"
-                  size="sm"
-                  className="hover:bg-[#ede9fe] sm:hidden"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  رجوع
-                </Button>
-              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0 flex-1 flex flex-col overflow-hidden">
@@ -628,6 +657,7 @@ export default function CustomerChatsPage() {
           animation: bounce 1s infinite;
         }
       `}</style>
+    </div>
     </div>
   )
 }
