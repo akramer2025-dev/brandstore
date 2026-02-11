@@ -6,14 +6,25 @@ import { ShoppingBag, ArrowLeft, Package, Clock, CheckCircle, XCircle, Truck } f
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
-export default async function AdminOrdersPage() {
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: { status?: string };
+}) {
   const session = await auth();
 
   if (!session || session.user?.role !== "ADMIN") {
     redirect("/auth/login");
   }
 
+  // Build where clause based on status filter
+  const whereClause: any = {};
+  if (searchParams.status) {
+    whereClause.status = searchParams.status;
+  }
+
   const orders = await prisma.order.findMany({
+    where: whereClause,
     include: {
       customer: true,
       items: {
@@ -46,7 +57,12 @@ export default async function AdminOrdersPage() {
     DELIVERED: "تم التوصيل",
     REJECTED: "تم الرفض",
     CANCELLED: "ملغي",
+    RETURNED: "مرتجعة",
+    PROCESSING: "قيد المعالجة",
   };
+
+  // Get filter status label
+  const filterStatusLabel = searchParams.status ? statusLabels[searchParams.status as keyof typeof statusLabels] : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50 relative overflow-hidden">
@@ -64,11 +80,26 @@ export default async function AdminOrdersPage() {
             <ArrowLeft className="w-5 h-5" />
             العودة للوحة الإدارة
           </Link>
-          <h1 className="text-4xl font-bold drop-shadow-lg flex items-center gap-3">
-            <ShoppingBag className="w-10 h-10" />
-            إدارة الطلبات
-          </h1>
-          <p className="text-teal-100 mt-2 text-lg">إجمالي الطلبات: {orders.length}</p>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-4xl font-bold drop-shadow-lg flex items-center gap-3">
+                <ShoppingBag className="w-10 h-10" />
+                إدارة الطلبات
+                {filterStatusLabel && (
+                  <span className="text-2xl font-normal text-teal-100">- {filterStatusLabel}</span>
+                )}
+              </h1>
+              <p className="text-teal-100 mt-2 text-lg">إجمالي الطلبات: {orders.length}</p>
+            </div>
+            {searchParams.status && (
+              <Link href="/admin/orders">
+                <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                  <XCircle className="w-4 h-4 ml-2" />
+                  عرض جميع الطلبات
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 

@@ -125,72 +125,80 @@ export default async function AdminReportsPage() {
         {/* Main Statistics */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Revenue */}
-          <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">إجمالي الإيرادات</p>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                    {totalRevenue._sum.totalAmount?.toFixed(2) || 0} جنيه
-                  </p>
+          <Link href="/admin/orders?status=DELIVERED" className="block transition-transform hover:scale-105">
+            <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl cursor-pointer hover:shadow-2xl transition-all hover:border-green-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">إجمالي الإيرادات</p>
+                    <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                      {totalRevenue} جنيه
+                    </p>
+                  </div>
+                  <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                    <DollarSign className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-                <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                  <DollarSign className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Total Orders */}
-          <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">إجمالي الطلبات</p>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                    {totalOrders}
-                  </p>
+          <Link href="/admin/orders" className="block transition-transform hover:scale-105">
+            <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl cursor-pointer hover:shadow-2xl transition-all hover:border-blue-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">إجمالي الطلبات</p>
+                    <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                      {totalOrders}
+                    </p>
+                  </div>
+                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                    <ShoppingCart className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                  <ShoppingCart className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Total Products */}
-          <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">إجمالي المنتجات</p>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    {totalProducts}
-                  </p>
+          <Link href="/admin/products" className="block transition-transform hover:scale-105">
+            <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl cursor-pointer hover:shadow-2xl transition-all hover:border-purple-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">إجمالي المنتجات</p>
+                    <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {totalProducts}
+                    </p>
+                  </div>
+                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Package className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-                <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <Package className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Total Customers */}
-          <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">إجمالي العملاء</p>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                    {totalCustomers}
-                  </p>
+          <Link href="/admin/users" className="block transition-transform hover:scale-105">
+            <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl cursor-pointer hover:shadow-2xl transition-all hover:border-orange-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">إجمالي العملاء</p>
+                    <p className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                      {totalCustomers}
+                    </p>
+                  </div>
+                  <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                  <Users className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         {/* Orders by Status */}
@@ -200,30 +208,42 @@ export default async function AdminReportsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <p className="text-sm text-gray-600 mb-1">قيد الانتظار</p>
-                <p className="text-2xl font-bold text-yellow-600">{statusCounts.PENDING}</p>
-              </div>
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm text-gray-600 mb-1">قيد المعالجة</p>
-                <p className="text-2xl font-bold text-blue-600">{statusCounts.PROCESSING}</p>
-              </div>
-              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <p className="text-sm text-gray-600 mb-1">قيد التوصيل</p>
-                <p className="text-2xl font-bold text-purple-600">{statusCounts.OUT_FOR_DELIVERY}</p>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <p className="text-sm text-gray-600 mb-1">تم التوصيل</p>
-                <p className="text-2xl font-bold text-green-600">{statusCounts.DELIVERED}</p>
-              </div>
-              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                <p className="text-sm text-gray-600 mb-1">ملغاة</p>
-                <p className="text-2xl font-bold text-red-600">{statusCounts.CANCELLED}</p>
-              </div>
-              <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                <p className="text-sm text-gray-600 mb-1">مرتجعة</p>
-                <p className="text-2xl font-bold text-orange-600">{statusCounts.RETURNED}</p>
-              </div>
+              <Link href="/admin/orders?status=PENDING" className="block transition-transform hover:scale-105">
+                <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 cursor-pointer hover:shadow-lg hover:border-yellow-400 transition-all">
+                  <p className="text-sm text-gray-600 mb-1">قيد الانتظار</p>
+                  <p className="text-2xl font-bold text-yellow-600">{statusCounts.PENDING}</p>
+                </div>
+              </Link>
+              <Link href="/admin/orders?status=PROCESSING" className="block transition-transform hover:scale-105">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer hover:shadow-lg hover:border-blue-400 transition-all">
+                  <p className="text-sm text-gray-600 mb-1">قيد المعالجة</p>
+                  <p className="text-2xl font-bold text-blue-600">{statusCounts.PROCESSING}</p>
+                </div>
+              </Link>
+              <Link href="/admin/orders?status=OUT_FOR_DELIVERY" className="block transition-transform hover:scale-105">
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200 cursor-pointer hover:shadow-lg hover:border-purple-400 transition-all">
+                  <p className="text-sm text-gray-600 mb-1">قيد التوصيل</p>
+                  <p className="text-2xl font-bold text-purple-600">{statusCounts.OUT_FOR_DELIVERY}</p>
+                </div>
+              </Link>
+              <Link href="/admin/orders?status=DELIVERED" className="block transition-transform hover:scale-105">
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200 cursor-pointer hover:shadow-lg hover:border-green-400 transition-all">
+                  <p className="text-sm text-gray-600 mb-1">تم التوصيل</p>
+                  <p className="text-2xl font-bold text-green-600">{statusCounts.DELIVERED}</p>
+                </div>
+              </Link>
+              <Link href="/admin/orders?status=CANCELLED" className="block transition-transform hover:scale-105">
+                <div className="p-4 bg-red-50 rounded-lg border border-red-200 cursor-pointer hover:shadow-lg hover:border-red-400 transition-all">
+                  <p className="text-sm text-gray-600 mb-1">ملغاة</p>
+                  <p className="text-2xl font-bold text-red-600">{statusCounts.CANCELLED}</p>
+                </div>
+              </Link>
+              <Link href="/admin/orders?status=RETURNED" className="block transition-transform hover:scale-105">
+                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200 cursor-pointer hover:shadow-lg hover:border-orange-400 transition-all">
+                  <p className="text-sm text-gray-600 mb-1">مرتجعة</p>
+                  <p className="text-2xl font-bold text-orange-600">{statusCounts.RETURNED}</p>
+                </div>
+              </Link>
             </div>
           </CardContent>
         </Card>
