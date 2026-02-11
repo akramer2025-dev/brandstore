@@ -133,6 +133,28 @@ export default function OrderPendingPage() {
                     />
                   </div>
                 )}
+
+                {order.wePayReceipt && (
+                  <div className="space-y-2">
+                    <Label className="text-white">صورة إيصال تحويل وي باي</Label>
+                    <img 
+                      src={order.wePayReceipt} 
+                      alt="إيصال وي باي" 
+                      className="w-full rounded-lg border-2 border-purple-500"
+                    />
+                  </div>
+                )}
+
+                {order.eWalletReceipt && (
+                  <div className="space-y-2">
+                    <Label className="text-white">صورة إيصال المحفظة</Label>
+                    <img 
+                      src={order.eWalletReceipt} 
+                      alt="إيصال المحفظة" 
+                      className="w-full rounded-lg border-2 border-green-500"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
