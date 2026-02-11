@@ -10,7 +10,11 @@ import {
   Phone,
   MessageCircle,
   Sparkles,
-  ArrowLeft,
+  Home,
+  User,
+  Settings,
+  Menu,
+  X,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -59,6 +63,7 @@ export default function ChatPage() {
   const [conversationHistory, setConversationHistory] = useState<any[]>([])
   const [showWelcome, setShowWelcome] = useState(true)
   const [sessionId] = useState(() => generateSessionId())
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -157,81 +162,126 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-teal-950 to-slate-950 flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 shadow-2xl shadow-teal-900/50">
-        {/* Pattern overlay */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMDgiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50"></div>
-        
-        <div className="relative px-4 py-3 flex items-center justify-between">
-          {/* Left side - Logo & Info */}
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-white/20 animate-ping"></div>
-              <img
-                src="/logo.png"
-                alt="Remo Store"
-                className="relative w-11 h-11 rounded-full object-cover ring-3 ring-white/50 shadow-xl"
-              />
-            </div>
-            <div>
-              <h1 className="text-white font-black text-lg tracking-wide flex items-center gap-1.5">
-                مساعد ريمو الذكي
-                <Sparkles className="w-4 h-4 text-yellow-300" />
-              </h1>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                <span className="text-teal-100 text-xs">متصل الآن • يرد فوراً</span>
-              </div>
-            </div>
+    <div className="flex h-screen bg-white">
+      {/* Sidebar - على اليسار زي Messenger */}
+      <div className={`
+        fixed lg:relative inset-y-0 left-0 z-50 w-20 lg:w-20
+        bg-white border-l border-gray-200 shadow-lg
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="flex flex-col h-full py-4">
+          {/* Logo */}
+          <div className="flex items-center justify-center mb-6">
+            <img
+              src="/logo.png"
+              alt="Remo"
+              className="w-12 h-12 rounded-full object-cover shadow-md"
+            />
           </div>
 
-          {/* Right side - Actions */}
-          <div className="flex items-center gap-2">
+          {/* Navigation Icons */}
+          <nav className="flex-1 flex flex-col items-center gap-4">
+            {/* المحادثة (Active) */}
+            <button
+              className="relative w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
+              title="المحادثة"
+            >
+              <MessageCircle className="w-6 h-6" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+            </button>
+
+            {/* الرئيسية */}
+            <Link
+              href="/"
+              className="w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 transition-all hover:scale-110"
+              title="الرئيسية"
+            >
+              <Home className="w-5 h-5" />
+            </Link>
+
+            {/* السلة */}
+            <Link
+              href="/cart"
+              className="w-12 h-12 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 transition-all hover:scale-110"
+              title="السلة"
+            >
+              <ShoppingCart className="w-5 h-5" />
+            </Link>
+
+            {/* الواتساب */}
             <a
               href="https://wa.me/201555512778"
               target="_blank"
-              className="bg-white/15 hover:bg-white/25 p-2.5 rounded-xl transition-all backdrop-blur"
+              className="w-12 h-12 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center text-green-700 transition-all hover:scale-110"
               title="واتساب"
             >
-              <Phone className="w-5 h-5 text-white" />
+              <Phone className="w-5 h-5" />
             </a>
-            <Link
-              href="/"
-              className="bg-white/15 hover:bg-white/25 p-2.5 rounded-xl transition-all backdrop-blur"
-              title="المتجر"
+          </nav>
+
+          {/* Settings/Profile at bottom */}
+          <div className="flex flex-col items-center gap-3">
+            <button
+              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-all"
+              title="الإعدادات"
             >
-              <ShoppingCart className="w-5 h-5 text-white" />
-            </Link>
+              <Settings className="w-5 h-5" />
+            </button>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Chat Container */}
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed top-4 left-4 z-40 w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-lg"
+      >
+        {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </button>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col bg-gray-50">
+        {/* Chat Header - بسيط زي Messenger */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <img
+              src="/logo.png"
+              alt="Remo"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div>
+              <h1 className="font-bold text-gray-900 text-base">مساعد ريمو الذكي</h1>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-gray-600">متصل الآن</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {/* Chat Container - زي Messenger */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-3 md:px-6 py-4 space-y-4 max-w-3xl w-full mx-auto"
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
       >
         {/* Welcome Animation */}
         <AnimatePresence>
           {showWelcome && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex flex-col items-center justify-center py-20 gap-4"
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="flex flex-col items-center justify-center py-12 gap-3"
             >
-              <div className="relative">
-                <div className="absolute inset-0 bg-teal-500/30 rounded-full blur-2xl animate-pulse"></div>
-                <img
-                  src="/logo.png"
-                  alt="Remo Store"
-                  className="relative w-24 h-24 rounded-full object-cover ring-4 ring-teal-400/50 shadow-2xl"
-                />
-              </div>
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-3 h-3 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <img
+                src="/logo.png"
+                alt="Remo Store"
+                className="w-20 h-20 rounded-full object-cover shadow-lg"
+              />
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                 <div className="w-3 h-3 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
               <p className="text-teal-300 text-sm">جاري تحميل المساعد الذكي...</p>
@@ -242,79 +292,86 @@ export default function ChatPage() {
         {/* Messages */}
         {messages.map((msg) => (
           <motion.div
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+              <p className="text-gray-500 text-sm">جاري تحميل المساعد الذكي...</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Messages - بسيط زي Messenger */}
+        {messages.map((msg) => (
+          <motion.div
             key={msg.id}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
+            transition={{ duration: 0.3 }}
           >
-            {/* رسالة المستخدم */}
+            {/* رسالة المستخدم - على اليمين بلون أزرق */}
             {msg.type === 'user' && (
-              <div className="flex justify-end mb-1">
-                <div className="bg-gradient-to-br from-teal-600 to-cyan-600 text-white rounded-2xl rounded-bl-sm px-4 py-3 max-w-[85%] shadow-lg shadow-teal-900/30 text-sm md:text-base leading-relaxed">
+              <div className="flex justify-end">
+                <div className="bg-blue-600 text-white rounded-3xl px-4 py-2.5 max-w-[75%] sm:max-w-[60%] shadow-sm text-sm leading-relaxed">
                   {msg.content}
                 </div>
               </div>
             )}
 
-            {/* رسالة المساعد */}
+            {/* رسالة المساعد - على اليسار بلون رمادي */}
             {msg.type === 'assistant' && (
-              <div className="flex gap-3 mb-1">
-                <div className="flex-shrink-0 relative mt-1">
-                  <div className="absolute inset-0 bg-teal-400/20 rounded-full blur-md"></div>
-                  <img
-                    src="/logo.png"
-                    alt="Remo"
-                    className="relative w-9 h-9 rounded-full object-cover ring-2 ring-teal-400/40 shadow-lg"
-                  />
-                </div>
-                <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-teal-500/20 text-white/95 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] shadow-lg text-sm md:text-base whitespace-pre-line leading-relaxed">
+              <div className="flex gap-2">
+                <img
+                  src="/logo.png"
+                  alt="Remo"
+                  className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+                />
+                <div className="bg-gray-200 text-gray-900 rounded-3xl px-4 py-2.5 max-w-[75%] sm:max-w-[60%] shadow-sm text-sm whitespace-pre-line leading-relaxed">
                   {msg.content}
                 </div>
               </div>
             )}
 
-            {/* كروت المنتجات */}
+            {/* كروت المنتجات - بسيطة */}
             {msg.type === 'products' && msg.products && msg.products.length > 0 && (
-              <div className="pr-12 mb-1">
-                <p className="text-teal-400/80 text-xs mb-2 flex items-center gap-1">
+              <div className="mr-9">
+                <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
                   <ShoppingCart className="w-3.5 h-3.5" />
                   اضغط على أي منتج لمشاهدته 👇
                 </p>
-                <div className="grid gap-2.5">
+                <div className="grid gap-2">
                   {msg.products.map((product) => (
                     <Link key={product.id} href={product.link}>
                       <motion.div
-                        whileHover={{ scale: 1.02, x: 4 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="bg-gradient-to-r from-slate-800/80 to-slate-800/50 hover:from-slate-700/90 hover:to-slate-700/70 border border-teal-500/30 hover:border-teal-400/60 rounded-2xl p-3 cursor-pointer transition-all group shadow-lg"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="bg-white border border-gray-200 hover:border-blue-300 rounded-2xl p-3 cursor-pointer transition-all shadow-sm hover:shadow-md"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-700/50 border border-teal-500/15">
+                          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
                             {product.imageUrl ? (
                               <img
                                 src={product.imageUrl}
                                 alt={product.name}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                className="w-full h-full object-cover"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <ShoppingCart className="w-6 h-6 text-teal-500/50" />
+                                <ShoppingCart className="w-6 h-6 text-gray-400" />
                               </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-white font-bold text-sm md:text-base truncate">{product.name}</p>
+                            <p className="text-gray-900 font-semibold text-sm truncate">{product.name}</p>
                             {product.category && (
-                              <p className="text-teal-400/70 text-xs mt-0.5">{product.category}</p>
+                              <p className="text-gray-500 text-xs mt-0.5">{product.category}</p>
                             )}
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <span className="text-emerald-400 font-black text-base md:text-lg">{product.price} ج.م</span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-blue-600 font-bold text-sm">{product.price} ج.م</span>
                               {product.originalPrice && product.originalPrice > product.price && (
-                                <span className="text-gray-500 line-through text-xs">{product.originalPrice} ج.م</span>
+                                <span className="text-gray-400 line-through text-xs">{product.originalPrice} ج.م</span>
                               )}
                             </div>
                           </div>
-                          <ExternalLink className="w-5 h-5 text-teal-400 group-hover:text-teal-300 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                          <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         </div>
                       </motion.div>
                     </Link>
@@ -323,19 +380,19 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* الأسئلة السريعة */}
+            {/* الأسئلة السريعة - بسيطة */}
             {msg.type === 'suggestions' && msg.suggestions && (
-              <div className="pr-12 mb-1">
+              <div className="mr-9">
                 <div className="flex flex-wrap gap-2">
                   {msg.suggestions.map((suggestion, i) => (
                     <motion.button
                       key={i}
-                      initial={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.08 }}
+                      transition={{ delay: i * 0.05 }}
                       onClick={() => sendMessage(suggestion)}
                       disabled={isLoading}
-                      className="bg-gradient-to-r from-slate-800/70 to-slate-800/50 hover:from-teal-800/50 hover:to-cyan-800/50 border border-teal-500/30 hover:border-teal-400/60 text-white/90 hover:text-white text-xs md:text-sm px-3.5 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-white border border-gray-300 hover:border-blue-400 text-gray-700 hover:text-blue-600 text-xs sm:text-sm px-3 py-1.5 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {suggestion}
                     </motion.button>
@@ -346,26 +403,26 @@ export default function ChatPage() {
           </motion.div>
         ))}
 
-        {/* مؤشر الكتابة */}
+        {/* مؤشر الكتابة - بسيط زي Messenger */}
         <AnimatePresence>
           {isLoading && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex gap-3"
+              className="flex gap-2"
             >
-              <div className="flex-shrink-0 relative mt-1">
-                <div className="absolute inset-0 bg-teal-400/20 rounded-full blur-md animate-pulse"></div>
-                <img
-                  src="/logo.png"
-                  alt="Remo"
-                  className="relative w-9 h-9 rounded-full object-cover ring-2 ring-teal-400/40 shadow-lg"
-                />
-              </div>
-              <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-teal-500/20 rounded-2xl rounded-tl-sm px-5 py-3.5 flex items-center gap-2.5 shadow-lg">
-                <Loader2 className="w-5 h-5 animate-spin text-teal-400" />
-                <span className="text-teal-300 text-sm">جاري التفكير...</span>
+              <img
+                src="/logo.png"
+                alt="Remo"
+                className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+              />
+              <div className="bg-gray-200 rounded-3xl px-4 py-3 flex items-center gap-2">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -374,41 +431,40 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* رسالة أسفل الشات */}
-      <div className="text-center py-1.5">
-        <Link href="/" className="text-teal-500/60 hover:text-teal-400 text-[10px] md:text-xs transition-colors">
-          Powered by Remo Store • www.remostore.net
-        </Link>
-      </div>
-
-      {/* Input Area */}
-      <div className="sticky bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent pt-4 pb-4 px-3 md:px-6">
-        <div className="max-w-3xl mx-auto">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="اكتب سؤالك هنا..."
-              disabled={isLoading}
-              className="flex-1 bg-slate-800/60 border border-teal-500/30 focus:border-teal-400 rounded-2xl px-5 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500/40 disabled:opacity-50 text-sm md:text-base transition-all backdrop-blur"
-              autoFocus
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !inputMessage.trim()}
-              className="bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white p-3.5 rounded-2xl transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg shadow-teal-600/30 hover:shadow-teal-500/50"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </button>
-          </form>
+      {/* Input Area - بسيط زي Messenger */}
+      <div className="border-t border-gray-200 bg-white px-4 py-3">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            placeholder="اكتب رسالة..."
+            disabled={isLoading}
+            className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-gray-200 disabled:opacity-50 text-sm transition-all"
+            autoFocus
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !inputMessage.trim()}
+            className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </button>
+        </form>
+        
+        {/* Powered by */}
+        <div className="text-center mt-2">
+          <Link href="/" className="text-gray-400 hover:text-gray-600 text-[10px] transition-colors">
+            Powered by Remo Store
+          </Link>
         </div>
       </div>
+    </div>
     </div>
   )
 }
