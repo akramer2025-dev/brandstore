@@ -13,8 +13,6 @@ import {
   Home,
   User,
   Settings,
-  Menu,
-  X,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -63,7 +61,6 @@ export default function ChatPage() {
   const [conversationHistory, setConversationHistory] = useState<any[]>([])
   const [showWelcome, setShowWelcome] = useState(true)
   const [sessionId] = useState(() => generateSessionId())
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -179,15 +176,14 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen bg-white">
-      {/* Sidebar - على اليسار زي Messenger */}
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar - ظاهر على Desktop بس */}
       <div className={`
-        fixed lg:relative inset-y-0 left-0 z-50 w-20 lg:w-20
-        bg-white border-l border-gray-200 shadow-lg
-        transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        hidden lg:flex
+        w-20 bg-white border-l border-gray-200 shadow-lg
+        flex-col h-full py-4
       `}>
-        <div className="flex flex-col h-full py-4">
+        <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-center mb-6">
             <img
@@ -201,7 +197,7 @@ export default function ChatPage() {
           <nav className="flex-1 flex flex-col items-center gap-4">
             {/* المحادثة (Active) */}
             <button
-              className="relative w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
+              className="relative w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg"
               title="المحادثة"
             >
               <MessageCircle className="w-6 h-6" />
@@ -237,7 +233,7 @@ export default function ChatPage() {
             </a>
           </nav>
 
-          {/* Settings/Profile at bottom */}
+          {/* Settings at bottom */}
           <div className="flex flex-col items-center gap-3">
             <button
               className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-all"
@@ -249,30 +245,43 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-40 w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-lg"
-      >
-        {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-gray-50">
-        {/* Chat Header - بسيط زي Messenger */}
-        <div className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
-          <div className="flex items-center gap-3">
-            <img
-              src="/logo.png"
-              alt="Remo"
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div>
-              <h1 className="font-bold text-gray-900 text-base">مساعد ريمو الذكي</h1>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs text-gray-600">متصل الآن</span>
+      {/* Main Chat Area - كامل الشاشة على المحمول */}
+      <div className="flex-1 flex flex-col">
+        {/* Chat Header - بنفس ألوان الموقع */}
+        <div className="bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 px-4 py-3 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.png"
+                alt="Remo"
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-white/30"
+              />
+              <div>
+                <h1 className="font-bold text-white text-base">مساعد ريمو الذكي</h1>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-purple-200">متصل الآن</span>
+                </div>
               </div>
+            </div>
+            
+            {/* أزرار التنقل على الموبايل */}
+            <div className="flex items-center gap-2 lg:hidden">
+              <Link
+                href="/"
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
+                title="الرئيسية"
+              >
+                <Home className="w-4 h-4" />
+              </Link>
+              <a
+                href="https://wa.me/201555512778"
+                target="_blank"
+                className="w-9 h-9 rounded-full bg-green-500/20 hover:bg-green-500/30 flex items-center justify-center text-green-300 transition-all"
+                title="واتساب"
+              >
+                <Phone className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </div>
@@ -314,10 +323,10 @@ export default function ChatPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* رسالة المستخدم - على اليمين بلون أزرق */}
+            {/* رسالة المستخدم - على اليمين بلون بنفسجي */}
             {msg.type === 'user' && (
               <div className="flex justify-end">
-                <div className="bg-blue-600 text-white rounded-3xl px-4 py-2.5 max-w-[75%] sm:max-w-[60%] shadow-sm text-sm leading-relaxed">
+                <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-3xl px-4 py-2.5 max-w-[75%] sm:max-w-[60%] shadow-sm text-sm leading-relaxed">
                   {msg.content}
                 </div>
               </div>
@@ -350,7 +359,7 @@ export default function ChatPage() {
                       <motion.div
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.98 }}
-                        className="bg-white border border-gray-200 hover:border-blue-300 rounded-2xl p-3 cursor-pointer transition-all shadow-sm hover:shadow-md"
+                        className="bg-white border border-gray-200 hover:border-purple-300 rounded-2xl p-3 cursor-pointer transition-all shadow-sm hover:shadow-md"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
@@ -372,7 +381,7 @@ export default function ChatPage() {
                               <p className="text-gray-500 text-xs mt-0.5">{product.category}</p>
                             )}
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-blue-600 font-bold text-sm">{product.price} ج.م</span>
+                              <span className="text-purple-600 font-bold text-sm">{product.price} ج.م</span>
                               {product.originalPrice && product.originalPrice > product.price && (
                                 <span className="text-gray-400 line-through text-xs">{product.originalPrice} ج.م</span>
                               )}
@@ -399,7 +408,7 @@ export default function ChatPage() {
                       transition={{ delay: i * 0.05 }}
                       onClick={() => sendMessage(suggestion)}
                       disabled={isLoading}
-                      className="bg-white border border-gray-300 hover:border-blue-400 text-gray-700 hover:text-blue-600 text-xs sm:text-sm px-3 py-1.5 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-white border border-gray-300 hover:border-purple-400 text-gray-700 hover:text-purple-600 text-xs sm:text-sm px-3 py-1.5 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {suggestion}
                     </motion.button>
@@ -454,7 +463,7 @@ export default function ChatPage() {
           <button
             type="submit"
             disabled={isLoading || !inputMessage.trim()}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-2.5 rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
