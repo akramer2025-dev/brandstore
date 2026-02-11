@@ -437,10 +437,10 @@ export default function CustomerChatsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Conversations List */}
-        <Card className="lg:col-span-1 shadow-xl border-2" style={{ borderColor: '#7c3aed' }}>
-          <CardHeader style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 h-[calc(100vh-180px)]">
+        {/* Conversations List - على اليسار */}
+        <Card className="sm:col-span-1 shadow-xl border-2 flex flex-col overflow-hidden" style={{ borderColor: '#7c3aed' }}>
+          <CardHeader className="flex-shrink-0" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)' }}>
             <CardTitle className="flex items-center justify-between" style={{ color: '#7c3aed' }}>
               <div className="flex items-center gap-2">
                 📋 قائمة المحادثات
@@ -452,7 +452,7 @@ export default function CustomerChatsPage() {
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
+          <CardContent className="p-0 flex-1 overflow-y-auto">
             {conversations.length === 0 ? (
               <div className="p-6 sm:p-8 text-center text-gray-500">
                 <MessageCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 opacity-30" />
@@ -518,9 +518,9 @@ export default function CustomerChatsPage() {
           </CardContent>
         </Card>
 
-        {/* Messages Display */}
-        <Card className="lg:col-span-2 shadow-xl border-2" style={{ borderColor: '#7c3aed' }}>
-          <CardHeader className="border-b-2" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)', borderColor: '#c4b5fd' }}>
+        {/* Messages Display - على اليمين */}
+        <Card className="sm:col-span-2 shadow-xl border-2 flex flex-col overflow-hidden" style={{ borderColor: '#7c3aed' }}>
+          <CardHeader className="border-b-2 flex-shrink-0" style={{ background: 'linear-gradient(to right, #ede9fe, #fce7f3)', borderColor: '#c4b5fd' }}>
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2 font-bold" style={{ color: '#7c3aed' }}>
                 💬 المحادثة
@@ -536,7 +536,7 @@ export default function CustomerChatsPage() {
                   }}
                   variant="ghost"
                   size="sm"
-                  className="hover:bg-[#ede9fe]"
+                  className="hover:bg-[#ede9fe] sm:hidden"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   رجوع
@@ -544,20 +544,20 @@ export default function CustomerChatsPage() {
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 flex-1 flex flex-col overflow-hidden">
             {!selectedConv ? (
-              <div className="flex flex-col items-center justify-center h-[50vh] sm:h-[60vh] text-gray-400 px-4">
+              <div className="flex flex-col items-center justify-center flex-1 text-gray-400 px-4">
                 <MessageCircle className="w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4 opacity-10 animate-pulse" />
                 <p className="text-lg sm:text-2xl font-bold text-center">👈 اختر محادثة من القائمة</p>
                 <p className="text-xs sm:text-sm mt-1 text-gray-500">لعرض الرسائل</p>
               </div>
             ) : isLoadingMessages ? (
-              <div className="flex items-center justify-center h-[50vh] sm:h-[60vh]">
+              <div className="flex items-center justify-center flex-1">
                 <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 animate-spin" style={{ color: '#7c3aed' }} />
                 <span className="mr-2 sm:mr-3 text-base sm:text-lg font-medium">⏳ جاري تحميل الرسائل...</span>
               </div>
             ) : (
-              <div className="h-[50vh] sm:h-[60vh] overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4" style={{ background: 'linear-gradient(to bottom, #faf5ff, #ffffff, #fce7f3)' }}>
+              <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4" style={{ background: 'linear-gradient(to bottom, #faf5ff, #ffffff, #fce7f3)' }}>
                 {chatMessages.map((msg, idx) => (
                   <div
                     key={msg.id}
