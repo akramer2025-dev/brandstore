@@ -192,27 +192,45 @@ function findMatchingProducts(message: string, products: ProductInfo[]): Product
   
   // 🔄 مرادفات للمنتجات (synonyms mapping)
   const synonyms: Record<string, string> = {
+    // إسدال / ملحفة variations
+    'إسدال': 'اسدال',
+    'إسدالات': 'اسدال',
+    'اسدالات': 'اسدال',
     'ملحفة': 'اسدال',
     'ملحفه': 'اسدال',
-    'ملحفه': 'اسدال',
     'ملحفات': 'اسدال',
+    // طرحة / حجاب variations
     'حجاب': 'طرحة',
     'حجابات': 'طرحة',
     'شيلة': 'طرحة',
     'شيلات': 'طرحة',
+    'طرح': 'طرحة',
+    'طرحه': 'طرحة',
+    // عباءة variations
     'عباية': 'عباءة',
     'عبايه': 'عباءة',
+    'عبايات': 'عباءة',
+    'عباءات': 'عباءة',
+    // ملابس عامة
     'بلوزة': 'بلوزه',
     'تنورة': 'تنوره',
     'جلابية': 'جلابيه',
     'جلابيه': 'جلابيه',
   }
   
+  console.log('[Search] Original query:', message)
+  console.log('[Search] Lowercase query:', query)
+  
   // استبدال المرادفات في النص
   for (const [synonym, replacement] of Object.entries(synonyms)) {
     const regex = new RegExp(`\\b${synonym}\\b`, 'gi')
-    query = query.replace(regex, replacement)
+    if (regex.test(query)) {
+      console.log(`[Search] Replacing "${synonym}" with "${replacement}"`)
+      query = query.replace(regex, replacement)
+    }
   }
+  
+  console.log('[Search] Final query after synonyms:', query)
   
   // كلمات عامة نتجاهلها
   const stopWords = ['عاوز', 'عايز', 'عاوزة', 'عاوزه', 'عاوزين', 'عندكم', 'فين', 'ايه', 'عن', 'في', 'من', 'على', 'ال', 'ده', 'دي', 'هل', 'كم', 'سعر', 'اسعار', 'منتج', 'منتجات', 'حاجة', 'حاجات', 'ابغى', 'ابي', 'وش', 'شو', 'بكام', 'كام', 'قد', 'ايش', 'شنو', 'يا', 'لو', 'ممكن']
@@ -258,14 +276,20 @@ function findMatchingProducts(message: string, products: ProductInfo[]): Product
       }
     }
     
+    if (score > 0) {
+      console.log(`[Search] Product "${p.nameAr}" scored ${score}`)
+    }
+    
     return { product: p, score }
   })
   
-  // عرض فقط المنتجات اللي عندها score أكبر من 10
+  // عرض فقط المنتجات اللي عندها score أكبر من 5 (كان 10 - خفضناه)
   const filtered = scored
-    .filter(s => s.score > 10)
+    .filter(s => s.score > 5)
     .sort((a, b) => b.score - a.score)
     .slice(0, 8)
+  
+  console.log(`[Search] Found ${filtered.length} matching products (score > 5)`)
   
   return filtered.map(s => s.product)
 }
