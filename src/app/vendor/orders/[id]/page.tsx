@@ -546,6 +546,58 @@ export default function VendorOrderDetailPage({ params }: { params: Promise<{ id
                       <p className="text-xs text-gray-400 mt-2">اضغط على الصورة للعرض بالحجم الكامل</p>
                     </div>
                   )}
+
+                  {/* عرض صورة إيصال تحويل وي باي */}
+                  {order.paymentMethod === 'WE_PAY' && order.wePayReceipt && (
+                    <div className="bg-purple-900/30 border border-purple-500/30 rounded-lg p-3">
+                      <p className="text-purple-300 text-sm mb-2 flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        إيصال تحويل وي باي
+                      </p>
+                      <a 
+                        href={order.wePayReceipt} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block relative group"
+                      >
+                        <img 
+                          src={order.wePayReceipt} 
+                          alt="إيصال تحويل وي باي" 
+                          className="w-full rounded-lg border-2 border-purple-500 hover:border-purple-400 transition-all cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                          <ExternalLink className="h-8 w-8 text-white" />
+                        </div>
+                      </a>
+                      <p className="text-xs text-gray-400 mt-2">اضغط على الصورة للعرض بالحجم الكامل</p>
+                    </div>
+                  )}
+
+                  {/* عرض صورة إيصال المحفظة الإلكترونية */}
+                  {order.paymentMethod === 'E_WALLET_TRANSFER' && order.eWalletReceipt && (
+                    <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-3">
+                      <p className="text-green-300 text-sm mb-2 flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        إيصال المحفظة الإلكترونية
+                      </p>
+                      <a 
+                        href={order.eWalletReceipt} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block relative group"
+                      >
+                        <img 
+                          src={order.eWalletReceipt} 
+                          alt="إيصال المحفظة الإلكترونية" 
+                          className="w-full rounded-lg border-2 border-green-500 hover:border-green-400 transition-all cursor-pointer"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                          <ExternalLink className="h-8 w-8 text-white" />
+                        </div>
+                      </a>
+                      <p className="text-xs text-gray-400 mt-2">اضغط على الصورة للعرض بالحجم الكامل</p>
+                    </div>
+                  )}
                   
                   {order.paymentStatus && (
                     <div className={`${order.paymentStatus === 'PAID' ? 'bg-green-500/20 border-green-500/30' : 'bg-orange-500/20 border-orange-500/30'} border rounded-lg p-3 text-center`}>

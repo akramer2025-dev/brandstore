@@ -53,7 +53,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH_ON_DELIVERY');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('WE_PAY');
   const [eWalletType, setEWalletType] = useState<EWalletType>('vodafone_cash');
   const [selectedInstallmentPlan, setSelectedInstallmentPlan] = useState<any>(null);
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
@@ -188,6 +188,11 @@ export default function CheckoutPage() {
   // Auto-select payment method based on cart items
   useEffect(() => {
     if (mounted && items.length > 0) {
+      // الصفحة الحالية تستخدم WE_PAY فقط كطريقة دفع رئيسية
+      // لا حاجة لتغيير paymentMethod تلقائياً
+      // إذا كنت تريد تفعيل طرق دفع أخرى، قم بإزالة هذا التعليق
+      
+      /*
       // If cart has Shein/Trendyol, default to partial payment
       if (hasSheinOrTrendyol && paymentMethod === 'CASH_ON_DELIVERY') {
         setPaymentMethod('PARTIAL_PAYMENT_50');
@@ -196,6 +201,7 @@ export default function CheckoutPage() {
       else if (!isAllClothing && paymentMethod === 'CASH_ON_DELIVERY') {
         setPaymentMethod('E_WALLET_TRANSFER');
       }
+      */
     }
   }, [mounted, items, isAllClothing, hasSheinOrTrendyol, paymentMethod]);
 
