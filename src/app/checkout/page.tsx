@@ -518,28 +518,25 @@ export default function CheckoutPage() {
     }
   };
 
-  // رفع صورة الإيصال إلى Cloudinary
+  // رفع صورة الإيصال إلى Cloudinary عبر API
   const uploadReceiptToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'ml_default'); // تأكد من إنشاء upload preset في Cloudinary
 
     try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      const response = await fetch('/api/upload-receipt', {
+        method: 'POST',
+        body: formData,
+      });
 
       if (!response.ok) {
-        throw new Error('فشل رفع الصورة');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'فشل رفع الصورة');
       }
 
       const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
+      return data.url;
+    } catch (error: any) {
       console.error('خطأ في رفع الصورة:', error);
       throw error;
     }
