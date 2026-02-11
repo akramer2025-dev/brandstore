@@ -282,16 +282,6 @@ export default function ChatPage() {
               <div className="flex gap-1">
                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-3 h-3 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-              </div>
-              <p className="text-teal-300 text-sm">جاري تحميل المساعد الذكي...</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Messages */}
-        {messages.map((msg) => (
-          <motion.div
                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
               <p className="text-gray-500 text-sm">جاري تحميل المساعد الذكي...</p>
