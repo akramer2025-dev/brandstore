@@ -41,6 +41,7 @@ model User {
   pushSubscriptions PushSubscription[] // Push notification subscriptions
   fcmDeviceTokens  FCMDeviceToken[] // FCM tokens للتطبيقات الموبايل
   activityLogs     UserActivityLog[] // سجل النشاط
+  sheinOrders      SheinOrder[] // طلبات شي إن
   partner          PartnerCapital? @relation(fields: [partnerId], references: [id])
 
   @@map("users")
@@ -1729,4 +1730,44 @@ model UserActivityLog {
   @@index([userId])
   @@index([action])
   @@index([createdAt(sort: Desc)])
+}
+
+// Shein Orders - طلبات شي إن المخصصة
+model SheinOrder {
+  id                String   @id @default(cuid())
+  userId            String
+  customerName      String
+  customerPhone     String
+  customerEmail     String?
+  productLinks      Json     // مصفوفة من روابط المنتجات
+  productImages     Json?    // مصفوفة من روابط الصور المرفوعة
+  notes             String?  // ملاحظات العميل
+  status            SheinOrderStatus @default(PENDING)
+  estimatedTotal    Float?   // التكلفة التقديرية
+  advancePayment    Float?   // الدفعة المقدمة (50%)
+  finalPayment      Float?   // الدفعة النهائية (50%)
+  advancePaid       Boolean  @default(false) // تم دفع المقدم؟
+  finalPaid         Boolean  @default(false) // تم دفع النهائي؟
+  adminNotes        String?  // ملاحظات الإدارة
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("shein_orders")
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+}
+
+enum SheinOrderStatus {
+  PENDING           // قيد المراجعة
+  REVIEWING         // تحت المراجعة
+  QUOTED            // تم تحديد السعر
+  ADVANCE_PAID      // تم دفع المقدم
+  ORDERING          // جاري الطلب من شي إن
+  SHIPPED           // تم الشحن
+  DELIVERED         // تم التسليم
+  COMPLETED         // مكتمل
+  CANCELLED         // ملغي
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "517017205516",
+    "project_id": "remo-store-60575",
+    "storage_bucket": "remo-store-60575.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:517017205516:android:492a6a953b0f8e51a52729",
+        "android_client_info": {
+          "package_name": "com.remostore.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzdWO05PuLbNT_WDYRv3XaJn_qhCqB0Zg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
