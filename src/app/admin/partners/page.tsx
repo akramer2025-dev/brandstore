@@ -345,6 +345,8 @@ export default function AdminPartnersPage() {
           notes: '',
           createUserAccount: false,
           canDeleteOrders: true,
+          canUploadShein: false,
+          canAddOfflineProducts: false,
         })
         fetchPartners()
       } else {

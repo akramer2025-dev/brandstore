@@ -1,12 +1,17 @@
 // 📱 أمثلة عملية لاستخدام نظام الإشعارات في Remostore
 
-import { messaging } from '@/lib/firebase-admin';
+import { messaging, isFirebaseInitialized } from '@/lib/firebase-admin';
 import { prisma } from '@/lib/prisma';
 
 /**
  * مثال 1: إرسال إشعار لمستخدم واحد عند تأكيد طلبه
  */
 export async function notifyOrderConfirmed(orderId: string, userId: string) {
+  if (!isFirebaseInitialized || !messaging) {
+    console.warn('⚠️ Firebase not initialized - Skipping notification');
+    return null;
+  }
+  
   try {
     // جلب token المستخدم
     const userTokens = await prisma.fCMDeviceToken.findMany({

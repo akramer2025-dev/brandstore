@@ -2,6 +2,8 @@
 import * as admin from 'firebase-admin';
 
 // تهيئة Firebase Admin (مرة واحدة فقط)
+let isInitialized = false;
+
 if (!admin.apps.length) {
   try {
     // من Firebase Console -> Project Settings -> Service Accounts
@@ -12,15 +14,23 @@ if (!admin.apps.length) {
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     };
 
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-    });
+    // فقط إذا كانت كل الـ credentials موجودة
+    if (serviceAccount.projectId && serviceAccount.clientEmail && serviceAccount.privateKey) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+      });
 
-    console.log('✅ Firebase Admin initialized');
+      isInitialized = true;
+      console.log('✅ Firebase Admin initialized');
+    } else {
+      console.warn('⚠️ Firebase credentials not found - Push notifications disabled');
+    }
   } catch (error) {
     console.error('❌ خطأ في تهيئة Firebase Admin:', error);
   }
 }
 
-export const messaging = admin.messaging();
+// Export messaging only if initialized
+export const messaging = isInitialized ? admin.messaging() : null;
+export const isFirebaseInitialized = isInitialized;
 export default admin;

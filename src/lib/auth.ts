@@ -193,7 +193,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               action: 'LOGIN',
               metadata: { 
                 provider: account?.provider || 'credentials',
-                isNewUser: !existingUser,
               },
             });
           } catch (logError) {

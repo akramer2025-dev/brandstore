@@ -1,19 +1,26 @@
 // API لإرسال Push Notifications عبر FCM
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { messaging } from '@/lib/firebase-admin';
+import { auth } from '@/lib/auth';
+import { messaging, isFirebaseInitialized } from '@/lib/firebase-admin';
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     // فقط ADMIN يقدر يبعت notifications
     if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Unauthorized - Admin only' },
         { status: 403 }
+      );
+    }
+
+    // تحقق من تهيئة Firebase
+    if (!isFirebaseInitialized || !messaging) {
+      return NextResponse.json(
+        { error: 'Push notifications are not configured. Please add Firebase credentials.' },
+        { status: 503 }
       );
     }
 
@@ -134,7 +141,7 @@ export async function POST(req: NextRequest) {
 // GET - جلب آخر الإشعارات المرسلة
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json(
