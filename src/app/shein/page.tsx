@@ -24,6 +24,7 @@ export default function SheinOrderPage() {
     customerEmail: '',
     productLinks: ['', '', '', '', ''], // 5 حقول افتراضية
     productImages: [] as string[],
+    selectedColors: [] as string[], // الألوان المختارة
     notes: '',
   });
 
@@ -112,6 +113,7 @@ export default function SheinOrderPage() {
           customerEmail: formData.customerEmail || session.user?.email,
           productLinks: validLinks,
           productImages: formData.productImages,
+          selectedColors: formData.selectedColors,
           notes: formData.notes,
         }),
       });
@@ -426,6 +428,170 @@ export default function SheinOrderPage() {
                         </button>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+
+              {/* اختيار الألوان */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <span className="text-2xl">🎨</span>
+                  الألوان المطلوبة (اختياري)
+                </h3>
+                <p className="text-sm text-gray-600">
+                  اختر الألوان التي تريدها للمنتجات (يمكنك اختيار أكثر من لون)
+                </p>
+
+                {/* Foundation Colors */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-gray-700">ألوان Foundation</h4>
+                  <div className="grid grid-cols-6 md:grid-cols-9 gap-2">
+                    {[
+                      { name: 'Porcelain', hex: '#F5E8DD' },
+                      { name: 'Ivory', hex: '#F4E4D7' },
+                      { name: 'Vanilla', hex: '#F3DFC9' },
+                      { name: 'Sand', hex: '#E8C9A8' },
+                      { name: 'Beige', hex: '#DDC3A4' },
+                      { name: 'Natural', hex: '#D3B99F' },
+                      { name: 'Honey', hex: '#C9A882' },
+                      { name: 'Tan', hex: '#BD9A75' },
+                      { name: 'Caramel', hex: '#B08968' },
+                      { name: 'Golden', hex: '#A57C5C' },
+                      { name: 'Almond', hex: '#9A6F54' },
+                      { name: 'Chestnut', hex: '#8D6449' },
+                      { name: 'Bronze', hex: '#7F5A42' },
+                      { name: 'Mahogany', hex: '#6F4E3B' },
+                      { name: 'Coffee', hex: '#5F4234' },
+                      { name: 'Cocoa', hex: '#523628' },
+                      { name: 'Espresso', hex: '#442B1F' },
+                      { name: 'Ebony', hex: '#362016' }
+                    ].map((color) => (
+                      <button
+                        key={color.name}
+                        type="button"
+                        onClick={() => {
+                          const isSelected = formData.selectedColors.includes(color.name);
+                          if (isSelected) {
+                            setFormData({
+                              ...formData,
+                              selectedColors: formData.selectedColors.filter(c => c !== color.name)
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              selectedColors: [...formData.selectedColors, color.name]
+                            });
+                          }
+                        }}
+                        className={`w-12 h-12 rounded-full border-2 transition-all relative ${
+                          formData.selectedColors.includes(color.name)
+                            ? 'border-purple-600 ring-4 ring-purple-200'
+                            : 'border-gray-300 hover:border-purple-400'
+                        }`}
+                        style={{ backgroundColor: color.hex }}
+                        title={color.name}
+                      >
+                        {formData.selectedColors.includes(color.name) && (
+                          <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
+                            ✓
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* General Colors */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-gray-700">ألوان عامة</h4>
+                  <div className="grid grid-cols-6 md:grid-cols-10 gap-2">
+                    {[
+                      { name: 'أسود', hex: '#000000' },
+                      { name: 'أبيض', hex: '#FFFFFF' },
+                      { name: 'رمادي', hex: '#808080' },
+                      { name: 'أحمر', hex: '#FF0000' },
+                      { name: 'وردي', hex: '#FFC0CB' },
+                      { name: 'برتقالي', hex: '#FFA500' },
+                      { name: 'أصفر', hex: '#FFFF00' },
+                      { name: 'أخضر', hex: '#008000' },
+                      { name: 'أزرق فاتح', hex: '#87CEEB' },
+                      { name: 'أزرق', hex: '#0000FF' },
+                      { name: 'أزرق غامق', hex: '#00008B' },
+                      { name: 'بنفسجي', hex: '#800080' },
+                      { name: 'بني', hex: '#8B4513' },
+                      { name: 'بيج', hex: '#F5F5DC' },
+                      { name: 'ذهبي', hex: '#FFD700' },
+                      { name: 'فضي', hex: '#C0C0C0' },
+                      { name: 'نيلي', hex: '#000080' },
+                      { name: 'فيروزي', hex: '#40E0D0' },
+                      { name: 'كحلي', hex: '#191970' },
+                      { name: 'زيتي', hex: '#808000' }
+                    ].map((color) => (
+                      <button
+                        key={color.name}
+                        type="button"
+                        onClick={() => {
+                          const isSelected = formData.selectedColors.includes(color.name);
+                          if (isSelected) {
+                            setFormData({
+                              ...formData,
+                              selectedColors: formData.selectedColors.filter(c => c !== color.name)
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              selectedColors: [...formData.selectedColors, color.name]
+                            });
+                          }
+                        }}
+                        className={`w-12 h-12 rounded-full border-2 transition-all relative ${
+                          formData.selectedColors.includes(color.name)
+                            ? 'border-purple-600 ring-4 ring-purple-200'
+                            : 'border-gray-300 hover:border-purple-400'
+                        } ${color.hex === '#FFFFFF' ? 'border-gray-400' : ''}`}
+                        style={{ backgroundColor: color.hex }}
+                        title={color.name}
+                      >
+                        {formData.selectedColors.includes(color.name) && (
+                          <span className={`absolute inset-0 flex items-center justify-center font-bold text-lg ${
+                            color.hex === '#FFFFFF' || color.hex === '#FFFF00' || color.hex === '#FFD700' ? 'text-gray-800' : 'text-white'
+                          }`}>
+                            ✓
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Selected Colors Display */}
+                {formData.selectedColors.length > 0 && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-purple-900 mb-2">
+                      الألوان المختارة ({formData.selectedColors.length}):
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.selectedColors.map((color) => (
+                        <span
+                          key={color}
+                          className="inline-flex items-center gap-1 bg-white border border-purple-300 rounded-full px-3 py-1 text-sm"
+                        >
+                          {color}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                selectedColors: formData.selectedColors.filter(c => c !== color)
+                              });
+                            }}
+                            className="text-red-500 hover:text-red-700 font-bold"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

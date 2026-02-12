@@ -1741,6 +1741,7 @@ model SheinOrder {
   customerEmail     String?
   productLinks      Json     // مصفوفة من روابط المنتجات
   productImages     Json?    // مصفوفة من روابط الصور المرفوعة
+  selectedColors    Json?    // مصفوفة من الألوان المختارة
   notes             String?  // ملاحظات العميل
   status            SheinOrderStatus @default(PENDING)
   estimatedTotal    Float?   // التكلفة التقديرية

@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       customerEmail,
       productLinks,
       productImages,
+      selectedColors,
       notes,
     } = body;
 
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
         customerEmail: customerEmail || session.user.email || null,
         productLinks: productLinks || [],
         productImages: productImages || [],
+        selectedColors: selectedColors || [],
         notes,
         status: 'PENDING',
       },

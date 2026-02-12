@@ -60,11 +60,11 @@ export async function POST(req: Request) {
           );
         }
 
-        // Validate file size (5MB max)
-        const maxSize = 5 * 1024 * 1024;
+        // Validate file size (10MB max)
+        const maxSize = 10 * 1024 * 1024;
         if (file.size > maxSize) {
           return NextResponse.json(
-            { error: `File ${file.name} exceeds 5MB limit` },
+            { error: `File ${file.name} exceeds 10MB limit` },
             { status: 400 }
           );
         }
@@ -106,11 +106,11 @@ export async function POST(req: Request) {
           );
         }
 
-        // Validate file size (5MB max)
-        const maxSize = 5 * 1024 * 1024;
+        // Validate file size (10MB max)
+        const maxSize = 10 * 1024 * 1024;
         if (file.size > maxSize) {
           return NextResponse.json(
-            { error: `File ${file.name} exceeds 5MB limit` },
+            { error: `File ${file.name} exceeds 10MB limit` },
             { status: 400 }
           );
         }

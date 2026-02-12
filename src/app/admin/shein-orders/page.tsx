@@ -41,6 +41,7 @@ interface SheinOrder {
   customerEmail: string | null;
   productLinks: string[];
   productImages: string[];
+  selectedColors: string[];
   notes: string | null;
   status: string;
   estimatedTotal: number | null;
@@ -379,6 +380,25 @@ export default function AdminSheinOrdersPage() {
                                   className="w-full h-32 object-cover rounded-lg"
                                 />
                               ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Selected Colors */}
+                        {order.selectedColors && order.selectedColors.length > 0 && (
+                          <div>
+                            <h3 className="font-semibold mb-2">الألوان المطلوبة</h3>
+                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                              <div className="flex flex-wrap gap-2">
+                                {order.selectedColors.map((color, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-1 bg-white border border-purple-300 rounded-full px-3 py-1 text-sm font-medium"
+                                  >
+                                    🎨 {color}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         )}
