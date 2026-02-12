@@ -77,6 +77,28 @@ export default function VendorDashboard() {
   const [recentNotifications, setRecentNotifications] = useState<RecentNotification[]>([])
   const isInitialLoadRef = useRef(true)
 
+  // 🔒 فحص حالة التعليق للحساب
+  useEffect(() => {
+    const checkSuspensionStatus = async () => {
+      if (status === 'authenticated' && session?.user?.role === 'VENDOR') {
+        try {
+          const res = await fetch('/api/vendor/suspension-status')
+          if (res.ok) {
+            const data = await res.json()
+            if (data.isSuspended) {
+              router.push('/vendor/suspended')
+              return
+            }
+          }
+        } catch (error) {
+          console.error('Error checking suspension status:', error)
+        }
+      }
+    }
+
+    checkSuspensionStatus()
+  }, [status, session, router])
+
 
   // تهيئة AudioContext عند أول تفاعل
   const initAudioContext = () => {

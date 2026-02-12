@@ -26,6 +26,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@capacitor/android": "^8.0.2",
+    "@capacitor/browser": "^8.0.0",
     "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",
     "@capacitor/push-notifications": "^8.0.0",
@@ -51,6 +52,7 @@
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "firebase-admin": "^13.6.1",
     "framer-motion": "^12.31.0",
     "groq-sdk": "^0.37.0",
     "lucide-react": "^0.469.0",
@@ -69,12 +71,14 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "ua-parser-js": "^2.0.9",
     "web-push": "^3.6.7",
     "workbox-window": "^7.4.0",
     "zod": "^3.24.1",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22",
     "@types/react": "^19",

@@ -46,6 +46,8 @@ interface Partner {
   capitalPercent: number
   joinDate: string
   isActive: boolean
+  isSuspended?: boolean
+  suspensionReason?: string | null
   notes: string | null
   createdAt: string
 }
@@ -59,6 +61,8 @@ export default function AdminPartnersPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isStaffDialogOpen, setIsStaffDialogOpen] = useState(false)
+  const [isSuspensionDialogOpen, setIsSuspensionDialogOpen] = useState(false)
+  const [suspensionReason, setSuspensionReason] = useState('')
   const [partnerToDelete, setPartnerToDelete] = useState<Partner | null>(null)
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null)
   const [staffFormData, setStaffFormData] = useState({
@@ -204,6 +208,74 @@ export default function AdminPartnersPage() {
       }
     } catch (error) {
       console.error('Error toggling partner status:', error)
+      toast.error('حدث خطأ')
+    }
+  }
+
+  const openSuspensionDialog = (partner: Partner) => {
+    setSelectedPartner(partner)
+    setSuspensionReason(`${partner.partnerName} يا أهلاً وسهلاً! من فضلك تواصل معايا على الواتساب لتفعيل حسابك.\n\n01555512778\nم : اكــرم المــصرى`)
+    setIsSuspensionDialogOpen(true)
+  }
+
+  const handleToggleSuspension = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!selectedPartner) return
+    
+    try {
+      // تعليق الحساب (partner.id هو نفسه vendor.id)
+      const response = await fetch(`/api/admin/vendors/${selectedPartner.id}/toggle-suspension`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          suspend: true,
+          reason: suspensionReason,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(data.message)
+        setIsSuspensionDialogOpen(false)
+        setSuspensionReason('')
+        fetchPartners()
+      } else {
+        toast.error(data.error || 'حدث خطأ')
+      }
+    } catch (error) {
+      console.error('Error toggling suspension:', error)
+      toast.error('حدث خطأ')
+    }
+  }
+
+  const handleActivateAccount = async (partner: Partner) => {
+    if (!confirm(`هل أنت متأكد من تفعيل حساب "${partner.partnerName}"؟`)) {
+      return
+    }
+    
+    try {
+      // تفعيل الحساب (partner.id هو نفسه vendor.id)
+      const response = await fetch(`/api/admin/vendors/${partner.id}/toggle-suspension`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          suspend: false,
+          reason: null,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(data.message)
+        fetchPartners()
+      } else {
+        toast.error(data.error || 'حدث خطأ')
+      }
+    } catch (error) {
+      console.error('Error activating account:', error)
       toast.error('حدث خطأ')
     }
   }
@@ -701,6 +773,12 @@ export default function AdminPartnersPage() {
                             غير نشط
                           </span>
                         )}
+                        {partner.isSuspended && (
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 flex items-center gap-1 animate-pulse">
+                            <Shield className="h-3 w-3" />
+                            موقوف مؤقتاً
+                          </span>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
@@ -786,6 +864,30 @@ export default function AdminPartnersPage() {
                       >
                         {partner.isActive ? 'إيقاف' : 'تفعيل'}
                       </Button>
+                      
+                      {/* زر الإيقاف المؤقت أو التفعيل */}
+                      {partner.isSuspended ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleActivateAccount(partner)}
+                          className="bg-green-500/10 border-green-500/30 text-green-300 hover:bg-green-500/20"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          تفعيل الحساب
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openSuspensionDialog(partner)}
+                          className="bg-yellow-500/10 border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/20"
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          إيقاف مؤقت
+                        </Button>
+                      )}
+                      
                       <Button
                         size="sm"
                         variant="outline"
@@ -1236,6 +1338,67 @@ export default function AdminPartnersPage() {
                   type="button"
                   variant="outline"
                   onClick={() => setIsStaffDialogOpen(false)}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  إلغاء
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Suspension Dialog - إيقاف مؤقت */}
+        <Dialog open={isSuspensionDialogOpen} onOpenChange={setIsSuspensionDialogOpen}>
+          <DialogContent className="bg-gray-900 border-yellow-500/30 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-yellow-400 flex items-center gap-2">
+                <Shield className="h-6 w-6" />
+                إيقاف مؤقت للحساب
+              </DialogTitle>
+              <DialogDescription className="text-gray-400">
+                {selectedPartner?.partnerName}
+              </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleToggleSuspension} className="space-y-6 mt-4">
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <p className="text-yellow-300 text-sm">
+                  ⚠️ عند الإيقاف المؤقت، لن يتمكن الشريك من الدخول إلى حسابه وستظهر له رسالة مخصصة
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="suspensionReason" className="text-white mb-2 block">
+                  رسالة الإيقاف المؤقت *
+                </Label>
+                <Textarea
+                  id="suspensionReason"
+                  value={suspensionReason}
+                  onChange={(e) => setSuspensionReason(e.target.value)}
+                  placeholder="اكتب الرسالة التي ستظهر للشريك عند محاولة الدخول..."
+                  className="bg-white/10 border-white/20 text-white min-h-[150px]"
+                  required
+                />
+                <p className="text-gray-400 text-xs mt-2">
+                  💡 الرسالة الافتراضية تحتوي على اسم المتجر ورابط الواتساب
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  type="submit" 
+                  className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  تطبيق الإيقاف المؤقت
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsSuspensionDialogOpen(false)
+                    setSuspensionReason('')
+                  }}
                   className="border-white/20 text-white hover:bg-white/10"
                 >
                   إلغاء

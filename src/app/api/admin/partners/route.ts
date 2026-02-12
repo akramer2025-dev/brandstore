@@ -48,6 +48,8 @@ export async function GET(request: NextRequest) {
         capitalPercent: vendor.commissionRate || 15,
         joinDate: vendor.createdAt.toISOString(),
         isActive: vendor.isActive,
+        isSuspended: vendor.isSuspended || false,
+        suspensionReason: vendor.suspensionReason || null,
         notes: vendor.description || null,
         createdAt: vendor.createdAt.toISOString(),
         vendor: {

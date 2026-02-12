@@ -14,17 +14,21 @@ export class NotificationManager {
     console.log('🔔 تهيئة نظام الإشعارات...');
     
     try {
+      // إعداد المستمعين قبل طلب الأذونات
+      this.setupListeners();
+      
       // طلب إذن الإشعارات
       const permission = await PushNotifications.requestPermissions();
+      
+      console.log('📱 حالة الأذونات:', permission);
       
       if (permission.receive === 'granted') {
         console.log('✅ تم منح إذن الإشعارات');
         
         // تسجيل الجهاز
         await PushNotifications.register();
+        console.log('📝 تم طلب التسجيل...');
         
-        // الاستماع للأحداث
-        this.setupListeners();
       } else {
         console.log('❌ لم يتم منح إذن الإشعارات');
       }

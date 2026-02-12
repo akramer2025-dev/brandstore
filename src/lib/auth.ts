@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { logUserActivity } from "@/lib/user-activity";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
@@ -183,6 +184,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         
         console.log('✅ SignIn callback returning TRUE - allowing signin');
         console.log('🔐 ========== SignIn Callback END ==========');
+        
+        // 📊 تسجيل نشاط تسجيل الدخول
+        if (user.id) {
+          try {
+            await logUserActivity({
+              userId: user.id,
+              action: 'LOGIN',
+              metadata: { 
+                provider: account?.provider || 'credentials',
+                isNewUser: !existingUser,
+              },
+            });
+          } catch (logError) {
+            // لا نمنع تسجيل الدخول إذا فشل التسجيل
+            console.error('⚠️ Failed to log user activity:', logError);
+          }
+        }
+        
         return true;
       } catch (error) {
         console.error('❌ ========== ERROR in signIn callback ==========');

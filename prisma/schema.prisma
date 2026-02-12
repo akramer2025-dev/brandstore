@@ -21,6 +21,9 @@ model User {
   points           Int            @default(0) // نقاط الولاء
   partnerId        String?        // معرف الشريك (للموظفين)
   partnerStaffPermissions Json?   // صلاحيات الموظف كـ JSON
+  lastLoginAt      DateTime?      // آخر تسجيل دخول
+  lastLoginIp      String?        // آخر IP
+  lastLoginDevice  String?        // آخر جهاز
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   accounts         Account[]
@@ -36,6 +39,8 @@ model User {
   savedAddresses   SavedAddress[] // العناوين المحفوظة
   pointTransactions PointTransaction[] // سجل حركة النقاط
   pushSubscriptions PushSubscription[] // Push notification subscriptions
+  fcmDeviceTokens  FCMDeviceToken[] // FCM tokens للتطبيقات الموبايل
+  activityLogs     UserActivityLog[] // سجل النشاط
   partner          PartnerCapital? @relation(fields: [partnerId], references: [id])
 
   @@map("users")
@@ -160,6 +165,10 @@ model Vendor {
   businessLicense    String?
   isApproved         Boolean        @default(false)
   isActive           Boolean        @default(true)
+  isSuspended        Boolean        @default(false) // إيقاف مؤقت للحساب
+  suspensionReason   String?        // سبب الإيقاف (رسالة مخصصة)
+  suspendedAt        DateTime?      // تاريخ الإيقاف
+  suspendedBy        String?        // ID المسؤول اللي عمل الإيقاف
   rating             Float          @default(0)
   totalSales         Int            @default(0)
   // صلاحيات الشريك
@@ -1678,4 +1687,46 @@ model PushNotification {
   @@map("push_notifications")
   @@index([sentBy])
   @@index([createdAt])
+}
+
+// FCM Device Tokens - للتطبيقات الموبايل
+model FCMDeviceToken {
+  id              String   @id @default(cuid())
+  userId          String?  // مستخدم مسجل (اختياري)
+  token           String   @unique // FCM registration token
+  platform        String   // android أو ios
+  deviceInfo      Json?    // معلومات الجهاز (model, OS version, etc.)
+  isActive        Boolean  @default(true) // الـ token لسه شغال
+  createdAt       DateTime @default(now())
+  lastUsedAt      DateTime @default(now())
+  
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("fcm_device_tokens")
+  @@index([userId])
+  @@index([token])
+  @@index([isActive])
+}
+
+// User Activity Logs - تتبع نشاط المستخدمين
+model UserActivityLog {
+  id            String   @id @default(cuid())
+  userId        String
+  action        String   // LOGIN, LOGOUT, ADD_PRODUCT, CREATE_ORDER, etc
+  ip            String?
+  userAgent     String?
+  deviceType    String?  // MOBILE, DESKTOP, TABLET
+  browser       String?
+  os            String?
+  deviceModel   String?
+  location      String?  // المدينة/البلد (اختياري)
+  metadata      Json?    // بيانات إضافية
+  createdAt     DateTime @default(now())
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_activity_logs")
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt(sort: Desc)])
 }

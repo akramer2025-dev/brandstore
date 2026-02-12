@@ -41,7 +41,31 @@ export default function NewProductPage() {
   });
 
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-  const availableColors = [
+  
+  // ألوان مستحضرات التجميل (Foundation Shades)
+  const cosmeticColors = [
+    { name: 'Ivory', value: 'ivory', hex: '#FFF8E7' },
+    { name: 'Porcelain', value: 'porcelain', hex: '#FFEFD5' },
+    { name: 'Fair', value: 'fair', hex: '#FFE4C4' },
+    { name: 'Light', value: 'light', hex: '#FFDEAD' },
+    { name: 'Light Medium', value: 'light-medium', hex: '#E8C5A5' },
+    { name: 'Beige', value: 'beige', hex: '#D4A574' },
+    { name: 'Medium', value: 'medium', hex: '#C19A6B' },
+    { name: 'Warm Honey', value: 'warm-honey', hex: '#C68642' },
+    { name: 'Tan', value: 'tan', hex: '#D2B48C' },
+    { name: 'Golden', value: 'golden', hex: '#DAA520' },
+    { name: 'Caramel', value: 'caramel', hex: '#AF6E4D' },
+    { name: 'Bronze', value: 'bronze', hex: '#8B4513' },
+    { name: 'Deep', value: 'deep', hex: '#8B7355' },
+    { name: 'Rich', value: 'rich', hex: '#704214' },
+    { name: 'Cocoa', value: 'cocoa', hex: '#5C4033' },
+    { name: 'Espresso', value: 'espresso', hex: '#4B3621' },
+    { name: 'Ebony', value: 'ebony', hex: '#3D2817' },
+    { name: 'Mahogany', value: 'mahogany', hex: '#6F4E37' },
+  ];
+
+  // الألوان العامة (للملابس والمنتجات الأخرى)
+  const generalColors = [
     { name: 'أحمر', value: 'red', hex: '#EF4444' },
     { name: 'أزرق', value: 'blue', hex: '#3B82F6' },
     { name: 'أخضر', value: 'green', hex: '#10B981' },
@@ -52,7 +76,26 @@ export default function NewProductPage() {
     { name: 'بني', value: 'brown', hex: '#92400E' },
     { name: 'وردي', value: 'pink', hex: '#EC4899' },
     { name: 'بنفسجي', value: 'purple', hex: '#8B5CF6' },
+    { name: 'برتقالي', value: 'orange', hex: '#F97316' },
+    { name: 'أزرق فاتح', value: 'light-blue', hex: '#38BDF8' },
+    { name: 'أخضر فاتح', value: 'light-green', hex: '#4ADE80' },
+    { name: 'أحمر داكن', value: 'dark-red', hex: '#B91C1C' },
+    { name: 'بيج', value: 'beige', hex: '#D4A574' },
+    { name: 'كريمي', value: 'cream', hex: '#FFF8DC' },
+    { name: 'كحلي', value: 'navy', hex: '#1E3A8A' },
+    { name: 'زيتي', value: 'olive', hex: '#6B7D2C' },
+    { name: 'فيروزي', value: 'turquoise', hex: '#14B8A6' },
+    { name: 'موف', value: 'mauve', hex: '#9333EA' },
   ];
+  
+  // اختيار الألوان حسب الفئة
+  const selectedCategory = categories.find(cat => cat.id === formData.categoryId);
+  const isCosmeticCategory = selectedCategory?.nameAr?.includes('تجميل') || 
+                            selectedCategory?.name?.toLowerCase().includes('cosmetic') ||
+                            selectedCategory?.name?.toLowerCase().includes('makeup') ||
+                            selectedCategory?.name?.toLowerCase().includes('beauty');
+  
+  const availableColors = isCosmeticCategory ? cosmeticColors : generalColors;
 
   // Fetch categories on mount
   useEffect(() => {
@@ -570,8 +613,15 @@ export default function NewProductPage() {
 
               {/* الألوان */}
               <div className="space-y-2">
-                <Label>الألوان المتاحة</Label>
-                <div className="grid grid-cols-5 gap-2">
+                <Label>
+                  الألوان المتاحة 
+                  {isCosmeticCategory && (
+                    <span className="mr-2 text-sm text-purple-600 font-normal">
+                      (درجات Foundation)
+                    </span>
+                  )}
+                </Label>
+                <div className={`grid gap-3 ${isCosmeticCategory ? 'grid-cols-6' : 'grid-cols-5'}`}>
                   {availableColors.map(color => (
                     <button
                       key={color.value}
@@ -583,17 +633,34 @@ export default function NewProductPage() {
                           setFormData({ ...formData, colors: [...formData.colors, color.name] });
                         }
                       }}
-                      className={`p-3 rounded-lg border-2 transition-all ${
+                      className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-all ${
                         formData.colors.includes(color.name)
-                          ? 'border-teal-500 ring-2 ring-teal-500'
-                          : 'border-gray-200 hover:border-teal-400'
+                          ? 'border-teal-500 ring-2 ring-teal-500 bg-teal-50'
+                          : 'border-gray-200 hover:border-teal-400 bg-white'
                       }`}
-                      style={{ backgroundColor: color.hex }}
                       title={color.name}
                     >
-                      {formData.colors.includes(color.name) && (
-                        <div className="text-white font-bold text-center drop-shadow-md">✓</div>
-                      )}
+                      <div 
+                        className={`w-12 h-12 rounded-full border-2 ${
+                          color.hex === '#FFFFFF' ? 'border-gray-300' : 'border-gray-200'
+                        } flex items-center justify-center`}
+                        style={{ backgroundColor: color.hex }}
+                      >
+                        {formData.colors.includes(color.name) && (
+                          <div className={`font-bold text-lg drop-shadow-md ${
+                            ['#FFFFFF', '#FFF8E7', '#FFEFD5', '#FFE4C4', '#FFDEAD'].includes(color.hex) 
+                              ? 'text-teal-600' 
+                              : 'text-white'
+                          }`}>
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                      <span className={`text-xs text-center leading-tight ${
+                        formData.colors.includes(color.name) ? 'font-semibold text-teal-700' : 'text-gray-600'
+                      }`}>
+                        {color.name}
+                      </span>
                     </button>
                   ))}
                 </div>

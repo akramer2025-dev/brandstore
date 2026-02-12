@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ShoppingBag, Sparkles, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 interface SliderImage {
   id: string;
@@ -99,14 +101,35 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError('');
     try {
-      const result = await signIn('google', { 
-        callbackUrl: '/',
-        redirect: true
-      });
+      // كشف إذا كنا في Capacitor mobile app
+      const isNative = Capacitor.isNativePlatform();
       
-      if (result?.error) {
-        setError(`حدث خطأ: ${result.error}`);
-        setGoogleLoading(false);
+      if (isNative) {
+        // على الموبايل: فتح OAuth في in-app browser
+        const baseUrl = window.location.origin;
+        const authUrl = `${baseUrl}/api/auth/signin/google?callbackUrl=${encodeURIComponent('/')}`;
+        
+        await Browser.open({ 
+          url: authUrl,
+          presentationStyle: 'popover'
+        });
+        
+        // الانتظار حتى يكتمل OAuth flow
+        Browser.addListener('browserFinished', () => {
+          setGoogleLoading(false);
+          window.location.reload();
+        });
+      } else {
+        // على الويب العادي: استخدام NextAuth
+        const result = await signIn('google', { 
+          callbackUrl: '/',
+          redirect: true
+        });
+        
+        if (result?.error) {
+          setError(`حدث خطأ: ${result.error}`);
+          setGoogleLoading(false);
+        }
       }
     } catch (error: any) {
       setError(error?.message || 'حدث خطأ في تسجيل الدخول بواسطة Google');

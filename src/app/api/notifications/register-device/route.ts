@@ -9,57 +9,102 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth()
     
-    // يمكن حفظ الـ token حتى للمستخدمين غير المسجلين
     const body = await request.json()
     const { token, platform, deviceInfo } = body
 
-    if (!token) {
+    if (!token || !platform) {
       return NextResponse.json(
-        { error: 'Device token is required' },
+        { error: 'Token and platform are required' },
         { status: 400 }
       )
     }
 
-    // حفظ أو تحديث الـ token
-    // ملاحظة: تحتاج لإنشاء جدول DeviceToken في schema.prisma
-    
-    // بشكل مؤقت، يمكنك حفظه في السجلات فقط
-    console.log('📱 تسجيل جهاز جديد:', {
-      userId: session?.user?.id || 'guest',
-      token,
-      platform,
-      deviceInfo,
-      timestamp: new Date().toISOString()
-    })
+    // البحث عن token موجود
+    const existingToken = await prisma.fCMDeviceToken.findUnique({
+      where: { token }
+    });
 
-    // TODO: حفظ في قاعدة البيانات
-    // await prisma.deviceToken.upsert({
-    //   where: { token },
-    //   update: {
-    //     userId: session?.user?.id,
-    //     platform,
-    //     deviceInfo,
-    //     updatedAt: new Date()
-    //   },
-    //   create: {
-    //     token,
-    //     userId: session?.user?.id,
-    //     platform,
-    //     deviceInfo
-    //   }
-    // })
+    if (existingToken) {
+      // تحديث lastUsedAt وربطه بالمستخدم لو مسجل دخول
+      await prisma.fCMDeviceToken.update({
+        where: { token },
+        data: {
+          userId: session?.user?.id || existingToken.userId,
+          lastUsedAt: new Date(),
+          isActive: true,
+          deviceInfo: deviceInfo || existingToken.deviceInfo
+        }
+      });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Device registered successfully',
+      console.log('✅ تم تحديث device token:', {
+        userId: session?.user?.id || 'guest',
+        platform,
+        tokenPreview: token.substring(0, 20) + '...'
+      });
+
+      return NextResponse.json({ 
+        success: true,
+        message: 'Token updated successfully' 
+      });
+    }
+
+    // إنشاء token جديد
+    await prisma.fCMDeviceToken.create({
       data: {
-        token: token.substring(0, 20) + '...',
-        registered: true
+        token,
+        platform,
+        deviceInfo,
+        userId: session?.user?.id || null,
+        isActive: true
       }
-    })
+    });
+
+    console.log('✅ تم تسجيل device token جديد:', {
+      userId: session?.user?.id || 'guest',
+      platform,
+      tokenPreview: token.substring(0, 20) + '...'
+    });
+
+    return NextResponse.json({ 
+      success: true,
+      message: 'Token registered successfully' 
+    });
 
   } catch (error) {
     console.error('❌ خطأ في تسجيل الجهاز:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// GET - الحصول على جميع tokens للمستخدم الحالي
+export async function GET(request: NextRequest) {
+  try {
+    const session = await auth()
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const tokens = await prisma.fCMDeviceToken.findMany({
+      where: {
+        userId: session.user.id,
+        isActive: true
+      },
+      orderBy: {
+        lastUsedAt: 'desc'
+      }
+    });
+
+    return NextResponse.json({ tokens });
+
+  } catch (error) {
+    console.error('❌ خطأ في جلب device tokens:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

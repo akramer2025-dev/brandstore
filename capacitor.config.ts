@@ -3,16 +3,12 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.remostore.app',
   appName: 'Remo Store',
-  webDir: 'public',
+  webDir: 'www',
   server: {
-    // التطبيق هيتصل بالسيرفر الحقيقي - آمن ومافيش تأثير على الكود
-    url: 'https://www.remostore.net',
-    cleartext: true
-  },
-  plugins: {
-    PushNotifications: {
-      presentationOptions: ['badge', 'sound', 'alert']
-    }
+    // للتطوير: التطبيق يحمّل من الجهاز المحلي
+    url: 'http://192.168.3.17:3002',
+    cleartext: true,
+    androidScheme: 'http'
   },
   android: {
     buildOptions: {
