@@ -11,43 +11,6 @@ export default async function MessagesPage() {
   // تم نقل محادثات العملاء إلى مركز المحادثات والرسائل المتكامل
   redirect("/admin/messages-center");
 }
-
-interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  receiverId: string | null;
-  isRead: boolean;
-  isAdminMessage: boolean;
-  createdAt: string;
-  sender: {
-    id: string;
-    name: string | null;
-    email: string | null;
-    image: string | null;
-  };
-  receiver: {
-    id: string;
-    name: string | null;
-    email: string | null;
-    image: string | null;
-  } | null;
-}
-
-interface Conversation {
-  user: {
-    id: string;
-    name: string | null;
-    email: string | null;
-    image: string | null;
-  };
-  lastMessage: Message;
-  unreadCount: number;
-}
-
-export default function AdminMessagesPage() {
-  const { data: session, status } = useSession();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');

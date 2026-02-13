@@ -11,43 +11,6 @@ export default async function CustomerChatsPage() {
   // تم نقل رسائل المساعد الذكي إلى مركز المحادثات والرسائل المتكامل
   redirect("/admin/messages-center");
 }
-
-interface Conversation {
-  id: string
-  sessionId: string
-  source: string
-  isResolved: boolean
-  lastMessage: string
-  lastMessageRole: string
-  messageCount: number
-  lastMessageAt: string
-  createdAt: string
-}
-
-interface ChatMsg {
-  id: string
-  conversationId: string
-  role: string
-  content: string
-  productIds: string | null
-  createdAt: string
-}
-
-export default function CustomerChatsPage() {
-  const { data: session, status } = useSession()
-  const [conversations, setConversations] = useState<Conversation[]>([])
-  const [selectedConv, setSelectedConv] = useState<string | null>(null)
-  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false)
-  const [soundEnabled, setSoundEnabled] = useState(true)
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
-  const [isInstallable, setIsInstallable] = useState(false)
-  const [isListMinimized, setIsListMinimized] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
   const previousConversationsRef = useRef<Conversation[]>([])
 
   // إعداد PWA للتثبيت
