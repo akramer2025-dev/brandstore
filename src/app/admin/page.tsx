@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell, Bot, Eye, Target } from "lucide-react";
+import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell, Bot, Eye, Target, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -223,7 +223,42 @@ export default async function AdminDashboard() {
             color="text-pink-600"
           />
           <ActionCard
-            title="💬 مركز المحادثات والرسائل"
+            title="� إدارة التسويق"
+            description="إدارة الحملات التسويقية والتحليلات وتحسين SEO"
+            href="/admin/marketing"
+            icon={<BarChart3 className="w-12 h-12" />}
+            color="text-blue-600"
+          />
+          <ActionCard
+            title="🚀 التسويق الذكي (AI)"
+            description="استراتيجيات تسويق ذكية مدعومة بالذكاء الاصطناعي"
+            href="/admin/smart-marketing"
+            icon={<Sparkles className="w-12 h-12" />}
+            color="text-purple-600"
+          />
+          <ActionCard
+            title="🎯 إدارة الحملات"
+            description="إنشاء ومتابعة جميع الحملات الإعلانية"
+            href="/admin/campaign-manager"
+            icon={<Target className="w-12 h-12" />}
+            color="text-indigo-600"
+          />
+          <ActionCard
+            title="🔧 إصلاح الإعلانات"
+            description="تشخيص وإصلاح مشاكل الإعلانات على Facebook"
+            href="/admin/ads-fixer"
+            icon={<AlertCircle className="w-12 h-12" />}
+            color="text-red-600"
+          />
+          <ActionCard
+            title="👁️ معاينة الإعلانات"
+            description="عرض ومراجعة جميع الإعلانات النشطة"
+            href="/admin/ads-preview"
+            icon={<Eye className="w-12 h-12" />}
+            color="text-cyan-600"
+          />
+          <ActionCard
+            title="�💬 مركز المحادثات والرسائل"
             description="جميع أنواع المحادثات والرسائل في مكان واحد - محادثات العملاء المباشرة مع رسائل المساعد الذكي AI"
             href="/admin/messages-center"
             icon={<MessageCircle className="w-12 h-12" />}
