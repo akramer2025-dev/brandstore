@@ -198,7 +198,185 @@ export function MarketingCenterClient() {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        {/* Quick Links to All Marketing Pages */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          
+          {/* Media Buyer + Campaign Wizard */}
+          <Link href="/admin/media-buyer">
+            <Card className="bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200 hover:shadow-xl transition-all cursor-pointer h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-pink-800">
+                  <Target className="w-6 h-6" />
+                  🎯 Media Buyer + مساعد الحملات
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  مساعد ذكي يعطيك كل إعدادات ونصوص الحملات جاهزة للنسخ لـ Facebook Ads
+                </p>
+                <div className="flex items-center gap-2 mt-4 text-pink-600 font-semibold">
+                  <span>افتح الصفحة</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Marketing Page */}
+          <Link href="/admin/marketing">
+            <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:shadow-xl transition-all cursor-pointer h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-blue-800">
+                  <BarChart3 className="w-6 h-6" />
+                  📊 إدارة التسويق
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  إدارة الحملات التسويقية والتحليلات وتحسين SEO
+                </p>
+                <div className="flex items-center gap-2 mt-4 text-blue-600 font-semibold">
+                  <span>افتح الصفحة</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Smart Marketing */}
+          <Link href="/admin/smart-marketing">
+            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200 hover:shadow-xl transition-all cursor-pointer h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-purple-800">
+                  <Brain className="w-6 h-6" />
+                  🚀 التسويق الذكي (AI)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  استراتيجيات تسويق ذكية مدعومة بالذكاء الاصطناعي
+                </p>
+                <div className="flex items-center gap-2 mt-4 text-purple-600 font-semibold">
+                  <span>افتح الصفحة</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Campaign Manager */}
+          <Link href="/admin/campaign-manager">
+            <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200 hover:shadow-xl transition-all cursor-pointer h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-indigo-800">
+                  <Target className="w-6 h-6" />
+                  🎯 إدارة الحملات
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  إنشاء ومتابعة جميع الحملات الإعلانية
+                </p>
+                <div className="flex items-center gap-2 mt-4 text-indigo-600 font-semibold">
+                  <span>افتح الصفحة</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Ads Fixer */}
+          <Link href="/admin/ads-fixer">
+            <Card className="bg-gradient-to-br from-red-50 to-orange-50 border-red-200 hover:shadow-xl transition-all cursor-pointer h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-800">
+                  <Wrench className="w-6 h-6" />
+                  🔧 إصلاح الإعلانات
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  تشخيص وإصلاح مشاكل الإعلانات على Facebook
+                </p>
+                <div className="flex items-center gap-2 mt-4 text-red-600 font-semibold">
+                  <span>افتح الصفحة</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Ads Preview */}
+          <Link href="/admin/ads-preview">
+            <Card className="bg-gradient-to-br from-cyan-50 to-teal-50 border-cyan-200 hover:shadow-xl transition-all cursor-pointer h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-cyan-800">
+                  <Eye className="w-6 h-6" />
+                  👁️ معاينة الإعلانات
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  عرض ومراجعة جميع الإعلانات النشطة
+                </p>
+                <div className="flex items-center gap-2 mt-4 text-cyan-600 font-semibold">
+                  <span>افتح الصفحة</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+        </div>
+
+        {/* Additional Tools */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Product Catalog */}
+          <Link href="/admin/product-catalog">
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-xl transition-all cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-green-800">
+                  <Megaphone className="w-6 h-6" />
+                  📦 كتالوج المنتجات (Product Feed)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  كتالوج XML/CSV لاستخدامه في Facebook Ads و Google Shopping
+                </p>
+                <div className="flex items-center gap-2 text-green-600 font-semibold">
+                  <span>افتح الصفحة</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Messages Center */}
+          <Link href="/admin/messages-center">
+            <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 hover:shadow-xl transition-all cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-yellow-800">
+                  <MessageSquare className="w-6 h-6" />
+                  💬 مركز المحادثات والرسائل
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  جميع أنواع المحادثات والرسائل في مكان واحد
+                </p>
+                <div className="flex items-center gap-2 text-yellow-600 font-semibold">
+                  <span>افتح الصفحة</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 mt-8">
           
           {/* Navigation Tabs */}
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 gap-2 h-auto p-2 bg-white/50 border border-gray-200 rounded-lg">
