@@ -7,6 +7,8 @@ import InstallPWA from "@/components/InstallPWA";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import VisitorTracker from "@/components/VisitorTracker";
 import MobileNotifications from "@/components/MobileNotifications";
+import FacebookPixel from "@/components/FacebookPixel";
+import { EnvironmentBadge } from "@/components/EnvironmentBadge";
 
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
@@ -64,9 +66,11 @@ export default function RootLayout({
       </head>
       <body className={`${cairo.variable} font-sans antialiased`} suppressHydrationWarning>
         <Providers>
+          <FacebookPixel />
           <ServiceWorkerRegistration />
           <VisitorTracker />
           <MobileNotifications />
+          <EnvironmentBadge />
           <Header />
           {children}
           <InstallPWA />

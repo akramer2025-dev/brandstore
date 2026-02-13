@@ -42,6 +42,7 @@ model User {
   fcmDeviceTokens  FCMDeviceToken[] // FCM tokens للتطبيقات الموبايل
   activityLogs     UserActivityLog[] // سجل النشاط
   sheinOrders      SheinOrder[] // طلبات شي إن
+  
   partner          PartnerCapital? @relation(fields: [partnerId], references: [id])
 
   @@map("users")
@@ -676,6 +677,7 @@ model MarketingCampaign {
   id             String         @id @default(cuid())
   name           String
   type           CampaignType
+  types          Json?          // أنواع متعددة للحملة
   platform       String?
   budget         Float
   spent          Float          @default(0)
@@ -692,6 +694,12 @@ model MarketingCampaign {
   cpc            Float          @default(0)
   roi            Float          @default(0)
   notes          String?
+  
+  // Facebook Integration
+  facebookCampaignId String?    // معرف الحملة على Facebook
+  facebookAdSetId    String?    // معرف مجموعة الإعلانات
+  facebookAdId       String?    // معرف الإعلان
+  
   createdBy      String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
@@ -1772,3 +1780,4 @@ enum SheinOrderStatus {
   COMPLETED         // مكتمل
   CANCELLED         // ملغي
 }
+

@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
       data: {
         name: body.name,
         type: body.type,
+        types: body.types || null, // حفظ الأنواع المتعددة
         platform: body.platform,
         budget: body.budget,
         spent: 0,
@@ -30,6 +31,7 @@ export async function POST(req: NextRequest) {
         targetAudience: body.targetAudience || null,
         keywords: body.keywords || null,
         adCopy: body.adCopy || null,
+        facebookCampaignId: body.facebookCampaignId || null,
         status: "ACTIVE",
       },
     });
