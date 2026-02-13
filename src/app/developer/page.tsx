@@ -30,16 +30,16 @@ function ActionCard({ title, description, href, icon, color }: ActionCardProps) 
   return (
     <Link href={href}>
       <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer border-2 hover:border-purple-500/50 bg-gradient-to-br from-gray-900 to-gray-800">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3">
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="flex items-center gap-2 sm:gap-3">
             <div className={`${color}`}>
-              {icon}
+              <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10">{icon}</div>
             </div>
-            <span className="text-xl">{title}</span>
+            <span className="text-sm sm:text-base md:text-lg lg:text-xl">{title}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-gray-400">{description}</p>
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+          <p className="text-xs sm:text-sm text-gray-400 line-clamp-2">{description}</p>
         </CardContent>
       </Card>
     </Link>
@@ -77,71 +77,71 @@ export default function DeveloperDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950 p-3 sm:p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+        <div className="mb-4 sm:mb-6 md:mb-8 text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
             👨‍💻 لوحة تحكم المطور
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-sm sm:text-base md:text-lg">
             مرحباً {session.user.name} - إدارة كاملة للنظام
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
           <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-500/30">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">إجمالي العملاء</p>
-                  <p className="text-3xl font-bold text-purple-400">9</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">إجمالي العملاء</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-purple-400">9</p>
                 </div>
-                <Users className="w-12 h-12 text-purple-400 opacity-50" />
+                <Users className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-purple-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 border-blue-500/30">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">إجمالي المنتجات</p>
-                  <p className="text-3xl font-bold text-blue-400">-</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">إجمالي المنتجات</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-blue-400">-</p>
                 </div>
-                <Package className="w-12 h-12 text-blue-400 opacity-50" />
+                <Package className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-blue-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-green-900/50 to-green-800/30 border-green-500/30">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">إجمالي الطلبات</p>
-                  <p className="text-3xl font-bold text-green-400">-</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">إجمالي الطلبات</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-green-400">-</p>
                 </div>
-                <ShoppingCart className="w-12 h-12 text-green-400 opacity-50" />
+                <ShoppingCart className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-green-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-pink-900/50 to-pink-800/30 border-pink-500/30">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">الإيرادات</p>
-                  <p className="text-3xl font-bold text-pink-400">-</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">الإيرادات</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-pink-400">-</p>
                 </div>
-                <TrendingUp className="w-12 h-12 text-pink-400 opacity-50" />
+                <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-pink-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Actions Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           <ActionCard
             title="🔔 إرسال إشعارات"
             description="إرسال إشعارات Push للعملاء مباشرة على أجهزتهم"
@@ -216,10 +216,10 @@ export default function DeveloperDashboard() {
         </div>
 
         {/* Footer Note */}
-        <div className="mt-8 text-center">
+        <div className="mt-4 sm:mt-6 md:mt-8 text-center">
           <Card className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/30">
-            <CardContent className="p-4">
-              <p className="text-gray-400 text-sm">
+            <CardContent className="p-3 sm:p-4">
+              <p className="text-gray-400 text-xs sm:text-sm">
                 🔒 أنت تصل كمطور - لديك صلاحيات كاملة على النظام
               </p>
             </CardContent>

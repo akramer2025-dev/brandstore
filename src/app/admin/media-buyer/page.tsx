@@ -45,41 +45,41 @@ export default async function MediaBuyerPage() {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-12 shadow-2xl">
-        <div className="container mx-auto px-4">
-          <Link href="/admin" className="inline-flex items-center gap-2 text-indigo-100 hover:text-white mb-4 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+      <div className="relative z-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-6 sm:py-8 md:py-12 shadow-2xl">
+        <div className="container mx-auto px-3 sm:px-4">
+          <Link href="/admin" className="inline-flex items-center gap-2 text-indigo-100 hover:text-white mb-3 sm:mb-4 transition-colors text-sm sm:text-base">
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             العودة للوحة الإدارة
           </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-5xl font-bold drop-shadow-lg mb-2">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold drop-shadow-lg mb-1 sm:mb-2">
                 🎯 Media Buyer بالذكاء الاصطناعي
               </h1>
-              <p className="text-indigo-100 text-xl">
+              <p className="text-indigo-100 text-sm sm:text-base md:text-lg lg:text-xl">
                 تحليل الإعلانات • تحسين الحملات • A/B Testing • اقتراحات الميزانية • تحليل الجمهور
               </p>
-              <div className="flex items-center gap-6 mt-4">
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">{campaigns.filter((c: any) => c.status === "ACTIVE").length} حملات نشطة</span>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-6 mt-3 sm:mt-4">
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs sm:text-sm font-medium">{campaigns.filter((c: any) => c.status === "ACTIVE").length} حملات نشطة</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <span className="text-sm font-medium">{orders.length} طلب (آخر 30 يوم)</span>
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">
+                  <span className="text-xs sm:text-sm font-medium">{orders.length} طلب (آخر 30 يوم)</span>
                 </div>
               </div>
             </div>
-            <div className="hidden lg:flex gap-4">
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-                <p className="text-sm text-indigo-100 mb-2">إجمالي الإيرادات</p>
-                <p className="text-4xl font-bold">
+            <div className="hidden lg:flex gap-3 md:gap-4">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-white/20">
+                <p className="text-xs sm:text-sm text-indigo-100 mb-2">إجمالي الإيرادات</p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold">
                   {orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString('en-US')} ج
                 </p>
                 <p className="text-xs text-indigo-200 mt-1">آخر 30 يوم</p>
               </div>
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-                <p className="text-sm text-indigo-100 mb-2">إجمالي الإنفاق</p>
-                <p className="text-4xl font-bold">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-white/20">
+                <p className="text-xs sm:text-sm text-indigo-100 mb-2">إجمالي الإنفاق</p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold">
                   {campaigns.reduce((sum: number, c: any) => sum + (c.budget || 0), 0).toLocaleString('en-US')} ج
                 </p>
                 <p className="text-xs text-indigo-200 mt-1">جميع الحملات</p>
@@ -90,7 +90,7 @@ export default async function MediaBuyerPage() {
       </div>
 
       {/* Content with Tabs */}
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 relative z-10">
         <MediaBuyerTabs campaigns={campaigns} analytics={analytics} orders={orders} />
       </div>
     </div>

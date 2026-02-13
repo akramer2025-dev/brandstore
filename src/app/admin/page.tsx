@@ -50,20 +50,20 @@ export default async function AdminDashboard() {
         <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-float-slow"></div>
       </div>
 
-      <div className="relative z-10 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white py-8 shadow-2xl">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <div className="flex items-center gap-4">
+      <div className="relative z-10 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white py-4 sm:py-6 md:py-8 shadow-2xl">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="flex justify-between items-center flex-wrap gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
               {/* Logo */}
               <img 
                 src="/logo.png" 
                 alt="Remostore" 
-                className="h-16 w-16 object-contain drop-shadow-2xl"
+                className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 object-contain drop-shadow-2xl"
               />
               <div>
-                <BackButton fallbackUrl="/" label="العودة للرئيسية" className="mb-2" />
-                <h1 className="text-3xl md:text-4xl font-bold drop-shadow-lg">لوحة الإدارة</h1>
-                <p className="text-purple-100 mt-1 text-base md:text-lg">مرحبًا {session.user?.name || "المدير"}</p>
+                <BackButton fallbackUrl="/" label="العودة" className="mb-1 sm:mb-2 text-xs sm:text-sm" />
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold drop-shadow-lg">لوحة الإدارة</h1>
+                <p className="text-purple-100 mt-0.5 sm:mt-1 text-xs sm:text-sm md:text-base lg:text-lg">مرحبًا {session.user?.name || "المدير"}</p>
               </div>
             </div>
             <form
@@ -75,19 +75,20 @@ export default async function AdminDashboard() {
               <Button
                 type="submit"
                 variant="outline"
-                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl text-xs sm:text-sm px-3 sm:px-4 py-2"
               >
-                <LogOut className="ml-2 h-5 w-5" />
-                تسجيل الخروج
+                <LogOut className="ml-1 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">تسجيل الخروج</span>
+                <span className="sm:hidden">خروج</span>
               </Button>
             </form>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 relative z-10">
         {/* Statistics Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
           <StatCard
             title="إجمالي المنتجات"
             value={totalProducts.toString()}
@@ -115,7 +116,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Visitor & Users Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
           <VisitorStatsCard />
           <div className="bg-gradient-to-br from-emerald-600/20 to-teal-600/20 border border-emerald-500/40 backdrop-blur-sm rounded-xl p-4 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300">
             <div className="flex items-center gap-2 mb-3">
@@ -178,7 +179,7 @@ export default async function AdminDashboard() {
         )}
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           <ActionCard
             title="إدارة المنتجات"
             description="إضافة وتعديل وحذف المنتجات"
@@ -298,8 +299,13 @@ export default async function AdminDashboard() {
             icon={<Truck className="w-12 h-12" />}
             color="text-blue-600"
           />
-          <ActionCard
-            title="🗺️ أسعار التوصيل"
+          <ActionCard            title="📦 كتالوج المنتجات (Product Feed)"
+            description="كتالوج XML/CSV لاستخدامه في Facebook Ads و Google Shopping"
+            href="/admin/product-catalog"
+            icon={<Package2 className="w-12 h-12" />}
+            color="text-green-600"
+          />
+          <ActionCard            title="🗺️ أسعار التوصيل"
             description="إدارة وتعديل رسوم التوصيل لكل محافظة"
             href="/admin/delivery-zones"
             icon={<MapPin className="w-12 h-12" />}
@@ -359,13 +365,15 @@ function StatCard({
 }) {
   return (
     <Card className="backdrop-blur-sm bg-gray-800/80 border-purple-500/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:border-pink-500/50">
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-400 mb-1">{title}</p>
-            <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">{value}</p>
+            <p className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">{title}</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">{value}</p>
           </div>
-          <div className={`${color} text-white p-3 rounded-lg shadow-lg`}>{icon}</div>
+          <div className={`${color} text-white p-2 sm:p-3 rounded-lg shadow-lg`}>
+            <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8">{icon}</div>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -388,12 +396,14 @@ function ActionCard({
   return (
     <Link href={href}>
       <Card className="backdrop-blur-sm bg-gray-800/80 border-purple-500/30 hover:shadow-2xl transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-gray-800/90 hover:border-pink-500/50 group">
-        <CardHeader>
-          <div className={`${color} mb-4 transform group-hover:scale-110 transition-transform duration-300`}>{icon}</div>
-          <CardTitle className="text-xl text-white group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 group-hover:bg-clip-text group-hover:text-transparent transition-all">{title}</CardTitle>
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <div className={`${color} mb-2 sm:mb-3 md:mb-4 transform group-hover:scale-110 transition-transform duration-300`}>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12">{icon}</div>
+          </div>
+          <CardTitle className="text-sm sm:text-base md:text-lg lg:text-xl text-white group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 group-hover:bg-clip-text group-hover:text-transparent transition-all">{title}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-gray-300 group-hover:text-gray-200 transition-colors">{description}</p>
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+          <p className="text-xs sm:text-sm text-gray-300 group-hover:text-gray-200 transition-colors line-clamp-2">{description}</p>
         </CardContent>
       </Card>
     </Link>
