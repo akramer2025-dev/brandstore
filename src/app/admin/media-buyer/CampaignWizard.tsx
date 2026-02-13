@@ -252,14 +252,240 @@ export function CampaignWizard() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="settings" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+      <Tabs defaultValue="pixel" className="w-full">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="pixel">📊 Pixel & Tracking</TabsTrigger>
           <TabsTrigger value="settings">⚙️ الإعدادات</TabsTrigger>
           <TabsTrigger value="audience">👥 الجمهور</TabsTrigger>
           <TabsTrigger value="budget">💰 الميزانية</TabsTrigger>
           <TabsTrigger value="creative">✍️ النصوص</TabsTrigger>
           <TabsTrigger value="summary">📋 الملخص</TabsTrigger>
         </TabsList>
+
+        {/* Facebook Pixel Tab - NEW */}
+        <TabsContent value="pixel" className="space-y-4">
+          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="w-6 h-6 text-blue-600" />
+                ⚠️ مطلوب: Facebook Pixel للتتبع
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Why Pixel is Needed */}
+              <div className="bg-red-50 border-2 border-red-300 rounded-xl p-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <AlertCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-xl font-bold text-red-900 mb-2">
+                      لماذا يطلب Facebook الـ Pixel؟
+                    </h3>
+                    <p className="text-red-800 mb-3">
+                      Facebook بيحتاج الـ Pixel عشان يقدر يتتبع:
+                    </p>
+                    <ul className="space-y-2 text-red-800">
+                      <li className="flex items-start gap-2">
+                        <span className="text-red-600 font-bold">•</span>
+                        <span>مين اللي زار موقعك من الإعلان</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-red-600 font-bold">•</span>
+                        <span>مين اللي اشترى منتج (Conversion)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-red-600 font-bold">•</span>
+                        <span>مين ضاف منتج للسلة</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-red-600 font-bold">•</span>
+                        <span>تحسين الإعلانات تلقائياً للناس اللي بتشتري</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-4 mt-4">
+                  <p className="text-sm font-bold text-red-900">
+                    ⚠️ بدون Pixel: Facebook مش هيعرف أي إعلان نجح أو فشل!
+                  </p>
+                </div>
+              </div>
+
+              {/* How to Get Pixel */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-5">
+                <h3 className="text-xl font-bold text-green-900 mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-6 h-6 text-green-600" />
+                  خطوات إنشاء Facebook Pixel
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <p className="font-bold text-lg mb-2">الخطوة 1️⃣ اذهب إلى Events Manager</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <code className="text-sm bg-gray-100 px-3 py-1 rounded">
+                        facebook.com/events_manager2
+                      </code>
+                      <CopyButton text="https://facebook.com/events_manager2" label="نسخ الرابط" />
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      أو من Business Settings → Data Sources → Pixels
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <p className="font-bold text-lg mb-2">الخطوة 2️⃣ اضغط "Add" → اختر "Pixel"</p>
+                    <p className="text-sm text-gray-600">
+                      اكتب اسم للـ Pixel مثل: "Remostore Pixel"
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <p className="font-bold text-lg mb-2">الخطوة 3️⃣ اختر "Set up the Pixel Now"</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                      اختر: <strong>"Manually add pixel code to website"</strong>
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <p className="font-bold text-lg mb-2">الخطوة 4️⃣ انسخ كود الـ Pixel</p>
+                    <p className="text-sm text-gray-600 mb-3">
+                      هيديك كود شبه كده:
+                    </p>
+                    <div className="bg-gray-900 text-green-400 p-3 rounded-lg font-mono text-xs overflow-x-auto">
+{`<!-- Facebook Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', 'YOUR_PIXEL_ID');
+fbq('track', 'PageView');
+</script>
+<!-- End Facebook Pixel Code -->`}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-green-500">
+                    <p className="font-bold text-lg mb-2">الخطوة 5️⃣ أرسل الكود للمطور</p>
+                    <p className="text-sm text-gray-600 mb-3">
+                      المطور هيحط الكود ده في ملف <code className="bg-gray-100 px-2 py-0.5 rounded">layout.tsx</code>
+                    </p>
+                    <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3">
+                      <p className="text-sm text-yellow-900">
+                        💡 <strong>ملحوظة:</strong> الموقع محتاج تعديل من المطور لإضافة كود الـ Pixel
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Temporary Solution */}
+              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-300 rounded-xl p-5">
+                <h3 className="text-xl font-bold text-orange-900 mb-4 flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-orange-600" />
+                  حل مؤقت: ابدأ بدون Pixel (للتجربة فقط)
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="bg-white rounded-lg p-4">
+                    <p className="text-sm text-gray-800 mb-3">
+                      إذا كنت عايز تجرب الإعلان بسرعة بدون تعقيد:
+                    </p>
+                    <ol className="space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-orange-600">1.</span>
+                        <span>اختر <strong>"حركة المرور" (Traffic)</strong> بدلاً من "مبيعات"</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-orange-600">2.</span>
+                        <span>الهدف: جلب زوار للموقع فقط (لا يحتاج Pixel)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold text-orange-600">3.</span>
+                        <span>بعدين لما تركب الـ Pixel، حول الحملة لـ "مبيعات"</span>
+                      </li>
+                    </ol>
+                  </div>
+                  
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-sm text-red-900 font-semibold">
+                      ⚠️ تحذير: حملات "المبيعات" بدون Pixel مش هتشتغل كويس!
+                    </p>
+                    <p className="text-xs text-red-800 mt-1">
+                      Facebook مش هيعرف يحسن الإعلانات عشان يجيبلك عملاء بيشتروا
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pixel Benefits */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-xl p-5">
+                <h3 className="text-xl font-bold text-purple-900 mb-4">
+                  ✨ فوائد الـ Pixel بعد التركيب
+                </h3>
+                
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="font-semibold text-purple-900 mb-1">🎯 إعادة الاستهداف</p>
+                    <p className="text-xs text-gray-600">
+                      ظهور إعلانك للناس اللي زارت الموقع ومشتراش
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="font-semibold text-purple-900 mb-1">🤖 تحسين تلقائي</p>
+                    <p className="text-xs text-gray-600">
+                      Facebook يوصل للناس الأكثر احتمالاً للشراء
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="font-semibold text-purple-900 mb-1">📊 تقارير دقيقة</p>
+                    <p className="text-xs text-gray-600">
+                      تعرف كل طلب جاي من أيconversion tracking
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="font-semibold text-purple-900 mb-1">💰 توفير المال</p>
+                    <p className="text-xs text-gray-600">
+                      Facebook يوقف الإعلانات الفاشلة تلقائياً
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Links */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-bold text-lg mb-3">🔗 روابط مفيدة</h3>
+                <div className="space-y-2">
+                  <a
+                    href="https://facebook.com/events_manager2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block bg-white rounded-lg p-3 hover:bg-blue-50 transition-colors"
+                  >
+                    <p className="font-semibold text-blue-600">Events Manager →</p>
+                    <p className="text-sm text-gray-600">لإنشاء وإدارة الـ Pixel</p>
+                  </a>
+                  
+                  <a
+                    href="https://www.facebook.com/business/help/952192354843755"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block bg-white rounded-lg p-3 hover:bg-blue-50 transition-colors"
+                  >
+                    <p className="font-semibold text-blue-600">دليل Facebook Pixel →</p>
+                    <p className="text-sm text-gray-600">شرح رسمي من Facebook</p>
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Campaign Settings Tab */}
         <TabsContent value="settings" className="space-y-4">
