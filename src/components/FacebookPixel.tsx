@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 
-export default function FacebookPixel() {
+function PixelTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
@@ -16,10 +16,19 @@ export default function FacebookPixel() {
     window.fbq("track", "PageView");
   }, [pathname, searchParams, pixelId]);
 
+  return null;
+}
+
+export default function FacebookPixel() {
+  const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
+
   if (!pixelId) return null;
 
   return (
     <>
+      <Suspense fallback={null}>
+        <PixelTracker />
+      </Suspense>
       {/* Facebook Pixel Code */}
       <Script
         id="facebook-pixel"
