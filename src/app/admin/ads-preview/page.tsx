@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { AdsPreviewClient } from "./AdsPreviewClient";
 
 export default async function AdsPreviewPage() {
   const session = await auth();
@@ -9,5 +8,6 @@ export default async function AdsPreviewPage() {
     redirect("/auth/login");
   }
 
-  return <AdsPreviewClient />;
+  // تم نقل معاينة الإعلانات إلى مركز التسويق المتكامل
+  redirect("/admin/marketing-center");
 }

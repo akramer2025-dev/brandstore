@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { CampaignManagerClient } from "./CampaignManagerClient";
 
 export default async function CampaignManagerPage() {
   const session = await auth();
@@ -9,5 +8,6 @@ export default async function CampaignManagerPage() {
     redirect("/auth/login");
   }
 
-  return <CampaignManagerClient />;
+  // تم نقل إدارة الحملات إلى مركز التسويق المتكامل
+  redirect("/admin/marketing-center");
 }

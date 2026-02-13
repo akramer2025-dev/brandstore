@@ -1,11 +1,16 @@
-'use client';
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { MessageCircle, Send, Loader2, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { redirect } from 'next/navigation';
+export default async function MessagesPage() {
+  const session = await auth();
+
+  if (!session || session.user?.role !== "ADMIN") {
+    redirect("/auth/login");
+  }
+
+  // تم نقل محادثات العملاء إلى مركز المحادثات والرسائل المتكامل
+  redirect("/admin/messages-center");
+}
 
 interface Message {
   id: string;

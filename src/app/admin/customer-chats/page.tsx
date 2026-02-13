@@ -1,16 +1,16 @@
-'use client'
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
-import { useState, useEffect, useRef } from 'react'
-import { useSession } from 'next-auth/react'
-import { redirect } from 'next/navigation'
-import { 
-  MessageCircle, Bot, User, Clock, Trash2, 
-  RefreshCw, ChevronLeft, Globe, Smartphone, 
-  MessageSquare, Loader2, CheckCircle, Bell, Volume2
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+export default async function CustomerChatsPage() {
+  const session = await auth();
+
+  if (!session || session.user?.role !== "ADMIN") {
+    redirect("/auth/login");
+  }
+
+  // تم نقل رسائل المساعد الذكي إلى مركز المحادثات والرسائل المتكامل
+  redirect("/admin/messages-center");
+}
 
 interface Conversation {
   id: string
