@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell, Bot, Eye } from "lucide-react";
+import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell, Bot, Eye, Target } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -216,6 +216,13 @@ export default async function AdminDashboard() {
             color="text-purple-600"
           />
           <ActionCard
+            title="🎯 Media Buyer + مساعد الحملات"
+            description="مساعد ذكي يعطيك كل إعدادات ونصوص الحملات جاهزة للنسخ لـ Facebook Ads - إنشاء إعلانات احترافية في دقائق!"
+            href="/admin/media-buyer"
+            icon={<Target className="w-12 h-12" />}
+            color="text-pink-600"
+          />
+          <ActionCard
             title="💬 مركز المحادثات والرسائل"
             description="جميع أنواع المحادثات والرسائل في مكان واحد - محادثات العملاء المباشرة مع رسائل المساعد الذكي AI"
             href="/admin/messages-center"
@@ -223,60 +230,11 @@ export default async function AdminDashboard() {
             color="text-green-600"
           />
           <ActionCard
-            title="🎯 إدارة الحملات الإعلانية"
-            description="عرض وتعديل وتحسين جميع الحملات مع Media Buyer ذكية - متاح الآن في مركز التسويق المتكامل"
-            href="/admin/marketing-center"
-            icon={<Megaphone className="w-12 h-12" />}
-            color="text-indigo-600"
-          />
-          <ActionCard
-            title="🚀 التسويق الذكي بالـ AI"
-            description="مساعد التسويق • Media Buyer • الاستراتيجيات الاحترافية - متاح الآن في مركز التسويق المتكامل"
-            href="/admin/marketing-center"
-            icon={<BarChart3 className="w-12 h-12" />}
-            color="text-purple-600"
-          />
-          <ActionCard
-            title="� إصلاح الإعلانات المفقودة"
-            description="تشخيص وإصلاح مشاكل الإعلانات اللي مش بتظهر في Facebook Ads Manager - متاح الآن في مركز التسويق المتكامل"
-            href="/admin/marketing-center"
-            icon={<AlertCircle className="w-12 h-12" />}
-            color="text-red-600"
-          />
-          <ActionCard
-            title="�👁️ معاينة الإعلانات"
-            description="عرض وإدارة جميع الحملات الإعلانية على فيسبوك مع إمكانية التحكم - متاح الآن في مركز التسويق المتكامل"
-            href="/admin/marketing-center"
-            icon={<Eye className="w-12 h-12" />}
-            color="text-blue-600"
-          />
-          <ActionCard
-            title="📊 التسويق التقليدي"
-            description="إدارة الحملات وGoogle Ads والتحليلات - الأدوات التقليدية - متاح الآن في مركز التسويق المتكامل"
-            href="/admin/marketing-center"
-            icon={<TrendingUp className="w-12 h-12" />}
-            color="text-gray-600"
-          />
-          <ActionCard
             title="إدارة المخزون"
             description="متابعة وتحديث كميات المخزون"
             href="/admin/inventory"
             icon={<Package className="w-12 h-12" />}
             color="text-yellow-600"
-          />
-          <ActionCard
-            title="💬 محادثات العملاء"
-            description="التواصل مع العملاء والرد على استفساراتهم - متاح الآن في مركز المحادثات والرسائل المتكامل"
-            href="/admin/messages-center"
-            icon={<MessageCircle className="w-12 h-12" />}
-            color="text-teal-600"
-          />
-          <ActionCard
-            title="🤖 رسائل المساعد الذكي"
-            description="جميع محادثات العملاء مع المساعد الذكي AI - متاح الآن في مركز المحادثات والرسائل المتكامل"
-            href="/admin/messages-center"
-            icon={<Bot className="w-12 h-12" />}
-            color="text-pink-600"
           />
           <ActionCard
             title="🤖 بوت Messenger"
