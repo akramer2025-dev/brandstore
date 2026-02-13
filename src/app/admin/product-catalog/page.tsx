@@ -339,11 +339,22 @@ export default function ProductCatalogPage() {
                         <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                           {product.images ? (
                             <img
-                              src={
-                                typeof product.images === "string"
-                                  ? JSON.parse(product.images)[0]
-                                  : product.images[0]
-                              }
+                              src={(() => {
+                                try {
+                                  if (typeof product.images === "string") {
+                                    // Check if it's a JSON array or direct URL
+                                    if (product.images.startsWith("[") || product.images.startsWith("{")) {
+                                      const parsed = JSON.parse(product.images);
+                                      return Array.isArray(parsed) ? parsed[0] : parsed;
+                                    }
+                                    // Direct URL
+                                    return product.images;
+                                  }
+                                  return Array.isArray(product.images) ? product.images[0] : product.images;
+                                } catch (e) {
+                                  return product.images;
+                                }
+                              })()}
                               alt={product.nameAr}
                               className="w-full h-full object-cover"
                             />
