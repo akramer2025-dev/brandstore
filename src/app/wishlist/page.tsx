@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useWishlist } from "@/store/wishlist";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductCardPro } from "@/components/ProductCardPro";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingBag, Loader2, AlertCircle, Bell } from "lucide-react";
@@ -149,9 +149,9 @@ export default function WishlistPage() {
 
         {/* Products Grid */}
         {items.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {items.map((item) => (
-              <ProductCard key={item.id} product={item.product} />
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+            {items.map((item, index) => (
+              <ProductCardPro key={item.id} product={item.product} index={index} />
             ))}
           </div>
         )}

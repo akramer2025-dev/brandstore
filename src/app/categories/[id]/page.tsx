@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
-import { ProductCard } from '@/components/ProductCard';
+import { ProductCardPro } from '@/components/ProductCardPro';
 
 interface PageProps {
   params: {
@@ -138,9 +138,9 @@ export default async function CategoryPage({ params }: PageProps) {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {category.products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+              {category.products.map((product, index) => (
+                <ProductCardPro key={product.id} product={product} index={index} />
               ))}
             </div>
           </>

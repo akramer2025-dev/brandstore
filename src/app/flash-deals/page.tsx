@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductCardPro } from "@/components/ProductCardPro";
 import { Zap, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function FlashDealsPage() {
-  const [flashDeals, setFlashDeals] = useState([]);
+  const [flashDeals, setFlashDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -74,9 +74,9 @@ export default function FlashDealsPage() {
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-yellow-500"></div>
           </div>
         ) : flashDeals.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {flashDeals.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+            {flashDeals.map((product, index) => (
+              <ProductCardPro key={product.id} product={product} index={index} />
             ))}
           </div>
         ) : (
