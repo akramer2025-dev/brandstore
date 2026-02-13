@@ -70,7 +70,6 @@ export default function RootLayout({
           <ServiceWorkerRegistration />
           <VisitorTracker />
           <MobileNotifications />
-          <EnvironmentBadge />
           <Header />
           {children}
           <InstallPWA />
