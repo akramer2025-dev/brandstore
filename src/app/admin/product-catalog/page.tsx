@@ -284,7 +284,7 @@ export default function ProductCatalogPage() {
                     <div>
                       <h4 className="font-semibold">أنشئ كتالوج جديد</h4>
                       <p className="text-sm text-gray-600">
-                        اختر "E-commerce" ثم "Add Items" > "Use Data Feed"
+                        اختر &quot;E-commerce&quot; ثم &quot;Add Items&quot; {'->'} &quot;Use Data Feed&quot;
                       </p>
                     </div>
                   </div>
