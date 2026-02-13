@@ -47,12 +47,25 @@ function generateXMLFeed(products: any[]) {
   // تنظيف الصور - استخدام الصورة الأولى فقط
   const getFirstImage = (images: string | null): string => {
     if (!images) return `${baseUrl}/placeholder.jpg`;
+    
     try {
+      // محاولة parse كـ JSON array
       const imageArray = JSON.parse(images);
-      return imageArray[0] || `${baseUrl}/placeholder.jpg`;
+      if (Array.isArray(imageArray) && imageArray.length > 0) {
+        return imageArray[0];
+      }
     } catch {
-      return images || `${baseUrl}/placeholder.jpg`;
+      // إذا فشل الـ parse، نفترض أنها comma-separated string
+      if (images.includes(',')) {
+        const firstImage = images.split(',')[0].trim();
+        if (firstImage) return firstImage;
+      } else if (images.startsWith('http')) {
+        // URL مباشر
+        return images;
+      }
     }
+    
+    return `${baseUrl}/placeholder.jpg`;
   };
 
   // Google/Facebook Product Feed - RSS 2.0 + Google Shopping
