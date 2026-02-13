@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, TrendingUp, Users, Zap, Eye, DollarSign, Sparkles, BarChart3, TestTube, Lightbulb } from "lucide-react";
+import { Target, TrendingUp, Users, Zap, Eye, DollarSign, Sparkles, BarChart3, TestTube, Lightbulb, Rocket } from "lucide-react";
 import { MediaBuyerAI } from "./MediaBuyerAI";
 import { BudgetOptimizer } from "./BudgetOptimizer";
 import { AudienceAnalyzer } from "./AudienceAnalyzer";
@@ -11,6 +11,7 @@ import { SmartAlerts } from "./SmartAlerts";
 import { PerformanceIndicators } from "./PerformanceIndicators";
 import { QuickActions } from "./QuickActions";
 import { CampaignComparison } from "./CampaignComparison";
+import { CampaignWizard } from "./CampaignWizard";
 
 export function MediaBuyerTabs({ campaigns, analytics, orders }: any) {
   // Calculate key metrics
@@ -36,29 +37,38 @@ export function MediaBuyerTabs({ campaigns, analytics, orders }: any) {
   };
 
   return (
-    <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-5 mb-6 bg-white/80 backdrop-blur-sm shadow-xl h-14">
-        <TabsTrigger value="overview" className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white">
-          <BarChart3 className="w-5 h-5 ml-2" />
+    <Tabs defaultValue="wizard" className="w-full">
+      <TabsList className="grid w-full grid-cols-6 mb-6 bg-white/80 backdrop-blur-sm shadow-xl h-14">
+        <TabsTrigger value="wizard" className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-rose-600 data-[state=active]:text-white">
+          <Rocket className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+          مساعد الحملات
+        </TabsTrigger>
+        <TabsTrigger value="overview" className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white">
+          <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
           نظرة عامة
         </TabsTrigger>
-        <TabsTrigger value="budget" className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white">
-          <DollarSign className="w-5 h-5 ml-2" />
-          تحسين الميزانية
+        <TabsTrigger value="budget" className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white">
+          <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+          الميزانية
         </TabsTrigger>
-        <TabsTrigger value="audience" className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white">
-          <Users className="w-5 h-5 ml-2" />
-          تحليل الجمهور
+        <TabsTrigger value="audience" className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white">
+          <Users className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+          الجمهور
         </TabsTrigger>
-        <TabsTrigger value="abtest" className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-600 data-[state=active]:to-yellow-600 data-[state=active]:text-white">
-          <TestTube className="w-5 h-5 ml-2" />
+        <TabsTrigger value="abtest" className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-600 data-[state=active]:to-yellow-600 data-[state=active]:text-white">
+          <TestTube className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
           A/B Testing
         </TabsTrigger>
-        <TabsTrigger value="ai" className="text-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-rose-600 data-[state=active]:text-white">
-          <Sparkles className="w-5 h-5 ml-2" />
+        <TabsTrigger value="ai" className="text-sm sm:text-base data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
           AI Advisor
         </TabsTrigger>
       </TabsList>
+
+      {/* Campaign Wizard Tab - NEW */}
+      <TabsContent value="wizard">
+        <CampaignWizard />
+      </TabsContent>
 
       {/* Overview Tab */}
       <TabsContent value="overview">
