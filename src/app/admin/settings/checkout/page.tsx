@@ -17,6 +17,7 @@ interface CheckoutSettings {
   paymentMethodCashOnDelivery: boolean;
   paymentMethodBankTransfer: boolean;
   paymentMethodEWallet: boolean;
+  paymentMethodGooglePay: boolean;    // إضافة Google Pay
   paymentMethodInstallment: boolean;
 }
 
@@ -27,6 +28,7 @@ export default function CheckoutSettingsPage() {
     paymentMethodCashOnDelivery: true,
     paymentMethodBankTransfer: true,
     paymentMethodEWallet: true,
+    paymentMethodGooglePay: true,
     paymentMethodInstallment: true,
   });
   const [loading, setLoading] = useState(true);
@@ -44,6 +46,7 @@ export default function CheckoutSettingsPage() {
         'payment_method_cash_on_delivery',
         'payment_method_bank_transfer',
         'payment_method_e_wallet',
+        'payment_method_google_pay',
         'payment_method_installment',
       ];
       
@@ -58,6 +61,7 @@ export default function CheckoutSettingsPage() {
           paymentMethodCashOnDelivery: data.find((s: any) => s.key === 'payment_method_cash_on_delivery')?.value !== 'false',
           paymentMethodBankTransfer: data.find((s: any) => s.key === 'payment_method_bank_transfer')?.value !== 'false',
           paymentMethodEWallet: data.find((s: any) => s.key === 'payment_method_e_wallet')?.value !== 'false',
+          paymentMethodGooglePay: data.find((s: any) => s.key === 'payment_method_google_pay')?.value !== 'false',
           paymentMethodInstallment: data.find((s: any) => s.key === 'payment_method_installment')?.value !== 'false',
         };
         
@@ -79,6 +83,7 @@ export default function CheckoutSettingsPage() {
       if (!settings.paymentMethodCashOnDelivery && 
           !settings.paymentMethodBankTransfer && 
           !settings.paymentMethodEWallet && 
+          !settings.paymentMethodGooglePay && 
           !settings.paymentMethodInstallment) {
         toast.error('يجب تفعيل طريقة دفع واحدة على الأقل');
         setSaving(false);
@@ -119,6 +124,11 @@ export default function CheckoutSettingsPage() {
           key: 'payment_method_e_wallet',
           value: String(settings.paymentMethodEWallet),
           description: 'تفعيل المحفظة الإلكترونية'
+        },
+        {
+          key: 'payment_method_google_pay',
+          value: String(settings.paymentMethodGooglePay),
+          description: 'تفعيل الدفع عبر Google Pay'
         },
         {
           key: 'payment_method_installment',
@@ -358,6 +368,37 @@ export default function CheckoutSettingsPage() {
               />
             </div>
 
+            {/* Google Pay */}
+            <div className="flex items-start justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-5 h-5 text-yellow-600" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="google-pay" className="text-base font-semibold text-gray-900 cursor-pointer flex items-center gap-2">
+                    Google Pay
+                    <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">جديد</span>
+                  </Label>
+                  <p className="text-sm text-gray-600">
+                    الدفع الفوري والآمن عبر Google Pay بضغطة واحدة
+                  </p>
+                  {settings.paymentMethodGooglePay && (
+                    <div className="flex items-center gap-1 text-xs text-green-600 mt-2">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>مُفَعَّل</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Switch
+                id="google-pay"
+                checked={settings.paymentMethodGooglePay}
+                onCheckedChange={(checked) =>
+                  setSettings({ ...settings, paymentMethodGooglePay: checked })
+                }
+              />
+            </div>
+
             {/* التقسيط */}
             <div className="flex items-start justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex items-start gap-3">
@@ -431,6 +472,12 @@ export default function CheckoutSettingsPage() {
                     <li className="text-sm text-green-700 flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
                       المحفظة الإلكترونية
+                    </li>
+                  )}
+                  {settings.paymentMethodGooglePay && (
+                    <li className="text-sm text-green-700 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      Google Pay
                     </li>
                   )}
                   {settings.paymentMethodInstallment && (

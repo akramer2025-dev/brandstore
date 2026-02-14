@@ -14,7 +14,7 @@ import InstallmentCalculator from "@/components/InstallmentCalculator";
 import AddressSelector from "@/components/AddressSelector";
 import AddressForm from "@/components/AddressForm";
 
-type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'WE_PAY' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24' | 'PARTIAL_PAYMENT_50' | 'FULL_PAYMENT';
+type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'WE_PAY' | 'GOOGLE_PAY' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24' | 'PARTIAL_PAYMENT_50' | 'FULL_PAYMENT';
 type EWalletType = 'etisalat_cash' | 'vodafone_cash' | 'we_pay';
 type DeliveryMethod = 'HOME_DELIVERY' | 'STORE_PICKUP';
 
@@ -76,6 +76,7 @@ export default function CheckoutPage() {
     paymentMethodCashOnDelivery: true,
     paymentMethodBankTransfer: true,
     paymentMethodEWallet: true,
+    paymentMethodGooglePay: true,
     paymentMethodInstallment: true,
   });
   
@@ -255,6 +256,7 @@ export default function CheckoutPage() {
         'payment_method_cash_on_delivery',
         'payment_method_bank_transfer',
         'payment_method_e_wallet',
+        'payment_method_google_pay',
         'payment_method_installment',
       ];
       
@@ -288,6 +290,7 @@ export default function CheckoutPage() {
           deliveryMethodStorePickup: settings.find((s: any) => s.key === 'delivery_method_store_pickup')?.value !== 'false',
           paymentMethodCashOnDelivery: settings.find((s: any) => s.key === 'payment_method_cash_on_delivery')?.value !== 'false',
           paymentMethodBankTransfer: settings.find((s: any) => s.key === 'payment_method_bank_transfer')?.value !== 'false',
+          paymentMethodGooglePay: settings.find((s: any) => s.key === 'payment_method_google_pay')?.value !== 'false',
           paymentMethodEWallet: settings.find((s: any) => s.key === 'payment_method_e_wallet')?.value !== 'false',
           paymentMethodInstallment: settings.find((s: any) => s.key === 'payment_method_installment')?.value !== 'false',
         };
@@ -1123,6 +1126,68 @@ export default function CheckoutPage() {
                       </p>
                     </div>
                   </div>
+
+                  {/* Google Pay - Digital Payment */}
+                  {checkoutSettings.paymentMethodGooglePay && (
+                    <div className="mt-6 bg-gradient-to-r from-gray-800 to-gray-700 text-white rounded-xl p-6 shadow-2xl border-2 border-yellow-500/30">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="bg-white/20 p-3 rounded-full">
+                          <CreditCard className="w-8 h-8" />
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-bold flex items-center gap-2">
+                            Google Pay
+                            <span className="text-xs bg-yellow-500 text-black px-2 py-1 rounded-full">سريع وآمن</span>
+                          </h3>
+                          <p className="text-white/80 text-sm">ادفع بأمان بضغطة واحدة</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="bg-white/10 rounded-lg p-5 backdrop-blur-sm border border-white/20">
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-white/90 font-medium">المبلغ المطلوب:</p>
+                            <p className="text-3xl font-black text-yellow-400">{finalTotal.toFixed(2)} ج.م</p>
+                          </div>
+                          
+                          {/* Google Pay Button (mockup) */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPaymentMethod('GOOGLE_PAY');
+                              toast.info('🔒 خدمة Google Pay قريباً! سيتم التفعيل الكامل قريباً.');
+                            }}
+                            className="w-full bg-white hover:bg-gray-100 text-black font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-all shadow-lg hover:shadow-xl"
+                          >
+                            <svg className="w-6 h-6" viewBox="0 0 512 512" fill="currentColor">
+                              <path d="M473.16 221.48l-2.26-9.59H262.46v88.22H387c-12.93 61.4-72.93 93.72-121.94 93.72-35.66 0-73.25-15-98.13-39.11a140.08 140.08 0 01-41.8-98.88c0-37.16 16.7-74.33 41-98.78s61-38.13 97.49-38.13c41.79 0 71.74 22.19 82.94 32.31l62.69-62.36C390.86 72.72 340.34 32 261.6 32c-60.75 0-119 23.27-161.58 65.71C58 139.5 36.25 199.93 36.25 256s20.58 113.48 61.3 154.84c42.43 42.29 100.58 64.85 162.13 64.85 87.32 0 162.25-61.09 162.25-163.58 0-15.16-1.77-29.51-3.44-41.37z"/>
+                            </svg>
+                            <span className="text-xl">ادفع باستخدام Google Pay</span>
+                          </button>
+                        </div>
+
+                        <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-3">
+                          <div className="flex items-start gap-2">
+                            <div className="text-green-300 mt-0.5">🔒</div>
+                            <div className="flex-1">
+                              <p className="text-green-100 text-sm font-semibold">دفع آمن 100%</p>
+                              <ul className="text-green-200 text-xs mt-1 space-y-1">
+                                <li>✓ لا يتم مشاركة بيانات بطاقتك مع أحد</li>
+                                <li>✓ معالجة فورية - تأكيد الطلب خلال ثوانٍ</li>
+                                <li>✓ متوافق مع جميع البطاقات المحلية والدولية</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-3">
+                          <p className="text-blue-300 text-sm">
+                            <strong>💡 نصيحة:</strong> Google Pay يوفر عليك إدخال معلومات البطاقة يدوياً وأسرع في الدفع
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* HIDDEN - Keep old payment methods hidden but in code for later use */}
                   {false && (

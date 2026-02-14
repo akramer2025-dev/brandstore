@@ -872,6 +872,7 @@ enum PaymentMethod {
   BANK_TRANSFER
   E_WALLET_TRANSFER
   WE_PAY
+  GOOGLE_PAY              // دفع عبر Google Pay
   INSTALLMENT_4
   INSTALLMENT_6
   INSTALLMENT_12
