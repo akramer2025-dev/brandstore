@@ -1,12 +1,30 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Star, Sparkles, Moon } from 'lucide-react'
 
 export function RamadanSplashScreen() {
   const [isVisible, setIsVisible] = useState(true)
   const [progress, setProgress] = useState(0)
+
+  // Generate random positions once on client side
+  const starPositions = useMemo(() => 
+    Array.from({ length: 50 }, () => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: 2 + Math.random() * 2,
+      delay: Math.random() * 2,
+    })), []
+  )
+
+  const sparklePositions = useMemo(() =>
+    Array.from({ length: 20 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      delay: 1 + Math.random()
+    })), []
+  )
 
   useEffect(() => {
     // التحقق من عرض Splash Screen من قبل
@@ -56,28 +74,26 @@ export function RamadanSplashScreen() {
       >
         {/* النجوم المتحركة في الخلفية */}
         <div className="absolute inset-0 overflow-hidden">
-          {[...Array(50)].map((_, i) => (
+          {starPositions.map((star, i) => (
             <motion.div
               key={i}
               initial={{ 
                 opacity: 0,
                 scale: 0,
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight
               }}
               animate={{ 
                 opacity: [0, 1, 0],
                 scale: [0, 1, 0],
               }}
               transition={{
-                duration: 2 + Math.random() * 2,
+                duration: star.duration,
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: star.delay,
               }}
               className="absolute w-1 h-1 bg-white rounded-full"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                left: `${star.left}%`,
+                top: `${star.top}%`,
               }}
             />
           ))}
@@ -587,7 +603,7 @@ export function RamadanSplashScreen() {
 
           {/* شرارات متحركة */}
           <div className="absolute inset-0 pointer-events-none">
-            {[...Array(20)].map((_, i) => (
+            {sparklePositions.map((sparkle, i) => (
               <motion.div
                 key={i}
                 initial={{ 
@@ -597,13 +613,13 @@ export function RamadanSplashScreen() {
                 }}
                 animate={{ 
                   opacity: [0, 1, 0],
-                  x: `${Math.random() * 100}vw`,
-                  y: `${Math.random() * 100}vh`,
+                  x: `${sparkle.x}vw`,
+                  y: `${sparkle.y}vh`,
                   scale: [0, 1, 0],
                 }}
                 transition={{
                   duration: 2,
-                  delay: 1 + Math.random(),
+                  delay: sparkle.delay,
                   ease: 'easeOut',
                 }}
               >
