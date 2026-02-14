@@ -65,14 +65,14 @@ export function RamadanSplashScreen() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0, scale: 1.2 }}
-        transition={{ duration: 0.5 }}
+        exit={{ opacity: 0, scale: 1.1 }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
         className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+          background: 'linear-gradient(135deg, #4a1c6b 0%, #2d1b4e 25%, #1a0f2e 50%, #0d0520 75%, #000000 100%)'
         }}
       >
-        {/* النجوم المتحركة في الخلفية */}
+        {/* النجوم المتحركة الثابتة */}
         <div className="absolute inset-0 overflow-hidden">
           {starPositions.map((star, i) => (
             <motion.div
@@ -82,15 +82,14 @@ export function RamadanSplashScreen() {
                 scale: 0,
               }}
               animate={{ 
-                opacity: [0, 1, 0],
-                scale: [0, 1, 0],
+                opacity: 0.8,
+                scale: 1,
               }}
               transition={{
-                duration: star.duration,
-                repeat: Infinity,
+                duration: 0.5,
                 delay: star.delay,
               }}
-              className="absolute w-1 h-1 bg-white rounded-full"
+              className="absolute w-1 h-1 bg-yellow-200 rounded-full shadow-[0_0_4px_rgba(250,204,21,0.8)]"
               style={{
                 left: `${star.left}%`,
                 top: `${star.top}%`,
