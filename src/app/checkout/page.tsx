@@ -1033,16 +1033,120 @@ export default function CheckoutPage() {
                 <CardHeader className="p-4 sm:p-6">
                   <CardTitle className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2">
                     <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
-                    طريقة الدفع - محفظة وي باي
+                    اختر طريقة الدفع
                   </CardTitle>
                   <p className="text-gray-300 text-sm mt-2">
-                    💳 الدفع عن طريق وي باي (WE Pay) فقط
+                    💳 اختر الطريقة الأنسب لك
                   </p>
                 </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
+                <CardContent className="space-y-4 p-4 sm:p-6">
                   
-                  {/* WE Pay - Simple and Only Payment Method */}
-                  <div className="bg-gradient-to-r from-purple-600 to-emerald-600 text-white rounded-xl p-6 shadow-2xl">
+                  {/* قائمة اختيار طرق الدفع */}
+                  <div className="space-y-3">
+                    {/* WE Pay Option */}
+                    <div
+                      onClick={() => setPaymentMethod('WE_PAY')}
+                      className={`cursor-pointer border-2 rounded-xl p-4 transition-all ${
+                        paymentMethod === 'WE_PAY'
+                          ? 'border-purple-500 bg-purple-900/30 shadow-lg'
+                          : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          paymentMethod === 'WE_PAY'
+                            ? 'border-purple-500 bg-purple-500'
+                            : 'border-gray-500'
+                        }`}>
+                          {paymentMethod === 'WE_PAY' && (
+                            <div className="w-3 h-3 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                            <CreditCard className="w-5 h-5 text-purple-400" />
+                            محفظة وي باي (WE Pay)
+                          </h3>
+                          <p className="text-gray-300 text-sm mt-1">
+                            حوّل على المحفظة وارفع صورة الإيصال
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Google Pay Option */}
+                    {checkoutSettings.paymentMethodGooglePay && (
+                      <div
+                        onClick={() => setPaymentMethod('GOOGLE_PAY')}
+                        className={`cursor-pointer border-2 rounded-xl p-4 transition-all ${
+                          paymentMethod === 'GOOGLE_PAY'
+                            ? 'border-yellow-500 bg-yellow-900/30 shadow-lg'
+                            : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            paymentMethod === 'GOOGLE_PAY'
+                              ? 'border-yellow-500 bg-yellow-500'
+                              : 'border-gray-500'
+                          }`}>
+                            {paymentMethod === 'GOOGLE_PAY' && (
+                              <div className="w-3 h-3 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                              <CreditCard className="w-5 h-5 text-yellow-400" />
+                              Google Pay
+                              <span className="text-xs bg-yellow-500 text-black px-2 py-0.5 rounded-full">سريع</span>
+                            </h3>
+                            <p className="text-gray-300 text-sm mt-1">
+                              دفع فوري وآمن بالبطاقة بضغطة واحدة
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Cash on Delivery Option */}
+                    {checkoutSettings.paymentMethodCashOnDelivery && isAllClothing && !hasSheinOrTrendyol && (
+                      <div
+                        onClick={() => setPaymentMethod('CASH_ON_DELIVERY')}
+                        className={`cursor-pointer border-2 rounded-xl p-4 transition-all ${
+                          paymentMethod === 'CASH_ON_DELIVERY'
+                            ? 'border-teal-500 bg-teal-900/30 shadow-lg'
+                            : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            paymentMethod === 'CASH_ON_DELIVERY'
+                              ? 'border-teal-500 bg-teal-500'
+                              : 'border-gray-500'
+                          }`}>
+                            {paymentMethod === 'CASH_ON_DELIVERY' && (
+                              <div className="w-3 h-3 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                              <Banknote className="w-5 h-5 text-teal-400" />
+                              الدفع عند الاستلام (COD)
+                            </h3>
+                            <p className="text-gray-300 text-sm mt-1">
+                              ادفع نقداً عند استلام الطلب - افحص المنتج أولاً
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* تفاصيل طريقة الدفع المختارة */}
+                  <div className="mt-6">
+                    {/* WE Pay Details */}
+                    {paymentMethod === 'WE_PAY' && (
+                      <div className="bg-gradient-to-r from-purple-600 to-emerald-600 text-white rounded-xl p-6 shadow-2xl animate-in fade-in duration-300">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="bg-white/20 p-3 rounded-full">
                         <CreditCard className="w-8 h-8" />
@@ -1126,10 +1230,11 @@ export default function CheckoutPage() {
                       </p>
                     </div>
                   </div>
+                    )}
 
-                  {/* Google Pay - Digital Payment */}
-                  {checkoutSettings.paymentMethodGooglePay && (
-                    <div className="mt-6 bg-gradient-to-r from-gray-800 to-gray-700 text-white rounded-xl p-6 shadow-2xl border-2 border-yellow-500/30">
+                    {/* Google Pay Details */}
+                    {paymentMethod === 'GOOGLE_PAY' && checkoutSettings.paymentMethodGooglePay && (
+                      <div className="bg-gradient-to-r from-gray-800 to-gray-700 text-white rounded-xl p-6 shadow-2xl border-2 border-yellow-500/30 animate-in fade-in duration-300">
                       <div className="flex items-center gap-3 mb-4">
                         <div className="bg-white/20 p-3 rounded-full">
                           <CreditCard className="w-8 h-8" />
@@ -1186,8 +1291,57 @@ export default function CheckoutPage() {
                           </p>
                         </div>
                       </div>
-                    </div>
-                  )}
+                      </div>
+                    )}
+
+                    {/* Cash on Delivery Details */}
+                    {paymentMethod === 'CASH_ON_DELIVERY' && checkoutSettings.paymentMethodCashOnDelivery && isAllClothing && !hasSheinOrTrendyol && (
+                      <div className="bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-xl p-6 shadow-2xl animate-in fade-in duration-300">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-white/20 p-3 rounded-full">
+                            <Banknote className="w-8 h-8" />
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-bold">الدفع عند الاستلام</h3>
+                            <p className="text-white/80 text-sm">Cash on Delivery (COD)</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="bg-white/10 rounded-lg p-5 backdrop-blur-sm border border-white/20">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-white/90 font-medium">المبلغ المطلوب عند الاستلام:</p>
+                              <p className="text-3xl font-black text-teal-400">{finalTotal.toFixed(2)} ج.م</p>
+                            </div>
+                            
+                            <div className="mt-4 space-y-2 text-sm text-white/90">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-teal-300" />
+                                <span>قم بفحص المنتجات قبل الدفع</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-teal-300" />
+                                <span>ادفع المبلغ نقداً لموظف التوصيل</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-teal-300" />
+                                <span>في حالة عدم الرضا، ادفع رسوم التوصيل فقط</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-yellow-400/20 border border-yellow-400/40 rounded-lg p-3">
+                            <div className="flex items-start gap-2">
+                              <div className="text-yellow-200 mt-0.5">⚠️</div>
+                              <p className="text-yellow-100 text-sm">
+                                <strong>ملحوظة مهمة:</strong> يرجى التأكد من توفر المبلغ الكامل عند الاستلام. في حالة رفض الطلب بعد الفحص، يجب دفع رسوم التوصيل فقط.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* HIDDEN - Keep old payment methods hidden but in code for later use */}
                   {false && (
@@ -1451,7 +1605,7 @@ export default function CheckoutPage() {
                               {receiptPreview ? (
                                 <div className="relative">
                                   <img 
-                                    src={receiptPreview} 
+                                    src={receiptPreview || ''} 
                                     alt="معاينة الإيصال" 
                                     className="w-full h-48 object-cover rounded-lg border-2 border-blue-500"
                                   />
@@ -1634,7 +1788,7 @@ export default function CheckoutPage() {
                               {eWalletReceiptPreview ? (
                                 <div className="relative">
                                   <img 
-                                    src={eWalletReceiptPreview} 
+                                    src={eWalletReceiptPreview || ''} 
                                     alt="معاينة إيصال المحفظة" 
                                     className="w-full h-48 object-cover rounded-lg border-2 border-green-500"
                                   />
