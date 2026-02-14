@@ -288,8 +288,31 @@ model Product {
   supplierPayments SupplierPayment[]
   marketingStaff  MarketingStaff? @relation(fields: [marketingStaffId], references: [id])
   commissions     MarketingCommission[]
+  variants        ProductVariant[]
 
   @@map("products")
+}
+
+// 🎯 نظام المقاسات والأعمار المتعددة (Variants System)
+model ProductVariant {
+  id          String      @id @default(cuid())
+  productId   String
+  variantType VariantType @default(SIZE)
+  name        String      // "Medium" أو "1-3 شهور"
+  nameAr      String      // "متوسط" أو "من شهر لـ 3 شهور"
+  sku         String?     // كود المنتج الاختياري
+  price       Float       // السعر لهذا المقاس
+  stock       Int         @default(0) // الكمية المتوفرة
+  isActive    Boolean     @default(true)
+  sortOrder   Int         @default(0) // ترتيب العرض
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@map("product_variants")
+  @@index([productId])
+  @@index([isActive])
 }
 
 model Fabric {
@@ -848,6 +871,13 @@ enum UserRole {
 enum SaleType {
   SINGLE    // قطعة واحدة
   BUNDLE    // عرض (مع منتجات أخرى)
+}
+
+enum VariantType {
+  SIZE      // مقاسات عادية (S, M, L, XL)
+  AGE       // أعمار للأطفال (1-3 شهور، 6 شهور، سنة، إلخ)
+  COLOR     // ألوان
+  CUSTOM    // مخصص
 }
 
 enum ImportSource {
