@@ -24,70 +24,118 @@ interface ProductVariantsManagerProps {
 
 // مقاسات معرفة مسبقاً
 const PRESET_SIZES = [
-  { name: "Small", nameAr: "صغير", sortOrder: 1 },
-  { name: "Medium", nameAr: "متوسط", sortOrder: 2 },
-  { name: "Large", nameAr: "كبير", sortOrder: 3 },
-  { name: "XL", nameAr: "كبير جداً", sortOrder: 4 },
-  { name: "XXL", nameAr: "كبير جداً جداً", sortOrder: 5 },
-  { name: "3XL", nameAr: "3XL", sortOrder: 6 },
+  { name: "Small", nameAr: "صغير" },
+  { name: "Medium", nameAr: "متوسط" },
+  { name: "Large", nameAr: "كبير" },
+  { name: "XL", nameAr: "كبير جداً" },
+  { name: "XXL", nameAr: "كبير جداً جداً" },
+  { name: "3XL", nameAr: "3XL" },
 ];
 
 // أعمار معرفة مسبقاً للأطفال
 const PRESET_AGES = [
-  { name: "0-3 months", nameAr: "من 0 إلى 3 شهور", sortOrder: 1 },
-  { name: "3-6 months", nameAr: "من 3 إلى 6 شهور", sortOrder: 2 },
-  { name: "6-9 months", nameAr: "من 6 إلى 9 شهور", sortOrder: 3 },
-  { name: "9-12 months", nameAr: "من 9 إلى 12 شهر", sortOrder: 4 },
-  { name: "1 year", nameAr: "سنة", sortOrder: 5 },
-  { name: "2 years", nameAr: "سنتين", sortOrder: 6 },
-  { name: "3 years", nameAr: "3 سنين", sortOrder: 7 },
-  { name: "4 years", nameAr: "4 سنين", sortOrder: 8 },
-  { name: "5 years", nameAr: "5 سنين", sortOrder: 9 },
-  { name: "6 years", nameAr: "6 سنين", sortOrder: 10 },
-  { name: "7 years", nameAr: "7 سنين", sortOrder: 11 },
-  { name: "8 years", nameAr: "8 سنين", sortOrder: 12 },
+  { name: "0-3 months", nameAr: "من 0 إلى 3 شهور" },
+  { name: "3-6 months", nameAr: "من 3 إلى 6 شهور" },
+  { name: "6-9 months", nameAr: "من 6 إلى 9 شهور" },
+  { name: "9-12 months", nameAr: "من 9 إلى 12 شهر" },
+  { name: "1 year", nameAr: "سنة" },
+  { name: "2 years", nameAr: "سنتين" },
+  { name: "3 years", nameAr: "3 سنين" },
+  { name: "4 years", nameAr: "4 سنين" },
+  { name: "5 years", nameAr: "5 سنين" },
+  { name: "6 years", nameAr: "6 سنين" },
+  { name: "7 years", nameAr: "7 سنين" },
+  { name: "8 years", nameAr: "8 سنين" },
 ];
 
 // مقاسات أحذية الكبار
 const PRESET_SHOE_SIZES_ADULT = [
-  { name: "36", nameAr: "36", sortOrder: 1 },
-  { name: "37", nameAr: "37", sortOrder: 2 },
-  { name: "38", nameAr: "38", sortOrder: 3 },
-  { name: "39", nameAr: "39", sortOrder: 4 },
-  { name: "40", nameAr: "40", sortOrder: 5 },
-  { name: "41", nameAr: "41", sortOrder: 6 },
-  { name: "42", nameAr: "42", sortOrder: 7 },
-  { name: "43", nameAr: "43", sortOrder: 8 },
-  { name: "44", nameAr: "44", sortOrder: 9 },
-  { name: "45", nameAr: "45", sortOrder: 10 },
+  { name: "36", nameAr: "36" },
+  { name: "37", nameAr: "37" },
+  { name: "38", nameAr: "38" },
+  { name: "39", nameAr: "39" },
+  { name: "40", nameAr: "40" },
+  { name: "41", nameAr: "41" },
+  { name: "42", nameAr: "42" },
+  { name: "43", nameAr: "43" },
+  { name: "44", nameAr: "44" },
+  { name: "45", nameAr: "45" },
 ];
 
 // مقاسات أحذية الأطفال
 const PRESET_SHOE_SIZES_KIDS = [
-  { name: "20", nameAr: "20", sortOrder: 1 },
-  { name: "21", nameAr: "21", sortOrder: 2 },
-  { name: "22", nameAr: "22", sortOrder: 3 },
-  { name: "23", nameAr: "23", sortOrder: 4 },
-  { name: "24", nameAr: "24", sortOrder: 5 },
-  { name: "25", nameAr: "25", sortOrder: 6 },
-  { name: "26", nameAr: "26", sortOrder: 7 },
-  { name: "27", nameAr: "27", sortOrder: 8 },
-  { name: "28", nameAr: "28", sortOrder: 9 },
-  { name: "29", nameAr: "29", sortOrder: 10 },
-  { name: "30", nameAr: "30", sortOrder: 11 },
-  { name: "31", nameAr: "31", sortOrder: 12 },
-  { name: "32", nameAr: "32", sortOrder: 13 },
-  { name: "33", nameAr: "33", sortOrder: 14 },
-  { name: "34", nameAr: "34", sortOrder: 15 },
-  { name: "35", nameAr: "35", sortOrder: 16 },
+  { name: "20", nameAr: "20" },
+  { name: "21", nameAr: "21" },
+  { name: "22", nameAr: "22" },
+  { name: "23", nameAr: "23" },
+  { name: "24", nameAr: "24" },
+  { name: "25", nameAr: "25" },
+  { name: "26", nameAr: "26" },
+  { name: "27", nameAr: "27" },
+  { name: "28", nameAr: "28" },
+  { name: "29", nameAr: "29" },
+  { name: "30", nameAr: "30" },
+  { name: "31", nameAr: "31" },
+  { name: "32", nameAr: "32" },
+  { name: "33", nameAr: "33" },
+  { name: "34", nameAr: "34" },
+  { name: "35", nameAr: "35" },
 ];
 
 export function ProductVariantsManager({ variants, onChange }: ProductVariantsManagerProps) {
-  const [variantType, setVariantType] = useState<VariantType>("SIZE");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>("");
 
-  const addVariant = () => {
+  // الحصول على المقاسات المتاحة حسب الفئة
+  const getAvailableSizes = () => {
+    switch (selectedCategory) {
+      case "clothes":
+        return PRESET_SIZES;
+      case "kids":
+        return PRESET_AGES;
+      case "shoes-adult":
+        return PRESET_SHOE_SIZES_ADULT;
+      case "shoes-kids":
+        return PRESET_SHOE_SIZES_KIDS;
+      default:
+        return [];
+    }
+  };
+
+  // إضافة مقاس من القائمة
+  const addSelectedSize = () => {
+    if (!selectedCategory || !selectedSize) return;
+
+    const availableSizes = getAvailableSizes();
+    const sizeData = availableSizes.find(s => s.nameAr === selectedSize);
+    if (!sizeData) return;
+
+    // التحقق من عدم التكرار
+    const exists = variants.some(v => v.nameAr === sizeData.nameAr);
+    if (exists) {
+      alert("⚠️ هذا المقاس موجود بالفعل!");
+      return;
+    }
+
     const newVariant: ProductVariant = {
-      variantType,
+      variantType: selectedCategory === "kids" ? "AGE" : "SIZE",
+      name: sizeData.name,
+      nameAr: sizeData.nameAr,
+      sku: "",
+      price: 0,
+      stock: 0,
+      isActive: true,
+      sortOrder: variants.length + 1,
+    };
+    
+    onChange([...variants, newVariant]);
+    setSelectedSize(""); // إعادة تعيين الاختيار
+  };
+
+  // إضافة مقاس مخصص
+  const addCustomVariant = () => {
+    const newVariant: ProductVariant = {
+      variantType: "CUSTOM",
       name: "",
       nameAr: "",
       sku: "",
@@ -97,62 +145,6 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
       sortOrder: variants.length + 1,
     };
     onChange([...variants, newVariant]);
-  };
-
-  const addPresetSizes = () => {
-    const newVariants = PRESET_SIZES.map((size) => ({
-      variantType: "SIZE" as VariantType,
-      name: size.name,
-      nameAr: size.nameAr,
-      sku: "",
-      price: 0,
-      stock: 0,
-      isActive: true,
-      sortOrder: size.sortOrder,
-    }));
-    onChange([...variants, ...newVariants]);
-  };
-
-  const addPresetAges = () => {
-    const newVariants = PRESET_AGES.map((age) => ({
-      variantType: "AGE" as VariantType,
-      name: age.name,
-      nameAr: age.nameAr,
-      sku: "",
-      price: 0,
-      stock: 0,
-      isActive: true,
-      sortOrder: age.sortOrder,
-    }));
-    onChange([...variants, ...newVariants]);
-  };
-
-  const addPresetShoeSizesAdult = () => {
-    const newVariants = PRESET_SHOE_SIZES_ADULT.map((size) => ({
-      variantType: "SIZE" as VariantType,
-      name: size.name,
-      nameAr: size.nameAr,
-      sku: "",
-      price: 0,
-      stock: 0,
-      isActive: true,
-      sortOrder: size.sortOrder,
-    }));
-    onChange([...variants, ...newVariants]);
-  };
-
-  const addPresetShoeSizesKids = () => {
-    const newVariants = PRESET_SHOE_SIZES_KIDS.map((size) => ({
-      variantType: "SIZE" as VariantType,
-      name: size.name,
-      nameAr: size.nameAr,
-      sku: "",
-      price: 0,
-      stock: 0,
-      isActive: true,
-      sortOrder: size.sortOrder,
-    }));
-    onChange([...variants, ...newVariants]);
   };
 
   const updateVariant = (index: number, field: keyof ProductVariant, value: any) => {
@@ -193,91 +185,85 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
           المقاسات والأسعار
         </h3>
         <p className="text-gray-300 text-sm">
-          أضف المقاسات المختلفة للمنتج مع السعر والكمية لكل مقاس
+          اختر نوع المنتج ثم اختر المقاس من القائمة
         </p>
       </div>
 
-      {/* Preset Buttons - منظمة في مجموعات */}
-      <div className="space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* مقاسات الملابس */}
-          <button
-            type="button"
-            onClick={addPresetSizes}
-            className="group relative overflow-hidden p-4 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-2 border-purple-500/30 rounded-xl hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/20 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-2xl">
-                👕
-              </div>
-              <div className="text-right flex-1">
-                <div className="text-white font-bold text-lg">مقاسات ملابس كبار</div>
-                <div className="text-gray-300 text-sm">S, M, L, XL, XXL, 3XL</div>
-              </div>
-            </div>
-          </button>
+      {/* Add Size Section - القوائم المنسدلة */}
+      <div className="p-6 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-2 border-purple-500/30 rounded-xl">
+        <h4 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
+          <Plus className="w-5 h-5" />
+          إضافة مقاس جديد
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* اختيار نوع المنتج */}
+          <div>
+            <label className="block text-white font-medium mb-2">
+              1️⃣ اختر نوع المنتج
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setSelectedSize("");
+              }}
+              className="w-full px-4 py-3 bg-white/10 border-2 border-white/30 rounded-lg text-white font-medium focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <option value="" className="bg-gray-800">اختر النوع...</option>
+              <option value="clothes" className="bg-gray-800">👕 ملابس كبار</option>
+              <option value="kids" className="bg-gray-800">👶 ملابس أطفال (بالعمر)</option>
+              <option value="shoes-adult" className="bg-gray-800">👞 أحذية كبار</option>
+              <option value="shoes-kids" className="bg-gray-800">👟 أحذية أطفال</option>
+            </select>
+          </div>
 
-          {/* أعمار الأطفال */}
-          <button
-            type="button"
-            onClick={addPresetAges}
-            className="group relative overflow-hidden p-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-2 border-blue-500/30 rounded-xl hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center text-2xl">
-                👶
-              </div>
-              <div className="text-right flex-1">
-                <div className="text-white font-bold text-lg">ملابس أطفال (بالعمر)</div>
-                <div className="text-gray-300 text-sm">من 0-3 شهور حتى 8 سنوات</div>
-              </div>
-            </div>
-          </button>
+          {/* اختيار المقاس */}
+          <div>
+            <label className="block text-white font-medium mb-2">
+              2️⃣ اختر المقاس
+            </label>
+            <select
+              value={selectedSize}
+              onChange={(e) => setSelectedSize(e.target.value)}
+              disabled={!selectedCategory}
+              className="w-full px-4 py-3 bg-white/10 border-2 border-white/30 rounded-lg text-white font-medium focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="" className="bg-gray-800">
+                {selectedCategory ? "اختر المقاس..." : "اختر النوع أولاً"}
+              </option>
+              {getAvailableSizes().map((size, index) => (
+                <option key={index} value={size.nameAr} className="bg-gray-800">
+                  {size.nameAr}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          {/* أحذية كبار */}
-          <button
-            type="button"
-            onClick={addPresetShoeSizesAdult}
-            className="group relative overflow-hidden p-4 bg-gradient-to-r from-amber-600/20 to-orange-600/20 border-2 border-amber-500/30 rounded-xl hover:border-amber-500 hover:shadow-lg hover:shadow-amber-500/20 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center text-2xl">
-                👞
-              </div>
-              <div className="text-right flex-1">
-                <div className="text-white font-bold text-lg">أحذية كبار</div>
-                <div className="text-gray-300 text-sm">مقاسات 36 إلى 45</div>
-              </div>
-            </div>
-          </button>
-
-          {/* أحذية أطفال */}
-          <button
-            type="button"
-            onClick={addPresetShoeSizesKids}
-            className="group relative overflow-hidden p-4 bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border-2 border-yellow-500/30 rounded-xl hover:border-yellow-500 hover:shadow-lg hover:shadow-yellow-500/20 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-lg flex items-center justify-center text-2xl">
-                👟
-              </div>
-              <div className="text-right flex-1">
-                <div className="text-white font-bold text-lg">أحذية أطفال</div>
-                <div className="text-gray-300 text-sm">مقاسات 20 إلى 35</div>
-              </div>
-            </div>
-          </button>
+          {/* زر الإضافة */}
+          <div className="flex items-end">
+            <button
+              type="button"
+              onClick={addSelectedSize}
+              disabled={!selectedCategory || !selectedSize}
+              className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ➕ إضافة المقاس
+            </button>
+          </div>
         </div>
 
         {/* زر إضافة مخصص */}
-        <button
-          type="button"
-          onClick={addVariant}
-          className="w-full p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all font-bold text-lg"
-        >
-          <Plus className="w-5 h-5 inline ml-2" />
-          إضافة مقاس مخصص
-        </button>
+        <div className="mt-4 pt-4 border-t border-white/20">
+          <button
+            type="button"
+            onClick={addCustomVariant}
+            className="w-full px-4 py-3 bg-white/10 border-2 border-white/30 text-white rounded-lg hover:bg-white/20 transition-all font-medium"
+          >
+            <Plus className="w-4 h-4 inline ml-2" />
+            أو أضف مقاس مخصص يدوياً
+          </button>
+        </div>
       </div>
 
       {/* Variants List */}
