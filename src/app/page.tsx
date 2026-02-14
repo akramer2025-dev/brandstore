@@ -65,7 +65,7 @@ function getCategoryImage(categoryName: string, categoryImage?: string | null): 
 async function getProducts() {
   try {
     return await prisma.product.findMany({
-      take: 20, // زودنا العدد للشريط المتحرك
+      take: 30, // زيادة العدد لعرض المزيد من المنتجات
       include: {
         category: true,
       },
@@ -246,9 +246,9 @@ export default async function HomePage() {
 
           {products.length > 0 ? (
             <>
-              {/* Grid View - احترافي نظيف */}
+              {/* Grid View - احترافي نظيف مع عرض المزيد من المنتجات */}
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
-                {products.slice(0, 10).map((product, index) => (
+                {products.slice(0, 20).map((product, index) => (
                   <ProductCardPro key={product.id} product={product} index={index} />
                 ))}
               </div>

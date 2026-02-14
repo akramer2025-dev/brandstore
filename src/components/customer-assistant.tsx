@@ -579,9 +579,9 @@ export default function CustomerAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-            className="fixed bottom-[180px] right-2 md:bottom-24 md:right-4 w-[calc(100vw-16px)] sm:w-[min(95vw,440px)] z-[9999]"
+            className="fixed bottom-4 right-2 md:bottom-4 md:right-4 w-[calc(100vw-16px)] sm:w-[min(95vw,440px)] z-[9999] max-h-[calc(100vh-100px)] md:max-h-[calc(100vh-80px)]"
           >
-            <Card className="bg-gradient-to-br from-slate-900 via-teal-900/95 to-slate-900 border-2 border-teal-400/60 shadow-[0_20px_60px_rgba(13,148,136,0.4)] overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-xl max-h-[75vh] md:max-h-[80vh] flex flex-col">
+            <Card className="bg-gradient-to-br from-slate-900 via-teal-900/95 to-slate-900 border-2 border-teal-400/60 shadow-[0_20px_60px_rgba(13,148,136,0.4)] overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-xl h-full flex flex-col">
               {/* رأس النافذة - محسّن للموبايل */}
               <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-3 md:p-5 flex items-center justify-between overflow-hidden flex-shrink-0">
                 {/* نمط خلفية متحرك */}

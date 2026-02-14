@@ -82,63 +82,74 @@ export function BottomNavBar() {
       {/* Spacer لمنع المحتوى من الاختفاء خلف الـ Bottom Nav */}
       <div className="h-20 md:h-0" />
       
-      {/* Bottom Navigation Bar - Matching Reference Image */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.08)] border-t border-gray-200">
-        <div className="relative flex items-center justify-around px-4 py-3 max-w-screen-xl mx-auto">
+      {/* Bottom Navigation Bar - تصميم احترافي محسّن */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+        {/* خلفية الـ Blur */}
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"></div>
+        
+        <div className="relative flex items-center justify-around px-6 py-2.5 max-w-screen-xl mx-auto">
           {navItems.map((item, index) => {
             const Icon = item.icon;
             const isCenter = item.isCenter;
 
             if (isCenter) {
-              // الزر المركزي - مطابق للصورة المرجعية
+              // الزر المركزي - تصميم متميز وجذاب
               return (
                 <div key={item.name} className="flex-1 flex justify-center">
                   <button
                     onClick={() => handleNavigation(item.href)}
-                    className="relative -mt-8 group"
+                    className="relative -mt-7 group"
                     aria-label={item.name}
                   >
-                    {/* الخلفية البيضاء الخارجية */}
-                    <div className="absolute inset-0 bg-white rounded-full scale-[1.2] shadow-[0_4px_12px_rgba(0,0,0,0.1)]" />
+                    {/* الخلفية البيضاء الكبيرة */}
+                    <div className="absolute inset-0 bg-white rounded-full scale-[1.3] shadow-[0_0_0_8px_rgba(255,255,255,1),0_8px_16px_rgba(0,0,0,0.12)]" />
                     
-                    {/* الزر الوردي الدائري */}
-                    <div 
-                      className="relative w-16 h-16 rounded-full bg-gradient-to-br from-pink-400 to-pink-500 shadow-lg flex items-center justify-center transition-transform duration-200 active:scale-95"
-                    >
-                      <Icon className="w-7 h-7 text-white" strokeWidth={2} />
+                    {/* الزر البنفسجي الدائري */}
+                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 shadow-[0_4px_16px_rgba(168,85,247,0.4)] flex items-center justify-center transition-all duration-300 active:scale-95 group-hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)]">
+                      <Icon className="w-7 h-7 text-white drop-shadow-md" strokeWidth={2.5} />
                       
                       {/* Badge للعدد */}
                       {item.badge !== undefined && item.badge > 0 && (
-                        <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                        <span className="absolute -top-1 -right-1 min-w-[22px] h-5 px-1.5 bg-gradient-to-br from-red-500 to-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg ring-2 ring-white">
                           {item.badge > 9 ? '9+' : item.badge}
                         </span>
                       )}
+                      
+                      {/* تأثير التوهج */}
+                      <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-active:opacity-100 transition-opacity duration-200"></div>
                     </div>
                   </button>
                 </div>
               );
             }
 
-            // الأزرار العادية - بسيطة ونظيفة
+            // الأزرار العادية - تصميم نظيف وأنيق
             return (
               <button
                 key={item.name}
                 onClick={() => handleNavigation(item.href)}
-                className="flex-1 flex flex-col items-center justify-center gap-1 py-1"
+                className="flex-1 flex flex-col items-center justify-center gap-1.5 py-1 relative group"
                 aria-label={item.name}
               >
-                {/* الأيقونة */}
+                {/* الأيقونة مع تأثير الـ Active */}
                 <div className="relative">
+                  {/* خلفية ملونة للـ Active State */}
+                  {item.isActive && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full scale-150 -z-10"></div>
+                  )}
+                  
                   <Icon 
-                    className={`w-6 h-6 transition-colors ${
-                      item.isActive ? 'text-pink-500' : 'text-gray-600'
+                    className={`w-6 h-6 transition-all duration-200 ${
+                      item.isActive 
+                        ? 'text-purple-600 scale-110' 
+                        : 'text-gray-500 group-hover:text-purple-500 group-hover:scale-105'
                     }`}
                     strokeWidth={item.isActive ? 2.5 : 2}
                   />
                   
-                  {/* Badge للعدد (للمفضلة) */}
+                  {/* Badge للعدد */}
                   {item.badge !== undefined && item.badge > 0 && !isCenter && (
-                    <span className="absolute -top-2 -right-2 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 min-w-[18px] h-4 px-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-md ring-2 ring-white">
                       {item.badge > 9 ? '9+' : item.badge}
                     </span>
                   )}
@@ -146,12 +157,19 @@ export function BottomNavBar() {
 
                 {/* النص */}
                 <span 
-                  className={`text-[11px] font-medium transition-colors ${
-                    item.isActive ? 'text-pink-500' : 'text-gray-600'
+                  className={`text-[10px] font-semibold transition-colors duration-200 ${
+                    item.isActive 
+                      ? 'text-purple-600' 
+                      : 'text-gray-500 group-hover:text-purple-500'
                   }`}
                 >
                   {item.name}
                 </span>
+                
+                {/* خط مؤشر للـ Active State */}
+                {item.isActive && (
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-full shadow-sm"></div>
+                )}
               </button>
             );
           })}
