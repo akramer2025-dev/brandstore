@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { prisma } from '@/lib/prisma';
 import { ProductCardPro } from '@/components/ProductCardPro';
 import { HeroSlider } from '@/components/HeroSlider';
@@ -9,59 +9,59 @@ import { TrendingUp } from 'lucide-react';
 import { Metadata } from 'next';
 
 // 🚀 Lazy Loading للمكونات الثقيلة (تحسين للهواتف الضعيفة)
-const RamadanHomeDecorations = dynamic(() => import('@/components/RamadanHomeDecorations'), {
+const RamadanHomeDecorations = dynamicImport(() => import('@/components/RamadanHomeDecorations'), {
   ssr: false, // لا يتم تحميلها في السيرفر
   loading: () => null, // بدون loading indicator
 });
 
-const BrandBackgroundPattern = dynamic(() => import('@/components/BrandBackgroundPattern'), {
+const BrandBackgroundPattern = dynamicImport(() => import('@/components/BrandBackgroundPattern'), {
   ssr: false,
   loading: () => null,
 });
 
-const FloatingBubbles = dynamic(() => import('@/components/FloatingBubbles'), {
+const FloatingBubbles = dynamicImport(() => import('@/components/FloatingBubbles'), {
   ssr: false,
   loading: () => null,
 });
 
-const FireworksEffect = dynamic(() => import('@/components/FireworksEffect'), {
+const FireworksEffect = dynamicImport(() => import('@/components/FireworksEffect'), {
   ssr: false,
   loading: () => null,
 });
 
-const RamadanBanner = dynamic(() => import('@/components/RamadanBanner'), {
+const RamadanBanner = dynamicImport(() => import('@/components/RamadanBanner'), {
   ssr: false,
 });
 
-const PendingPrizeHandler = dynamic(() => import('@/components/PendingPrizeHandler'), {
+const PendingPrizeHandler = dynamicImport(() => import('@/components/PendingPrizeHandler'), {
   ssr: false,
 });
 
-const TestimonialsSection = dynamic(() => import('@/components/TestimonialsSection'), {
+const TestimonialsSection = dynamicImport(() => import('@/components/TestimonialsSection'), {
   ssr: false,
 });
 
-const InfiniteProductCarousel = dynamic(() => import('@/components/InfiniteProductCarousel'), {
+const InfiniteProductCarousel = dynamicImport(() => import('@/components/InfiniteProductCarousel'), {
   ssr: false,
 });
 
-const ProductsSlider = dynamic(() => import('@/components/ProductsSlider'), {
+const ProductsSlider = dynamicImport(() => import('@/components/ProductsSlider'), {
   ssr: false,
 });
 
-const FlashDeals = dynamic(() => import('@/components/FlashDeals'), {
+const FlashDeals = dynamicImport(() => import('@/components/FlashDeals'), {
   ssr: false,
 });
 
-const LogoBanner = dynamic(() => import('@/components/LogoBanner'), {
+const LogoBanner = dynamicImport(() => import('@/components/LogoBanner'), {
   ssr: false,
 });
 
-const ChatButton = dynamic(() => import('@/components/ChatButton'), {
+const ChatButton = dynamicImport(() => import('@/components/ChatButton'), {
   ssr: false,
 });
 
-const CustomerAssistant = dynamic(() => import('@/components/customer-assistant'), {
+const CustomerAssistant = dynamicImport(() => import('@/components/customer-assistant'), {
   ssr: false,
 });
 
