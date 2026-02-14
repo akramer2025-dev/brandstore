@@ -222,8 +222,13 @@ export default async function AdminDashboard() {
             icon={<Target className="w-12 h-12" />}
             color="text-pink-600"
           />
-          <ActionCard
-            title="� إدارة التسويق"
+          <ActionCard            title="🔧 إعدادات Facebook API"
+            description="ربط التطبيق مع Facebook Ads Manager - إدخال Access Token وإعدادات الحساب لإنشاء الحملات تلقائياً"
+            href="/admin/facebook-settings"
+            icon={<Settings className="w-12 h-12" />}
+            color="text-blue-600"
+          />
+          <ActionCard            title="� إدارة التسويق"
             description="إدارة الحملات التسويقية والتحليلات وتحسين SEO"
             href="/admin/marketing"
             icon={<BarChart3 className="w-12 h-12" />}

@@ -19,8 +19,10 @@ import {
   ShoppingCart,
   AlertCircle,
   CheckCircle2,
+  Zap,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AutoCampaignCreator } from "./AutoCampaignCreator";
 
 interface CopyButtonProps {
   text: string;
@@ -252,15 +254,25 @@ export function CampaignWizard() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="pixel" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="pixel">📊 Pixel & Tracking</TabsTrigger>
-          <TabsTrigger value="settings">⚙️ الإعدادات</TabsTrigger>
-          <TabsTrigger value="audience">👥 الجمهور</TabsTrigger>
-          <TabsTrigger value="budget">💰 الميزانية</TabsTrigger>
-          <TabsTrigger value="creative">✍️ النصوص</TabsTrigger>
-          <TabsTrigger value="summary">📋 الملخص</TabsTrigger>
+      <Tabs defaultValue="auto-create" className="w-full">
+        <TabsList className="grid w-full grid-cols-7 gap-1">
+          <TabsTrigger value="auto-create" className="text-xs sm:text-sm">
+            <Zap className="w-4 h-4 ml-1" />
+            <span className="hidden sm:inline">إنشاء تلقائي</span>
+            <span className="sm:hidden">تلقائي</span>
+          </TabsTrigger>
+          <TabsTrigger value="pixel" className="text-xs sm:text-sm">📊 Pixel</TabsTrigger>
+          <TabsTrigger value="settings" className="text-xs sm:text-sm">⚙️ إعدادات</TabsTrigger>
+          <TabsTrigger value="audience" className="text-xs sm:text-sm">👥 جمهور</TabsTrigger>
+          <TabsTrigger value="budget" className="text-xs sm:text-sm">💰 ميزانية</TabsTrigger>
+          <TabsTrigger value="creative" className="text-xs sm:text-sm">✍️ نصوص</TabsTrigger>
+          <TabsTrigger value="summary" className="text-xs sm:text-sm">📋 ملخص</TabsTrigger>
         </TabsList>
+
+        {/* Auto-Create Tab - NEW FIRST TAB */}
+        <TabsContent value="auto-create" className="space-y-4">
+          <AutoCampaignCreator />
+        </TabsContent>
 
         {/* Facebook Pixel Tab - NEW */}
         <TabsContent value="pixel" className="space-y-4">
