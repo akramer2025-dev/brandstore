@@ -3,13 +3,14 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff, LayoutDashboard, MapPin, Wallet, Coins } from "lucide-react";
+import { ShoppingCart, User, LogOut, Settings, Package, Heart, Search, Image as ImageIcon, Upload, Bell, BellOff, LayoutDashboard, MapPin, Wallet, Coins, Menu } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
+import { MobileSidebar } from "@/components/MobileSidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +40,7 @@ export function Header() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
@@ -415,19 +417,32 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Mobile Search Button */}
+            {/* Mobile Search Button - يظهر أولاً على اليمين */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileSearchOpen(true)}
-              className="sm:hidden text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-7 h-7"
+              className="sm:hidden text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-9 h-9"
             >
-              <Search className="w-3 h-3 animate-pulse" />
+              <Search className="w-5 h-5 animate-pulse" />
+            </Button>
+
+            {/* Mobile Menu Button - يظهر ثانياً على اليسار */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                console.log('Menu button clicked, opening sidebar...');
+                setIsSidebarOpen(true);
+              }}
+              className="md:hidden text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-9 h-9"
+            >
+              <Menu className="w-5 h-5" />
             </Button>
             
-            {/* Wishlist */}
+            {/* Wishlist - مخفي على الموبايل */}
             {session && (
-              <Link href="/wishlist">
+              <Link href="/wishlist" className="hidden md:block">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -446,10 +461,12 @@ export function Header() {
               </Link>
             )}
             
-            {/* Notifications */}
-            {session && (
-              <NotificationsDropdown role={session.user?.role} />
-            )}
+            {/* Notifications - مخفي على الموبايل */}
+            <div className="hidden md:block">
+              {session && (
+                <NotificationsDropdown role={session.user?.role} />
+              )}
+            </div>
             
             {/* Notification Bell - مخفي حالياً */}
             {false && mounted && isNotificationSupported && (
@@ -475,8 +492,8 @@ export function Header() {
               </Button>
             )}
             
-            {/* Cart */}
-            <Link href="/cart">
+            {/* Cart - مخفي على الموبايل */}
+            <Link href="/cart" className="hidden md:block">
               <Button
                 variant="ghost"
                 size="icon"
@@ -491,14 +508,14 @@ export function Header() {
               </Button>
             </Link>
 
-            {/* User Menu */}
+            {/* User Menu - يظهر فقط على الديسكتوب */}
             {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 w-7 h-7 sm:w-8 sm:h-8"
+                    className="hidden md:flex text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 w-7 h-7 sm:w-8 sm:h-8"
                   >
                     <User className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
@@ -618,7 +635,7 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/auth/login">
+              <Link href="/auth/login" className="hidden md:block">
                 <Button className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10">
                   <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">تسجيل الدخول</span>
@@ -629,6 +646,9 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Sidebar */}
+      <MobileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       {/* Mobile Search Overlay */}
       {isMobileSearchOpen && (

@@ -156,9 +156,9 @@ export function ProductCard({ product }: ProductCardProps) {
           ) : null}
         </div>
 
-        <CardContent className="p-2.5 sm:p-3 md:p-4 space-y-2 sm:space-y-2.5">
+        <CardContent className="p-3 sm:p-3.5 md:p-4 space-y-2 sm:space-y-2.5">
           {/* Product Name */}
-          <h3 className="text-white font-bold text-xs sm:text-sm md:text-base lg:text-lg line-clamp-2 group-hover:text-teal-400 transition-colors min-h-[2.5rem] sm:min-h-[3rem]">
+          <h3 className="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl line-clamp-2 group-hover:text-teal-400 transition-colors min-h-[2.5rem] sm:min-h-[3rem]">
             {product.nameAr}
           </h3>
           
@@ -181,13 +181,13 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Price */}
           <div className="space-y-0.5 sm:space-y-1">
             <div className="flex items-baseline gap-1">
-              <span className="text-lg sm:text-xl md:text-2xl font-bold text-teal-400">
+              <span className="text-xl sm:text-2xl md:text-3xl font-bold text-teal-400">
                 {product.price.toLocaleString('en-US')}
               </span>
-              <span className="text-gray-400 text-[9px] sm:text-xs">جنيه</span>
+              <span className="text-gray-400 text-xs sm:text-sm">جنيه</span>
             </div>
             {product.originalPrice && product.originalPrice > product.price && (
-              <div className="text-gray-500 line-through text-[9px] sm:text-xs">
+              <div className="text-gray-500 line-through text-xs sm:text-sm">
                 {product.originalPrice.toLocaleString('en-US')} جنيه
               </div>
             )}
@@ -197,9 +197,9 @@ export function ProductCard({ product }: ProductCardProps) {
           <Button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold text-xs sm:text-sm py-1.5 sm:py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold text-sm sm:text-base py-2 sm:py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 ml-1 sm:ml-2" />
             أضف للسلة
           </Button>
         </CardContent>

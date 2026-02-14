@@ -3,6 +3,7 @@ import { Cairo } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
+import { BottomNavBar } from "@/components/BottomNavBar";
 import InstallPWA from "@/components/InstallPWA";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import VisitorTracker from "@/components/VisitorTracker";
@@ -72,6 +73,7 @@ export default function RootLayout({
           <MobileNotifications />
           <Header />
           {children}
+          <BottomNavBar />
           <InstallPWA />
         </Providers>
       </body>

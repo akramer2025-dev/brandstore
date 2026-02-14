@@ -20,11 +20,20 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
+  // Debug: Log slider state
+  useEffect(() => {
+    console.log('🎬 Slider Auto-Play:', isAutoPlaying, '| Current Slide:', currentSlide, '| Total Slides:', slides.length);
+  }, [currentSlide, isAutoPlaying, slides.length]);
+
   useEffect(() => {
     if (!isAutoPlaying || slides.length === 0) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => {
+        const nextSlide = (prev + 1) % slides.length;
+        console.log('🔄 Auto-switching to slide:', nextSlide);
+        return nextSlide;
+      });
     }, 5000);
 
     return () => clearInterval(interval);
@@ -49,11 +58,28 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
   };
 
   if (slides.length === 0) {
-    return null;
+    // عرض placeholder إذا لم توجد صور
+    return (
+      <div className="relative w-full h-[320px] sm:h-[380px] md:h-[420px] lg:h-[480px] overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center text-white px-4">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">مرحباً بك في ريمو ستور</h2>
+            <p className="text-lg md:text-xl mb-6">أفضل المنتجات بأفضل الأسعار</p>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 bg-white text-purple-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-all"
+            >
+              <span>تسوق الآن</span>
+              <ChevronLeft className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="relative w-full h-[280px] sm:h-[320px] md:h-[380px] lg:h-[450px] overflow-hidden group">
+    <div className="relative w-full h-[320px] sm:h-[380px] md:h-[420px] lg:h-[480px] overflow-hidden group">
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
