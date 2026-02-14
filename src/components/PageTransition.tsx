@@ -19,8 +19,9 @@ export function PageTransition() {
     // Mark as mounted and generate positions on client only
     if (!isMounted) {
       setIsMounted(true)
+      // تقليل عدد النجوم لتحسين الأداء
       setStarPositions(
-        Array.from({ length: 20 }, () => ({
+        Array.from({ length: 10 }, () => ({
           left: 20 + Math.random() * 60,
           top: 20 + Math.random() * 60,
         }))
@@ -120,7 +121,7 @@ export function PageTransition() {
               opacity: [0.4, 0.5, 0.4],
             }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 blur-2xl bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full"
+            className="absolute inset-0 blur-lg bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full"
           />
 
           {/* الشعار */}

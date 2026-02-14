@@ -17,18 +17,18 @@ export function RamadanSplashScreen() {
     // Mark as mounted to prevent hydration mismatch
     setIsMounted(true)
     
-    // Generate positions on client only
+    // Generate positions on client only - تقليل العدد لتحسين الأداء
     setStarPositions(
-      Array.from({ length: 50 }, () => ({
+      Array.from({ length: 20 }, () => ({
         left: Math.random() * 100,
         top: Math.random() * 100,
-        duration: 2 + Math.random() * 2,
+        duration: 3 + Math.random() * 2,
         delay: Math.random() * 2,
       }))
     )
     
     setSparklePositions(
-      Array.from({ length: 20 }, () => ({
+      Array.from({ length: 8 }, () => ({
         x: Math.random() * 100,
         y: Math.random() * 100,
         delay: 1 + Math.random()

@@ -954,3 +954,31 @@
 .animate-wave-fast {
   animation: wave-fast 4s ease-in-out infinite;
 }
+
+/* Performance Optimizations للأنيميشنات */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* تحسين أداء الأنيميشنات والتحويلات */
+.motion-safe\:transform {
+  will-change: transform;
+}
+
+svg, path, circle, ellipse {
+  will-change: auto;
+  transform: translateZ(0);
+}
+
+/* تقليل استهلاك الـ GPU للعناصر المتحركة */
+[class*="animate-"], 
+[class*="motion-"] {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* تحسين rendering للعناصر الثابتة */
+.fixed, .absolute {
+  transform: translateZ(0);
+}

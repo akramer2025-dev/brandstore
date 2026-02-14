@@ -18,51 +18,52 @@ export function RamadanHomeDecorations() {
     // Mark as mounted and generate all positions on client only
     setIsMounted(true)
     
+    // تقليل العناصر بشكل كبير لتحسين الأداء
     setStarPositions(
-      Array.from({ length: 15 }, () => ({
+      Array.from({ length: 5 }, () => ({
         top: Math.random() * 100,
         left: Math.random() * 100,
-        size: 8 + Math.random() * 8,
-        duration: 2 + Math.random() * 2,
+        size: 12 + Math.random() * 8,
+        duration: 3 + Math.random() * 2,
         delay: Math.random() * 3
       }))
     )
 
     setConfettiPositions(
-      Array.from({ length: 12 }, () => ({
+      Array.from({ length: 4 }, () => ({
         startX: Math.random() * 100,
         startY: Math.random() * 100,
-        size: 8 + Math.random() * 12,
-        duration: 4 + Math.random() * 3,
+        size: 10 + Math.random() * 10,
+        duration: 5 + Math.random() * 3,
         delay: Math.random() * 4
       }))
     )
 
     setSparkleTrails(
-      Array.from({ length: 6 }, () => ({
+      Array.from({ length: 2 }, () => ({
         startX: Math.random() * 100,
         startY: Math.random() * 100,
         endX: Math.random() * 100,
         endY: Math.random() * 100,
-        duration: 5 + Math.random() * 3,
+        duration: 6 + Math.random() * 3,
         delay: Math.random() * 5
       }))
     )
 
     setMiniStarPositions(
-      Array.from({ length: 25 }, () => ({
+      Array.from({ length: 8 }, () => ({
         left: Math.random() * 100,
         top: Math.random() * 100,
-        duration: 3 + Math.random() * 4,
+        duration: 4 + Math.random() * 4,
         delay: Math.random() * 5
       }))
     )
 
     setSparklePositions(
-      Array.from({ length: 8 }, () => ({
+      Array.from({ length: 3 }, () => ({
         top: 10 + Math.random() * 80,
         left: 10 + Math.random() * 80,
-        size: 12 + Math.random() * 8,
+        size: 14 + Math.random() * 8,
         delay: Math.random() * 4
       }))
     )
@@ -81,12 +82,12 @@ export function RamadanHomeDecorations() {
             fill="none"
           />
           
-          {/* أعلام الزينة */}
-          {[...Array(15)].map((_, i) => {
-            const x = (i * 80) + 40
+          {/* أعلام الزينة - مقللة للأداء */}
+          {[...Array(8)].map((_, i) => {
+            const x = (i * 150) + 75
             const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3']
             const color = colors[i % colors.length]
-            const delay = i * 0.15
+            const delay = i * 0.2
             
             return (
               <g key={i}>
@@ -135,13 +136,13 @@ export function RamadanHomeDecorations() {
         </svg>
       </div>
 
-      {/* 💡 خيط إضاءة LED متلألئ */}
+      {/* 💡 خيط إضاءة LED متلألئ - مقلل للأداء */}
       <div className="absolute top-0 left-0 right-0 h-16">
-        {[...Array(20)].map((_, i) => {
-          const left = (i * 5) + 2.5
+        {[...Array(10)].map((_, i) => {
+          const left = (i * 10) + 5
           const colors = ['#FFD700', '#FFA500', '#FF6B6B', '#4ECDC4', '#AA96DA']
           const color = colors[i % colors.length]
-          const delay = i * 0.2
+          const delay = i * 0.3
           
           return (
             <motion.div
