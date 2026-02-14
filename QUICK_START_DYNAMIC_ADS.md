@@ -64,14 +64,31 @@ Custom Audience:
 > **ملاحظة:** إذا مافيش Custom Audience جاهز، ابدأ بـ Broad وهنعمل retargeting بعدين
 
 #### **3.4 - Placements:**
+
+> ⚠️ **مهم جداً!** Dynamic Ads **لا تظهر** على كل Placements - اتبع الخطوات التالية:
+
+**الطريقة الصحيحة (لتجنب رسائل الخطأ):**
+
 ```
-✅ Advantage+ Placements (Automatic)
-   أو
-✅ Manual Placements:
-   - Facebook Feed
-   - Instagram Feed
-   - Instagram Stories
+❌ لا تستخدم: Advantage+ Placements (يسبب مشاكل!)
+
+✅ استخدم: Manual Placements - اختر فقط:
+   ✓ Facebook Feed (الأساسي - يجب تفعيله!)
+   ✓ Facebook Marketplace
+   ✓ Facebook Right Column
+   
+   ❌ أزِل علامة ✓ من:
+      Instagram Feed (قد يسبب مشاكل)
+      Instagram Stories (غير مدعوم)
+      Instagram Explore (غير مدعوم)
+      Audience Network (غير مدعوم)
+      Messenger (غير مدعوم)
 ```
+
+**رسالة الخطأ: "هذا التنسيق غير متوفر"؟**
+- **الحل:** ارجع لـ Placements → اختر Manual Placements
+- **فعّل فقط:** Facebook Feed + Marketplace
+- **احفظ** وحاول تاني!
 
 #### **3.5 - Optimization:**
 ```
@@ -204,6 +221,25 @@ Expected ROAS: 2-4x
 ---
 
 ## 🆘 **إذا واجهت مشكلة:**
+
+### **"هذا التنسيق غير متوفر في قصص/موجز Instagram" (الأكثر شيوعاً! 🔥)**
+```
+المشكلة: Dynamic Product Ads لا تعمل على كل Placements
+
+✅ الحل السريع (خطوة بخطوة):
+1. ارجع لـ Ad Set Settings
+2. اضغط على Placements
+3. اختر Manual Placements (بدل Advantage+)
+4. أزِل علامة ✓ من كل Instagram
+5. أزِل علامة ✓ من Audience Network
+6. أزِل علامة ✓ من Messenger
+7. خلي بس: ✓ Facebook Feed + ✓ Marketplace
+8. Save Changes
+
+➡️ النتيجة: الإعلان سيشتغل بدون أخطاء!
+
+📌 ملاحظة: بعد نجاح الحملة، جرب تضيف Instagram Feed (لكن مش Stories!)
+```
 
 ### **"No products available"**
 ```
