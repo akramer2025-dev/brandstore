@@ -2,52 +2,92 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Moon, Star, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 
 export function PageTransition() {
   const pathname = usePathname()
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Generate star positions once on client
+  const starPositions = useMemo(() => 
+    Array.from({ length: 20 }, () => ({
+      left: 20 + Math.random() * 60,
+      top: 20 + Math.random() * 60,
+    })),
+    []
+  )
 
   useEffect(() => {
+    // Show transition when pathname changes
     setIsTransitioning(true)
-    const timer = setTimeout(() => setIsTransitioning(false), 800)
-    return () => clearTimeout(timer)
+    setIsLoading(true)
+
+    // Minimum display time for smooth experience
+    const minDisplayTime = 600
+    const startTime = Date.now()
+
+    // Wait for page to be interactive
+    const checkPageReady = () => {
+      const elapsed = Date.now() - startTime
+      const remainingTime = Math.max(0, minDisplayTime - elapsed)
+
+      setTimeout(() => {
+        setIsLoading(false)
+        // Hide transition after content is loaded
+        setTimeout(() => {
+          setIsTransitioning(false)
+        }, 200)
+      }, remainingTime)
+    }
+
+    // Check if page is already loaded
+    if (document.readyState === 'complete') {
+      checkPageReady()
+    } else {
+      window.addEventListener('load', checkPageReady)
+    }
+
+    return () => {
+      window.removeEventListener('load', checkPageReady)
+    }
   }, [pathname])
 
   if (!isTransitioning) return null
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
+        key={pathname}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
         className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden pointer-events-none"
         style={{
           background: 'linear-gradient(135deg, rgba(74,28,107,0.95) 0%, rgba(45,27,78,0.95) 50%, rgba(26,15,46,0.95) 100%)'
         }}
       >
-        {/* نجوم متلألئة */}
-        {[...Array(20)].map((_, i) => (
+        {/* نجوم ثابتة ومتلألئة */}
+        {starPositions.map((star, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0 }}
             animate={{ 
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
+              opacity: 0.8,
+              scale: 1,
             }}
             transition={{
-              duration: 0.6,
-              delay: i * 0.02,
+              duration: 0.4,
+              delay: i * 0.015,
               ease: "easeOut"
             }}
-            className="absolute w-1 h-1 bg-yellow-300 rounded-full"
+            className="absolute w-1 h-1 bg-yellow-200 rounded-full shadow-[0_0_4px_rgba(250,204,21,0.8)]"
             style={{
-              left: `${20 + Math.random() * 60}%`,
-              top: `${20 + Math.random() * 60}%`,
+              left: `${star.left}%`,
+              top: `${star.top}%`,
             }}
           />
         ))}
@@ -68,10 +108,10 @@ export function PageTransition() {
           {/* توهج ذهبي حول الشعار */}
           <motion.div
             animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.3, 0.6, 0.3],
+              scale: [1, 1.15, 1],
+              opacity: [0.4, 0.5, 0.4],
             }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
             className="absolute inset-0 blur-2xl bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full"
           />
 
@@ -90,11 +130,9 @@ export function PageTransition() {
           <motion.div
             animate={{
               rotate: 360,
-              scale: [1, 1.1, 1]
             }}
             transition={{
-              rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-              scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+              rotate: { duration: 4, repeat: Infinity, ease: "linear" },
             }}
             className="absolute -top-2 -right-2"
           >
@@ -105,11 +143,9 @@ export function PageTransition() {
           <motion.div
             animate={{
               rotate: -360,
-              scale: [1, 1.2, 1]
             }}
             transition={{
-              rotate: { duration: 2.5, repeat: Infinity, ease: "linear" },
-              scale: { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
+              rotate: { duration: 3.5, repeat: Infinity, ease: "linear" },
             }}
             className="absolute -bottom-2 -left-2"
           >
@@ -120,11 +156,9 @@ export function PageTransition() {
           <motion.div
             animate={{
               rotate: 360,
-              scale: [1, 1.3, 1]
             }}
             transition={{
-              rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-              scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+              rotate: { duration: 3, repeat: Infinity, ease: "linear" },
             }}
             className="absolute -top-1 -left-1"
           >
