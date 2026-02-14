@@ -17,21 +17,21 @@ export function RamadanSplashScreen() {
     // Mark as mounted to prevent hydration mismatch
     setIsMounted(true)
     
-    // Generate positions on client only - تقليل العدد لتحسين الأداء
+    // Generate positions on client only - عناصر قليلة جداً للسرعة
     setStarPositions(
-      Array.from({ length: 20 }, () => ({
+      Array.from({ length: 12 }, () => ({
         left: Math.random() * 100,
         top: Math.random() * 100,
-        duration: 3 + Math.random() * 2,
-        delay: Math.random() * 2,
+        duration: 2 + Math.random() * 1,
+        delay: Math.random() * 1,
       }))
     )
     
     setSparklePositions(
-      Array.from({ length: 8 }, () => ({
+      Array.from({ length: 5 }, () => ({
         x: Math.random() * 100,
         y: Math.random() * 100,
-        delay: 1 + Math.random()
+        delay: 0.5 + Math.random() * 0.5
       }))
     )
 
@@ -43,22 +43,22 @@ export function RamadanSplashScreen() {
       return
     }
 
-    // تحديث progress bar
+    // تحديث progress bar - أسرع
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(progressInterval)
           return 100
         }
-        return prev + 2
+        return prev + 5 // أسرع بكتير
       })
-    }, 50) // زيادة الوقت لكل خطوة
+    }, 40) // تحديث أسرع
 
-    // إخفاء بعد 5 ثواني
+    // إخفاء بعد 2 ثانية فقط - لتقليل التهنيج
     const timer = setTimeout(() => {
       setIsVisible(false)
       sessionStorage.setItem('hasSeenRamadanSplash', 'true')
-    }, 5000)
+    }, 2000)
 
     return () => {
       clearTimeout(timer)

@@ -14,12 +14,13 @@ export default function FloatingBubbles() {
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
 
   useEffect(() => {
-    const generated: Bubble[] = Array.from({ length: 15 }, (_, i) => ({
+    // تقليل العدد لـ 5 فقط لتحسين الأداء
+    const generated: Bubble[] = Array.from({ length: 5 }, (_, i) => ({
       id: i,
-      size: Math.random() * 18 + 5,
-      left: Math.random() * 95 + 2,
-      delay: Math.random() * 14,
-      duration: Math.random() * 8 + 10,
+      size: Math.random() * 15 + 8, // أحجام أكبر قليلاً وأقل تنوع
+      left: Math.random() * 90 + 5,
+      delay: Math.random() * 8,
+      duration: Math.random() * 5 + 8, // أسرع
     }));
     setBubbles(generated);
   }, []);

@@ -34,8 +34,8 @@ export function PageTransition() {
     setIsTransitioning(true)
     setIsLoading(true)
 
-    // Minimum display time for smooth experience
-    const minDisplayTime = 600
+    // Minimum display time for smooth experience - تقليل المدة
+    const minDisplayTime = 400 // كانت 600، الآن 400
     const startTime = Date.now()
 
     // Wait for page to be interactive

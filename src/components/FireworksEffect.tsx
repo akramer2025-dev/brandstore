@@ -31,7 +31,7 @@ export default function FireworksEffect() {
   const [rockets, setRockets] = useState<Rocket[]>([]);
 
   useEffect(() => {
-    // تظهر بعد 4 ثواني (بعد ما الـ splash يختفي)
+    // تظهر بعد 3 ثواني (بعد ما الـ splash يختفي)
     const alreadyShown = sessionStorage.getItem('fireworksShown');
     if (alreadyShown) return;
 
@@ -39,18 +39,18 @@ export default function FireworksEffect() {
       setShow(true);
       sessionStorage.setItem('fireworksShown', 'true');
 
-      // إنشاء صواريخ متتابعة
-      const rocketList: Rocket[] = Array.from({ length: 8 }, (_, i) => ({
+      // إنشاء 3 صواريخ فقط للأداء
+      const rocketList: Rocket[] = Array.from({ length: 3 }, (_, i) => ({
         id: i,
-        x: 10 + Math.random() * 80,
-        delay: i * 0.4 + Math.random() * 0.3,
+        x: 20 + i * 30,
+        delay: i * 0.5,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
       }));
       setRockets(rocketList);
 
-      // إخفاء بعد 4 ثواني
-      setTimeout(() => setShow(false), 4500);
-    }, 3500);
+      // إخفاء بعد 3 ثواني فقط
+      setTimeout(() => setShow(false), 3000);
+    }, 2500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -79,11 +79,11 @@ export default function FireworksEffect() {
               opacity: 0,
             }}
           >
-            {Array.from({ length: 16 }, (_, i) => {
-              const angle = (i / 16) * 360;
-              const dist = 40 + Math.random() * 60;
+            {Array.from({ length: 6 }, (_, i) => {
+              const angle = (i / 6) * 360;
+              const dist = 50 + Math.random() * 40;
               const particleColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-              const size = Math.random() * 4 + 2;
+              const size = Math.random() * 3 + 2;
               return (
                 <div
                   key={i}
@@ -107,8 +107,8 @@ export default function FireworksEffect() {
         </div>
       ))}
 
-      {/* ✨ شرارات عشوائية */}
-      {Array.from({ length: 20 }, (_, i) => (
+      {/* ✨ شرارات عشوائية - مقللة */}
+      {Array.from({ length: 8 }, (_, i) => (
         <div
           key={`sparkle-${i}`}
           className="absolute text-yellow-300"

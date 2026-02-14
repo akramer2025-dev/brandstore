@@ -12,7 +12,6 @@ import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
 import ChatButton from '@/components/ChatButton';
 import CustomerAssistant from '@/components/customer-assistant';
 import FlashDeals from '@/components/FlashDeals';
-import SpinWheel from '@/components/SpinWheel';
 import FloatingBubbles from '@/components/FloatingBubbles';
 import FireworksEffect from '@/components/FireworksEffect';
 import RamadanBanner from '@/components/RamadanBanner';
@@ -150,9 +149,6 @@ export default async function HomePage() {
         
         {/* Pending Prize Handler */}
         <PendingPrizeHandler />
-        
-        {/* Spin Wheel */}
-        <SpinWheel />
         
         {/*  MAIN CONTENT - خلفية موف فاتحة */}
         <div className="min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white">
