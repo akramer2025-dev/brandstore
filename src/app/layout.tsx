@@ -10,6 +10,7 @@ import VisitorTracker from "@/components/VisitorTracker";
 import MobileNotifications from "@/components/MobileNotifications";
 import FacebookPixel from "@/components/FacebookPixel";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
+import { RamadanSplashScreen } from "@/components/RamadanSplashScreen";
 
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
@@ -67,6 +68,7 @@ export default function RootLayout({
       </head>
       <body className={`${cairo.variable} font-sans antialiased`} suppressHydrationWarning>
         <Providers>
+          <RamadanSplashScreen />
           <FacebookPixel />
           <ServiceWorkerRegistration />
           <VisitorTracker />

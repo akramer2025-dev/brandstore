@@ -8,6 +8,7 @@ import { AnimatedSection } from '@/components/AnimatedSection';
 import { LogoBanner } from '@/components/LogoBanner';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { InfiniteProductCarousel } from '@/components/InfiniteProductCarousel';
+import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
 import ChatButton from '@/components/ChatButton';
 import CustomerAssistant from '@/components/customer-assistant';
 import FlashDeals from '@/components/FlashDeals';
@@ -130,6 +131,9 @@ export default async function HomePage() {
 
     return (
       <>
+        {/* ديكورات رمضانية في خلفية الصفحة */}
+        <RamadanHomeDecorations />
+
         {/* Brand Background Pattern */}
         <BrandBackgroundPattern />
 

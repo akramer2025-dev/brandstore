@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Heart, ShoppingBag, ShoppingCart, User } from "lucide-react";
+import { Home, Heart, ShoppingBag, ShoppingCart, User, Gift } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { useState, useEffect } from "react";
@@ -48,16 +48,15 @@ export function BottomNavBar() {
       badge: mounted ? wishlistItems.length : 0,
     },
     {
-      name: "السلة",
-      icon: ShoppingBag,
-      href: "/cart",
-      isActive: pathname === "/cart",
-      color: "from-purple-500 to-pink-500",
-      badge: mounted ? totalItems : 0,
+      name: "العروض",
+      icon: Gift,
+      href: "/offers",
+      isActive: pathname === "/offers",
+      color: "from-red-500 to-orange-500",
       isCenter: true, // الزر المركزي
     },
     {
-      name: "العربة",
+      name: "السلة",
       icon: ShoppingCart,
       href: "/cart",
       isActive: pathname === "/cart",
@@ -98,22 +97,15 @@ export function BottomNavBar() {
                 <div key={item.name} className="flex-1 flex justify-center">
                   <button
                     onClick={() => handleNavigation(item.href)}
-                    className="relative -mt-7 group"
+                    className="relative -mt-5 group"
                     aria-label={item.name}
                   >
                     {/* الخلفية البيضاء الكبيرة */}
-                    <div className="absolute inset-0 bg-white rounded-full scale-[1.3] shadow-[0_0_0_8px_rgba(255,255,255,1),0_8px_16px_rgba(0,0,0,0.12)]" />
+                    <div className="absolute inset-0 bg-white rounded-full scale-[1.15] shadow-[0_0_0_6px_rgba(255,255,255,1),0_6px_12px_rgba(0,0,0,0.1)]" />
                     
-                    {/* الزر البنفسجي الدائري */}
-                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 shadow-[0_4px_16px_rgba(168,85,247,0.4)] flex items-center justify-center transition-all duration-300 active:scale-95 group-hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)]">
-                      <Icon className="w-7 h-7 text-white drop-shadow-md" strokeWidth={2.5} />
-                      
-                      {/* Badge للعدد */}
-                      {item.badge !== undefined && item.badge > 0 && (
-                        <span className="absolute -top-1 -right-1 min-w-[22px] h-5 px-1.5 bg-gradient-to-br from-red-500 to-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg ring-2 ring-white">
-                          {item.badge > 9 ? '9+' : item.badge}
-                        </span>
-                      )}
+                    {/* الزر الملون الدائري - العروض الخاصة */}
+                    <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-red-500 via-orange-500 to-amber-500 shadow-[0_3px_12px_rgba(239,68,68,0.4)] flex items-center justify-center transition-all duration-300 active:scale-95 group-hover:shadow-[0_4px_16px_rgba(239,68,68,0.6)]">
+                      <Icon className="w-6 h-6 text-white drop-shadow-md" strokeWidth={2.5} />
                       
                       {/* تأثير التوهج */}
                       <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-active:opacity-100 transition-opacity duration-200"></div>
@@ -139,7 +131,7 @@ export function BottomNavBar() {
                   )}
                   
                   <Icon 
-                    className={`w-6 h-6 transition-all duration-200 ${
+                    className={`w-5 h-5 transition-all duration-200 ${
                       item.isActive 
                         ? 'text-purple-600 scale-110' 
                         : 'text-gray-500 group-hover:text-purple-500 group-hover:scale-105'
@@ -149,7 +141,7 @@ export function BottomNavBar() {
                   
                   {/* Badge للعدد */}
                   {item.badge !== undefined && item.badge > 0 && !isCenter && (
-                    <span className="absolute -top-2 -right-2 min-w-[18px] h-4 px-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-md ring-2 ring-white">
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-3.5 px-0.5 bg-gradient-to-br from-red-500 to-red-600 text-white text-[8px] font-bold rounded-full flex items-center justify-center shadow-md ring-1 ring-white">
                       {item.badge > 9 ? '9+' : item.badge}
                     </span>
                   )}
@@ -157,7 +149,7 @@ export function BottomNavBar() {
 
                 {/* النص */}
                 <span 
-                  className={`text-[10px] font-semibold transition-colors duration-200 ${
+                  className={`text-[9px] font-semibold transition-colors duration-200 ${
                     item.isActive 
                       ? 'text-purple-600' 
                       : 'text-gray-500 group-hover:text-purple-500'
@@ -168,7 +160,7 @@ export function BottomNavBar() {
                 
                 {/* خط مؤشر للـ Active State */}
                 {item.isActive && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-full shadow-sm"></div>
+                  <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-full shadow-sm"></div>
                 )}
               </button>
             );
