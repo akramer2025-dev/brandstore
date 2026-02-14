@@ -12,7 +12,6 @@ import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
 import ChatButton from '@/components/ChatButton';
 import CustomerAssistant from '@/components/customer-assistant';
 import FlashDeals from '@/components/FlashDeals';
-import SplashScreen from '@/components/SplashScreen';
 import SpinWheel from '@/components/SpinWheel';
 import FloatingBubbles from '@/components/FloatingBubbles';
 import FireworksEffect from '@/components/FireworksEffect';
@@ -139,9 +138,6 @@ export default async function HomePage() {
 
         {/* Floating Bubbles */}
         <FloatingBubbles />
-
-        {/* Splash Screen with Video - أول حاجة تظهر */}
-        <SplashScreen />
 
         {/* تأثير الصواريخ بعد الـ Splash */}
         <FireworksEffect />
