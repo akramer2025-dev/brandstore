@@ -185,68 +185,140 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-900">
-          المقاسات/الأعمار والأسعار
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+          <span className="text-3xl">📏</span>
+          المقاسات والأسعار
         </h3>
-        <div className="flex gap-2">
+        <p className="text-gray-300 text-sm">
+          أضف المقاسات المختلفة للمنتج مع السعر والكمية لكل مقاس
+        </p>
+      </div>
+
+      {/* Preset Buttons - منظمة في مجموعات */}
+      <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* مقاسات الملابس */}
           <button
             type="button"
             onClick={addPresetSizes}
-            className="px-3 py-1.5 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200"
+            className="group relative overflow-hidden p-4 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-2 border-purple-500/30 rounded-xl hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/20 transition-all"
           >
-            + مقاسات جاهزة
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-2xl">
+                👕
+              </div>
+              <div className="text-right flex-1">
+                <div className="text-white font-bold text-lg">مقاسات ملابس كبار</div>
+                <div className="text-gray-300 text-sm">S, M, L, XL, XXL, 3XL</div>
+              </div>
+            </div>
           </button>
+
+          {/* أعمار الأطفال */}
           <button
             type="button"
             onClick={addPresetAges}
-            className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
+            className="group relative overflow-hidden p-4 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-2 border-blue-500/30 rounded-xl hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all"
           >
-            + أعمار أطفال جاهزة
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center text-2xl">
+                👶
+              </div>
+              <div className="text-right flex-1">
+                <div className="text-white font-bold text-lg">ملابس أطفال (بالعمر)</div>
+                <div className="text-gray-300 text-sm">من 0-3 شهور حتى 8 سنوات</div>
+              </div>
+            </div>
           </button>
+
+          {/* أحذية كبار */}
           <button
             type="button"
             onClick={addPresetShoeSizesAdult}
-            className="px-3 py-1.5 text-sm bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200"
+            className="group relative overflow-hidden p-4 bg-gradient-to-r from-amber-600/20 to-orange-600/20 border-2 border-amber-500/30 rounded-xl hover:border-amber-500 hover:shadow-lg hover:shadow-amber-500/20 transition-all"
           >
-            + مقاسات أحذية كبار
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center text-2xl">
+                👞
+              </div>
+              <div className="text-right flex-1">
+                <div className="text-white font-bold text-lg">أحذية كبار</div>
+                <div className="text-gray-300 text-sm">مقاسات 36 إلى 45</div>
+              </div>
+            </div>
           </button>
+
+          {/* أحذية أطفال */}
           <button
             type="button"
             onClick={addPresetShoeSizesKids}
-            className="px-3 py-1.5 text-sm bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200"
+            className="group relative overflow-hidden p-4 bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border-2 border-yellow-500/30 rounded-xl hover:border-yellow-500 hover:shadow-lg hover:shadow-yellow-500/20 transition-all"
           >
-            + مقاسات أحذية أطفال
-          </button>
-          <button
-            type="button"
-            onClick={addVariant}
-            className="px-3 py-1.5 text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg"
-          >
-            <Plus className="w-4 h-4 inline mr-1" />
-            إضافة مقاس مخصص
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-lg flex items-center justify-center text-2xl">
+                👟
+              </div>
+              <div className="text-right flex-1">
+                <div className="text-white font-bold text-lg">أحذية أطفال</div>
+                <div className="text-gray-300 text-sm">مقاسات 20 إلى 35</div>
+              </div>
+            </div>
           </button>
         </div>
+
+        {/* زر إضافة مخصص */}
+        <button
+          type="button"
+          onClick={addVariant}
+          className="w-full p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all font-bold text-lg"
+        >
+          <Plus className="w-5 h-5 inline ml-2" />
+          إضافة مقاس مخصص
+        </button>
       </div>
 
+      {/* Variants List */}
       {variants.length === 0 ? (
-        <div className="p-8 text-center border-2 border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500">
-            لا توجد مقاسات بعد. اضغط على الأزرار أعلاه لإضافة مقاسات أو أعمار
+        <div className="p-12 text-center border-2 border-dashed border-white/20 rounded-xl bg-white/5">
+          <div className="text-6xl mb-4">📦</div>
+          <p className="text-white text-lg font-bold mb-2">
+            لم تُضف أي مقاسات بعد
+          </p>
+          <p className="text-gray-400">
+            اضغط على أحد الأزرار أعلاه لإضافة مقاسات جاهزة أو أضف مقاس مخصص
           </p>
         </div>
       ) : (
         <div className="space-y-3">
+          {/* عداد المقاسات */}
+          <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg">
+            <span className="text-white font-bold">
+              📊 إجمالي المقاسات: {variants.length}
+            </span>
+            <span className="text-gray-300 text-sm">
+              إجمالي الكميات: {variants.reduce((sum, v) => sum + (v.stock || 0), 0)}
+            </span>
+          </div>
+
           {variants.map((variant, index) => (
             <div
               key={index}
-              className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+              className="p-5 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-xl hover:border-purple-500/50 transition-all shadow-lg"
             >
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                {/* رقم الترتيب */}
+                <div className="md:col-span-1 flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">{index + 1}</span>
+                  </div>
+                </div>
+
                 {/* نوع المقاس */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-white mb-2">
                     النوع
                   </label>
                   <select
@@ -254,33 +326,33 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
                     onChange={(e) =>
                       updateVariant(index, "variantType", e.target.value as VariantType)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-2.5 bg-white/10 border border-white/30 rounded-lg text-white font-medium focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
-                    <option value="SIZE">مقاس</option>
-                    <option value="AGE">عمر</option>
-                    <option value="COLOR">لون</option>
-                    <option value="CUSTOM">مخصص</option>
+                    <option value="SIZE" className="bg-gray-800">مقاس 👕</option>
+                    <option value="AGE" className="bg-gray-800">عمر 👶</option>
+                    <option value="COLOR" className="bg-gray-800">لون 🎨</option>
+                    <option value="CUSTOM" className="bg-gray-800">مخصص ✨</option>
                   </select>
                 </div>
 
-                {/* الاسم بالعربي */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    المقاس/العمر بالعربي
+                {/* المقاس بالعربي */}
+                <div className="md:col-span-3">
+                  <label className="block text-sm font-bold text-white mb-2">
+                    المقاس/العمر
                   </label>
                   <input
                     type="text"
                     value={variant.nameAr}
                     onChange={(e) => updateVariant(index, "nameAr", e.target.value)}
-                    placeholder="مثال: متوسط أو من 3 إلى 6 شهور"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    placeholder="مثال: كبير أو 36"
+                    className="w-full px-3 py-2.5 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>
 
                 {/* السعر */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    السعر (جنيه)
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-white mb-2">
+                    💰 السعر (ج.م)
                   </label>
                   <input
                     type="number"
@@ -289,16 +361,16 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
                       updateVariant(index, "price", parseFloat(e.target.value) || 0)
                     }
                     placeholder="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-2.5 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     step="0.01"
                     min="0"
                   />
                 </div>
 
                 {/* الكمية */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الكمية
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-white mb-2">
+                    📦 الكمية
                   </label>
                   <input
                     type="number"
@@ -307,53 +379,53 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
                       updateVariant(index, "stock", parseInt(e.target.value) || 0)
                     }
                     placeholder="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-2.5 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     min="0"
                   />
                 </div>
 
-                {/* الأزرار */}
-                <div className="flex items-end gap-2">
+                {/* أزرار التحكم */}
+                <div className="md:col-span-2 flex items-end gap-2">
                   <button
                     type="button"
                     onClick={() => moveVariant(index, "up")}
                     disabled={index === 0}
-                    className="p-2 text-gray-600 hover:bg-gray-200 rounded disabled:opacity-30"
+                    className="flex-1 p-2.5 bg-white/10 text-white hover:bg-white/20 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                     title="للأعلى"
                   >
-                    ↑
+                    ⬆️
                   </button>
                   <button
                     type="button"
                     onClick={() => moveVariant(index, "down")}
                     disabled={index === variants.length - 1}
-                    className="p-2 text-gray-600 hover:bg-gray-200 rounded disabled:opacity-30"
+                    className="flex-1 p-2.5 bg-white/10 text-white hover:bg-white/20 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                     title="للأسفل"
                   >
-                    ↓
+                    ⬇️
                   </button>
                   <button
                     type="button"
                     onClick={() => removeVariant(index)}
-                    className="p-2 text-red-600 hover:bg-red-100 rounded"
+                    className="flex-1 p-2.5 bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded-lg transition-all"
                     title="حذف"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 mx-auto" />
                   </button>
                 </div>
               </div>
 
               {/* الاسم بالإنجليزي - سطر منفصل */}
-              <div className="mt-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  المقاس/العمر بالإنجليزي (اختياري)
+              <div className="mt-3 pt-3 border-t border-white/10">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  الاسم بالإنجليزي (اختياري)
                 </label>
                 <input
                   type="text"
                   value={variant.name}
                   onChange={(e) => updateVariant(index, "name", e.target.value)}
-                  placeholder="Example: Medium or 3-6 months"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  placeholder="Example: Large or 36"
+                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -361,16 +433,20 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
         </div>
       )}
 
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-800">
-          <strong>💡 ملاحظة:</strong> كل مقاس/عمر له سعر وكمية منفصلة. مثال:
-          <br />
-          - مقاس Small بسعر 250 جنيه، الكمية 10
-          <br />
-          - مقاس Medium بسعر 300 جنيه، الكمية 15
-          <br />
-          - من 3 إلى 6 شهور بسعر 200 جنيه، الكمية 8
-        </p>
+      {/* ملاحظة توضيحية */}
+      <div className="p-5 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl">
+        <div className="flex items-start gap-3">
+          <div className="text-3xl">💡</div>
+          <div className="flex-1">
+            <p className="text-white font-bold mb-2">كيف يعمل نظام المقاسات؟</p>
+            <ul className="text-gray-300 text-sm space-y-1">
+              <li>• كل مقاس له سعر وكمية منفصلة في المخزون</li>
+              <li>• يمكنك إضافة مقاسات جاهزة أو إنشاء مقاسات مخصصة</li>
+              <li>• العميل سيختار المقاس عند الشراء</li>
+              <li>• المخزون يتحدث تلقائياً عند البيع لكل مقاس</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
