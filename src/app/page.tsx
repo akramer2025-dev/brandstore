@@ -8,62 +8,40 @@ import Image from 'next/image';
 import { TrendingUp } from 'lucide-react';
 import { Metadata } from 'next';
 
-// 🚀 Lazy Loading للمكونات الثقيلة (تحسين للهواتف الضعيفة)
+// 🚀 Lazy Loading للمكونات الثقيلة (تحسين الأداء)
 const RamadanHomeDecorations = dynamicImport(() => import('@/components/RamadanHomeDecorations'), {
-  ssr: false, // لا يتم تحميلها في السيرفر
-  loading: () => null, // بدون loading indicator
+  loading: () => null,
 });
 
 const BrandBackgroundPattern = dynamicImport(() => import('@/components/BrandBackgroundPattern'), {
-  ssr: false,
   loading: () => null,
 });
 
 const FloatingBubbles = dynamicImport(() => import('@/components/FloatingBubbles'), {
-  ssr: false,
   loading: () => null,
 });
 
 const FireworksEffect = dynamicImport(() => import('@/components/FireworksEffect'), {
-  ssr: false,
   loading: () => null,
 });
 
-const RamadanBanner = dynamicImport(() => import('@/components/RamadanBanner'), {
-  ssr: false,
-});
+const RamadanBanner = dynamicImport(() => import('@/components/RamadanBanner'));
 
-const PendingPrizeHandler = dynamicImport(() => import('@/components/PendingPrizeHandler'), {
-  ssr: false,
-});
+const PendingPrizeHandler = dynamicImport(() => import('@/components/PendingPrizeHandler'));
 
-const TestimonialsSection = dynamicImport(() => import('@/components/TestimonialsSection'), {
-  ssr: false,
-});
+const TestimonialsSection = dynamicImport(() => import('@/components/TestimonialsSection'));
 
-const InfiniteProductCarousel = dynamicImport(() => import('@/components/InfiniteProductCarousel'), {
-  ssr: false,
-});
+const InfiniteProductCarousel = dynamicImport(() => import('@/components/InfiniteProductCarousel'));
 
-const ProductsSlider = dynamicImport(() => import('@/components/ProductsSlider'), {
-  ssr: false,
-});
+const ProductsSlider = dynamicImport(() => import('@/components/ProductsSlider'));
 
-const FlashDeals = dynamicImport(() => import('@/components/FlashDeals'), {
-  ssr: false,
-});
+const FlashDeals = dynamicImport(() => import('@/components/FlashDeals'));
 
-const LogoBanner = dynamicImport(() => import('@/components/LogoBanner'), {
-  ssr: false,
-});
+const LogoBanner = dynamicImport(() => import('@/components/LogoBanner'));
 
-const ChatButton = dynamicImport(() => import('@/components/ChatButton'), {
-  ssr: false,
-});
+const ChatButton = dynamicImport(() => import('@/components/ChatButton'));
 
-const CustomerAssistant = dynamicImport(() => import('@/components/customer-assistant'), {
-  ssr: false,
-});
+const CustomerAssistant = dynamicImport(() => import('@/components/customer-assistant'));
 
 export const dynamic = 'force-dynamic';
 
