@@ -17,19 +17,22 @@ import {
   Eye,
   EyeOff,
   RefreshCw,
+  Edit,
+  Lock,
 } from "lucide-react";
 
 interface FacebookSettings {
   accessToken: string;
   adAccountId: string;
   pageId: string;
+  hasAccessToken?: boolean;
 }
 
 export default function FacebookSettingsPage() {
   const [settings, setSettings] = useState<FacebookSettings>({
     accessToken: "",
-    adAccountId: "",
-    pageId: "",
+    adAccountId: "act_1962278932225",
+    pageId: "103042954595602",
   });
 
   const [showToken, setShowToken] = useState(false);
@@ -37,6 +40,8 @@ export default function FacebookSettingsPage() {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [saved, setSaved] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [isConfigured, setIsConfigured] = useState(false);
 
   // Load current settings on mount
   useEffect(() => {
@@ -50,10 +55,18 @@ export default function FacebookSettingsPage() {
         const data = await response.json();
         if (data.settings) {
           setSettings(data.settings);
+          // إذا كان الـ Token موجود، نعتبر أن الإعدادات مكتملة
+          if (data.settings.hasAccessToken) {
+            setIsConfigured(true);
+            setEditMode(false); // وضع القراءة فقط
+          } else {
+            setEditMode(true); // تفعيل التحرير إذا لم يكن هناك token
+          }
         }
       }
     } catch (error) {
       console.error("Failed to load settings:", error);
+      setEditMode(true); // إذا فشل التحميل، نفعل التحرير
     }
   };
 
@@ -71,6 +84,8 @@ export default function FacebookSettingsPage() {
 
       if (response.ok) {
         setSaved(true);
+        setIsConfigured(true);
+        setEditMode(false); // الرجوع لوضع القراءة بعد الحفظ
         setTimeout(() => setSaved(false), 3000);
       } else {
         throw new Error("فشل حفظ الإعدادات");
@@ -108,17 +123,91 @@ export default function FacebookSettingsPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <Card className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0">
+        <Card className={isConfigured ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0" : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0"}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-2xl">
-              <Facebook className="w-8 h-8" />
-              إعدادات Facebook Marketing API
-            </CardTitle>
-            <p className="text-white/90">
-              قم بإدخال بيانات الاعتماد للربط مع Facebook Ads Manager
-            </p>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-3 text-2xl mb-2">
+                  <Facebook className="w-8 h-8" />
+                  إعدادات Facebook Marketing API
+                </CardTitle>
+                <p className="text-white/90">
+                  {isConfigured 
+                    ? "✅ الإعدادات مكتملة - جاهز للتسويق!" 
+                    : "قم بإدخال بيانات الاعتماد للربط مع Facebook Ads Manager"}
+                </p>
+              </div>
+              {isConfigured && (
+                <Button
+                  onClick={() => setEditMode(!editMode)}
+                  variant="secondary"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  {editMode ? (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      وضع القراءة
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="w-4 h-4" />
+                      تعديل
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </CardHeader>
         </Card>
+
+        {/* Quick Status Summary */}
+        {isConfigured && !editMode && (
+          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+            <CardContent className="pt-6">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-green-900">Access Token</p>
+                    <p className="text-sm text-green-700">مفعّل ويعمل</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <FileText className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-green-900">Ad Account</p>
+                    <p className="text-sm text-green-700 font-mono">{settings.adAccountId}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <Facebook className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-green-900">Page ID</p>
+                    <p className="text-sm text-green-700 font-mono">{settings.pageId}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-green-200">
+                <p className="text-center text-green-800 font-semibold">
+                  🎉 جاهز للتسويق! يمكنك الآن إنشاء حملات إعلانية من{" "}
+                  <a href="/admin/media-buyer" className="underline hover:text-green-900">
+                    لوحة التحكم → Media Buyer → كتالوج 🛍️
+                  </a>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Status Card */}
         {testResult && (
@@ -146,10 +235,24 @@ export default function FacebookSettingsPage() {
         {/* Main Settings Form */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              بيانات الاعتماد (Credentials)
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                بيانات الاعتماد (Credentials)
+              </CardTitle>
+              {isConfigured && !editMode && (
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  مفعّل
+                </Badge>
+              )}
+              {editMode && (
+                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                  <Edit className="w-3 h-3 mr-1" />
+                  وضع التعديل
+                </Badge>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Access Token */}
@@ -165,6 +268,8 @@ export default function FacebookSettingsPage() {
                   onChange={(e) => setSettings({ ...settings, accessToken: e.target.value })}
                   placeholder="EAAWc2Eqq7AO..."
                   className="pr-12 font-mono text-sm"
+                  disabled={!editMode}
+                  readOnly={!editMode}
                 />
                 <button
                   type="button"
@@ -174,10 +279,18 @@ export default function FacebookSettingsPage() {
                   {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-xs text-gray-600 flex items-start gap-1">
-                <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <span>احصل عليه من Facebook Graph API Explorer أو استخدم refresh-facebook-token.ps1</span>
-              </p>
+              {!editMode && isConfigured && (
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Token مفعّل ويعمل بنجاح</span>
+                </p>
+              )}
+              {editMode && (
+                <p className="text-xs text-gray-600 flex items-start gap-1">
+                  <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  <span>احصل عليه من Facebook Graph API Explorer أو استخدم refresh-facebook-token.ps1</span>
+                </p>
+              )}
             </div>
 
             {/* Ad Account ID */}
@@ -191,11 +304,21 @@ export default function FacebookSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, adAccountId: e.target.value })}
                 placeholder="act_1234567890"
                 className="font-mono text-sm"
+                disabled={!editMode}
+                readOnly={!editMode}
               />
-              <p className="text-xs text-gray-600 flex items-start gap-1">
-                <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <span>يبدأ بـ "act_" - اذهب إلى Ads Manager → Settings → Account ID</span>
-              </p>
+              {!editMode && isConfigured && (
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Ad Account: {settings.adAccountId}</span>
+                </p>
+              )}
+              {editMode && (
+                <p className="text-xs text-gray-600 flex items-start gap-1">
+                  <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  <span>يبدأ بـ "act_" - اذهب إلى Ads Manager → Settings → Account ID</span>
+                </p>
+              )}
             </div>
 
             {/* Page ID */}
@@ -209,57 +332,81 @@ export default function FacebookSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, pageId: e.target.value })}
                 placeholder="123456789012345"
                 className="font-mono text-sm"
+                disabled={!editMode}
+                readOnly={!editMode}
               />
-              <p className="text-xs text-gray-600 flex items-start gap-1">
-                <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <span>اذهب إلى صفحتك → About → Page ID</span>
-              </p>
+              {!editMode && isConfigured && (
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Page ID: {settings.pageId}</span>
+                </p>
+              )}
+              {editMode && (
+                <p className="text-xs text-gray-600 flex items-start gap-1">
+                  <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  <span>اذهب إلى صفحتك → About → Page ID</span>
+                </p>
+              )}
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Button
-                onClick={handleSave}
-                disabled={loading || !settings.accessToken || !settings.adAccountId || !settings.pageId}
-                className="flex-1 bg-green-600 hover:bg-green-700"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    جاري الحفظ...
-                  </>
-                ) : saved ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    تم الحفظ!
-                  </>
-                ) : (
-                  <>
-                    <Settings className="w-4 h-4 mr-2" />
-                    حفظ الإعدادات
-                  </>
-                )}
-              </Button>
+            {editMode && (
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleSave}
+                  disabled={loading || !settings.accessToken || !settings.adAccountId || !settings.pageId}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      جاري الحفظ...
+                    </>
+                  ) : saved ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      تم الحفظ!
+                    </>
+                  ) : (
+                    <>
+                      <Settings className="w-4 h-4 mr-2" />
+                      حفظ الإعدادات
+                    </>
+                  )}
+                </Button>
 
-              <Button
-                onClick={handleTest}
-                disabled={testing || !settings.accessToken || !settings.adAccountId}
-                variant="outline"
-                className="flex-1"
-              >
-                {testing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    جاري الاختبار...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    اختبار الاتصال
-                  </>
+                {isConfigured && (
+                  <Button
+                    onClick={() => setEditMode(false)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    إلغاء
+                  </Button>
                 )}
-              </Button>
-            </div>
+              </div>
+            )}
+
+            {/* Test Button (always visible) */}
+            <Button
+              onClick={handleTest}
+              disabled={testing || !settings.accessToken || !settings.adAccountId}
+              variant="outline"
+              className="w-full"
+            >
+              {testing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  جاري الاختبار...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  🧪 اختبار الاتصال
+                </>
+              )}
+            </Button>
 
             {saved && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
