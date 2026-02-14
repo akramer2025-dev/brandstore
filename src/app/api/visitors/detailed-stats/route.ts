@@ -116,16 +116,29 @@ export async function GET(req: NextRequest) {
     const last24Hours = new Date();
     last24Hours.setHours(last24Hours.getHours() - 24);
     
-    const hourlyVisitors = await prisma.$queryRaw`
-      SELECT 
-        DATE_TRUNC('hour', "visitedAt") as hour,
-        COUNT(*) as count
-      FROM visitors
-      WHERE "visitedAt" >= ${last24Hours}
-      GROUP BY hour
-      ORDER BY hour DESC
-      LIMIT 24
-    `;
+    // Get hourly visitors for last 24 hours
+    const recentVisitorsForHourly = await prisma.visitor.findMany({
+      where: {
+        visitedAt: { gte: last24Hours }
+      },
+      select: {
+        visitedAt: true
+      }
+    });
+
+    // Group by hour manually
+    const hourlyMap = new Map<string, number>();
+    recentVisitorsForHourly.forEach(visitor => {
+      const hour = new Date(visitor.visitedAt);
+      hour.setMinutes(0, 0, 0);
+      const hourKey = hour.toISOString();
+      hourlyMap.set(hourKey, (hourlyMap.get(hourKey) || 0) + 1);
+    });
+
+    const hourlyData = Array.from(hourlyMap.entries())
+      .map(([hour, count]) => ({ hour, count }))
+      .sort((a, b) => new Date(b.hour).getTime() - new Date(a.hour).getTime())
+      .slice(0, 24);
 
     return NextResponse.json({
       summary: {
@@ -143,11 +156,16 @@ export async function GET(req: NextRequest) {
       referrers: referrerStats,
       popularPages,
       recent: recentVisitors,
-      hourlyData: hourlyVisitors
+      hourlyData: hourlyData
     });
 
   } catch (error) {
-    console.error('Error fetching detailed visitor stats:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('❌ Error fetching detailed visitor stats:', error);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 });
   }
 }

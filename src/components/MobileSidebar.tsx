@@ -118,7 +118,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         },
       ],
     });
-  } else if (session?.user?.role === "PARTNER") {
+  } else if (session?.user?.role === "VENDOR") {
     menuSections.push({
       title: "⭐ لوحة الشريك",
       items: [
