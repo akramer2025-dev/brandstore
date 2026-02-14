@@ -1,26 +1,69 @@
+import dynamic from 'next/dynamic';
 import { prisma } from '@/lib/prisma';
-import { ProductCard } from '@/components/ProductCard';
 import { ProductCardPro } from '@/components/ProductCardPro';
-import { ProductsSlider } from '@/components/ProductsSlider';
 import { HeroSlider } from '@/components/HeroSlider';
-import { CategoriesSection } from '@/components/CategoriesSection';
 import { AnimatedSection } from '@/components/AnimatedSection';
-import { LogoBanner } from '@/components/LogoBanner';
-import { TestimonialsSection } from '@/components/TestimonialsSection';
-import { InfiniteProductCarousel } from '@/components/InfiniteProductCarousel';
-import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
-import ChatButton from '@/components/ChatButton';
-import CustomerAssistant from '@/components/customer-assistant';
-import FlashDeals from '@/components/FlashDeals';
-import FloatingBubbles from '@/components/FloatingBubbles';
-import FireworksEffect from '@/components/FireworksEffect';
-import RamadanBanner from '@/components/RamadanBanner';
-import PendingPrizeHandler from '@/components/PendingPrizeHandler';
-import BrandBackgroundPattern from '@/components/BrandBackgroundPattern';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Sparkles, ShoppingBag, TrendingUp, Star } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { Metadata } from 'next';
+
+// 🚀 Lazy Loading للمكونات الثقيلة (تحسين للهواتف الضعيفة)
+const RamadanHomeDecorations = dynamic(() => import('@/components/RamadanHomeDecorations'), {
+  ssr: false, // لا يتم تحميلها في السيرفر
+  loading: () => null, // بدون loading indicator
+});
+
+const BrandBackgroundPattern = dynamic(() => import('@/components/BrandBackgroundPattern'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const FloatingBubbles = dynamic(() => import('@/components/FloatingBubbles'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const FireworksEffect = dynamic(() => import('@/components/FireworksEffect'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const RamadanBanner = dynamic(() => import('@/components/RamadanBanner'), {
+  ssr: false,
+});
+
+const PendingPrizeHandler = dynamic(() => import('@/components/PendingPrizeHandler'), {
+  ssr: false,
+});
+
+const TestimonialsSection = dynamic(() => import('@/components/TestimonialsSection'), {
+  ssr: false,
+});
+
+const InfiniteProductCarousel = dynamic(() => import('@/components/InfiniteProductCarousel'), {
+  ssr: false,
+});
+
+const ProductsSlider = dynamic(() => import('@/components/ProductsSlider'), {
+  ssr: false,
+});
+
+const FlashDeals = dynamic(() => import('@/components/FlashDeals'), {
+  ssr: false,
+});
+
+const LogoBanner = dynamic(() => import('@/components/LogoBanner'), {
+  ssr: false,
+});
+
+const ChatButton = dynamic(() => import('@/components/ChatButton'), {
+  ssr: false,
+});
+
+const CustomerAssistant = dynamic(() => import('@/components/customer-assistant'), {
+  ssr: false,
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -167,6 +210,7 @@ export default async function HomePage() {
               width={60}
               height={60}
               className="object-contain rotate-12 filter opacity-25 hover:opacity-35 transition-opacity duration-500"
+              loading="lazy"
               unoptimized
             />
           </div>
@@ -178,6 +222,7 @@ export default async function HomePage() {
               width={50}
               height={50}
               className="object-contain -rotate-12 filter opacity-20 hover:opacity-30 transition-opacity duration-700"
+              loading="lazy"
               unoptimized
             />
           </div>
@@ -204,7 +249,9 @@ export default async function HomePage() {
                         alt={category.nameAr}
                         width={32}
                         height={32}
+                        sizes="(max-width: 640px) 32px, 56px"
                         className="object-cover w-full h-full"
+                        loading="lazy"
                         unoptimized
                       />
                     </div>

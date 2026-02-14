@@ -9,6 +9,20 @@ interface AnimatedSectionProps {
   className?: string;
 }
 
+// دالة للتحقق من الجهاز (للأجهزة الضعيفة نعطل الأنيميشن)
+const isLowEndDevice = () => {
+  if (typeof window === 'undefined') return false;
+  
+  // التحقق من عدد cores
+  const cores = navigator.hardwareConcurrency || 2;
+  
+  // التحقق من memory (إذا متاح)
+  const memory = (navigator as any).deviceMemory;
+  
+  // جهاز ضعيف إذا: cores أقل من 4 أو memory أقل من 4GB
+  return cores < 4 || (memory && memory < 4);
+};
+
 export function AnimatedSection({ 
   children, 
   animation = 'fadeInUp', 
@@ -16,9 +30,17 @@ export function AnimatedSection({
   className = '' 
 }: AnimatedSectionProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(true);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // تعطيل الأنيميشن على الأجهزة الضعيفة
+    if (isLowEndDevice()) {
+      setShouldAnimate(false);
+      setIsVisible(true); // أظهر المحتوى مباشرة
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -41,6 +63,11 @@ export function AnimatedSection({
       }
     };
   }, []);
+
+  // إذا كان جهاز ضعيف، أظهر المحتوى مباشرة بدون أنيميشن
+  if (!shouldAnimate) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <div
