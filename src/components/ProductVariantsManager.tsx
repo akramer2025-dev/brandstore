@@ -48,6 +48,40 @@ const PRESET_AGES = [
   { name: "8 years", nameAr: "8 سنين", sortOrder: 12 },
 ];
 
+// مقاسات أحذية الكبار
+const PRESET_SHOE_SIZES_ADULT = [
+  { name: "36", nameAr: "36", sortOrder: 1 },
+  { name: "37", nameAr: "37", sortOrder: 2 },
+  { name: "38", nameAr: "38", sortOrder: 3 },
+  { name: "39", nameAr: "39", sortOrder: 4 },
+  { name: "40", nameAr: "40", sortOrder: 5 },
+  { name: "41", nameAr: "41", sortOrder: 6 },
+  { name: "42", nameAr: "42", sortOrder: 7 },
+  { name: "43", nameAr: "43", sortOrder: 8 },
+  { name: "44", nameAr: "44", sortOrder: 9 },
+  { name: "45", nameAr: "45", sortOrder: 10 },
+];
+
+// مقاسات أحذية الأطفال
+const PRESET_SHOE_SIZES_KIDS = [
+  { name: "20", nameAr: "20", sortOrder: 1 },
+  { name: "21", nameAr: "21", sortOrder: 2 },
+  { name: "22", nameAr: "22", sortOrder: 3 },
+  { name: "23", nameAr: "23", sortOrder: 4 },
+  { name: "24", nameAr: "24", sortOrder: 5 },
+  { name: "25", nameAr: "25", sortOrder: 6 },
+  { name: "26", nameAr: "26", sortOrder: 7 },
+  { name: "27", nameAr: "27", sortOrder: 8 },
+  { name: "28", nameAr: "28", sortOrder: 9 },
+  { name: "29", nameAr: "29", sortOrder: 10 },
+  { name: "30", nameAr: "30", sortOrder: 11 },
+  { name: "31", nameAr: "31", sortOrder: 12 },
+  { name: "32", nameAr: "32", sortOrder: 13 },
+  { name: "33", nameAr: "33", sortOrder: 14 },
+  { name: "34", nameAr: "34", sortOrder: 15 },
+  { name: "35", nameAr: "35", sortOrder: 16 },
+];
+
 export function ProductVariantsManager({ variants, onChange }: ProductVariantsManagerProps) {
   const [variantType, setVariantType] = useState<VariantType>("SIZE");
 
@@ -89,6 +123,34 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
       stock: 0,
       isActive: true,
       sortOrder: age.sortOrder,
+    }));
+    onChange([...variants, ...newVariants]);
+  };
+
+  const addPresetShoeSizesAdult = () => {
+    const newVariants = PRESET_SHOE_SIZES_ADULT.map((size) => ({
+      variantType: "SIZE" as VariantType,
+      name: size.name,
+      nameAr: size.nameAr,
+      sku: "",
+      price: 0,
+      stock: 0,
+      isActive: true,
+      sortOrder: size.sortOrder,
+    }));
+    onChange([...variants, ...newVariants]);
+  };
+
+  const addPresetShoeSizesKids = () => {
+    const newVariants = PRESET_SHOE_SIZES_KIDS.map((size) => ({
+      variantType: "SIZE" as VariantType,
+      name: size.name,
+      nameAr: size.nameAr,
+      sku: "",
+      price: 0,
+      stock: 0,
+      isActive: true,
+      sortOrder: size.sortOrder,
     }));
     onChange([...variants, ...newVariants]);
   };
@@ -142,6 +204,20 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
             className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
           >
             + أعمار أطفال جاهزة
+          </button>
+          <button
+            type="button"
+            onClick={addPresetShoeSizesAdult}
+            className="px-3 py-1.5 text-sm bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200"
+          >
+            + مقاسات أحذية كبار
+          </button>
+          <button
+            type="button"
+            onClick={addPresetShoeSizesKids}
+            className="px-3 py-1.5 text-sm bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200"
+          >
+            + مقاسات أحذية أطفال
           </button>
           <button
             type="button"
