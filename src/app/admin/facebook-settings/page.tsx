@@ -297,7 +297,7 @@ export default function FacebookSettingsPage() {
                 </li>
               </ol>
               <a
-                href={`${window.location.origin}/FACEBOOK_TOKEN_GUIDE.md`}
+                href="/FACEBOOK_TOKEN_GUIDE.md"
                 target="_blank"
                 className="block mt-3"
               >
