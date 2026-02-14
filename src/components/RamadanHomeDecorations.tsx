@@ -2,58 +2,71 @@
 
 import { motion } from 'framer-motion'
 import { Star, Moon, Sparkles } from 'lucide-react'
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 export function RamadanHomeDecorations() {
+  const [isMounted, setIsMounted] = useState(false)
+  
   // Generate random positions once on client side
-  const starPositions = useMemo(() => 
-    Array.from({ length: 15 }, () => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      size: 8 + Math.random() * 8,
-      duration: 2 + Math.random() * 2,
-      delay: Math.random() * 3
-    })), []
-  )
+  const [starPositions, setStarPositions] = useState<Array<{top: number, left: number, size: number, duration: number, delay: number}>>([])
+  const [confettiPositions, setConfettiPositions] = useState<Array<{startX: number, startY: number, size: number, duration: number, delay: number}>>([])
+  const [sparkleTrails, setSparkleTrails] = useState<Array<{startX: number, startY: number, endX: number, endY: number, duration: number, delay: number}>>([])
+  const [miniStarPositions, setMiniStarPositions] = useState<Array<{left: number, top: number, duration: number, delay: number}>>([])
+  const [sparklePositions, setSparklePositions] = useState<Array<{top: number, left: number, size: number, delay: number}>>([])
 
-  const confettiPositions = useMemo(() =>
-    Array.from({ length: 12 }, () => ({
-      startX: Math.random() * 100,
-      startY: Math.random() * 100,
-      size: 8 + Math.random() * 12,
-      duration: 4 + Math.random() * 3,
-      delay: Math.random() * 4
-    })), []
-  )
+  useEffect(() => {
+    // Mark as mounted and generate all positions on client only
+    setIsMounted(true)
+    
+    setStarPositions(
+      Array.from({ length: 15 }, () => ({
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        size: 8 + Math.random() * 8,
+        duration: 2 + Math.random() * 2,
+        delay: Math.random() * 3
+      }))
+    )
 
-  const sparkleTrails = useMemo(() =>
-    Array.from({ length: 6 }, () => ({
-      startX: Math.random() * 100,
-      startY: Math.random() * 100,
-      endX: Math.random() * 100,
-      endY: Math.random() * 100,
-      duration: 5 + Math.random() * 3,
-      delay: Math.random() * 5
-    })), []
-  )
+    setConfettiPositions(
+      Array.from({ length: 12 }, () => ({
+        startX: Math.random() * 100,
+        startY: Math.random() * 100,
+        size: 8 + Math.random() * 12,
+        duration: 4 + Math.random() * 3,
+        delay: Math.random() * 4
+      }))
+    )
 
-  const miniStarPositions = useMemo(() =>
-    Array.from({ length: 25 }, () => ({
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      duration: 3 + Math.random() * 4,
-      delay: Math.random() * 5
-    })), []
-  )
+    setSparkleTrails(
+      Array.from({ length: 6 }, () => ({
+        startX: Math.random() * 100,
+        startY: Math.random() * 100,
+        endX: Math.random() * 100,
+        endY: Math.random() * 100,
+        duration: 5 + Math.random() * 3,
+        delay: Math.random() * 5
+      }))
+    )
 
-  const sparklePositions = useMemo(() =>
-    Array.from({ length: 8 }, () => ({
-      top: 10 + Math.random() * 80,
-      left: 10 + Math.random() * 80,
-      size: 12 + Math.random() * 8,
-      delay: Math.random() * 4
-    })), []
-  )
+    setMiniStarPositions(
+      Array.from({ length: 25 }, () => ({
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        duration: 3 + Math.random() * 4,
+        delay: Math.random() * 5
+      }))
+    )
+
+    setSparklePositions(
+      Array.from({ length: 8 }, () => ({
+        top: 10 + Math.random() * 80,
+        left: 10 + Math.random() * 80,
+        size: 12 + Math.random() * 8,
+        delay: Math.random() * 4
+      }))
+    )
+  }, [])
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
@@ -375,7 +388,7 @@ export function RamadanHomeDecorations() {
       </motion.div>
 
       {/* نجوم متلألئة في الخلفية */}
-      {starPositions.map((star, i) => (
+      {isMounted && starPositions.map((star, i) => (
         <motion.div
           key={`star-${i}`}
           className="absolute"
@@ -449,7 +462,7 @@ export function RamadanHomeDecorations() {
       </div>
 
       {/* بريق متحرك عشوائي */}
-      {sparklePositions.map((sparkle, i) => (
+      {isMounted && sparklePositions.map((sparkle, i) => (
         <motion.div
           key={`sparkle-${i}`}
           className="absolute"
@@ -583,7 +596,7 @@ export function RamadanHomeDecorations() {
       </motion.div>
 
       {/* 🎊 دوائر ملونة متحركة (Confetti Style) */}
-      {confettiPositions.map((confetti, i) => {
+      {isMounted && confettiPositions.map((confetti, i) => {
         const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#95E1D3', '#F38181', '#AA96DA']
         const color = colors[i % colors.length]
         
@@ -694,7 +707,7 @@ export function RamadanHomeDecorations() {
       </motion.div>
 
       {/* ✨ بريق رمضاني متحرك مع مسارات */}
-      {sparkleTrails.map((trail, i) => {
+      {isMounted && sparkleTrails.map((trail, i) => {
         return (
           <motion.div
             key={`sparkle-trail-${i}`}
@@ -789,7 +802,7 @@ export function RamadanHomeDecorations() {
       </motion.div>
 
       {/* 🌟 نجوم صغيرة متناثرة إضافية */}
-      {miniStarPositions.map((miniStar, i) => (
+      {isMounted && miniStarPositions.map((miniStar, i) => (
         <motion.div
           key={`mini-star-${i}`}
           className="absolute"

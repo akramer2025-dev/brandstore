@@ -10,15 +10,23 @@ export function PageTransition() {
   const pathname = usePathname()
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   // Generate star positions once on client
-  const starPositions = useMemo(() => 
-    Array.from({ length: 20 }, () => ({
-      left: 20 + Math.random() * 60,
-      top: 20 + Math.random() * 60,
-    })),
-    []
-  )
+  const [starPositions, setStarPositions] = useState<Array<{left: number, top: number}>>([])
+
+  useEffect(() => {
+    // Mark as mounted and generate positions on client only
+    if (!isMounted) {
+      setIsMounted(true)
+      setStarPositions(
+        Array.from({ length: 20 }, () => ({
+          left: 20 + Math.random() * 60,
+          top: 20 + Math.random() * 60,
+        }))
+      )
+    }
+  }, [])
 
   useEffect(() => {
     // Show transition when pathname changes
@@ -71,7 +79,7 @@ export function PageTransition() {
         }}
       >
         {/* نجوم ثابتة ومتلألئة */}
-        {starPositions.map((star, i) => (
+        {isMounted && starPositions.map((star, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0 }}

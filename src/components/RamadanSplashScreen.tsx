@@ -7,26 +7,34 @@ import { Star, Sparkles, Moon } from 'lucide-react'
 export function RamadanSplashScreen() {
   const [isVisible, setIsVisible] = useState(true)
   const [progress, setProgress] = useState(0)
+  const [isMounted, setIsMounted] = useState(false)
 
   // Generate random positions once on client side
-  const starPositions = useMemo(() => 
-    Array.from({ length: 50 }, () => ({
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      duration: 2 + Math.random() * 2,
-      delay: Math.random() * 2,
-    })), []
-  )
-
-  const sparklePositions = useMemo(() =>
-    Array.from({ length: 20 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: 1 + Math.random()
-    })), []
-  )
+  const [starPositions, setStarPositions] = useState<Array<{left: number, top: number, duration: number, delay: number}>>([])
+  const [sparklePositions, setSparklePositions] = useState<Array<{x: number, y: number, delay: number}>>([])
 
   useEffect(() => {
+    // Mark as mounted to prevent hydration mismatch
+    setIsMounted(true)
+    
+    // Generate positions on client only
+    setStarPositions(
+      Array.from({ length: 50 }, () => ({
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        duration: 2 + Math.random() * 2,
+        delay: Math.random() * 2,
+      }))
+    )
+    
+    setSparklePositions(
+      Array.from({ length: 20 }, () => ({
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        delay: 1 + Math.random()
+      }))
+    )
+
     // التحقق من عرض Splash Screen من قبل
     const hasSeenSplash = sessionStorage.getItem('hasSeenRamadanSplash')
     
@@ -73,30 +81,32 @@ export function RamadanSplashScreen() {
         }}
       >
         {/* النجوم المتحركة الثابتة */}
-        <div className="absolute inset-0 overflow-hidden">
-          {starPositions.map((star, i) => (
-            <motion.div
-              key={i}
-              initial={{ 
-                opacity: 0,
-                scale: 0,
-              }}
-              animate={{ 
-                opacity: 0.8,
-                scale: 1,
-              }}
-              transition={{
-                duration: 0.5,
-                delay: star.delay,
-              }}
-              className="absolute w-1 h-1 bg-yellow-200 rounded-full shadow-[0_0_4px_rgba(250,204,21,0.8)]"
-              style={{
-                left: `${star.left}%`,
-                top: `${star.top}%`,
-              }}
-            />
-          ))}
-        </div>
+        {isMounted && (
+          <div className="absolute inset-0 overflow-hidden">
+            {starPositions.map((star, i) => (
+              <motion.div
+                key={i}
+                initial={{ 
+                  opacity: 0,
+                  scale: 0,
+                }}
+                animate={{ 
+                  opacity: 0.8,
+                  scale: 1,
+                }}
+                transition={{
+                  duration: 0.5,
+                  delay: star.delay,
+                }}
+                className="absolute w-1 h-1 bg-yellow-200 rounded-full shadow-[0_0_4px_rgba(250,204,21,0.8)]"
+                style={{
+                  left: `${star.left}%`,
+                  top: `${star.top}%`,
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* الهلال الكبير مع التوهج */}
         <motion.div
@@ -601,31 +611,33 @@ export function RamadanSplashScreen() {
           </motion.div>
 
           {/* شرارات متحركة */}
-          <div className="absolute inset-0 pointer-events-none">
-            {sparklePositions.map((sparkle, i) => (
-              <motion.div
-                key={i}
-                initial={{ 
-                  opacity: 0,
-                  x: '50vw',
-                  y: '50vh',
-                }}
-                animate={{ 
-                  opacity: [0, 1, 0],
-                  x: `${sparkle.x}vw`,
-                  y: `${sparkle.y}vh`,
-                  scale: [0, 1, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  delay: sparkle.delay,
-                  ease: 'easeOut',
-                }}
-              >
-                <Sparkles className="w-4 h-4 text-yellow-300" />
-              </motion.div>
-            ))}
-          </div>
+          {isMounted && (
+            <div className="absolute inset-0 pointer-events-none">
+              {sparklePositions.map((sparkle, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ 
+                    opacity: 0,
+                    x: '50vw',
+                    y: '50vh',
+                  }}
+                  animate={{ 
+                    opacity: [0, 1, 0],
+                    x: `${sparkle.x}vw`,
+                    y: `${sparkle.y}vh`,
+                    scale: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    delay: sparkle.delay,
+                    ease: 'easeOut',
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 text-yellow-300" />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* الزخارف الإسلامية في الزوايا */}
