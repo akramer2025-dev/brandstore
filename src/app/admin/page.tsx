@@ -118,6 +118,29 @@ export default async function AdminDashboard() {
         {/* Visitor & Users Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
           <VisitorStatsCard />
+          
+          {/* زر تحليل الإعلان الممول */}
+          <a 
+            href="/admin/ad-campaign"
+            className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border border-yellow-500/40 backdrop-blur-sm rounded-xl p-4 hover:shadow-xl hover:shadow-yellow-500/20 transition-all duration-300 block"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-yellow-500/30 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-yellow-300" />
+                </div>
+                <h3 className="text-lg font-bold text-white">تحليل الإعلان الممول</h3>
+              </div>
+              <span className="text-yellow-300 text-xs bg-yellow-500/20 px-2 py-1 rounded">مباشر</span>
+            </div>
+            <p className="text-yellow-200/80 text-sm">متابعة تفصيلية لأداء الحملة الإعلانية</p>
+            <div className="mt-3 flex items-center gap-2 text-yellow-300 text-sm font-bold">
+              <span>عرض التفاصيل</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+          </a>
           <div className="bg-gradient-to-br from-emerald-600/20 to-teal-600/20 border border-emerald-500/40 backdrop-blur-sm rounded-xl p-4 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300">
             <div className="flex items-center gap-2 mb-3">
               <div className="p-2 bg-emerald-500/30 rounded-lg">
