@@ -85,7 +85,62 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     await signOut({ callbackUrl: "/" });
   };
 
-  const menuSections = [
+  const menuSections = [] as Array<{
+    title: string;
+    items: Array<{
+      icon: any;
+      label: string;
+      href: string;
+      color: string;
+      authRequired?: boolean;
+      badge?: number;
+      isSpecial?: boolean;
+    }>;
+  }>;
+
+  // إضافة قسم خاص للمدير أو الشريك في الأعلى
+  if (session?.user?.role === "ADMIN") {
+    menuSections.push({
+      title: "⭐ لوحة الإدارة",
+      items: [
+        {
+          icon: LayoutDashboard,
+          label: "🎯 لوحة التحكم الرئيسية",
+          href: "/admin",
+          color: "text-violet-600",
+          isSpecial: true,
+        },
+        {
+          icon: TrendingUp,
+          label: "📊 تحليل الإعلان الممول",
+          href: "/admin/ad-campaign",
+          color: "text-cyan-600",
+        },
+      ],
+    });
+  } else if (session?.user?.role === "PARTNER") {
+    menuSections.push({
+      title: "⭐ لوحة الشريك",
+      items: [
+        {
+          icon: LayoutDashboard,
+          label: "🎯 لوحة التحكم",
+          href: "/vendor/dashboard",
+          color: "text-violet-600",
+          isSpecial: true,
+        },
+        {
+          icon: TrendingUp,
+          label: "📈 الإحصائيات",
+          href: "/vendor/analytics",
+          color: "text-cyan-600",
+        },
+      ],
+    });
+  }
+
+  // القائمة الرئيسية
+  menuSections.push(
     {
       title: "القائمة الرئيسية",
       items: [
@@ -104,39 +159,8 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         { icon: ShoppingCart, label: "السلة", href: "/cart", color: "text-purple-500", badge: totalItems },
         { icon: Wallet, label: "المحفظة", href: "/profile/wallet", color: "text-emerald-500", authRequired: true },
       ],
-    },
-  ] as Array<{
-    title: string;
-    items: Array<{
-      icon: any;
-      label: string;
-      href: string;
-      color: string;
-      authRequired?: boolean;
-      badge?: number;
-    }>;
-  }>;
-
-  // Admin/Vendor menu items
-  if (session?.user?.role === "ADMIN" || session?.user?.role === "PARTNER") {
-    menuSections.push({
-      title: session?.user?.role === "ADMIN" ? "لوحة الإدارة" : "لوحة التحكم",
-      items: [
-        {
-          icon: LayoutDashboard,
-          label: session?.user?.role === "ADMIN" ? "الإدارة" : "لوحة البائع",
-          href: session?.user?.role === "ADMIN" ? "/admin" : "/vendor/dashboard",
-          color: "text-violet-500",
-        },
-        {
-          icon: TrendingUp,
-          label: "الإحصائيات",
-          href: session?.user?.role === "ADMIN" ? "/admin/analytics" : "/vendor/analytics",
-          color: "text-cyan-500",
-        },
-      ],
-    });
-  }
+    }
+  );
 
   // Support & Info section
   menuSections.push({
@@ -241,13 +265,15 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                         className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ${
                           isActive
                             ? "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-l-4 border-purple-500"
+                            : item.isSpecial
+                            ? "bg-gradient-to-r from-violet-50 to-purple-50 hover:from-violet-100 hover:to-purple-100 border-2 border-violet-200"
                             : "hover:bg-gray-100/50"
                         }`}
                       >
-                        <Icon className={`w-5 h-5 ${isActive ? item.color : "text-gray-600"}`} />
+                        <Icon className={`w-5 h-5 ${isActive ? item.color : item.isSpecial ? item.color : "text-gray-600"}`} />
                         <span
                           className={`flex-1 font-medium ${
-                            isActive ? "text-purple-600" : "text-gray-700"
+                            isActive ? "text-purple-600" : item.isSpecial ? item.color : "text-gray-700"
                           }`}
                         >
                           {item.label}

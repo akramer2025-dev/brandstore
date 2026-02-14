@@ -17,20 +17,6 @@ export function BottomNavBar() {
     setMounted(true);
   }, []);
 
-  // إخفاء الـ Bottom Nav في صفحات معينة (مثل صفحات الـ Admin)
-  const hideNavBarPaths = [
-    '/admin',
-    '/vendor',
-    '/auth/login',
-    '/auth/register',
-  ];
-
-  const shouldHideNavBar = hideNavBarPaths.some(path => pathname.startsWith(path));
-
-  if (shouldHideNavBar) {
-    return null;
-  }
-
   const navItems = [
     {
       name: "الرئيسية",
@@ -52,7 +38,7 @@ export function BottomNavBar() {
       icon: Gift,
       href: "/offers",
       isActive: pathname === "/offers",
-      color: "from-red-500 to-orange-500",
+      color: "from-red-500 via-orange-500 to-amber-500",
       isCenter: true, // الزر المركزي
     },
     {
@@ -76,6 +62,20 @@ export function BottomNavBar() {
     router.push(href);
   };
 
+  // إخفاء الـ Bottom Nav في صفحات معينة
+  const hideNavBarPaths = [
+    '/admin',
+    '/vendor',
+    '/auth/login',
+    '/auth/register',
+  ];
+  
+  const shouldHideNavBar = hideNavBarPaths.some(path => pathname.startsWith(path));
+
+  if (shouldHideNavBar) {
+    return null;
+  }
+
   return (
     <>
       {/* Spacer لمنع المحتوى من الاختفاء خلف الـ Bottom Nav */}
@@ -92,7 +92,7 @@ export function BottomNavBar() {
             const isCenter = item.isCenter;
 
             if (isCenter) {
-              // الزر المركزي - تصميم متميز وجذاب
+              // الزر المركزي - تصميم متميز وجذاب (العروض الخاصة)
               return (
                 <div key={item.name} className="flex-1 flex justify-center">
                   <button
