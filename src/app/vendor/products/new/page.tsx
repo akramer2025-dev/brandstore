@@ -15,6 +15,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SmartCamera } from '@/components/SmartCamera';
 import { BackButton } from '@/components/BackButton';
+import { ProductVariantsManager, ProductVariant } from '@/components/ProductVariantsManager';
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -49,6 +50,9 @@ export default function NewProductPage() {
     supplierCost: '', // تكلفة المورد (السعر اللي هتدفعه للمورد)
     supplierNotes: '', // ملاحظات
   });
+
+  // نظام المقاسات الجديد
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
 
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
   const availableColors = [
@@ -264,6 +268,8 @@ export default function NewProductPage() {
           sizes: formData.sizes.join(','),
           colors: formData.colors.join(','),
           platformCommission: 5,
+          // إضافة المقاسات الجديدة
+          variants: variants.length > 0 ? variants : undefined,
         }),
       });
 
@@ -589,62 +595,12 @@ export default function NewProductPage() {
                 )}
               </div>
 
-              {/* المقاسات */}
-              <div>
-                <Label className="text-white mb-2 block">المقاسات المتاحة</Label>
-                <div className="flex flex-wrap gap-2">
-                  {availableSizes.map(size => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => {
-                        if (formData.sizes.includes(size)) {
-                          setFormData({ ...formData, sizes: formData.sizes.filter(s => s !== size) });
-                        } else {
-                          setFormData({ ...formData, sizes: [...formData.sizes, size] });
-                        }
-                      }}
-                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                        formData.sizes.includes(size)
-                          ? 'bg-purple-500 border-purple-500 text-white'
-                          : 'bg-white/5 border-white/20 text-white hover:border-purple-400'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* الألوان */}
-              <div>
-                <Label className="text-white mb-2 block">الألوان المتاحة</Label>
-                <div className="grid grid-cols-5 gap-2">
-                  {availableColors.map(color => (
-                    <button
-                      key={color.value}
-                      type="button"
-                      onClick={() => {
-                        if (formData.colors.includes(color.name)) {
-                          setFormData({ ...formData, colors: formData.colors.filter(c => c !== color.name) });
-                        } else {
-                          setFormData({ ...formData, colors: [...formData.colors, color.name] });
-                        }
-                      }}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        formData.colors.includes(color.name)
-                          ? 'border-purple-500 ring-2 ring-purple-500'
-                          : 'border-white/20 hover:border-purple-400'
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                      title={color.name}
-                    >
-                      {formData.colors.includes(color.name) && (
-                        <div className="text-white font-bold text-center">✓</div>
-                      )}
-                    </button>
-                  ))}
-                </div>
+              {/* نظام المقاسات والأسعار الجديد */}
+              <div className="p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-xl">
+                <ProductVariantsManager
+                  variants={variants}
+                  onChange={setVariants}
+                />
               </div>
 
               {/* نوع البيع */}
