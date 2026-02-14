@@ -133,7 +133,7 @@ export default async function VendorProductsPage({
                 فاتورة مشتريات
               </Button>
             </Link>
-            <Link href="/vendor/products/add-with-variants" className="w-full sm:w-auto">
+            <Link href="/vendor/products/new" className="w-full sm:w-auto">
               <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white h-8 sm:h-10 text-xs sm:text-sm w-full">
                 <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 إضافة منتج جديد
