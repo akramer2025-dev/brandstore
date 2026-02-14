@@ -7,22 +7,35 @@ import Image from 'next/image';
 export default function SplashPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
   
   useEffect(() => {
     setMounted(true);
     
     console.log('🎬 Splash page loaded');
     
-    // تشغيل الفيديو والانتقال للصفحة الرئيسية بعد 4 ثواني
+    // تحديث شريط التقدم بشكل سلس
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return prev + 4; // يزيد 4% كل 100ms = 2.5 ثانية للوصول 100%
+      });
+    }, 100);
+    
+    // الانتقال للصفحة الرئيسية بعد 2.5 ثانية (سريع وخفيف)
     const timer = setTimeout(() => {
-      console.log('⏰ 4 seconds passed, redirecting...');
-      // حفظ انه شاهد الفيديو الترحيبي
+      console.log('⏰ 2.5 seconds passed, redirecting...');
       localStorage.setItem('splashViewed', 'true');
       router.push('/');
-    }, 4000);
+    }, 2500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(progressInterval);
+    };
   }, [router]);
 
   if (!mounted) {
@@ -30,115 +43,83 @@ export default function SplashPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-      {/* الفيديو الترحيبي */}
-      <div className="relative w-full h-full">
-        <video
-          className="w-full h-full object-cover"
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          onPlay={() => {
-            setVideoPlaying(true);
-            console.log('▶️ Video started playing');
-          }}
-          onError={(e) => {
-            console.error('❌ Video error:', e);
-          }}
-          onLoadStart={() => console.log('⏳ Video loading started')}
-          onLoadedData={() => console.log('✅ Video loaded successfully')}
-        >
-          <source src="/vid.mp4" type="video/mp4" />
-        </video>
-        
-        {/* شعار مؤقت في حال عدم تشغيل الفيديو */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900 flex items-center justify-center">
-          <div className="text-center">
-            {/* اللوجو */}
-            <div className="relative w-32 h-32 mx-auto mb-6 animate-pulse">
-              <Image
-                src="/logo.png"
-                alt="Remo Store"
-                fill
-                sizes="128px"
-                className="object-contain drop-shadow-2xl"
-                priority
-              />
-            </div>
-            
-            {/* النص الترحيبي */}
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in-up">
-              مرحباً بك في{' '}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                ريمو ستور
-              </span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-gray-300 animate-fade-in-up animation-delay-500">
-              أجود المنتجات - أفضل الأسعار - خدمة متميزة
-            </p>
-            
-            {/* شريط التحميل */}
-            <div className="mt-8 w-64 mx-auto">
-              <div className="bg-white/20 rounded-full h-2 overflow-hidden">
-                <div 
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-4000 ease-linear"
-                  style={{ 
-                    animation: 'progress 4s ease-linear forwards'
-                  }}
-                />
-              </div>
-            </div>
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900 flex items-center justify-center overflow-hidden">
+      {/* خلفية متحركة خفيفة */}
+      <div className="absolute inset-0">
+        {/* دوائر متحركة خفيفة */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+      
+      {/* المحتوى الرئيسي */}
+      <div className="relative z-10 text-center px-6 max-w-2xl">
+        {/* اللوجو مع أنيميشن */}
+        <div className="relative w-40 h-40 mx-auto mb-8 animate-bounce-slow">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-xl rounded-full border-4 border-white/40 shadow-2xl flex items-center justify-center p-6">
+            <Image
+              src="/logo.png"
+              alt="Remo Store"
+              width={140}
+              height={140}
+              className="object-contain drop-shadow-2xl"
+              priority
+            />
           </div>
+          {/* دوائر متوهجة حول اللوجو */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-xl animate-pulse"></div>
+        </div>
+        
+        {/* النص الترحيبي */}
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-7xl font-black text-white drop-shadow-2xl animate-fade-in-up">
+            مرحباً بك! 🎉
+          </h1>
+          
+          <p className="text-2xl md:text-3xl text-white/95 font-bold drop-shadow-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            أهلاً وسهلاً في{' '}
+            <span className="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">
+              ريمو ستور
+            </span>
+          </p>
+          
+          <p className="text-xl md:text-2xl text-white/80 font-medium drop-shadow-lg animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            ✨ أفضل المنتجات بأرخص الأسعار ✨
+          </p>
+        </div>
+        
+        {/* نقاط التحميل المتحركة */}
+        <div className="flex items-center justify-center gap-3 mt-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <div className="w-3 h-3 bg-white rounded-full animate-bounce"></div>
+          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+        </div>
+        
+        {/* شريط التقدم */}
+        <div className="mt-10 w-72 mx-auto">
+          <div className="bg-white/20 backdrop-blur-sm rounded-full h-2.5 overflow-hidden shadow-lg border border-white/30">
+            <div 
+              className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 h-full rounded-full transition-all duration-100 ease-linear shadow-lg"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="text-white/70 text-sm mt-3 font-medium">{Math.round(progress)}%</p>
         </div>
       </div>
       
-      {/* أزرار تحكم للاختبار */}
-      <div className="absolute bottom-6 left-6 flex gap-2">
-        <button
-          onClick={() => {
-            localStorage.clear();
-            window.location.reload();
-          }}
-          className="text-white/60 hover:text-white text-xs bg-black/30 hover:bg-black/50 px-3 py-1.5 rounded-full transition-all duration-300 backdrop-blur-sm"
-        >
-          🗑️ مسح البيانات
-        </button>
-        
-        <button
-          onClick={() => {
-            console.log('localStorage.splashViewed:', localStorage.getItem('splashViewed'));
-            console.log('Current URL:', window.location.href);
-          }}
-          className="text-white/60 hover:text-white text-xs bg-black/30 hover:bg-black/50 px-3 py-1.5 rounded-full transition-all duration-300 backdrop-blur-sm"
-        >
-          🔍 فحص البيانات
-        </button>
-      </div>
-
       {/* زر تخطي اختياري */}
       <button
         onClick={() => {
           localStorage.setItem('splashViewed', 'true');
           router.push('/');
         }}
-        className="absolute top-6 right-6 text-white/80 hover:text-white text-sm font-medium bg-black/30 hover:bg-black/50 px-4 py-2 rounded-full transition-all duration-300 backdrop-blur-sm"
+        className="absolute top-6 right-6 text-white/90 hover:text-white text-sm font-bold bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-full transition-all duration-300 backdrop-blur-md border border-white/30 shadow-lg hover:scale-105"
       >
         تخطي ⏩
       </button>
 
       {/* Custom CSS للأنيميشن */}
       <style jsx>{`
-        @keyframes progress {
-          from {
-            width: 0%;
-          }
-          to {
-            width: 100%;
-          }
-        }
-        
         @keyframes fade-in-up {
           from {
             opacity: 0;
@@ -150,17 +131,27 @@ export default function SplashPage() {
           }
         }
         
-        .animate-fade-in-up {
-          animation: fade-in-up 1s ease-out forwards;
+        @keyframes bounce-slow {
+          0%, 100% {
+            transform: translateY(0) scale(1);
+          }
+          50% {
+            transform: translateY(-10px) scale(1.05);
+          }
         }
         
-        .animation-delay-500 {
-          animation-delay: 0.5s;
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out forwards;
           opacity: 0;
         }
         
-        .duration-4000 {
-          transition-duration: 4s;
+        .animate-fade-in {
+          animation: fade-in-up 0.6s ease-out forwards;
+          opacity: 0;
+        }
+        
+        .animate-bounce-slow {
+          animation: bounce-slow 3s ease-in-out infinite;
         }
       `}</style>
     </div>
