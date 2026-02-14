@@ -8,18 +8,18 @@ import Image from 'next/image';
 import { TrendingUp, ShoppingBag, Sparkles } from 'lucide-react';
 import { Metadata } from 'next';
 import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
-import { BrandBackgroundPattern } from '@/components/BrandBackgroundPattern';
-import { FloatingBubbles } from '@/components/FloatingBubbles';
-import { FireworksEffect } from '@/components/FireworksEffect';
-import { RamadanBanner } from '@/components/RamadanBanner';
-import { PendingPrizeHandler } from '@/components/PendingPrizeHandler';
+import BrandBackgroundPattern from '@/components/BrandBackgroundPattern';
+import FloatingBubbles from '@/components/FloatingBubbles';
+import FireworksEffect from '@/components/FireworksEffect';
+import RamadanBanner from '@/components/RamadanBanner';
+import PendingPrizeHandler from '@/components/PendingPrizeHandler';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { InfiniteProductCarousel } from '@/components/InfiniteProductCarousel';
 import { ProductsSlider } from '@/components/ProductsSlider';
-import { FlashDeals } from '@/components/FlashDeals';
+import FlashDeals from '@/components/FlashDeals';
 import { LogoBanner } from '@/components/LogoBanner';
-import { ChatButton } from '@/components/ChatButton';
-import { CustomerAssistant } from '@/components/customer-assistant';
+import ChatButton from '@/components/ChatButton';
+import CustomerAssistant from '@/components/customer-assistant';
 
 export const dynamic = 'force-dynamic';
 
