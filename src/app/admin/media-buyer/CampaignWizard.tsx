@@ -24,6 +24,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AutoCampaignCreator } from "./AutoCampaignCreator";
 import { ProCampaignCreator } from "./ProCampaignCreator";
+import { QuickCatalogCampaign } from "./QuickCatalogCampaign";
 
 interface CopyButtonProps {
   text: string;
@@ -255,8 +256,13 @@ export function CampaignWizard() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="pro-create" className="w-full">
-        <TabsList className="grid w-full grid-cols-8 gap-1">
+      <Tabs defaultValue="catalog-quick" className="w-full">
+        <TabsList className="grid w-full grid-cols-9 gap-1">
+          <TabsTrigger value="catalog-quick" className="text-xs sm:text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+            <ShoppingCart className="w-4 h-4 ml-1" />
+            <span className="hidden sm:inline">كتالوج 🛍️</span>
+            <span className="sm:hidden">كتالوج</span>
+          </TabsTrigger>
           <TabsTrigger value="auto-create" className="text-xs sm:text-sm">
             <Zap className="w-4 h-4 ml-1" />
             <span className="hidden sm:inline">بسيط</span>
@@ -274,6 +280,11 @@ export function CampaignWizard() {
           <TabsTrigger value="creative" className="text-xs sm:text-sm">✍️ نصوص</TabsTrigger>
           <TabsTrigger value="summary" className="text-xs sm:text-sm">📋 ملخص</TabsTrigger>
         </TabsList>
+
+        {/* Quick Catalog Campaign - EASIEST WAY */}
+        <TabsContent value="catalog-quick" className="space-y-4">
+          <QuickCatalogCampaign />
+        </TabsContent>
 
         {/* Auto-Create Tab - Basic Version */}
         <TabsContent value="auto-create" className="space-y-4">
