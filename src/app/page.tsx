@@ -5,43 +5,21 @@ import { HeroSlider } from '@/components/HeroSlider';
 import { AnimatedSection } from '@/components/AnimatedSection';
 import Link from 'next/link';
 import Image from 'next/image';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Sparkles } from 'lucide-react';
 import { Metadata } from 'next';
-
-// 🚀 Lazy Loading للمكونات الثقيلة (تحسين الأداء)
-const RamadanHomeDecorations = dynamicImport(() => import('@/components/RamadanHomeDecorations'), {
-  loading: () => null,
-});
-
-const BrandBackgroundPattern = dynamicImport(() => import('@/components/BrandBackgroundPattern'), {
-  loading: () => null,
-});
-
-const FloatingBubbles = dynamicImport(() => import('@/components/FloatingBubbles'), {
-  loading: () => null,
-});
-
-const FireworksEffect = dynamicImport(() => import('@/components/FireworksEffect'), {
-  loading: () => null,
-});
-
-const RamadanBanner = dynamicImport(() => import('@/components/RamadanBanner'));
-
-const PendingPrizeHandler = dynamicImport(() => import('@/components/PendingPrizeHandler'));
-
-const TestimonialsSection = dynamicImport(() => import('@/components/TestimonialsSection'));
-
-const InfiniteProductCarousel = dynamicImport(() => import('@/components/InfiniteProductCarousel'));
-
-const ProductsSlider = dynamicImport(() => import('@/components/ProductsSlider'));
-
-const FlashDeals = dynamicImport(() => import('@/components/FlashDeals'));
-
-const LogoBanner = dynamicImport(() => import('@/components/LogoBanner'));
-
-const ChatButton = dynamicImport(() => import('@/components/ChatButton'));
-
-const CustomerAssistant = dynamicImport(() => import('@/components/customer-assistant'));
+import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
+import { BrandBackgroundPattern } from '@/components/BrandBackgroundPattern';
+import { FloatingBubbles } from '@/components/FloatingBubbles';
+import { FireworksEffect } from '@/components/FireworksEffect';
+import { RamadanBanner } from '@/components/RamadanBanner';
+import { PendingPrizeHandler } from '@/components/PendingPrizeHandler';
+import { TestimonialsSection } from '@/components/TestimonialsSection';
+import { InfiniteProductCarousel } from '@/components/InfiniteProductCarousel';
+import { ProductsSlider } from '@/components/ProductsSlider';
+import { FlashDeals } from '@/components/FlashDeals';
+import { LogoBanner } from '@/components/LogoBanner';
+import { ChatButton } from '@/components/ChatButton';
+import { CustomerAssistant } from '@/components/customer-assistant';
 
 export const dynamic = 'force-dynamic';
 
