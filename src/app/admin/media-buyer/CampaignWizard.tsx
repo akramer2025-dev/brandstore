@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AutoCampaignCreator } from "./AutoCampaignCreator";
+import { ProCampaignCreator } from "./ProCampaignCreator";
 
 interface CopyButtonProps {
   text: string;
@@ -254,12 +255,17 @@ export function CampaignWizard() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="auto-create" className="w-full">
-        <TabsList className="grid w-full grid-cols-7 gap-1">
+      <Tabs defaultValue="pro-create" className="w-full">
+        <TabsList className="grid w-full grid-cols-8 gap-1">
           <TabsTrigger value="auto-create" className="text-xs sm:text-sm">
             <Zap className="w-4 h-4 ml-1" />
-            <span className="hidden sm:inline">إنشاء تلقائي</span>
-            <span className="sm:hidden">تلقائي</span>
+            <span className="hidden sm:inline">بسيط</span>
+            <span className="sm:hidden">بسيط</span>
+          </TabsTrigger>
+          <TabsTrigger value="pro-create" className="text-xs sm:text-sm bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <Sparkles className="w-4 h-4 ml-1" />
+            <span className="hidden sm:inline">احترافي 🚀</span>
+            <span className="sm:hidden">احترافي</span>
           </TabsTrigger>
           <TabsTrigger value="pixel" className="text-xs sm:text-sm">📊 Pixel</TabsTrigger>
           <TabsTrigger value="settings" className="text-xs sm:text-sm">⚙️ إعدادات</TabsTrigger>
@@ -269,9 +275,14 @@ export function CampaignWizard() {
           <TabsTrigger value="summary" className="text-xs sm:text-sm">📋 ملخص</TabsTrigger>
         </TabsList>
 
-        {/* Auto-Create Tab - NEW FIRST TAB */}
+        {/* Auto-Create Tab - Basic Version */}
         <TabsContent value="auto-create" className="space-y-4">
           <AutoCampaignCreator />
+        </TabsContent>
+
+        {/* Pro Campaign Creator - ADVANCED VERSION */}
+        <TabsContent value="pro-create" className="space-y-4">
+          <ProCampaignCreator />
         </TabsContent>
 
         {/* Facebook Pixel Tab - NEW */}
