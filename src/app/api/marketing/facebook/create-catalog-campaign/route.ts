@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: name,
-        objective: 'OUTCOME_SALES', // For catalog sales
-        status: 'PAUSED', // Start paused, will be activated after review
+        objective: 'OUTCOME_TRAFFIC', // For catalog traffic (compatible with Dynamic Ads)
+        status: 'PAUSED', // Start paused, will be activated after setup
         special_ad_categories: [],
         access_token: accessToken,
       }),
@@ -48,7 +48,10 @@ export async function POST(request: NextRequest) {
     if (campaignData.error) {
       console.error('Campaign creation error:', campaignData.error);
       return NextResponse.json(
-        { error: `Facebook API Error: ${campaignData.error.message}` },
+        { 
+          error: `فشل إنشاء الحملة: ${campaignData.error.message}`,
+          details: campaignData.error,
+        },
         { status: 400 }
       );
     }
@@ -66,7 +69,7 @@ export async function POST(request: NextRequest) {
         campaign_id: facebookCampaignId,
         daily_budget: Math.round(budget * 100), // Convert to cents
         billing_event: 'IMPRESSIONS',
-        optimization_goal: 'OFFSITE_CONVERSIONS', // For purchases
+        optimization_goal: 'LINK_CLICKS', // For catalog clicks (compatible with v21.0)
         bid_strategy: 'LOWEST_COST_WITHOUT_CAP',
         
         // Targeting: Egypt, Broad
@@ -74,14 +77,11 @@ export async function POST(request: NextRequest) {
           geo_locations: { countries: ['EG'] },
           age_min: 18,
           age_max: 65,
-          device_platforms: ['mobile', 'desktop'],
-          publisher_platforms: ['facebook', 'instagram'],
         },
 
         // Dynamic Product Ads settings
         promoted_object: {
           product_catalog_id: catalogId,
-          product_set_id: null, // Use all products
         },
 
         status: 'PAUSED',
@@ -99,7 +99,10 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({ access_token: accessToken }),
       });
       return NextResponse.json(
-        { error: `AdSet Error: ${adSetData.error.message}` },
+        { 
+          error: `فشل إنشاء Ad Set: ${adSetData.error.message}`,
+          details: adSetData.error,
+        },
         { status: 400 }
       );
     }
@@ -116,20 +119,14 @@ export async function POST(request: NextRequest) {
         name: `${name} - Creative`,
         object_story_spec: {
           page_id: pageId,
-          template_data: {
-            // Dynamic Product Ad Template
-            message: message || 'تسوقي الآن! 🛍️',
+          link_data: {
             link: 'https://www.remostore.net',
+            message: message || 'اكتشفي أحدث صيحات الموضة! 🛍️✨\nتسوقي الآن من ريمو ستور\nتوصيل لجميع أنحاء مصر 🚚',
             call_to_action: {
               type: 'SHOP_NOW',
             },
-            // Carousel format for multiple products
-            format_option: 'carousel_images_multi_items',
-            multi_share_optimized: true,
-            // Products will be populated automatically from catalog
           },
         },
-        product_set_id: null, // All products from catalog
         access_token: accessToken,
       }),
     });
@@ -143,7 +140,10 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({ access_token: accessToken }),
       });
       return NextResponse.json(
-        { error: `Creative Error: ${creativeData.error.message}` },
+        { 
+          error: `فشل إنشاء Creative: ${creativeData.error.message}`,
+          details: creativeData.error,
+        },
         { status: 400 }
       );
     }
@@ -174,7 +174,10 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({ access_token: accessToken }),
       });
       return NextResponse.json(
-        { error: `Ad Error: ${adData.error.message}` },
+        { 
+          error: `فشل إنشاء الإعلان: ${adData.error.message}`,
+          details: adData.error,
+        },
         { status: 400 }
       );
     }
@@ -215,17 +218,17 @@ export async function POST(request: NextRequest) {
     const campaign = await prisma.marketingCampaign.create({
       data: {
         name,
-        type: 'FACEBOOK_CATALOG',
+        type: 'FACEBOOK_ADS',
         platform: 'FACEBOOK',
         budget,
         status: 'ACTIVE',
         targetAudience: 'مصر، 18-65 سنة',
-        content: message,
+        adCopy: message || 'اكتشفي أحدث صيحات الموضة! 🛍️',
         startDate: new Date(),
-        objective: 'إعلان ديناميكي للكتالوج - تحويلات',
         facebookCampaignId: facebookCampaignId,
         facebookAdSetId: adSetId,
         facebookAdId: adId,
+        notes: 'إعلان ديناميكي للكتالوج - Campaign created automatically',
       },
     });
 
