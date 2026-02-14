@@ -285,7 +285,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 backdrop-blur-sm border-b border-purple-300/20 overflow-hidden">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 backdrop-blur-sm border-b border-purple-300/20">
       {/* نجوم متحركة */}
       {mounted && stars.length > 0 && (
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -653,8 +653,8 @@ export function Header() {
       {/* Mobile Search Overlay */}
       {isMobileSearchOpen && (
         <div className="fixed inset-0 z-[100] bg-gray-900/98 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="container mx-auto px-3 py-3">
+            <div className="flex items-center gap-2 mb-3">
               <Button
                 variant="ghost"
                 size="icon"
@@ -663,23 +663,23 @@ export function Header() {
                   setSearchTerm("");
                   setShowSuggestions(false);
                 }}
-                className="text-gray-300 hover:text-red-400 hover:bg-red-900/30 shrink-0"
+                className="text-gray-300 hover:text-red-400 hover:bg-red-900/30 shrink-0 w-9 h-9"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </Button>
               
               <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400 w-5 h-5" />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 w-4 h-4" />
                   <Input
                     ref={mobileSearchInputRef}
                     type="text"
                     placeholder="ابحث عن منتج..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pr-12 pl-4 h-12 bg-gray-800/80 border-2 border-teal-500/50 text-white placeholder:text-gray-400 focus:border-cyan-400 text-base rounded-xl shadow-lg shadow-cyan-500/20"
+                    className="w-full pr-10 pl-3 h-10 bg-gray-800/80 border-2 border-teal-500/50 text-white placeholder:text-gray-400 focus:border-cyan-400 text-sm rounded-lg shadow-lg shadow-cyan-500/20"
                   />
                 </div>
                 
@@ -688,16 +688,15 @@ export function Header() {
                   size="icon"
                   variant="outline"
                   onClick={() => imageInputRef.current?.click()}
-                  className="border-2 border-teal-500/50 hover:bg-teal-700/30 text-cyan-400 w-12 h-12 shrink-0 rounded-xl"
+                  className="border-2 border-teal-500/50 hover:bg-teal-700/30 text-cyan-400 w-10 h-10 shrink-0 rounded-lg"
                   title="البحث بالصورة"
                 >
-                  <ImageIcon className="w-5 h-5" />
+                  <ImageIcon className="w-4 h-4" />
                 </Button>
                 
                 <Button 
                   type="submit"
-                  size="lg"
-                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-6 h-12 shrink-0 rounded-xl shadow-lg shadow-cyan-500/30"
+                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-4 h-10 shrink-0 rounded-lg shadow-lg shadow-cyan-500/30 text-sm"
                 >
                   بحث
                 </Button>
@@ -706,9 +705,9 @@ export function Header() {
             
             {/* Mobile Search Suggestions */}
             {searchTerm.trim().length >= 2 && suggestions.length > 0 && (
-              <div className="bg-gray-800/90 border-2 border-teal-500/30 rounded-xl shadow-2xl max-h-[calc(100vh-120px)] overflow-y-auto backdrop-blur-sm">
+              <div className="bg-gray-800/90 border-2 border-teal-500/30 rounded-lg shadow-2xl max-h-[calc(100vh-100px)] overflow-y-auto backdrop-blur-sm">
                 <div className="p-2">
-                  <p className="text-gray-400 text-xs px-3 py-2 font-medium">النتائج المقترحة:</p>
+                  <p className="text-gray-400 text-xs px-2 py-1.5 font-medium">النتائج المقترحة:</p>
                   {suggestions.map((product) => (
                     <button
                       key={product.id}
@@ -719,18 +718,18 @@ export function Header() {
                         setShowSuggestions(false);
                         setIsMobileSearchOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 p-3 hover:bg-gradient-to-r hover:from-teal-900/40 hover:to-cyan-900/40 transition-all duration-200 rounded-lg mb-2 active:scale-95"
+                      className="w-full flex items-center gap-2 p-2 hover:bg-gradient-to-r hover:from-teal-900/40 hover:to-cyan-900/40 transition-all duration-200 rounded-lg mb-1.5 active:scale-95"
                     >
                       <img 
                         src={product.imageUrl} 
                         alt={product.name}
-                        className="w-16 h-16 object-cover rounded-lg shadow-md"
+                        className="w-12 h-12 object-cover rounded-lg shadow-md flex-shrink-0"
                       />
-                      <div className="flex-1 text-right">
-                        <p className="text-white text-sm font-medium mb-1">{product.name}</p>
-                        <p className="text-cyan-400 text-base font-bold">{product.price} جنيه</p>
+                      <div className="flex-1 text-right min-w-0">
+                        <p className="text-white text-xs font-medium mb-0.5 line-clamp-1">{product.name}</p>
+                        <p className="text-cyan-400 text-sm font-bold">{product.price} ج.م</p>
                       </div>
-                      <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
@@ -741,30 +740,30 @@ export function Header() {
             
             {/* Empty State */}
             {searchTerm.trim().length >= 2 && suggestions.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gray-800/50 rounded-full flex items-center justify-center">
-                  <Search className="w-10 h-10 text-gray-600" />
+              <div className="text-center py-8">
+                <div className="w-14 h-14 mx-auto mb-3 bg-gray-800/50 rounded-full flex items-center justify-center">
+                  <Search className="w-7 h-7 text-gray-600" />
                 </div>
-                <p className="text-gray-400 text-lg font-medium">لا توجد نتائج</p>
-                <p className="text-gray-500 text-sm mt-1">حاول البحث بكلمات أخرى</p>
+                <p className="text-gray-400 text-base font-medium">لا توجد نتائج</p>
+                <p className="text-gray-500 text-xs mt-1">حاول البحث بكلمات أخرى</p>
               </div>
             )}
             
             {/* Hints */}
             {searchTerm.trim().length === 0 && (
-              <div className="text-center py-12 px-4">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-teal-600/20 to-cyan-600/20 rounded-full flex items-center justify-center animate-pulse">
-                  <Search className="w-10 h-10 text-cyan-400" />
+              <div className="text-center py-8 px-3">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-600/20 to-cyan-600/20 rounded-full flex items-center justify-center animate-pulse">
+                  <Search className="w-8 h-8 text-cyan-400" />
                 </div>
-                <h3 className="text-white text-xl font-bold mb-2">ابحث عن منتجاتك المفضلة</h3>
-                <p className="text-gray-400 text-sm mb-6">أدخل اسم المنتج أو الفئة أو العلامة التجارية</p>
+                <h3 className="text-white text-lg font-bold mb-1.5">ابحث عن منتجاتك المفضلة</h3>
+                <p className="text-gray-400 text-xs mb-4">أدخل اسم المنتج أو الفئة أو العلامة التجارية</p>
                 
-                <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
+                <div className="flex flex-wrap gap-1.5 justify-center max-w-md mx-auto">
                   {['تيشيرتات', 'أحذية', 'مستحضرات تجميل', 'اكسسوارات', 'ذهب'].map((keyword) => (
                     <button
                       key={keyword}
                       onClick={() => setSearchTerm(keyword)}
-                      className="px-4 py-2 bg-gray-800/50 hover:bg-teal-600/30 text-gray-300 hover:text-cyan-400 rounded-full text-sm border border-gray-700/50 hover:border-cyan-500/50 transition-all duration-200 active:scale-95"
+                      className="px-3 py-1.5 bg-gray-800/50 hover:bg-teal-600/30 text-gray-300 hover:text-cyan-400 rounded-full text-xs border border-gray-700/50 hover:border-cyan-500/50 transition-all duration-200 active:scale-95"
                     >
                       {keyword}
                     </button>

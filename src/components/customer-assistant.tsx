@@ -516,13 +516,13 @@ export default function CustomerAssistant() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={showAssistant}
-        className="fixed bottom-20 right-4 md:right-6 z-40 bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white p-2.5 md:p-3 rounded-full shadow-2xl backdrop-blur-sm transition-all hover:scale-105"
+        className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-[9999] bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white p-3 md:p-3.5 rounded-full shadow-2xl backdrop-blur-sm transition-all hover:scale-105"
         title="إظهار المساعد الذكي"
       >
         <img 
           src="/logo.png" 
           alt="Remo Store" 
-          className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover"
+          className="w-6 h-6 md:w-7 md:h-7 rounded-full object-cover"
         />
       </motion.button>
     )
@@ -540,7 +540,7 @@ export default function CustomerAssistant() {
             whileHover={{ scale: 1.08, rotate: [0, -5, 5, 0] }}
             whileTap={{ scale: 0.92 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 left-4 md:bottom-8 md:left-6 z-40 group"
+            className="fixed bottom-24 right-4 md:bottom-8 md:right-6 z-[9999] group"
             aria-label="مساعد ريمو الذكي"
           >
             <div className="relative">
@@ -551,17 +551,17 @@ export default function CustomerAssistant() {
               <div className="absolute inset-0 rounded-full border-2 border-teal-300/40 animate-spin-slow"></div>
               
               {/* الزر الرئيسي */}
-              <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 text-white p-3.5 md:p-4 rounded-full shadow-2xl shadow-teal-600/50 flex items-center gap-2.5 border-2 border-white/30 backdrop-blur">
+              <div className="relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-teal-600/50 flex items-center gap-2 border-2 border-white/30 backdrop-blur">
                 {/* شعار التطبيق مع توهج */}
                 <div className="relative">
                   <div className="absolute inset-0 bg-white/40 rounded-full blur-sm"></div>
                   <img 
                     src="/logo.png" 
                     alt="Remo Store" 
-                    className="relative w-7 h-7 md:w-8 md:h-8 rounded-full object-cover ring-2 ring-white/50 shadow-lg"
+                    className="relative w-6 h-6 md:w-8 md:h-8 rounded-full object-cover ring-2 ring-white/50 shadow-lg"
                   />
                 </div>
-                <span className="font-bold text-sm md:text-base hidden sm:inline drop-shadow-lg">مساعدك الذكي 🤖</span>
+                <span className="font-bold text-xs md:text-base hidden sm:inline drop-shadow-lg whitespace-nowrap">مساعدك الذكي 🤖</span>
               </div>
               
               {/* نقطة إشعار حية */}
@@ -579,7 +579,7 @@ export default function CustomerAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-            className="fixed bottom-16 md:bottom-20 left-2 right-2 sm:left-4 sm:right-auto sm:w-[min(95vw,440px)] z-40"
+            className="fixed bottom-[180px] right-2 md:bottom-24 md:right-4 w-[calc(100vw-16px)] sm:w-[min(95vw,440px)] z-[9999]"
           >
             <Card className="bg-gradient-to-br from-slate-900 via-teal-900/95 to-slate-900 border-2 border-teal-400/60 shadow-[0_20px_60px_rgba(13,148,136,0.4)] overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-xl max-h-[75vh] md:max-h-[80vh] flex flex-col">
               {/* رأس النافذة - محسّن للموبايل */}

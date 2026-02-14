@@ -36,7 +36,7 @@ export default function StoreAddressPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/signin');
+      router.push('/auth/login');
     }
     if (session?.user?.role !== 'VENDOR') {
       router.push('/');

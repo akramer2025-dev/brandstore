@@ -35,7 +35,7 @@ export default function RejectedOrdersReport() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/signin');
+      router.push('/auth/login');
       return;
     }
 

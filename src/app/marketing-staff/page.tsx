@@ -89,7 +89,7 @@ export default function MarketingStaffDashboard() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/signin');
+      router.push('/auth/login');
       return;
     }
 

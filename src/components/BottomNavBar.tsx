@@ -21,8 +21,8 @@ export function BottomNavBar() {
   const hideNavBarPaths = [
     '/admin',
     '/vendor',
-    '/auth/signin',
-    '/auth/signup',
+    '/auth/login',
+    '/auth/register',
   ];
 
   const shouldHideNavBar = hideNavBarPaths.some(path => pathname.startsWith(path));
@@ -57,11 +57,12 @@ export function BottomNavBar() {
       isCenter: true, // الزر المركزي
     },
     {
-      name: "المنتجات",
+      name: "العربة",
       icon: ShoppingCart,
-      href: "/products",
-      isActive: pathname === "/products" || pathname.startsWith("/products"),
+      href: "/cart",
+      isActive: pathname === "/cart",
       color: "from-orange-500 to-amber-500",
+      badge: mounted ? totalItems : 0,
     },
     {
       name: "حسابي",

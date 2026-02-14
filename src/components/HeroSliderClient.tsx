@@ -60,7 +60,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
   if (slides.length === 0) {
     // عرض placeholder إذا لم توجد صور
     return (
-      <div className="relative w-full h-[320px] sm:h-[380px] md:h-[420px] lg:h-[480px] overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600">
+      <div className="relative w-full h-[240px] sm:h-[320px] md:h-[380px] lg:h-[440px] overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white px-4">
             <h2 className="text-2xl md:text-4xl font-bold mb-4">مرحباً بك في ريمو ستور</h2>
@@ -79,7 +79,7 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
   }
 
   return (
-    <div className="relative w-full h-[320px] sm:h-[380px] md:h-[420px] lg:h-[480px] overflow-hidden group">
+    <div className="relative w-full h-[240px] sm:h-[320px] md:h-[380px] lg:h-[440px] overflow-hidden group">
       {/* Slides */}
       {slides.map((slide, index) => (
         <div

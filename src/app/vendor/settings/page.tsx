@@ -46,7 +46,7 @@ export default function VendorSettingsPage() {
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
-      router.push("/auth/signin");
+      router.push("/auth/login");
       return;
     }
     if (session.user.role !== "ADMIN" && session.user.role !== "VENDOR") {

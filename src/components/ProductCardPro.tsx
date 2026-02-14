@@ -231,15 +231,15 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
         >
         {/* Badge - Top Left */}
         {badge && (
-          <div className={`absolute top-3 left-3 z-20 bg-gradient-to-r ${badge.color} text-white font-bold px-3 py-1.5 rounded-full text-xs shadow-lg flex items-center gap-1.5`}>
-            <badge.icon className="w-3.5 h-3.5" />
-            <span>{badge.text}</span>
+          <div className={`absolute top-1.5 sm:top-3 left-1.5 sm:left-3 z-20 bg-gradient-to-r ${badge.color} text-white font-bold px-1.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full text-[9px] sm:text-xs shadow-lg flex items-center gap-0.5 sm:gap-1.5`}>
+            <badge.icon className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">{badge.text}</span>
           </div>
         )}
 
         {/* Discount Badge - Top Right */}
         {discount > 0 && (
-          <div className="absolute top-3 right-3 z-20 bg-gradient-to-r from-red-500 to-orange-500 text-white font-black px-3 py-1.5 rounded-xl text-sm shadow-lg">
+          <div className="absolute top-1.5 sm:top-3 right-1.5 sm:right-3 z-20 bg-gradient-to-r from-red-500 to-orange-500 text-white font-black px-1.5 sm:px-3 py-0.5 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-sm shadow-lg">
             -{discount}%
           </div>
         )}
@@ -261,13 +261,13 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
           <button
             onClick={handleToggleWishlist}
             disabled={isAddingToWishlist}
-            className={`absolute bottom-3 right-3 p-2.5 rounded-full transition-all duration-300 shadow-lg backdrop-blur-md z-30 ${
+            className={`absolute bottom-1.5 sm:bottom-3 right-1.5 sm:right-3 p-1.5 sm:p-2.5 rounded-full transition-all duration-300 shadow-lg backdrop-blur-md z-30 ${
               inWishlist 
                 ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white scale-110' 
                 : 'bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white'
             } ${isAddingToWishlist ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <Heart className={`w-4 h-4 transition-all ${inWishlist ? 'fill-current' : ''}`} />
+            <Heart className={`w-3 h-3 sm:w-4 sm:h-4 transition-all ${inWishlist ? 'fill-current' : ''}`} />
           </button>
 
           {/* Stock Badge */}
@@ -278,34 +278,34 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
           )}
         </div>
 
-        <CardContent className="p-2.5 space-y-1.5 bg-white rounded-b-2xl">
+        <CardContent className="p-1.5 sm:p-2.5 space-y-1 sm:space-y-1.5 bg-white rounded-b-2xl">
           {/* Product Name */}
-          <h3 className="font-bold text-xs md:text-sm line-clamp-1 bg-gradient-to-r from-purple-700 via-pink-600 to-orange-600 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:via-pink-500 group-hover:to-orange-500 transition-all">
+          <h3 className="font-bold text-[10px] sm:text-xs md:text-sm line-clamp-1 bg-gradient-to-r from-purple-700 via-pink-600 to-orange-600 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:via-pink-500 group-hover:to-orange-500 transition-all">
             {product.nameAr}
           </h3>
           
           {/* Rating */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-0.5 sm:gap-1.5">
             {renderStars(rating)}
-            <span className="text-yellow-600 font-bold text-xs">{rating}</span>
-            <span className="text-gray-400 text-[10px]">({reviewCount})</span>
+            <span className="text-yellow-600 font-bold text-[9px] sm:text-xs">{rating}</span>
+            <span className="text-gray-400 text-[8px] sm:text-[10px]">({reviewCount})</span>
           </div>
 
           {/* Price */}
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent">
+          <div className="flex items-baseline gap-1">
+            <span className="text-base sm:text-xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent">
               {product.price.toLocaleString('en-US')}
             </span>
-            <span className="text-green-600 text-xs font-bold">ج.م</span>
+            <span className="text-green-600 text-[10px] sm:text-xs font-bold">ج.م</span>
           </div>
 
           {/* Add to Cart Button */}
           <Button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="w-full bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold text-xs py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl rounded-xl group/btn"
+            className="w-full bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold text-[10px] sm:text-xs py-1.5 sm:py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl rounded-xl group/btn"
           >
-            <ShoppingCart className="w-3.5 h-3.5 ml-1.5 group-hover/btn:scale-110 transition-transform" />
+            <ShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5 group-hover/btn:scale-110 transition-transform" />
             أضف للسلة
           </Button>
         </CardContent>

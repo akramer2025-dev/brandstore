@@ -235,7 +235,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen relative overflow-hidden">
+    <div className="flex h-screen pb-20 md:pb-0 relative overflow-hidden">
       {/* خلفية السلايدر المتحرك */}
       <div className="absolute inset-0 z-0">
         {slides.length > 0 ? (
@@ -397,7 +397,7 @@ export default function ChatPage() {
       {/* Chat Container - زي Messenger */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+        className="flex-1 overflow-y-auto px-3 md:px-4 py-4 space-y-3 pb-4 md:pb-4"
         style={{
           backgroundImage: `
             radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
@@ -440,7 +440,7 @@ export default function ChatPage() {
             {/* رسالة المستخدم - على اليمين بلون بنفسجي */}
             {msg.type === 'user' && (
               <div className="flex justify-end">
-                <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-3xl px-4 py-2.5 max-w-[75%] sm:max-w-[60%] shadow-sm text-sm leading-relaxed">
+                <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-3xl px-4 py-2.5 max-w-[85%] sm:max-w-[70%] md:max-w-[60%] shadow-sm text-sm leading-relaxed">
                   {msg.content}
                 </div>
               </div>
@@ -454,7 +454,7 @@ export default function ChatPage() {
                   alt="Remo"
                   className="w-7 h-7 rounded-full object-cover flex-shrink-0"
                 />
-                <div className="bg-gray-200 text-gray-900 rounded-3xl px-4 py-2.5 max-w-[75%] sm:max-w-[60%] shadow-sm text-sm whitespace-pre-line leading-relaxed">
+                <div className="bg-gray-200 text-gray-900 rounded-3xl px-4 py-2.5 max-w-[85%] sm:max-w-[70%] md:max-w-[60%] shadow-sm text-sm whitespace-pre-line leading-relaxed">
                   {msg.content}
                 </div>
               </div>
@@ -562,7 +562,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area - بسيط زي Messenger */}
-      <div className="border-t border-purple-700/50 bg-gradient-to-r from-purple-900/95 via-purple-800/95 to-indigo-900/95 backdrop-blur-sm px-4 py-3 shadow-lg">
+      <div className="border-t border-purple-700/50 bg-gradient-to-r from-purple-900/95 via-purple-800/95 to-indigo-900/95 backdrop-blur-sm px-3 md:px-4 py-3 shadow-lg">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -588,7 +588,7 @@ export default function ChatPage() {
         </form>
         
         {/* Powered by */}
-        <div className="text-center mt-2">
+        <div className="text-center mt-2 hidden md:block">
           <Link href="/" className="text-purple-300 hover:text-purple-100 text-[10px] transition-colors">
             Powered by Remo Store
           </Link>

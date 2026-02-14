@@ -186,33 +186,33 @@ export default async function HomePage() {
             />
           </div>
           <div className="container mx-auto px-3 sm:px-4 relative z-10">
-            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide py-2">
+            <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-hide py-2">
               {categories.slice(0, 8).map((category) => (
                 <Link
                   key={category.id}
                   href={`/categories/${category.id}`}
-                  className={`relative flex items-center gap-2 sm:gap-3 md:gap-2 px-4 sm:px-6 md:px-5 py-3 sm:py-4 md:py-3 rounded-full transition-all duration-300 whitespace-nowrap group hover:shadow-md hover:scale-105 hover:-translate-y-1 ${
+                  className={`relative flex items-center gap-1.5 sm:gap-3 md:gap-2 px-2 sm:px-6 md:px-5 py-2 sm:py-4 md:py-3 rounded-full transition-all duration-300 whitespace-nowrap group hover:shadow-md hover:scale-105 hover:-translate-y-1 ${
                     category.nameAr.includes('جواك') || category.nameAr.includes('ملابس')
                       ? 'bg-gradient-to-r from-purple-50/80 to-pink-50/80 hover:from-purple-100/80 hover:to-pink-100/80'
                       : 'bg-white/60 hover:bg-white/80'
                   }`}
                   style={{
-                    borderWidth: '2px',
+                    borderWidth: '1.5px',
                     borderStyle: 'solid',
                     borderImage: 'linear-gradient(135deg, rgb(147 51 234) 0%, rgb(236 72 153) 50%, rgb(249 115 22) 100%) 1'
                   }}
                 >
-                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-purple-200">
+                  <div className="relative w-8 h-8 sm:w-14 sm:h-14 md:w-10 md:h-10 rounded-full overflow-hidden flex-shrink-0 ring-1 sm:ring-2 ring-purple-200">
                     <Image
                         src={getCategoryImage(category.nameAr, category.image)}
                         alt={category.nameAr}
-                        width={48}
-                        height={48}
+                        width={32}
+                        height={32}
                         className="object-cover w-full h-full"
                         unoptimized
                       />
                     </div>
-                    <span className="text-sm sm:text-base md:text-sm font-semibold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:via-pink-600 group-hover:to-orange-600 transition-all">
+                    <span className="text-xs sm:text-base md:text-sm font-semibold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:via-pink-600 group-hover:to-orange-600 transition-all">
                       {category.nameAr}
                     </span>
                   </Link>

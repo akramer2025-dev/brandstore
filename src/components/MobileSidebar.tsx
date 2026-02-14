@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -45,10 +46,17 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const totalItems = useCartStore((state) => state.getTotalItems());
   const { clearCart, setUserId } = useCartStore();
   const { items: wishlistItems } = useWishlist();
+  const [mounted, setMounted] = useState(false);
+
+  // Mount check for Portal
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Debug: Log when isOpen changes
   useEffect(() => {
-    console.log('MobileSidebar isOpen:', isOpen);
+    console.log('🚪 MobileSidebar isOpen:', isOpen);
+    console.log('📱 Sidebar element should be:', isOpen ? 'VISIBLE (translateX(0))' : 'HIDDEN (translateX(100%))');
   }, [isOpen]);
 
   // Close sidebar when route changes only if it's open
@@ -141,28 +149,36 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     ],
   });
 
-  return (
+  // لا نعرض شيء حتى يتم التحميل على العميل
+  if (!mounted) return null;
+
+  const sidebarContent = (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+        style={{
+          zIndex: 99998,
+          opacity: isOpen ? 1 : 0,
+          display: isOpen ? 'block' : 'none'
+        }}
         onClick={onClose}
       />
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 backdrop-blur-xl shadow-2xl z-[110] transform transition-transform duration-300 ease-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className="fixed top-0 bottom-0 w-72 max-w-[75vw] bg-white shadow-2xl transition-all duration-300 ease-out overflow-y-auto"
+        style={{
+          left: isOpen ? '0' : '-100%',
+          zIndex: 99999
+        }}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 p-6 shadow-lg">
             <button
               onClick={onClose}
-              className="absolute top-4 left-4 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+              className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
               aria-label="Close menu"
             >
               <X className="w-5 h-5 text-white" />
@@ -224,7 +240,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                         href={item.href}
                         className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ${
                           isActive
-                            ? "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-r-4 border-purple-500"
+                            ? "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-l-4 border-purple-500"
                             : "hover:bg-gray-100/50"
                         }`}
                       >
@@ -262,14 +278,14 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
             ) : (
               <div className="space-y-2">
                 <Link
-                  href="/auth/signin"
+                  href="/auth/login"
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg"
                 >
                   <LogIn className="w-5 h-5" />
                   تسجيل الدخول
                 </Link>
                 <Link
-                  href="/auth/signup"
+                  href="/auth/register"
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-gray-50 border-2 border-purple-500 text-purple-600 rounded-xl font-semibold transition-all duration-200"
                 >
                   <UserPlus className="w-5 h-5" />
@@ -282,4 +298,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
       </div>
     </>
   );
+
+  // استخدام Portal لإخراج الـ Sidebar من الـ Header ووضعه في body
+  return createPortal(sidebarContent, document.body);
 }

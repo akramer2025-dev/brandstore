@@ -3,12 +3,36 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+interface Star {
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  opacity: number;
+  duration: number;
+  delay: number;
+}
+
 export default function RamadanBanner() {
   const [isVisible, setIsVisible] = useState(true);
+  const [stars, setStars] = useState<Star[]>([]);
 
   useEffect(() => {
     const dismissed = sessionStorage.getItem('ramadanBannerDismissed');
     if (dismissed) setIsVisible(false);
+    
+    // إنشاء النجوم على جانب العميل فقط
+    setStars(
+      Array.from({ length: 20 }, () => ({
+        width: Math.random() * 2 + 1,
+        height: Math.random() * 2 + 1,
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        opacity: Math.random() * 0.5 + 0.3,
+        duration: Math.random() * 2 + 1,
+        delay: Math.random() * 2,
+      }))
+    );
   }, []);
 
   const dismiss = () => {
@@ -22,17 +46,17 @@ export default function RamadanBanner() {
     <div className="relative bg-gradient-to-r from-[#1a0a2e] via-[#16213e] to-[#1a0a2e] overflow-hidden">
       {/* نجوم خلفية */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {[...Array(20)].map((_, i) => (
+        {stars.map((star, i) => (
           <span
             key={i}
             className="absolute rounded-full bg-yellow-200"
             style={{
-              width: `${Math.random() * 2 + 1}px`,
-              height: `${Math.random() * 2 + 1}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              opacity: Math.random() * 0.5 + 0.3,
-              animation: `starTwinkle ${Math.random() * 2 + 1}s ease-in-out ${Math.random() * 2}s infinite alternate`,
+              width: `${star.width}px`,
+              height: `${star.height}px`,
+              top: `${star.top}%`,
+              left: `${star.left}%`,
+              opacity: star.opacity,
+              animation: `starTwinkle ${star.duration}s ease-in-out ${star.delay}s infinite alternate`,
             }}
           />
         ))}

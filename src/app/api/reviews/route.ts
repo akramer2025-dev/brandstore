@@ -2,21 +2,48 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// GET - Get all reviews for a product
+// GET - Get reviews (all or for specific product)
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const productId = searchParams.get("productId");
+    const rating = searchParams.get("rating");
+    const sort = searchParams.get("sort") || "recent";
 
-    if (!productId) {
-      return NextResponse.json({ error: "Product ID required" }, { status: 400 });
+    // Build where clause
+    const where: any = {
+      isApproved: true, // Only show approved reviews to public
+    };
+
+    // If productId specified, filter by it
+    if (productId) {
+      where.productId = productId;
+    }
+
+    // If rating filter specified
+    if (rating) {
+      where.rating = parseInt(rating);
+    }
+
+    // Build orderBy clause
+    let orderBy: any;
+    switch (sort) {
+      case "highest":
+        orderBy = { rating: "desc" };
+        break;
+      case "lowest":
+        orderBy = { rating: "asc" };
+        break;
+      case "recent":
+      default:
+        orderBy = { createdAt: "desc" };
+        break;
     }
 
     const reviews = await prisma.review.findMany({
-      where: {
-        productId,
-        isApproved: true, // Only show approved reviews to public
-      },
+      where,
+      orderBy,
+      take: productId ? undefined : 50, // Limit to 50 for all reviews page
       include: {
         user: {
           select: {
@@ -24,13 +51,26 @@ export async function GET(request: Request) {
             image: true,
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
+        product: {
+          select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json(reviews);
+    // If productId specified, return array directly (backward compatibility)
+    if (productId) {
+      return NextResponse.json(reviews);
+    }
+
+    // For all reviews page, return object with reviews array
+    return NextResponse.json({
+      success: true,
+      reviews,
+    });
   } catch (error) {
     console.error("Error fetching reviews:", error);
     return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 });
