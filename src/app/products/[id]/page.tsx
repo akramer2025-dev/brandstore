@@ -54,6 +54,18 @@ interface Product {
   } | null;
   createdAt: string;
   reviews?: Review[];
+  variants?: ProductVariant[];
+}
+
+interface ProductVariant {
+  id: string;
+  variantType: string;
+  name: string;
+  nameAr: string;
+  price: number;
+  stock: number;
+  isActive: boolean;
+  sortOrder: number;
 }
 
 interface Review {
@@ -74,11 +86,21 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const { addItem } = useCartStore();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
+  // Get current price and stock based on selected variant or product default
+  const getCurrentPrice = () => {
+    return selectedVariant ? selectedVariant.price : product?.price || 0;
+  };
+
+  const getCurrentStock = () => {
+    return selectedVariant ? selectedVariant.stock : product?.stock || 0;
+  };
 
   // Wishlist toggle
   const handleToggleWishlist = async () => {
@@ -202,8 +224,17 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (!product) return;
 
-    if (quantity > product.stock) {
-      toast.error(`الكمية المتاحة فقط ${product.stock}`);
+    // التحقق من اختيار المقاس إذا كان المنتج يحتوي على مقاسات
+    if (product.variants && product.variants.length > 0 && !selectedVariant) {
+      toast.error('⚠️ يرجى اختيار المقاس أولاً');
+      return;
+    }
+
+    const currentStock = getCurrentStock();
+    const currentPrice = getCurrentPrice();
+
+    if (quantity > currentStock) {
+      toast.error(`الكمية المتاحة فقط ${currentStock}`);
       return;
     }
 
@@ -211,17 +242,28 @@ export default function ProductDetailPage() {
       id: product.id,
       name: product.nameAr,
       nameAr: product.nameAr,
-      price: product.price,
+      price: currentPrice,
       image: images[0],
+      variant: selectedVariant ? {
+        id: selectedVariant.id,
+        nameAr: selectedVariant.nameAr,
+        price: selectedVariant.price,
+      } : undefined,
     });
 
-    toast.success("تمت الإضافة إلى السلة", {
-      icon: <Check className="w-4 h-4" />,
-    });
+    toast.success(
+      selectedVariant 
+        ? `تمت إضافة ${product.nameAr} - ${selectedVariant.nameAr} للسلة ✅`
+        : "تمت الإضافة إلى السلة ✅",
+      {
+        icon: <Check className="w-4 h-4" />,
+      }
+    );
   };
 
   const incrementQuantity = () => {
-    if (product && quantity < product.stock) {
+    const currentStock = getCurrentStock();
+    if (quantity < currentStock) {
       setQuantity(quantity + 1);
     }
   };
@@ -392,10 +434,79 @@ export default function ProductDetailPage() {
             {/* Price & Stock */}
             <div className="flex items-baseline gap-2 sm:gap-4">
               <span className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
-                {product.price.toLocaleString()}
+                {getCurrentPrice().toLocaleString()}
               </span>
               <span className="text-lg sm:text-xl md:text-2xl text-gray-600">جنيه</span>
             </div>
+
+            {/* Variants Selection - المقاسات */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="space-y-3">
+                <label className="text-gray-900 font-bold text-lg flex items-center gap-2">
+                  <span className="text-2xl">📏</span>
+                  اختر المقاس:
+                </label>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                  {product.variants.map((variant) => {
+                    const isSelected = selectedVariant?.id === variant.id;
+                    const isOutOfStock = variant.stock === 0;
+                    
+                    return (
+                      <button
+                        key={variant.id}
+                        onClick={() => {
+                          if (!isOutOfStock) {
+                            setSelectedVariant(variant);
+                            setQuantity(1); // إعادة تعيين الكمية
+                          }
+                        }}
+                        disabled={isOutOfStock}
+                        className={`relative p-3 rounded-xl border-2 font-bold transition-all ${
+                          isSelected
+                            ? 'border-purple-600 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105'
+                            : isOutOfStock
+                            ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed line-through'
+                            : 'border-purple-200 bg-white hover:border-purple-400 hover:shadow-md hover:scale-105'
+                        }`}
+                      >
+                        <div className="text-center">
+                          <div className={`text-lg ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                            {variant.nameAr}
+                          </div>
+                          {!isOutOfStock && (
+                            <div className={`text-xs mt-1 ${isSelected ? 'text-purple-100' : 'text-gray-500'}`}>
+                              {variant.price.toLocaleString()} ج
+                            </div>
+                          )}
+                          {isOutOfStock && (
+                            <div className="text-xs text-red-500 mt-1">
+                              نفذ
+                            </div>
+                          )}
+                        </div>
+                        {isSelected && (
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                            <Check className="w-4 h-4 text-purple-600" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedVariant && (
+                  <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">المقاس المختار:</span>
+                      <span className="font-bold text-purple-600">{selectedVariant.nameAr}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm mt-1">
+                      <span className="text-gray-700">المتاح:</span>
+                      <span className="font-bold text-green-600">{selectedVariant.stock} قطعة</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Vendor Info */}
             {product.vendor && (
@@ -434,13 +545,13 @@ export default function ProductDetailPage() {
             )}
 
             <div className="flex items-center gap-3">
-              {product.stock > 0 ? (
+              {getCurrentStock() > 0 ? (
                 <>
                   <div className="flex items-center gap-2 text-green-400">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span className="font-medium">متوفر</span>
                   </div>
-                  <span className="text-gray-500">({product.stock} قطعة متاحة)</span>
+                  <span className="text-gray-500">({getCurrentStock()} قطعة متاحة)</span>
                 </>
               ) : (
                 <div className="flex items-center gap-2 text-red-400">
@@ -451,7 +562,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Quantity Selector */}
-            {product.stock > 0 && (
+            {getCurrentStock() > 0 && (
               <div className="space-y-2 sm:space-y-3">
                 <label className="text-gray-300 font-medium text-sm sm:text-base">الكمية:</label>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
@@ -468,7 +579,7 @@ export default function ProductDetailPage() {
                     </span>
                     <button
                       onClick={incrementQuantity}
-                      disabled={quantity >= product.stock}
+                      disabled={quantity >= getCurrentStock()}
                       className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -476,7 +587,7 @@ export default function ProductDetailPage() {
                   </div>
                   <span className="text-sm sm:text-base text-gray-400">
                     الإجمالي: <span className="text-teal-400 font-bold text-base sm:text-xl">
-                      {(product.price * quantity).toLocaleString()} جنيه
+                      {(getCurrentPrice() * quantity).toLocaleString()} جنيه
                     </span>
                   </span>
                 </div>
@@ -487,7 +598,7 @@ export default function ProductDetailPage() {
             <div className="flex gap-2 sm:gap-3">
               <Button
                 onClick={handleAddToCart}
-                disabled={product.stock === 0}
+                disabled={getCurrentStock() === 0}
                 className="flex-1 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold py-4 sm:py-6 text-sm sm:text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
               >
                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-2" />

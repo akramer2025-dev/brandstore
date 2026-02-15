@@ -21,6 +21,14 @@ export async function GET(
             rating: true,
           },
         },
+        variants: {
+          where: {
+            isActive: true,
+          },
+          orderBy: {
+            sortOrder: 'asc',
+          },
+        },
         reviews: {
           where: {
             isApproved: true,

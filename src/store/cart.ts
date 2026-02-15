@@ -10,6 +10,11 @@ export interface CartItem {
   quantity: number;
   image?: string;
   categoryName?: string;
+  variant?: {
+    id: string;
+    nameAr: string;
+    price: number;
+  };
 }
 
 interface CartStore {
@@ -54,15 +59,31 @@ export const useCartStore = create<CartStore>()(
       
       addItem: (item) => {
         const items = get().items;
-        const existingItem = items.find((i) => i.id === item.id);
+        // البحث عن المنتج بنفس الـ id ونفس الـ variant (إن وجد)
+        const existingItem = items.find((i) => {
+          if (item.variant) {
+            // إذا كان المنتج له variant، نتحقق من id المنتج و id الـ variant
+            return i.id === item.id && i.variant?.id === item.variant.id;
+          } else {
+            // إذا لم يكن له variant، نتحقق من id المنتج فقط وأنه ليس له variant
+            return i.id === item.id && !i.variant;
+          }
+        });
         
         if (existingItem) {
           set({
-            items: items.map((i) =>
-              i.id === item.id
-                ? { ...i, quantity: i.quantity + 1 }
-                : i
-            ),
+            items: items.map((i) => {
+              // نفس المنطق في التحديث
+              if (item.variant) {
+                return i.id === item.id && i.variant?.id === item.variant.id
+                  ? { ...i, quantity: i.quantity + 1 }
+                  : i;
+              } else {
+                return i.id === item.id && !i.variant
+                  ? { ...i, quantity: i.quantity + 1 }
+                  : i;
+              }
+            }),
           });
         } else {
           set({ items: [...items, { ...item, quantity: 1 }] });
