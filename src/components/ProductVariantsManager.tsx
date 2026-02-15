@@ -284,14 +284,53 @@ export function ProductVariantsManager({ variants, onChange }: ProductVariantsMa
         </div>
       ) : (
         <div className="space-y-3">
-          {/* عداد المقاسات */}
-          <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-lg">
-            <span className="text-white font-bold">
-              📊 إجمالي المقاسات: {variants.length}
-            </span>
-            <span className="text-gray-300 text-sm">
-              إجمالي الكميات: {variants.reduce((sum, v) => sum + (v.stock || 0), 0)}
-            </span>
+          {/* عداد المقاسات - محسّن */}
+          <div className="p-4 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-orange-500/20 border-2 border-purple-500/40 rounded-xl shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center md:text-right">
+                <div className="text-3xl mb-1">📊</div>
+                <div className="text-gray-300 text-sm">عدد المقاسات</div>
+                <div className="text-white font-bold text-2xl">{variants.length}</div>
+              </div>
+              
+              <div className="text-center md:text-right">
+                <div className="text-3xl mb-1">📦</div>
+                <div className="text-gray-300 text-sm">إجمالي الكمية</div>
+                <div className="text-white font-bold text-2xl">
+                  {variants.reduce((sum, v) => sum + (v.stock || 0), 0)}
+                </div>
+              </div>
+              
+              <div className="text-center md:text-right">
+                <div className="text-3xl mb-1">💰</div>
+                <div className="text-gray-300 text-sm">أقل سعر</div>
+                <div className="text-green-400 font-bold text-2xl">
+                  {variants.length > 0 
+                    ? Math.min(...variants.map(v => v.price || 0)).toLocaleString()
+                    : 0} ج
+                </div>
+              </div>
+              
+              <div className="text-center md:text-right">
+                <div className="text-3xl mb-1">💎</div>
+                <div className="text-gray-300 text-sm">أعلى سعر</div>
+                <div className="text-purple-400 font-bold text-2xl">
+                  {variants.length > 0 
+                    ? Math.max(...variants.map(v => v.price || 0)).toLocaleString()
+                    : 0} ج
+                </div>
+              </div>
+            </div>
+            
+            {/* متوسط السعر */}
+            <div className="mt-4 pt-4 border-t border-white/20 text-center">
+              <span className="text-gray-300 text-sm">متوسط السعر: </span>
+              <span className="text-yellow-400 font-bold text-lg">
+                {variants.length > 0 
+                  ? (variants.reduce((sum, v) => sum + (v.price || 0), 0) / variants.length).toFixed(2)
+                  : 0} ج
+              </span>
+            </div>
           </div>
 
           {variants.map((variant, index) => (
