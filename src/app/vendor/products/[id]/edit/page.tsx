@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Package, ArrowLeft, Save, Loader2, Upload, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ProductVariantsManager, ProductVariant } from '@/components/ProductVariantsManager';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function EditProductPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
   
   const [formData, setFormData] = useState({
     nameAr: '',
@@ -31,7 +33,23 @@ export default function EditProductPage() {
     stock: '',
     categoryId: '',
     isVisible: true,
+    sizes: [] as string[],
+    colors: [] as string[],
   });
+
+  const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+  const availableColors = [
+    { name: 'أحمر', value: 'red', hex: '#EF4444' },
+    { name: 'أزرق', value: 'blue', hex: '#3B82F6' },
+    { name: 'أخضر', value: 'green', hex: '#10B981' },
+    { name: 'أصفر', value: 'yellow', hex: '#F59E0B' },
+    { name: 'أسود', value: 'black', hex: '#000000' },
+    { name: 'أبيض', value: 'white', hex: '#FFFFFF' },
+    { name: 'رمادي', value: 'gray', hex: '#6B7280' },
+    { name: 'بني', value: 'brown', hex: '#92400E' },
+    { name: 'وردي', value: 'pink', hex: '#EC4899' },
+    { name: 'بنفسجي', value: 'purple', hex: '#8B5CF6' },
+  ];
 
   // جلب الفئات
   useEffect(() => {
@@ -64,7 +82,14 @@ export default function EditProductPage() {
             stock: product.stock?.toString() || '',
             categoryId: product.categoryId || '',
             isVisible: product.isVisible ?? true,
+            sizes: product.sizes ? product.sizes.split(',').filter((s: string) => s.trim()) : [],
+            colors: product.colors ? product.colors.split(',').filter((c: string) => c.trim()) : [],
           });
+          
+          // جلب المقاسات (variants) إذا كانت موجودة
+          if (product.variants && product.variants.length > 0) {
+            setVariants(product.variants);
+          }
           
           // إصلاح: تحويل الصور من string إلى array
           if (product.images) {
@@ -184,6 +209,9 @@ export default function EditProductPage() {
           categoryId: formData.categoryId || null,
           images: images.join(','), // تحويل array إلى string مفصول بفواصل
           isVisible: formData.isVisible,
+          sizes: formData.sizes.join(','),
+          colors: formData.colors.join(','),
+          variants: variants.length > 0 ? variants : undefined, // إرسال المقاسات
         }),
       });
 
@@ -440,6 +468,100 @@ export default function EditProductPage() {
                   👁️ إظهار المنتج في المتجر
                 </Label>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* المقاسات والألوان التقليدية */}
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-white">📏 المقاسات والألوان (اختياري)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* المقاسات */}
+              <div>
+                <Label className="text-white mb-3 block">المقاسات المتاحة:</Label>
+                <div className="flex flex-wrap gap-2">
+                  {availableSizes.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        const newSizes = formData.sizes.includes(size)
+                          ? formData.sizes.filter((s) => s !== size)
+                          : [...formData.sizes, size];
+                        setFormData({ ...formData, sizes: newSizes });
+                      }}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                        formData.sizes.includes(size)
+                          ? 'bg-purple-600 border-purple-500 text-white'
+                          : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+                {formData.sizes.length > 0 && (
+                  <p className="text-sm text-green-400 mt-2">
+                    ✓ تم اختيار: {formData.sizes.join(', ')}
+                  </p>
+                )}
+              </div>
+
+              {/* الألوان */}
+              <div>
+                <Label className="text-white mb-3 block">الألوان المتاحة:</Label>
+                <div className="flex flex-wrap gap-2">
+                  {availableColors.map((color) => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => {
+                        const newColors = formData.colors.includes(color.name)
+                          ? formData.colors.filter((c) => c !== color.name)
+                          : [...formData.colors, color.name];
+                        setFormData({ ...formData, colors: newColors });
+                      }}
+                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                        formData.colors.includes(color.name)
+                          ? 'bg-purple-600 border-purple-500 text-white'
+                          : 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                      }`}
+                      style={{
+                        backgroundColor: formData.colors.includes(color.name) ? undefined : `${color.hex}20`,
+                        borderColor: formData.colors.includes(color.name) ? undefined : `${color.hex}60`,
+                      }}
+                    >
+                      <span 
+                        className="inline-block w-4 h-4 rounded-full border-2 border-white ml-2"
+                        style={{ backgroundColor: color.hex }}
+                      ></span>
+                      {color.name}
+                    </button>
+                  ))}
+                </div>
+                {formData.colors.length > 0 && (
+                  <p className="text-sm text-green-400 mt-2">
+                    ✓ تم اختيار: {formData.colors.join(', ')}
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* نظام المقاسات المتقدم (Variants) */}
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-white">📐 نظام المقاسات المتقدم</CardTitle>
+              <p className="text-gray-400 text-sm mt-2">
+                استخدم هذا النظام لتحديد أسعار ومخزون مختلف لكل مقاس (مثل: S=100ج، M=120ج، L=150ج)
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ProductVariantsManager
+                variants={variants}
+                onChange={setVariants}
+              />
             </CardContent>
           </Card>
 

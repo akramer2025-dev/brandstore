@@ -118,7 +118,12 @@ export async function GET(
         id,
         vendorId: vendor.id 
       },
-      include: { category: true }
+      include: { 
+        category: true,
+        variants: {
+          orderBy: { sortOrder: 'asc' },
+        },
+      }
     });
 
     if (!product) {
@@ -164,6 +169,9 @@ export async function PUT(
       where: { 
         id,
         vendorId: vendor.id 
+      },
+      include: {
+        variants: true,
       }
     });
 
@@ -171,10 +179,10 @@ export async function PUT(
       return NextResponse.json({ error: 'المنتج غير موجود' }, { status: 404 });
     }
 
-    // تحديث المنتج
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
+    // تحديث المنتج مع المقاسات
+    const product = await prisma.$transaction(async (tx) => {
+      // تحضير بيانات التحديث
+      const updateData: any = {
         name: data.name || existingProduct.name,
         nameAr: data.nameAr || existingProduct.nameAr,
         description: data.description,
@@ -188,8 +196,50 @@ export async function PUT(
         colors: data.colors || existingProduct.colors,
         productionCost: data.productionCost ? parseFloat(data.productionCost) : existingProduct.productionCost,
         categoryId: data.categoryId || existingProduct.categoryId,
-      },
-      include: { category: true }
+      };
+
+      // معالجة المقاسات (variants) إذا كانت موجودة
+      if (data.variants && Array.isArray(data.variants)) {
+        // حذف المقاسات القديمة
+        await tx.productVariant.deleteMany({
+          where: { productId: id }
+        });
+
+        // إضافة المقاسات الجديدة
+        if (data.variants.length > 0) {
+          // حساب السعر والمخزون من المقاسات
+          const minPrice = Math.min(...data.variants.map((v: any) => v.price));
+          const maxPrice = Math.max(...data.variants.map((v: any) => v.price));
+          const totalStock = data.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+          
+          updateData.price = minPrice;
+          updateData.originalPrice = maxPrice > minPrice ? maxPrice : updateData.originalPrice;
+          updateData.stock = totalStock;
+
+          updateData.variants = {
+            create: data.variants.map((variant: any, index: number) => ({
+              variantType: variant.variantType || 'SIZE',
+              name: variant.name || '',
+              nameAr: variant.nameAr,
+              sku: variant.sku || '',
+              price: variant.price,
+              stock: variant.stock || 0,
+              isActive: variant.isActive !== false,
+              sortOrder: variant.sortOrder || index + 1,
+            })),
+          };
+        }
+      }
+
+      // تحديث المنتج
+      return await tx.product.update({
+        where: { id },
+        data: updateData,
+        include: {
+          category: true,
+          variants: true,
+        }
+      });
     });
 
     return NextResponse.json({ 
