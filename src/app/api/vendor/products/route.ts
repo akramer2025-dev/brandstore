@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
       supplierPhone,
       supplierCost,
       supplierNotes,
+      // المقاسات (Variants)
+      variants,
     } = data;
 
     // التحقق من البيانات المطلوبة
@@ -98,37 +100,66 @@ export async function POST(req: NextRequest) {
 
     // إنشاء المنتج وخصم التكلفة من رأس المال
     const result = await prisma.$transaction(async (tx) => {
+      // تحضير بيانات المنتج
+      const productData: any = {
+        name: name || nameAr,
+        nameAr,
+        description: description || '',
+        descriptionAr: descriptionAr || '',
+        price: parseFloat(price),
+        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
+        stock: parseInt(stock),
+        categoryId: finalCategoryId,
+        images,
+        vendorId: vendor.id,
+        isVisible,
+        isActive: true, // تفعيل المنتج تلقائياً
+        sizes: sizes || null,
+        colors: colors || null,
+        saleType: saleType || 'SINGLE',
+        productionCost: purchasePrice || null,
+        platformCommission: platformCommission || 5,
+        // حقول منتجات الوسيط
+        productSource: productSource || 'OWNED',
+        supplierName: productSource === 'CONSIGNMENT' ? supplierName : null,
+        supplierPhone: productSource === 'CONSIGNMENT' ? supplierPhone : null,
+        supplierCost: productSource === 'CONSIGNMENT' && supplierCost ? parseFloat(supplierCost) : null,
+        supplierNotes: productSource === 'CONSIGNMENT' ? supplierNotes : null,
+        isSupplierPaid: false,
+      };
+
+      // إضافة variants إذا كانت موجودة
+      if (variants && variants.length > 0) {
+        // حساب السعر والمخزون من الـ variants
+        const minPrice = Math.min(...variants.map((v: any) => v.price));
+        const maxPrice = Math.max(...variants.map((v: any) => v.price));
+        const totalStock = variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+        
+        productData.price = minPrice;
+        productData.originalPrice = maxPrice > minPrice ? maxPrice : productData.originalPrice;
+        productData.stock = totalStock;
+        
+        productData.variants = {
+          create: variants.map((variant: any, index: number) => ({
+            variantType: variant.variantType || 'SIZE',
+            name: variant.name || '',
+            nameAr: variant.nameAr,
+            sku: variant.sku || '',
+            price: variant.price,
+            stock: variant.stock || 0,
+            isActive: variant.isActive !== false,
+            sortOrder: variant.sortOrder || index + 1,
+          })),
+        };
+      }
+
       // إنشاء المنتج
       const product = await tx.product.create({
-        data: {
-          name: name || nameAr,
-          nameAr,
-          description: description || '',
-          descriptionAr: descriptionAr || '',
-          price: parseFloat(price),
-          originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-          stock: parseInt(stock),
-          categoryId: finalCategoryId,
-          images,
-          vendorId: vendor.id,
-          isVisible,
-          isActive: true, // تفعيل المنتج تلقائياً
-          sizes: sizes || null,
-          colors: colors || null,
-          saleType: saleType || 'SINGLE',
-          productionCost: purchasePrice || null,
-          platformCommission: platformCommission || 5,
-          // حقول منتجات الوسيط
-          productSource: productSource || 'OWNED',
-          supplierName: productSource === 'CONSIGNMENT' ? supplierName : null,
-          supplierPhone: productSource === 'CONSIGNMENT' ? supplierPhone : null,
-          supplierCost: productSource === 'CONSIGNMENT' && supplierCost ? parseFloat(supplierCost) : null,
-          supplierNotes: productSource === 'CONSIGNMENT' ? supplierNotes : null,
-          isSupplierPaid: false,
-        },
+        data: productData,
         include: {
           category: true,
           vendor: true,
+          variants: true,
         }
       });
 
@@ -228,6 +259,10 @@ export async function GET(req: NextRequest) {
       take: limit,
       include: {
         category: true,
+        variants: {
+          where: { isActive: true },
+          orderBy: { sortOrder: 'asc' },
+        },
       },
       orderBy
     });
