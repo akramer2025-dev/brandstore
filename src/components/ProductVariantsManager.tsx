@@ -60,6 +60,11 @@ const PRESET_SHOE_SIZES_ADULT = [
   { name: "43", nameAr: "43" },
   { name: "44", nameAr: "44" },
   { name: "45", nameAr: "45" },
+  { name: "46", nameAr: "46" },
+  { name: "47", nameAr: "47" },
+  { name: "48", nameAr: "48" },
+  { name: "49", nameAr: "49" },
+  { name: "50", nameAr: "50" },
 ];
 
 // مقاسات أحذية الأطفال
