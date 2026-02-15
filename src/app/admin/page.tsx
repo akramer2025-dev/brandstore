@@ -218,7 +218,14 @@ export default async function AdminDashboard() {
             color="text-green-600"
           />
           <ActionCard
-            title="🏭 المخزون والإنتاج"
+            title="� اتفاقيات التقسيط"
+            description="مراجعة واعتماد طلبات التقسيط من العملاء"
+            href="/admin/installments"
+            icon={<Receipt className="w-12 h-12" />}
+            color="text-purple-600"
+          />
+          <ActionCard
+            title="�🏭 المخزون والإنتاج"
             description="إدارة الأقمشة، المواد الخام، والإنتاج"
             href="/admin/warehouse"
             icon={<Factory className="w-12 h-12" />}

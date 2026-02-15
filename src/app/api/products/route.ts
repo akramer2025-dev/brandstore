@@ -92,6 +92,7 @@ export async function POST(request: Request) {
         categoryId: body.categoryId,
         images: body.images || null,
         stock: parseInt(body.stock) || 0,
+        allowInstallment: body.allowInstallment || false, // دعم التقسيط
       },
       include: {
         category: true,

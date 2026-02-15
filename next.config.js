@@ -28,6 +28,17 @@ const nextConfig = {
       },
     ],
   },
+  // Fix chunk loading issues
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.output.chunkLoadTimeout = 120000; // زيادة timeout للـ chunk loading
+    }
+    return config;
+  },
+  // تحسين الـ production build
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@tanstack/react-query'],
+  },
 };
 
 module.exports = nextConfig;

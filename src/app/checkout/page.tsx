@@ -95,7 +95,22 @@ export default function CheckoutPage() {
   const [wePayReceiptPreview, setWePayReceiptPreview] = useState<string | null>(null);
   const [uploadingWePayReceipt, setUploadingWePayReceipt] = useState(false);
   
+  // Installment Documents states
+  const [idCardFront, setIdCardFront] = useState<File | null>(null);
+  const [idCardFrontPreview, setIdCardFrontPreview] = useState<string | null>(null);
+  const [idCardBack, setIdCardBack] = useState<File | null>(null);
+  const [idCardBackPreview, setIdCardBackPreview] = useState<string | null>(null);
+  const [signedPromissoryNote, setSignedPromissoryNote] = useState<File | null>(null);
+  const [signedPromissoryNotePreview, setSignedPromissoryNotePreview] = useState<string | null>(null);
+  const [firstPaymentReceipt, setFirstPaymentReceipt] = useState<File | null>(null);
+  const [firstPaymentReceiptPreview, setFirstPaymentReceiptPreview] = useState<string | null>(null);
+  const [uploadingInstallmentDocs, setUploadingInstallmentDocs] = useState(false);
+  
   const { items, getTotalPrice, clearCart } = useCartStore();
+  
+  // التحقق من المنتجات القابلة للتقسيط
+  const [installmentEligibleItems, setInstallmentEligibleItems] = useState<any[]>([]);
+  const [hasInstallmentItems, setHasInstallmentItems] = useState(false);
 
   // Check if all items are clothing (COD only for clothing)
   const clothingCategories = [
@@ -145,6 +160,41 @@ export default function CheckoutPage() {
     setMounted(true);
   }, []);
 
+  // التحقق من المنتجات القابلة للتقسيط
+  useEffect(() => {
+    const checkInstallmentEligibility = async () => {
+      if (items.length === 0) {
+        setHasInstallmentItems(false);
+        setInstallmentEligibleItems([]);
+        return;
+      }
+      
+      try {
+        // جلب معلومات المنتجات من API
+        const productIds = items.map(item => item.id).join(',');
+        const response = await fetch(`/api/products/check-installment?ids=${productIds}`);
+        
+        const data = await response.json();
+        
+        if (data.success && data.products && Array.isArray(data.products)) {
+          const eligibleItems = items.filter(item => 
+            data.products.find((p: any) => p.id === item.id && p.allowInstallment === true)
+          );
+          setInstallmentEligibleItems(eligibleItems);
+          setHasInstallmentItems(eligibleItems.length > 0);
+        } else {
+          setHasInstallmentItems(false);
+          setInstallmentEligibleItems([]);
+        }
+      } catch (error) {
+        setHasInstallmentItems(false);
+        setInstallmentEligibleItems([]);
+      }
+    };
+    
+    checkInstallmentEligibility();
+  }, [items]);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login");
@@ -185,6 +235,27 @@ export default function CheckoutPage() {
       }));
     }
   }, [session]);
+
+  // Check if returning from installment agreement completion
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const installmentCompleted = urlParams.get('installmentAgreementCompleted');
+    
+    if (installmentCompleted === 'true') {
+      // Get installment documents from sessionStorage
+      const storedDocs = sessionStorage.getItem('installmentDocuments');
+      if (storedDocs) {
+        const docs = JSON.parse(storedDocs);
+        // We have the documents, now we can proceed with order creation
+        // The documents will be used when submitting the order
+        toast.success('تم توثيق الكمبيالة بنجاح! يمكنك الآن إتمام الطلب', {
+          duration: 5000
+        });
+      }
+    }
+  }, []);
 
   // Auto-select payment method based on cart items
   useEffect(() => {
@@ -521,6 +592,83 @@ export default function CheckoutPage() {
     }
   };
 
+  // Installment Documents handlers
+  const handleIdCardFrontChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error("يرجى اختيار صورة فقط");
+        return;
+      }
+      setIdCardFront(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setIdCardFrontPreview(reader.result as string);
+      reader.readAsDataURL(file);
+      toast.success("تم اختيار صورة البطاقة الأمامية");
+    }
+  };
+
+  const handleIdCardBackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error("يرجى اختيار صورة فقط");
+        return;
+      }
+      setIdCardBack(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setIdCardBackPreview(reader.result as string);
+      reader.readAsDataURL(file);
+      toast.success("تم اختيار صورة البطاقة الخلفية");
+    }
+  };
+
+  const handleSignedPromissoryNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error("يرجى اختيار صورة فقط");
+        return;
+      }
+      setSignedPromissoryNote(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setSignedPromissoryNotePreview(reader.result as string);
+      reader.readAsDataURL(file);
+      toast.success("تم اختيار صورة الكمبيالة الموقعة");
+    }
+  };
+
+  const handleFirstPaymentReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error("يرجى اختيار صورة فقط");
+        return;
+      }
+      setFirstPaymentReceipt(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setFirstPaymentReceiptPreview(reader.result as string);
+      reader.readAsDataURL(file);
+      toast.success("تم اختيار صورة إيصال الدفعة الأولى");
+    }
+  };
+
   // رفع صورة الإيصال إلى Cloudinary عبر API
   const uploadReceiptToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
@@ -590,8 +738,22 @@ export default function CheckoutPage() {
       }
     }
 
-    if (paymentMethod.startsWith('INSTALLMENT_') && !selectedInstallmentPlan) {
-      toast.error("يرجى اختيار خطة التقسيط");
+    // للتقسيط: التحويل لصفحة الكمبيالة
+    if (paymentMethod === 'INSTALLMENT_4') {
+      // حفظ بيانات الطلب في session storage
+      sessionStorage.setItem('checkoutData', JSON.stringify({
+        items: items,
+        deliveryMethod: deliveryMethod,
+        formData: formData,
+        deliveryFee: deliveryFee,
+        selectedAddress: selectedAddress,
+        selectedPickupLocation: selectedPickupLocation,
+        paymentMethod: paymentMethod
+      }));
+      
+      // التوجيه لصفحة الكمبيالة
+      const totalAmount = getTotalPrice() + deliveryFee;
+      router.push(`/installment-agreement?totalAmount=${totalAmount}&downPayment=${totalAmount/4}&installments=4&monthlyAmount=${totalAmount/4}`);
       return;
     }
 
@@ -670,6 +832,36 @@ export default function CheckoutPage() {
         setUploadingWePayReceipt(false);
       }
 
+      // رفع مستندات التقسيط إلى Cloudinary (أو جلبها من sessionStorage)
+      let idCardFrontUrl: string | undefined;
+      let idCardBackUrl: string | undefined;
+      let signedPromissoryNoteUrl: string | undefined;
+      let firstPaymentReceiptUrl: string | undefined;
+      
+      if (paymentMethod === 'INSTALLMENT_4') {
+        // تحقق من وجود مستندات محفوظة من صفحة الكمبيالة
+        const storedDocs = sessionStorage.getItem('installmentDocuments');
+        
+        if (storedDocs) {
+          // استخدام المستندات من صفحة الكمبيالة
+          const docs = JSON.parse(storedDocs);
+          idCardFrontUrl = docs.nationalIdImage;
+          idCardBackUrl = docs.nationalIdImage; // نفس البطاقة (الصفحة الحالية تجمع front/back)
+          signedPromissoryNoteUrl = docs.signature;
+          firstPaymentReceiptUrl = docs.selfieImage; // نستخدم السيلفي كإثبات
+          
+          toast.success("تم استخدام المستندات الموثقة من الكمبيالة ✓");
+          
+        } else {
+          // لا توجد مستندات - إعادة توجيه لصفحة الكمبيالة
+          toast.error("يرجى توثيق الكمبيالة أولاً");
+          const totalAmount = getTotalPrice() + deliveryFee;
+          router.push(`/installment-agreement?totalAmount=${totalAmount}&downPayment=${totalAmount/4}&installments=4&monthlyAmount=${totalAmount/4}`);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       // تجميع العنوان الكامل للتوصيل المنزلي
       const fullAddress = deliveryMethod === 'HOME_DELIVERY' ? [
         formData.street,
@@ -719,12 +911,22 @@ export default function CheckoutPage() {
       // إضافة بيانات الأقساط إذا كانت الدفع بالتقسيط
       if (paymentMethod.startsWith('INSTALLMENT_') && selectedInstallmentPlan) {
         orderData.installmentPlan = {
-          totalAmount: selectedInstallmentPlan.totalWithInterest,
-          downPayment: selectedInstallmentPlan.downPayment,
-          monthlyAmount: selectedInstallmentPlan.monthlyAmount,
-          numberOfMonths: selectedInstallmentPlan.months,
-          interestRate: selectedInstallmentPlan.interestRate,
+          totalAmount: selectedInstallmentPlan.totalAmount || finalTotal,
+          firstPayment: selectedInstallmentPlan.firstPayment || (finalTotal / 4),
+          monthlyAmount: selectedInstallmentPlan.monthlyPayment || (finalTotal / 4),
+          numberOfMonths: selectedInstallmentPlan.months || 4,
+          remainingPayments: selectedInstallmentPlan.remainingPayments || 3,
         };
+        
+        // إضافة مستندات التقسيط
+        if (paymentMethod === 'INSTALLMENT_4') {
+          orderData.installmentDocuments = {
+            idCardFront: idCardFrontUrl,
+            idCardBack: idCardBackUrl,
+            signedPromissoryNote: signedPromissoryNoteUrl,
+            firstPaymentReceipt: firstPaymentReceiptUrl,
+          };
+        }
       }
 
       const response = await fetch("/api/orders", {
@@ -743,6 +945,10 @@ export default function CheckoutPage() {
       const order = await response.json();
       
       clearCart();
+      
+      // مسح المستندات المحفوظة
+      sessionStorage.removeItem('installmentDocuments');
+      sessionStorage.removeItem('checkoutData');
       
       if (deliveryMethod === 'STORE_PICKUP') {
         toast.success(`تم إنشاء الطلب بنجاح! 🎉\nالمبلغ المدفوع مقدماً: ${downPayment.toFixed(2)} ج.م\nالمبلغ المتبقي: ${remainingAmount.toFixed(2)} ج.م`);
@@ -1103,6 +1309,53 @@ export default function CheckoutPage() {
                             <p className="text-gray-300 text-sm mt-1">
                               دفع فوري وآمن بالبطاقة بضغطة واحدة
                             </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 🏦 التقسيط على 4 دفعات - SIMPLE VERSION */}
+                    {checkoutSettings.paymentMethodInstallment && hasInstallmentItems && (
+                      <div
+                        onClick={() => {
+                          setPaymentMethod('INSTALLMENT_4');
+                          // تعيين خطة التقسيط تلقائياً
+                          setSelectedInstallmentPlan({
+                            months: 4,
+                            monthlyPayment: finalTotal / 4,
+                            firstPayment: finalTotal / 4,
+                            remainingPayments: 3,
+                            totalAmount: finalTotal
+                          });
+                        }}
+                        className={`cursor-pointer border-2 rounded-xl p-4 transition-all ${
+                          paymentMethod === 'INSTALLMENT_4'
+                            ? 'border-blue-500 bg-blue-900/30 shadow-lg'
+                            : 'border-gray-600 bg-gray-700/30 hover:border-blue-500'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            paymentMethod === 'INSTALLMENT_4'
+                              ? 'border-blue-500 bg-blue-500'
+                              : 'border-gray-500'
+                          }`}>
+                            {paymentMethod === 'INSTALLMENT_4' && (
+                              <div className="w-3 h-3 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                              <Calendar className="w-5 h-5 text-blue-400" />
+                              🏦 التقسيط على 4 دفعات
+                              <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full animate-pulse">🔥 جديد</span>
+                            </h3>
+                            <p className="text-gray-300 text-sm mt-1">
+                              قسّط مشترياتك - دفع {(finalTotal / 4).toFixed(0)} ج × 4 دفعات
+                            </p>
+                            <div className="mt-2 text-xs text-emerald-300 bg-emerald-900/20 border border-emerald-500/30 rounded px-2 py-1 inline-block">
+                              ✅ {installmentEligibleItems.length} منتج قابل للتقسيط
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1836,38 +2089,245 @@ export default function CheckoutPage() {
                   </div>
                   )}
 
-                  {/* Installment */}
-                  {checkoutSettings.paymentMethodInstallment && (
-                    <div
-                      className={`relative border-2 rounded-lg p-4 transition-all opacity-60 cursor-not-allowed ${
-                        'border-gray-600 bg-gray-700/30'
-                      }`}
-                    >
-                    {/* Badge "قريباً" */}
-                    <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                      قريباً ⭐
-                    </div>
-                    
-                    <div className="flex items-start gap-4">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 border-gray-500`}>
-                        {/* Disabled */}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Calendar className="w-5 h-5 text-purple-400" />
-                          <h3 className="text-lg font-bold text-white">
-                            ValU - الدفع بالتقسيط
-                          </h3>
+                  {/* Installment Documents Upload */}
+                  {paymentMethod === 'INSTALLMENT_4' && (
+                    <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 rounded-xl p-6 border-2 border-blue-500/30 animate-in fade-in duration-300">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="bg-blue-500/20 p-3 rounded-full">
+                          📄
                         </div>
-                        <p className="text-gray-300 text-sm mb-2">
-                          قسّط مشترياتك على 4، 6، 12، أو 24 شهر مع ValU
+                        <div>
+                          <h3 className="text-2xl font-bold text-white">المستندات المطلوبة للتقسيط</h3>
+                          <p className="text-blue-200 text-sm">يرجى رفع جميع المستندات لإتمام الطلب</p>
+                        </div>
+                      </div>
+
+                      {/* First Payment Amount */}
+                      <div className="bg-emerald-500/20 border border-emerald-500/40 rounded-lg p-4 mb-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-emerald-100 text-sm">الدفعة الأولى المطلوبة:</p>
+                            <p className="text-3xl font-black text-white">{(finalTotal / 4).toFixed(0)} جنيه</p>
+                          </div>
+                          <div className="text-5xl">💰</div>
+                        </div>
+                        <p className="text-emerald-200 text-xs mt-2">
+                          حوّل على محفظة WE Pay: <span className="font-bold text-white">01555512778</span>
                         </p>
-                        <div className="bg-purple-900/20 border border-purple-500/30 rounded p-2 text-xs text-purple-300">
-                          <strong>قريباً:</strong> سنوفر قريباً خدمة التقسيط بالتعاون مع ValU
+                      </div>
+
+                      <div className="space-y-4">
+                        {/* ID Card Front */}
+                        <div className="bg-gray-800/50 rounded-lg p-4">
+                          <label className="block text-white font-semibold mb-3 flex items-center gap-2">
+                            <span className="text-2xl">🆔</span>
+                            صورة البطاقة الشخصية (الوجه الأمامي) *
+                          </label>
+                          {idCardFrontPreview ? (
+                            <div className="relative">
+                              <img 
+                                src={idCardFrontPreview || ''} 
+                                alt="معاينة البطاقة الأمامية" 
+                                className="w-full h-48 object-cover rounded-lg border-2 border-blue-500"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2"
+                                onClick={() => {
+                                  setIdCardFront(null);
+                                  setIdCardFrontPreview(null);
+                                }}
+                              >
+                                حذف
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <input
+                                type="file"
+                                id="id-card-front"
+                                accept="image/*"
+                                onChange={handleIdCardFrontChange}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor="id-card-front"
+                                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-500 rounded-lg cursor-pointer hover:bg-blue-900/20 transition-colors"
+                              >
+                                <Package className="w-8 h-8 text-blue-400 mb-2" />
+                                <span className="text-sm text-blue-300">اضغط لاختيار صورة البطاقة الأمامية</span>
+                                <span className="text-xs text-gray-400 mt-1">PNG, JPG أو JPEG - حد أقصى 5MB</span>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* ID Card Back */}
+                        <div className="bg-gray-800/50 rounded-lg p-4">
+                          <label className="block text-white font-semibold mb-3 flex items-center gap-2">
+                            <span className="text-2xl">🆔</span>
+                            صورة البطاقة الشخصية (الوجه الخلفي) *
+                          </label>
+                          {idCardBackPreview ? (
+                            <div className="relative">
+                              <img 
+                                src={idCardBackPreview || ''} 
+                                alt="معاينة البطاقة الخلفية" 
+                                className="w-full h-48 object-cover rounded-lg border-2 border-blue-500"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2"
+                                onClick={() => {
+                                  setIdCardBack(null);
+                                  setIdCardBackPreview(null);
+                                }}
+                              >
+                                حذف
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <input
+                                type="file"
+                                id="id-card-back"
+                                accept="image/*"
+                                onChange={handleIdCardBackChange}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor="id-card-back"
+                                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-500 rounded-lg cursor-pointer hover:bg-blue-900/20 transition-colors"
+                              >
+                                <Package className="w-8 h-8 text-blue-400 mb-2" />
+                                <span className="text-sm text-blue-300">اضغط لاختيار صورة البطاقة الخلفية</span>
+                                <span className="text-xs text-gray-400 mt-1">PNG, JPG أو JPEG - حد أقصى 5MB</span>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Signed Promissory Note */}
+                        <div className="bg-gray-800/50 rounded-lg p-4">
+                          <label className="block text-white font-semibold mb-3 flex items-center gap-2">
+                            <span className="text-2xl">📝</span>
+                            صورة الكمبيالة الموقعة *
+                          </label>
+                          <p className="text-yellow-200 text-sm mb-2 bg-yellow-900/20 border border-yellow-500/30 rounded p-2">
+                            💡 يرجى تحميل نموذج الكمبيالة، التوقيع عليها، ثم رفع صورة منها
+                          </p>
+                          {signedPromissoryNotePreview ? (
+                            <div className="relative">
+                              <img 
+                                src={signedPromissoryNotePreview || ''} 
+                                alt="معاينة الكمبيالة" 
+                                className="w-full h-48 object-cover rounded-lg border-2 border-blue-500"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2"
+                                onClick={() => {
+                                  setSignedPromissoryNote(null);
+                                  setSignedPromissoryNotePreview(null);
+                                }}
+                              >
+                                حذف
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <input
+                                type="file"
+                                id="signed-promissory-note"
+                                accept="image/*"
+                                onChange={handleSignedPromissoryNoteChange}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor="signed-promissory-note"
+                                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-500 rounded-lg cursor-pointer hover:bg-blue-900/20 transition-colors"
+                              >
+                                <Package className="w-8 h-8 text-blue-400 mb-2" />
+                                <span className="text-sm text-blue-300">اضغط لاختيار صورة الكمبيالة الموقعة</span>
+                                <span className="text-xs text-gray-400 mt-1">PNG, JPG أو JPEG - حد أقصى 5MB</span>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* First Payment Receipt */}
+                        <div className="bg-gray-800/50 rounded-lg p-4">
+                          <label className="block text-white font-semibold mb-3 flex items-center gap-2">
+                            <span className="text-2xl">🧾</span>
+                            صورة إيصال الدفعة الأولى (WE Pay) *
+                          </label>
+                          <p className="text-emerald-200 text-sm mb-2 bg-emerald-900/20 border border-emerald-500/30 rounded p-2">
+                            💰 يرجى تحويل {(finalTotal / 4).toFixed(0)} ج على محفظة WE Pay: <span className="font-bold">01555512778</span>
+                          </p>
+                          {firstPaymentReceiptPreview ? (
+                            <div className="relative">
+                              <img 
+                                src={firstPaymentReceiptPreview || ''} 
+                                alt="معاينة إيصال الدفعة الأولى" 
+                                className="w-full h-48 object-cover rounded-lg border-2 border-emerald-500"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2"
+                                onClick={() => {
+                                  setFirstPaymentReceipt(null);
+                                  setFirstPaymentReceiptPreview(null);
+                                }}
+                              >
+                                حذف
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <input
+                                type="file"
+                                id="first-payment-receipt"
+                                accept="image/*"
+                                onChange={handleFirstPaymentReceiptChange}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor="first-payment-receipt"
+                                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-emerald-500 rounded-lg cursor-pointer hover:bg-emerald-900/20 transition-colors"
+                              >
+                                <Package className="w-8 h-8 text-emerald-400 mb-2" />
+                                <span className="text-sm text-emerald-300">اضغط لاختيار صورة إيصال الدفعة الأولى</span>
+                                <span className="text-xs text-gray-400 mt-1">PNG, JPG أو JPEG - حد أقصى 5MB</span>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Important Notes */}
+                      <div className="mt-6 bg-amber-900/20 border border-amber-500/40 rounded-lg p-4">
+                        <div className="flex items-start gap-2">
+                          <div className="text-amber-200 mt-0.5">⚠️</div>
+                          <div className="text-amber-100 text-sm space-y-1">
+                            <p><strong>ملاحظات هامة:</strong></p>
+                            <ul className="list-disc list-inside space-y-1 mr-4">
+                              <li>جميع المستندات مطلوبة لإتمام عملية التقسيط</li>
+                              <li>يجب أن تكون صور المستندات واضحة وقابلة للقراءة</li>
+                              <li>الدفعة الأولى تمثل 25% من إجمالي المبلغ</li>
+                              <li>باقي المبلغ يُقسط على 3 دفعات متساوية</li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
                   )}
 
                   {/* Installment Calculator */}

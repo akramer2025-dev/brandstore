@@ -41,6 +41,7 @@ interface Product {
   stock: number;
   images: string | null;
   categoryId: string;
+  allowInstallment?: boolean;
   category: {
     id: string;
     nameAr: string;
@@ -90,6 +91,7 @@ export default function ProductDetailPage() {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(false);
   const { addItem } = useCartStore();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
@@ -251,14 +253,8 @@ export default function ProductDetailPage() {
       } : undefined,
     });
 
-    toast.success(
-      selectedVariant 
-        ? `تمت إضافة ${product.nameAr} - ${selectedVariant.nameAr} للسلة ✅`
-        : "تمت الإضافة إلى السلة ✅",
-      {
-        icon: <Check className="w-4 h-4" />,
-      }
-    );
+    // إظهار الـ modal بدلاً من toast
+    setShowCartModal(true);
   };
 
   const incrementQuantity = () => {
@@ -432,11 +428,24 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Price & Stock */}
-            <div className="flex items-baseline gap-2 sm:gap-4">
-              <span className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
-                {getCurrentPrice().toLocaleString()}
-              </span>
-              <span className="text-lg sm:text-xl md:text-2xl text-gray-600">جنيه</span>
+            <div className="space-y-3">
+              <div className="flex items-baseline gap-2 sm:gap-4">
+                <span className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+                  {getCurrentPrice().toLocaleString()}
+                </span>
+                <span className="text-lg sm:text-xl md:text-2xl text-gray-600">جنيه</span>
+              </div>
+              
+              {/* Installment Badge */}
+              {product.allowInstallment && (
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg text-sm font-bold shadow-lg animate-pulse">
+                  <span className="text-lg">🏦</span>
+                  <span>متاح التقسيط على 4 دفعات</span>
+                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                    {(getCurrentPrice() / 4).toFixed(0)} ج × 4
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Variants Selection - المقاسات */}
@@ -916,6 +925,74 @@ export default function ProductDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Cart Modal */}
+      {showCartModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in slide-in-from-bottom duration-300">
+            {/* Success Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <Check className="w-10 h-10 text-green-600" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-2xl font-bold text-center text-gray-900 mb-2">
+              تمت الإضافة للسلة! 🎉
+            </h3>
+            
+            {/* Product Info */}
+            <div className="bg-gray-50 rounded-xl p-4 mb-6 flex gap-3 items-center">
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                <Image
+                  src={images[0] || '/placeholder.jpg'}
+                  alt={product?.nameAr || ''}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-gray-900 line-clamp-1">{product?.nameAr}</p>
+                {selectedVariant && (
+                  <p className="text-sm text-gray-600">المقاس: {selectedVariant.nameAr}</p>
+                )}
+                <p className="text-purple-600 font-bold">
+                  {getCurrentPrice().toLocaleString()} جنيه × {quantity}
+                </p>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => setShowCartModal(false)}
+                variant="outline"
+                className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50 font-bold py-6 text-base"
+              >
+                <ShoppingCart className="w-5 h-5 ml-2" />
+                كمل شراء
+              </Button>
+              <Link href="/cart">
+                <Button
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-6 text-base"
+                >
+                  <Package className="w-5 h-5 ml-2" />
+                  عرض السلة
+                </Button>
+              </Link>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowCartModal(false)}
+              className="absolute top-4 left-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

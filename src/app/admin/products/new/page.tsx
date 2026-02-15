@@ -38,6 +38,7 @@ export default function NewProductPage() {
     sku: "",
     sizes: [] as string[],
     colors: [] as string[],
+    allowInstallment: false, // هل المنتج قابل للتقسيط
   });
 
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -278,6 +279,7 @@ export default function NewProductPage() {
           images: images.join(','),
           sizes: formData.sizes.join(','),
           colors: formData.colors.join(','),
+          allowInstallment: formData.allowInstallment, // إرسال حالة التقسيط
         }),
       });
 
@@ -663,6 +665,30 @@ export default function NewProductPage() {
                       </span>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* إعدادات الدفع */}
+              <div className="space-y-3 border-t pt-4">
+                <Label className="text-lg font-bold text-teal-700">💳 إعدادات الدفع</Label>
+                
+                {/* التقسيط */}
+                <div className="flex items-center gap-3 p-4 bg-purple-50 border-2 border-purple-200 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="allowInstallment"
+                    checked={formData.allowInstallment}
+                    onChange={(e) => setFormData({ ...formData, allowInstallment: e.target.checked })}
+                    className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="allowInstallment" className="cursor-pointer font-semibold text-purple-900">
+                      🏦 المنتج قابل للتقسيط (4 دفعات)
+                    </label>
+                    <p className="text-xs text-purple-700 mt-1">
+                      إذا فعّلت هذا الخيار، سيتمكن العملاء من شراء هذا المنتج بالتقسيط على 4 دفعات
+                    </p>
+                  </div>
                 </div>
               </div>
 

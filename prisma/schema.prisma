@@ -42,6 +42,7 @@ model User {
   fcmDeviceTokens  FCMDeviceToken[] // FCM tokens للتطبيقات الموبايل
   activityLogs     UserActivityLog[] // سجل النشاط
   sheinOrders      SheinOrder[] // طلبات شي إن
+  installmentAgreements InstallmentAgreement[] // اتفاقيات التقسيط
   
   partner          PartnerCapital? @relation(fields: [partnerId], references: [id])
 
@@ -264,6 +265,7 @@ model Product {
   
   // ============ إعدادات الدفع ============
   allowCashOnDelivery Boolean    @default(true) // هل يسمح بالدفع عند الاستلام
+  allowInstallment    Boolean    @default(false) // هل المنتج قابل للتقسيط (4 دفعات)
   
   // ============ نظام المنتجات الوسيط (Consignment/Dropship) ============
   productSource   ProductSource  @default(OWNED)     // مصدر المنتج: مملوك أو وسيط
@@ -391,6 +393,7 @@ model Order {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   installmentPlan  InstallmentPlan?
+  installmentAgreement InstallmentAgreement? // اتفاقية التقسيط
   items            OrderItem[]
   customer         User              @relation(fields: [customerId], references: [id])
   deliveryStaff    DeliveryStaff?    @relation(fields: [deliveryStaffId], references: [id])
@@ -1810,5 +1813,68 @@ enum SheinOrderStatus {
   DELIVERED         // تم التسليم
   COMPLETED         // مكتمل
   CANCELLED         // ملغي
+}
+
+// ============ نظام اتفاقية التقسيط (Installment Agreement) ============
+model InstallmentAgreement {
+  id                    String   @id @default(cuid())
+  userId                String
+  orderId               String?  @unique // الطلب المرتبط (بعد الموافقة)
+  
+  // 📄 بيانات الاتفاقية
+  agreementNumber       String   @unique // رقم الاتفاقية
+  status                InstallmentAgreementStatus @default(PENDING)
+  
+  // 🆔 المستندات المطلوبة (الخطوات الثلاثة)
+  nationalIdImage       String?  // صورة البطاقة الشخصية (Cloudinary URL)
+  signature             String?  // التوقيع الإلكتروني (base64 أو Cloudinary URL)
+  selfieImage           String?  // صورة السيلفي (Cloudinary URL)
+  
+  // 📝 بيانات العميل من البطاقة
+  fullName              String?  // الاسم الكامل
+  nationalId            String?  // رقم البطاقة
+  address               String?  // العنوان
+  
+  // 💰 تفاصيل التقسيط
+  totalAmount           Float    // المبلغ الإجمالي
+  downPayment           Float    // الدفعة المقدمة
+  numberOfInstallments  Int      // عدد الأقساط
+  monthlyInstallment    Float    // قيمة القسط الشهري
+  interestRate          Float    @default(0) // نسبة الفائدة
+  
+  // ✅ حالة الموافقة
+  acceptedTerms         Boolean  @default(false) // قبول الشروط
+  acceptedAt            DateTime? // وقت الموافقة
+  
+  // 👤 معلومات إضافية
+  ip                    String?  // IP address
+  userAgent             String?  // Browser info
+  
+  // 🔒 بيانات التدقيق
+  verifiedBy            String?  // من قام بالتدقيق (admin/developer)
+  verifiedAt            DateTime? // وقت التدقيق
+  verificationNotes     String?  // ملاحظات التدقيق
+  rejectionReason       String?  // سبب الرفض (إن وجد)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order                 Order?   @relation(fields: [orderId], references: [id])
+  
+  @@map("installment_agreements")
+  @@index([userId])
+  @@index([status])
+  @@index([agreementNumber])
+  @@index([createdAt(sort: Desc)])
+}
+
+enum InstallmentAgreementStatus {
+  PENDING              // في انتظار استكمال المستندات
+  DOCUMENTS_COMPLETE   // المستندات مكتملة - في انتظار المراجعة
+  UNDER_REVIEW         // تحت المراجعة من الإدارة
+  APPROVED             // تمت الموافقة
+  REJECTED             // مرفوض
+  EXPIRED              // منتهي الصلاحية
 }
 
