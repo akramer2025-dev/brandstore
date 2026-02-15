@@ -164,6 +164,17 @@ export async function PUT(
     const { id } = await params;
     const data = await req.json();
 
+    console.log('🔍 تحديث المنتج - البيانات الواردة:', {
+      productId: id,
+      nameAr: data.nameAr,
+      price: data.price,
+      priceType: typeof data.price,
+      stock: data.stock,
+      sizes: data.sizes,
+      colors: data.colors,
+      variants: data.variants?.length || 0,
+    });
+
     // التحقق من أن المنتج يخص هذا الشريك
     const existingProduct = await prisma.product.findFirst({
       where: { 
@@ -183,18 +194,18 @@ export async function PUT(
     const product = await prisma.$transaction(async (tx) => {
       // تحضير بيانات التحديث
       const updateData: any = {
-        name: data.name || existingProduct.name,
+        name: data.name || data.nameAr || existingProduct.name,
         nameAr: data.nameAr || existingProduct.nameAr,
-        description: data.description,
-        descriptionAr: data.descriptionAr,
-        price: data.price ? parseFloat(data.price) : existingProduct.price,
-        originalPrice: data.originalPrice ? parseFloat(data.originalPrice) : null,
-        stock: data.stock !== undefined ? parseInt(data.stock) : existingProduct.stock,
+        description: data.description !== undefined ? data.description : existingProduct.description,
+        descriptionAr: data.descriptionAr !== undefined ? data.descriptionAr : existingProduct.descriptionAr,
+        price: data.price !== undefined && data.price !== null ? parseFloat(data.price.toString()) : existingProduct.price,
+        originalPrice: data.originalPrice !== undefined && data.originalPrice !== null && data.originalPrice !== '' ? parseFloat(data.originalPrice.toString()) : existingProduct.originalPrice,
+        stock: data.stock !== undefined && data.stock !== null ? parseInt(data.stock.toString()) : existingProduct.stock,
         images: data.images || existingProduct.images,
         isVisible: data.isVisible !== undefined ? data.isVisible : existingProduct.isVisible,
-        sizes: data.sizes || existingProduct.sizes,
-        colors: data.colors || existingProduct.colors,
-        productionCost: data.productionCost ? parseFloat(data.productionCost) : existingProduct.productionCost,
+        sizes: data.sizes !== undefined ? data.sizes : existingProduct.sizes,
+        colors: data.colors !== undefined ? data.colors : existingProduct.colors,
+        productionCost: data.productionCost !== undefined && data.productionCost !== null && data.productionCost !== '' ? parseFloat(data.productionCost.toString()) : existingProduct.productionCost,
         categoryId: data.categoryId || existingProduct.categoryId,
       };
 
@@ -240,6 +251,14 @@ export async function PUT(
           variants: true,
         }
       });
+    });
+
+    console.log('✅ تم تحديث المنتج بنجاح:', {
+      productId: product.id,
+      nameAr: product.nameAr,
+      price: product.price,
+      stock: product.stock,
+      variants: product.variants.length,
     });
 
     return NextResponse.json({ 
