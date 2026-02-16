@@ -193,36 +193,7 @@ async function getProductsByCategory(categoryId: string, limit = 12) {
     console.error('Error fetching products by category:', error);
     return [];
   }
-}select: {
-        id: true,
-        nameAr: true,
-        image: true,
-        _count: {
-          select: { products: true }
-        }
-      },
-      where: {
-        products: {
-          some: {} // فقط الفئات التي تحتوي على منتجات
-        }
-      }
-    });
-    
-    // ترتيب حسب عدد المنتجات (الأكثر منتجات أولاً)
-    return categories
-      .sort((a, b) => b._count.products - a._count.products)
-      .slice(0, 12); // عرض أول 12 فئة فقط
-    });
-    
-    // ترتيب حسب عدد المنتجات (الأكثر منتجات أولاً) ثم عرض جميع الفئات
-    return categories
-      .sort((a, b) => b._count.products - a._count.products);
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return [];
-  }
 }
-
 
 async function getTopReviews() {
   try {
