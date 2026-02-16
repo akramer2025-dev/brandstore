@@ -287,8 +287,8 @@ function InstallmentAgreementContent() {
     }
   };
   
-  // Capture photo from camera
-  const capturePhoto = () => {
+  // Capture photo from camera with identity verification
+  const capturePhoto = async () => {
     if (!videoRef.current) {
       toast.error('الفيديو غير متاح');
       return;
@@ -320,19 +320,58 @@ function InstallmentAgreementContent() {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
       // تحويل إلى blob
-      canvas.toBlob((blob) => {
+      canvas.toBlob(async (blob) => {
         if (blob) {
           const file = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
           const reader = new FileReader();
-          reader.onloadend = () => {
+          reader.onloadend = async () => {
+            const selfieDataUrl = reader.result as string;
+            
+            // حفظ الصورة مؤقتاً
             setFormData(prev => ({
               ...prev,
               selfieImage: file,
-              selfiePreview: reader.result as string
+              selfiePreview: selfieDataUrl
             }));
             stopCamera();
-            toast.success('✓ تم التقاط الصورة بنجاح');
+            
+            toast.success('✓ تم التقاط الصورة');
             console.log('✅ تم حفظ الصورة:', file.size, 'bytes');
+            
+            // التحقق من الهوية إذا كان عنده صورة البطاقة
+            if (formData.nationalIdPreview) {
+              toast.loading('جاري التحقق من الهوية...', { id: 'verify' });
+              
+              try {
+                const verifyResponse = await fetch('/api/verify-identity', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    nationalIdImage: formData.nationalIdPreview,
+                    selfieImage: selfieDataUrl,
+                    fullName: formData.fullName
+                  })
+                });
+                
+                const verifyData = await verifyResponse.json();
+                
+                if (verifyData.success && verifyData.verified) {
+                  toast.success('✅ تم التحقق من الهوية بنجاح!', { id: 'verify' });
+                  console.log('✅ التحقق من الهوية:', verifyData);
+                } else {
+                  toast.error('❌ فشل التحقق: ' + verifyData.error, { id: 'verify', duration: 5000 });
+                  // إعادة تعيين السيلفي للمحاولة مرة أخرى
+                  setFormData(prev => ({
+                    ...prev,
+                    selfieImage: null,
+                    selfiePreview: null
+                  }));
+                }
+              } catch (verifyError) {
+                console.error('❌ خطأ في التحقق:', verifyError);
+                toast.warning('تعذر التحقق من الهوية. سيتم المراجعة يدوياً', { id: 'verify' });
+              }
+            }
           };
           reader.onerror = () => {
             toast.error('فشل قراءة الصورة');
@@ -922,69 +961,24 @@ function InstallmentAgreementContent() {
                 </Label>
                 
                 {!cameraActive && !formData.selfiePreview && (
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-3">
+                    <div className="bg-red-900/20 border border-red-600/50 rounded-lg p-3">
+                      <p className="text-red-200 text-sm font-bold">
+                        🚨 <strong>إجباري:</strong> يجب التقاط صورة سيلفي مباشرة بالكاميرا
+                      </p>
+                      <p className="text-red-300 text-xs mt-1">
+                        ⚠️ لا يمكن رفع صور محفوظة - للتأكد من هويتك
+                      </p>
+                    </div>
+                    
                     <Button
                       type="button"
                       onClick={startCamera}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4"
                     >
                       <Camera className="w-5 h-5 ml-2" />
-                      📷 تشغيل الكاميرا
+                      📷 تشغيل الكاميرا والتقاط صورة سيلفي
                     </Button>
-                    
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-600"></div>
-                      </div>
-                      <div className="relative flex justify-center text-xs">
-                        <span className="px-2 bg-gray-800 text-gray-400">أو</span>
-                      </div>
-                    </div>
-                    
-                    <Label
-                      htmlFor="selfieUpload"
-                      className="flex items-center justify-center gap-2 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg cursor-pointer transition-all"
-                    >
-                      <Upload className="w-5 h-5" />
-                      📂 رفع صورة من الجهاز
-                    </Label>
-                    <Input
-                      id="selfieUpload"
-                      type="file"
-                      accept="image/*"
-                      capture="user"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        
-                        if (!file.type.startsWith('image/')) {
-                          toast.error('يرجى اختيار صورة صحيحة');
-                          return;
-                        }
-                        
-                        if (file.size > 5 * 1024 * 1024) {
-                          toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
-                          return;
-                        }
-                        
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setFormData(prev => ({
-                            ...prev,
-                            selfieImage: file,
-                            selfiePreview: reader.result as string
-                          }));
-                          toast.success('✓ تم رفع صورة السيلفي بنجاح');
-                        };
-                          reader.readAsDataURL(file);
-                        }}
-                        className="hidden"
-                      />
-                      
-                      <p className="text-gray-400 text-xs text-center">
-                        💡 يمكنك استخدام الكاميرا مباشرة أو رفع صورة محفوظة
-                      </p>
-                    </div>
                   </div>
                 )}
                 
