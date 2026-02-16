@@ -173,9 +173,10 @@ export default function CheckoutPage() {
         return;
       }
       
-      console.log('🛒 [INSTALLMENT CHECK] فحص المنتجات في السلة:', {
-        itemsCount: items.length,
-        items: items.map(i => ({ id: i.id, name: i.name, price: i.price }))
+      console.log('🛒 [INSTALLMENT CHECK] فحص المنتجات في السلة:');
+      console.log('  - itemsCount:', items.length);
+      items.forEach((item, index) => {
+        console.log(`  - [${index + 1}] ${item.name || item.nameAr}: ${item.price} ج (ID: ${item.id})`);
       });
       
       try {
@@ -184,16 +185,18 @@ export default function CheckoutPage() {
         const response = await fetch(`/api/products/check-installment?ids=${productIds}`);
         
         const data = await response.json();
-        console.log('📦 [INSTALLMENT API] نتيجة API:', data);
+        console.log('📦 [INSTALLMENT API] نتيجة API:');
+        console.log('  - success:', data.success);
+        console.log('  - products count:', data.products?.length || 0);
+        console.log('  - products:', data.products);
         
         if (data.success && data.products && Array.isArray(data.products)) {
           const eligibleItems = items.filter(item => 
             data.products.find((p: any) => p.id === item.id && p.allowInstallment === true)
           );
-          console.log('✅ [INSTALLMENT CHECK] المنتجات القابلة للتقسيط:', {
-            eligibleCount: eligibleItems.length,
-            eligibleItems: eligibleItems.map(i => ({ id: i.id, name: i.name }))
-          });
+          console.log('✅ [INSTALLMENT CHECK] المنتجات القابلة للتقسيط:');
+          console.log('  - eligibleCount:', eligibleItems.length);
+          console.log('  - eligibleItems:', eligibleItems.map(i => ({ id: i.id, name: i.name })));
           setInstallmentEligibleItems(eligibleItems);
           setHasInstallmentItems(eligibleItems.length > 0);
         } else {
@@ -374,12 +377,11 @@ export default function CheckoutPage() {
         
         // Load checkout settings
         const installmentSettingRaw = settings.find((s: any) => s.key === 'payment_method_installment');
-        console.log('🔍 [SETTINGS LOAD] payment_method_installment من Database:', {
-          found: !!installmentSettingRaw,
-          key: installmentSettingRaw?.key,
-          value: installmentSettingRaw?.value,
-          type: typeof installmentSettingRaw?.value
-        });
+        console.log('🔍 [SETTINGS LOAD] payment_method_installment من Database:');
+        console.log('  - found:', !!installmentSettingRaw);
+        console.log('  - key:', installmentSettingRaw?.key);
+        console.log('  - value:', installmentSettingRaw?.value);
+        console.log('  - type:', typeof installmentSettingRaw?.value);
         
         const checkoutSettingsData = {
           deliveryMethodHomeDelivery: settings.find((s: any) => s.key === 'delivery_method_home_delivery')?.value !== 'false',
@@ -390,12 +392,13 @@ export default function CheckoutPage() {
           paymentMethodEWallet: settings.find((s: any) => s.key === 'payment_method_e_wallet')?.value !== 'false',
           paymentMethodInstallment: settings.find((s: any) => s.key === 'payment_method_installment')?.value !== 'false',
         };
-        console.log('⚙️ [SETTINGS] إعدادات Checkout:', checkoutSettingsData);
-        console.log('💳 [INSTALLMENT SETTING] قيمة payment_method_installment:', {
-          rawValue: settings.find((s: any) => s.key === 'payment_method_installment')?.value,
-          parsedValue: checkoutSettingsData.paymentMethodInstallment,
-          willShow: checkoutSettingsData.paymentMethodInstallment ? 'نعم ✅' : 'لا ❌'
-        });
+        console.log('⚙️ [SETTINGS] إعدادات Checkout:');
+        console.log('  - paymentMethodInstallment:', checkoutSettingsData.paymentMethodInstallment);
+        console.log('  - paymentMethodCashOnDelivery:', checkoutSettingsData.paymentMethodCashOnDelivery);
+        console.log('💳 [INSTALLMENT SETTING] قيمة payment_method_installment:');
+        console.log('  - rawValue:', installmentSettingRaw?.value);
+        console.log('  - parsedValue:', checkoutSettingsData.paymentMethodInstallment);
+        console.log('  - willShow:', checkoutSettingsData.paymentMethodInstallment ? 'نعم ✅' : 'لا ❌');
         setCheckoutSettings(checkoutSettingsData);
         
         // Set default delivery method based on enabled settings
@@ -1348,21 +1351,19 @@ export default function CheckoutPage() {
                     {/* 🏦 التقسيط على 4 دفعات - SIMPLE VERSION */}
                     {(() => {
                       const shouldShowInstallment = checkoutSettings.paymentMethodInstallment && hasInstallmentItems;
-                      console.log('🔍 [RENDER CHECK] Installment Rendering:', {
-                        timestamp: new Date().toISOString(),
-                        paymentMethodInstallment: checkoutSettings.paymentMethodInstallment,
-                        hasInstallmentItems: hasInstallmentItems,
-                        itemsInCart: items.length,
-                        shouldShow: shouldShowInstallment,
-                        allSettings: checkoutSettings
-                      });
+                      
+                      // Enhanced logging with actual values
+                      console.log('🔍 [RENDER CHECK] Installment Rendering:');
+                      console.log('  ⚙️ paymentMethodInstallment:', checkoutSettings.paymentMethodInstallment);
+                      console.log('  📦 hasInstallmentItems:', hasInstallmentItems);
+                      console.log('  🛒 itemsInCart:', items.length);
+                      console.log('  ✅ shouldShow:', shouldShowInstallment);
                       
                       if (!shouldShowInstallment) {
-                        console.log('❌ [RENDER] التقسيط مخفي - السبب:', {
-                          settingDisabled: !checkoutSettings.paymentMethodInstallment,
-                          noEligibleItems: !hasInstallmentItems,
-                          cartEmpty: items.length === 0
-                        });
+                        console.log('❌ [RENDER] التقسيط مخفي - السبب:');
+                        console.log('  - settingDisabled:', !checkoutSettings.paymentMethodInstallment, '(paymentMethodInstallment =', checkoutSettings.paymentMethodInstallment, ')');
+                        console.log('  - noEligibleItems:', !hasInstallmentItems, '(hasInstallmentItems =', hasInstallmentItems, ')');
+                        console.log('  - cartEmpty:', items.length === 0, '(items.length =', items.length, ')');
                       } else {
                         console.log('✅ [RENDER] التقسيط ظاهر!');
                       }
