@@ -201,9 +201,24 @@ async function getCategories() {
 async function getProductsByCategory(categoryId: string, limit = 12) {
   try {
     return await prisma.product.findMany({
-      where: { categoryId },
+      where: { 
+        categoryId,
+        isActive: true,
+        isVisible: true,
+      },
       take: limit,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        nameAr: true,
+        price: true,
+        originalPrice: true,
+        images: true, // ✅ نتأكد من جلب الصور
+        stock: true,
+        soldCount: true,
+        badge: true,
+        isFlashDeal: true,
+        flashDealEndsAt: true,
         category: {
           select: {
             id: true,
@@ -295,6 +310,7 @@ export default async function HomePage() {
               alt=""
               width={60}
               height={60}
+              style={{ width: 'auto', height: 'auto', maxWidth: '60px', maxHeight: '60px' }}
               className="object-contain rotate-12 filter opacity-25 hover:opacity-35 transition-opacity duration-500"
               loading="lazy"
               unoptimized
@@ -307,6 +323,7 @@ export default async function HomePage() {
               alt=""
               width={50}
               height={50}
+              style={{ width: 'auto', height: 'auto', maxWidth: '50px', maxHeight: '50px' }}
               className="object-contain -rotate-12 filter opacity-20 hover:opacity-30 transition-opacity duration-700"
               loading="lazy"
               unoptimized

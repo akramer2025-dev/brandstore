@@ -28,6 +28,7 @@ interface ProductCardProps {
     };
   };
   index?: number;
+  isCompact?: boolean; // للعرض الصغير الدائري
 }
 
 // Generate consistent random rating based on product id
@@ -58,40 +59,16 @@ function generateSoldCount(productId: string): number {
   return 50 + Math.abs(hash % 950);
 }
 
-export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
+export function ProductCardPro({ product, index = 0, isCompact = false }: ProductCardProps) {
   const { addItem } = useCartStore();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   
   const inWishlist = isInWishlist(product.id);
 
-  // Intersection Observer for scroll animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '50px' }
-    );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
-    return () => {
-      if (cardRef.current) {
-        observer.unobserve(cardRef.current);
-      }
-    };
-  }, []);
+  // ⚡ أنيميشن معطل للأداء - المنتجات تظهر مباشرة
   
   // Extract first image from comma-separated images
   const firstImage = product.images 
@@ -205,18 +182,69 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
     );
   };
 
+  // ✨ العرض الصغير الدائري للشريط المتحرك - احترافي مثل Shein & Noon
+  if (isCompact) {
+    return (
+      <Link href={`/products/${product.id}`} className="block group">
+        <div className="flex flex-col items-center gap-1.5">
+          {/* صورة دائرية صغيرة احترافية */}
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-purple-200 group-hover:border-purple-500 transition-all duration-300 group-hover:scale-110 shadow-md group-hover:shadow-xl">
+            <Image
+              src={firstImage}
+              alt={product.nameAr}
+              fill
+              sizes="(max-width: 640px) 80px, 96px"
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              quality={95}
+              priority={index < 4}
+            />
+            {discount > 0 && (
+              <div className="absolute top-0 right-0 bg-gradient-to-br from-red-500 to-red-600 text-white text-[8px] sm:text-[9px] font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-bl-lg shadow-lg">
+                -{discount}%
+              </div>
+            )}
+            {/* طبقة overlay عند الـ hover */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+          
+          {/* اسم المنتج */}
+          <p className="text-[10px] sm:text-xs font-semibold text-center text-gray-800 group-hover:text-purple-600 line-clamp-2 w-full px-1 transition-colors duration-300">
+            {product.nameAr}
+          </p>
+          
+          {/* تقييم + عدد المبيعات */}
+          <div className="flex items-center gap-1 text-[8px] sm:text-[10px]">
+            {renderStars(Math.floor(rating))}
+            <span className="text-gray-500">({reviewCount})</span>
+          </div>
+          
+          {/* السعر */}
+          <div className="flex flex-col items-center gap-0.5">
+            <p className="text-xs sm:text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {product.price.toFixed(2)} ج.م
+            </p>
+            {discount > 0 && (
+              <p className="text-[8px] sm:text-[10px] text-gray-400 line-through">
+                {displayOriginalPrice.toFixed(2)}
+              </p>
+            )}
+          </div>
+          
+          {/* مؤشر المبيعات */}
+          {soldCount > 100 && (
+            <div className="flex items-center gap-0.5 text-[8px] sm:text-[9px] text-orange-500">
+              <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+              <span className="font-medium">{soldCount}+ تم بيعه</span>
+            </div>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
+  // العرض العادي
   return (
-    <div
-      ref={cardRef}
-      className={`transition-all duration-700 ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
-          : 'opacity-0 translate-y-8'
-      }`}
-      style={{
-        transitionDelay: `${Math.min(index * 100, 800)}ms`
-      }}
-    >
+    <div ref={cardRef}>
       <Link href={`/products/${product.id}`}>
         <Card 
           className="group relative overflow-hidden h-full transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-2xl"
@@ -244,7 +272,7 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
           </div>
         )}
 
-        {/* Product Image */}
+        {/* Product Image - احترافي نظيف */}
         <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 rounded-t-2xl">
           <Image
             src={firstImage}
@@ -252,6 +280,7 @@ export function ProductCardPro({ product, index = 0 }: ProductCardProps) {
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover group-hover:scale-110 transition-transform duration-700"
+            quality={95}
             loading={index && index > 3 ? "lazy" : "eager"}
             priority={index !== undefined && index <= 3}
             onError={(e) => {

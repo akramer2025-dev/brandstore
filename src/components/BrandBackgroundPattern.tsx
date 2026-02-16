@@ -12,6 +12,7 @@ export default function BrandBackgroundPattern() {
           alt=""
           width={200}
           height={200}
+          style={{ width: 'auto', height: 'auto', maxWidth: '200px', maxHeight: '200px' }}
           className="object-contain"
         />
       </div>
@@ -23,6 +24,7 @@ export default function BrandBackgroundPattern() {
           alt=""
           width={180}
           height={120}
+          style={{ width: 'auto', height: 'auto', maxWidth: '180px', maxHeight: '120px' }}
           className="object-contain"
         />
       </div>
@@ -34,6 +36,7 @@ export default function BrandBackgroundPattern() {
           alt=""
           width={140}
           height={140}
+          style={{ width: 'auto', height: 'auto', maxWidth: '140px', maxHeight: '140px' }}
           className="object-contain"
         />
       </div>
@@ -45,6 +48,7 @@ export default function BrandBackgroundPattern() {
           alt=""
           width={200}
           height={200}
+          style={{ width: 'auto', height: 'auto', maxWidth: '200px', maxHeight: '200px' }}
           className="object-contain"
         />
       </div>
@@ -56,6 +60,7 @@ export default function BrandBackgroundPattern() {
           alt=""
           width={150}
           height={100}
+          style={{ width: 'auto', height: 'auto', maxWidth: '150px', maxHeight: '100px' }}
           className="object-contain"
         />
       </div>
@@ -99,6 +104,7 @@ export default function BrandBackgroundPattern() {
             alt=""
             width={160}
             height={160}
+            style={{ width: 'auto', height: 'auto', maxWidth: '160px', maxHeight: '160px' }}
             className="object-contain"
           />
         </div>
@@ -110,6 +116,7 @@ export default function BrandBackgroundPattern() {
             alt=""
             width={120}
             height={120}
+            style={{ width: 'auto', height: 'auto', maxWidth: '120px', maxHeight: '120px' }}
             className="object-contain"
           />
         </div>
@@ -121,6 +128,7 @@ export default function BrandBackgroundPattern() {
             alt=""
             width={180}
             height={180}
+            style={{ width: 'auto', height: 'auto', maxWidth: '180px', maxHeight: '180px' }}
             className="object-contain"
           />
         </div>

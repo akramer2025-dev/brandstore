@@ -116,7 +116,7 @@ export function CategoryProductsCarousel({
           <ChevronRight className="w-5 h-5 text-gray-700" />
         </button>
 
-        {/* Products Scroll */}
+        {/* Products Scroll - صور صغيرة دائرية */}
         <div 
           ref={scrollRef}
           className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
@@ -125,11 +125,35 @@ export function CategoryProductsCarousel({
             msOverflowStyle: 'none',
           }}
         >
-          {products.map((product, index) => (
-            <div key={product.id} className="min-w-[160px] sm:min-w-[200px] md:min-w-[220px] flex-shrink-0">
-              <ProductCardPro product={product} index={index} />
-            </div>
-          ))}
+          {products.map((product, index) => {
+            // تحويل الصور بشكل صحيح
+            const productImages = (() => {
+              if (!product.images) return '/placeholder.png';
+              if (typeof product.images === 'string') {
+                // إذا كانت string، نقسمها إلى array ثم نأخذ أول صورة
+                const imagesArray = product.images.split(',').map(img => img.trim()).filter(Boolean);
+                return imagesArray.length > 0 ? imagesArray.join(',') : '/placeholder.png';
+              }
+              if (Array.isArray(product.images)) {
+                return product.images.length > 0 ? product.images.join(',') : '/placeholder.png';
+              }
+              return '/placeholder.png';
+            })();
+
+            return (
+              <div key={product.id} className="min-w-[110px] sm:min-w-[130px] md:min-w-[140px] flex-shrink-0">
+                <ProductCardPro 
+                  product={{
+                    ...product,
+                    nameAr: product.nameAr || product.name,
+                    images: productImages
+                  }} 
+                  index={index} 
+                  isCompact 
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 
