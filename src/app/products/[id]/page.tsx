@@ -436,14 +436,35 @@ export default function ProductDetailPage() {
                 <span className="text-lg sm:text-xl md:text-2xl text-gray-600">جنيه</span>
               </div>
               
-              {/* Installment Badge */}
-              {product.allowInstallment && (
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg text-sm font-bold shadow-lg animate-pulse">
-                  <span className="text-lg">🏦</span>
-                  <span>متاح التقسيط على 4 دفعات</span>
-                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                    {(getCurrentPrice() / 4).toFixed(0)} ج × 4
-                  </span>
+              {/* Installment Badge - Professional & Eye-catching */}
+              {product.allowInstallment && getCurrentPrice() >= 100 && (
+                <div className="relative group">
+                  <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3.5 bg-gradient-to-r from-blue-600 via-blue-700 to-cyan-600 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xl hover:shadow-2xl transition-all duration-300 border border-blue-400/30 backdrop-blur-sm">
+                    <div className="flex items-center gap-1.5 sm:gap-2 animate-pulse">
+                      <span className="text-lg sm:text-2xl">🏦</span>
+                      <div>
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="font-black text-xs sm:text-sm">متاح التقسيط!</span>
+                          <span className="hidden sm:inline bg-white/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                            بدون فوائد
+                          </span>
+                        </div>
+                        <div className="text-[10px] sm:text-xs font-medium text-blue-100 mt-0.5">
+                          قسّط على 4 أشهر بدون أي فوائد إضافية
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mr-auto bg-white text-blue-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-sm font-black shadow-lg">
+                      {(getCurrentPrice() / 4).toFixed(0)} ج.م × 4
+                    </div>
+                  </div>
+                  {/* Tooltip */}
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50">
+                    <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap mt-2">
+                      💡 اشتري الآن وادفع على 4 دفعات بدون فوائد
+                      <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -788,6 +809,72 @@ export default function ProductDetailPage() {
                 <p className="text-xs sm:text-sm text-gray-600">فحص عند الاستلام</p>
               </div>
             </div>
+
+            {/* Installment Information Card - Professional & Detailed */}
+            {product.allowInstallment && getCurrentPrice() >= 100 && (
+              <Card className="bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-50 border-2 border-blue-300 shadow-xl mt-4 sm:mt-6 overflow-hidden">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl shadow-lg">
+                      <span className="text-2xl sm:text-3xl">🏦</span>
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <h3 className="text-base sm:text-lg font-black text-blue-900 mb-1">اشتري الآن وادفع على 4 أقساط بدون فوائد!</h3>
+                        <p className="text-xs sm:text-sm text-blue-700">احصل على المنتج الآن وادفع على 4 أشهر بدون أي فوائد إضافية</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 bg-white rounded-lg p-3 border border-blue-200">
+                        <div>
+                          <p className="text-[10px] sm:text-xs text-gray-600 mb-1">الدفعة الشهرية</p>
+                          <p className="text-base sm:text-xl font-black text-blue-600">
+                            {(getCurrentPrice() / 4).toFixed(0)} ج.م
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] sm:text-xs text-gray-600 mb-1">عدد الأقساط</p>
+                          <p className="text-base sm:text-xl font-black text-blue-600">4 أشهر</p>
+                        </div>
+                      </div>
+
+                      <div className="bg-blue-100/50 rounded-lg p-2.5 sm:p-3 border border-blue-200">
+                        <div className="flex items-center gap-2 text-blue-900 text-xs sm:text-sm font-semibold mb-2">
+                          <Check className="w-4 h-4" />
+                          <span>مثال على جدول الأقساط:</span>
+                        </div>
+                        <div className="space-y-1.5 text-[10px] sm:text-xs text-blue-800">
+                          <div className="flex justify-between">
+                            <span>• القسط الأول</span>
+                            <span className="font-bold">{(getCurrentPrice() / 4).toFixed(2)} ج.م</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>• القسط الثاني</span>
+                            <span className="font-bold">{(getCurrentPrice() / 4).toFixed(2)} ج.م</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>• القسط الثالث</span>
+                            <span className="font-bold">{(getCurrentPrice() / 4).toFixed(2)} ج.م</span>
+                          </div>
+                          <div className="flex justify-between border-t border-blue-300 pt-1.5 mt-1">
+                            <span>• القسط الرابع (الأخير)</span>
+                            <span className="font-bold">{(getCurrentPrice() / 4).toFixed(2)} ج.م</span>
+                          </div>
+                          <div className="flex justify-between font-black text-xs sm:text-sm text-blue-900 border-t-2 border-blue-400 pt-1.5 mt-2">
+                            <span>الإجمالي</span>
+                            <span>{getCurrentPrice().toFixed(2)} ج.م</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-[10px] sm:text-xs text-blue-700 flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        اختر طريقة الدفع "التقسيط" عند إتمام الطلب
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Browse All Vendor Products Button */}
             {product.vendor && (
