@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import { toast } from 'sonner';
 import SignaturePad from '@/components/SignaturePad';
 import Image from 'next/image';
 
-export default function InstallmentAgreementPage() {
+function InstallmentAgreementContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -939,5 +939,18 @@ export default function InstallmentAgreementPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrap with Suspense to fix Next.js 15 useSearchParams error
+export default function InstallmentAgreementPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+      </div>
+    }>
+      <InstallmentAgreementContent />
+    </Suspense>
   );
 }
