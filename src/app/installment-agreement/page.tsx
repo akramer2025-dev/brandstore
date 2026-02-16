@@ -61,6 +61,7 @@ function InstallmentAgreementContent() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
   
   useEffect(() => {
     setMounted(true);
@@ -211,22 +212,33 @@ function InstallmentAgreementContent() {
       console.log('✅ تم الحصول على stream الكاميرا');
       setStream(mediaStream);
       
-      // الانتظار قليلاً ثم تعيين الـ stream للفيديو
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        
-        // محاولة تشغيل الفيديو تلقائياً
-        try {
-          await videoRef.current.play();
-          console.log('✅ الكاميرا تعمل الآن');
-        } catch (playError) {
-          console.warn('تحذير: لم يتم تشغيل الفيديو تلقائياً:', playError);
-          // في بعض المتصفحات قد يحتاج المستخدم للتفاعل أولاً
-        }
+      // تأكد من أن video element موجود
+      if (!videoRef.current) {
+        console.error('❌ video element غير موجود');
+        toast.error('خطأ في تهيئة الكاميرا', { id: 'camera' });
+        return;
       }
       
-      setCameraActive(true);
-      toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
+      // تعيين الـ stream للفيديو
+      videoRef.current.srcObject = mediaStream;
+      
+      // ✅ الحل الأقوى: انتظر تحميل metadata ثم شغل الفيديو
+      videoRef.current.onloadedmetadata = async () => {
+        console.log('📹 Video metadata loaded');
+        try {
+          if (videoRef.current) {
+            // تأكد من أن الفيديو muted (مهم للـ autoplay)
+            videoRef.current.muted = true;
+            await videoRef.current.play();
+            console.log('✅ الكاميرا تعمل بنجاح');
+            setCameraActive(true);
+            toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
+          }
+        } catch (playError) {
+          console.error('❌ خطأ في تشغيل الفيديو:', playError);
+          toast.error('فشل تشغيل الكاميرا. حاول مرة أخرى', { id: 'camera' });
+        }
+      };
     } catch (error: any) {
       console.error('❌ Error accessing camera:', error);
       
@@ -281,6 +293,7 @@ function InstallmentAgreementContent() {
         videoRef.current.srcObject = null;
       }
       setCameraActive(false);
+      setVideoPlaying(false);
       console.log('✅ تم إيقاف الكاميرا بنجاح');
     } catch (error) {
       console.error('❌ خطأ في إيقاف الكاميرا:', error);
@@ -963,8 +976,21 @@ function InstallmentAgreementContent() {
                         autoPlay
                         playsInline
                         muted
+                        width="640"
+                        height="480"
                         className="w-full h-96 object-cover mirror"
                         style={{ transform: 'scaleX(-1)' }}
+                        onPlay={() => {
+                          console.log('✅ الفيديو بدأ التشغيل');
+                          setVideoPlaying(true);
+                        }}
+                        onCanPlay={(e) => {
+                          console.log('✅ الفيديو جاهز للتشغيل');
+                          // تأكيد التشغيل
+                          e.currentTarget.play().catch(err => {
+                            console.error('خطأ في play من onCanPlay:', err);
+                          });
+                        }}
                         onLoadedMetadata={(e) => {
                           console.log('📹 الفيديو جاهز:', {
                             width: e.currentTarget.videoWidth,
@@ -977,6 +1003,34 @@ function InstallmentAgreementContent() {
                           toast.error('حدث خطأ في تشغيل الكاميرا');
                         }}
                       />
+                      
+                      {/* زرار بدء التشغيل اليدوي (يظهر لو الفيديو مش شغال) */}
+                      {!videoPlaying && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (videoRef.current) {
+                                videoRef.current.muted = true;
+                                videoRef.current.play()
+                                  .then(() => {
+                                    console.log('✅ تم بدء التشغيل يدوياً');
+                                    setVideoPlaying(true);
+                                  })
+                                  .catch(err => {
+                                    console.error('❌ فشل التشغيل اليدوي:', err);
+                                    toast.error('فشل تشغيل الكاميرا');
+                                  });
+                              }
+                            }}
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6"
+                          >
+                            <Camera className="w-5 h-5 ml-2" />
+                            ابدأ التشغيل
+                          </Button>
+                        </div>
+                      )}
+                      
                       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse">
                         🔴 الكاميرا نشطة
                       </div>
