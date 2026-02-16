@@ -91,6 +91,8 @@ export default function AdminInstallmentsPage() {
   const fetchAgreements = async () => {
     try {
       setLoading(true);
+      console.log('🔄 [Installments Page] جاري جلب الاتفاقيات...');
+      
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: '20'
@@ -100,32 +102,54 @@ export default function AdminInstallmentsPage() {
         params.append('status', statusFilter);
       }
 
+      console.log('📡 [Installments Page] Request URL:', `/api/admin/installments?${params}`);
       const response = await fetch(`/api/admin/installments?${params}`);
+      
+      console.log('📨 [Installments Page] Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ [Installments Page] Error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+      
       const data = await response.json();
+      console.log('✅ [Installments Page] Data received:', data);
 
       if (data.success) {
         setAgreements(data.agreements);
         setTotalPages(data.pagination.totalPages);
         
         // حساب الإحصائيات
+        console.log('📊 [Installments Page] جاري جلب الإحصائيات...');
         const allAgreementsResponse = await fetch('/api/admin/installments?limit=1000');
-        const allData = await allAgreementsResponse.json();
         
-        if (allData.success) {
-          const allAgreements = allData.agreements;
-          setStats({
-            total: allAgreements.length,
-            pending: allAgreements.filter((a: Agreement) => 
-              a.status === 'PENDING' || a.status === 'DOCUMENTS_COMPLETE'
-            ).length,
-            approved: allAgreements.filter((a: Agreement) => a.status === 'APPROVED').length,
-            rejected: allAgreements.filter((a: Agreement) => a.status === 'REJECTED').length,
-            underReview: allAgreements.filter((a: Agreement) => a.status === 'UNDER_REVIEW').length
-          });
+        if (allAgreementsResponse.ok) {
+          const allData = await allAgreementsResponse.json();
+          
+          if (allData.success) {
+            const allAgreements = allData.agreements;
+            setStats({
+              total: allAgreements.length,
+              pending: allAgreements.filter((a: Agreement) => 
+                a.status === 'PENDING' || a.status === 'DOCUMENTS_COMPLETE'
+              ).length,
+              approved: allAgreements.filter((a: Agreement) => a.status === 'APPROVED').length,
+              rejected: allAgreements.filter((a: Agreement) => a.status === 'REJECTED').length,
+              underReview: allAgreements.filter((a: Agreement) => a.status === 'UNDER_REVIEW').length
+            });
+            console.log('✅ [Installments Page] Stats updated:', stats);
+          }
         }
+      } else {
+        console.error('❌ [Installments Page] API returned success: false', data);
       }
     } catch (error) {
-      console.error('Error fetching agreements:', error);
+      console.error('❌ [Installments Page] Error fetching agreements:', error);
+      console.error('📋 [Installments Page] Error details:', {
+        message: (error as Error).message,
+        stack: (error as Error).stack
+      });
     } finally {
       setLoading(false);
     }

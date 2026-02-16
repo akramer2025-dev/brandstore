@@ -459,33 +459,33 @@ export default function AdminPartnersPage() {
                 إضافة شريك
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-900 border-purple-500/30 text-white max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800">
-              <DialogHeader>
-                <DialogTitle className="text-xl sm:text-2xl text-white">إضافة شريك جديد</DialogTitle>
-                <DialogDescription className="text-gray-400">
+            <DialogContent className="bg-gray-900 border-purple-500/30 text-white w-[calc(100vw-16px)] sm:w-[calc(100vw-32px)] sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800 p-4 sm:p-6">
+              <DialogHeader className="pb-2">
+                <DialogTitle className="text-lg sm:text-xl text-white">إضافة شريك جديد</DialogTitle>
+                <DialogDescription className="text-gray-400 text-sm">
                   أدخل بيانات الشريك الجديد
                 </DialogDescription>
               </DialogHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mt-3 sm:mt-4">
-                <div className="space-y-3 sm:space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 mt-2">
+                <div className="space-y-2.5">
                   {/* الاسم */}
                   <div>
-                    <Label htmlFor="partnerName" className="text-white">
+                    <Label htmlFor="partnerName" className="text-white text-sm">
                       اسم الشريك *
                     </Label>
                     <Input
                       id="partnerName"
                       value={formData.partnerName}
                       onChange={(e) => setFormData({ ...formData, partnerName: e.target.value })}
-                      className="bg-white/10 border-white/20 text-white"
+                      className="bg-white/10 border-white/20 text-white h-9"
                       required
                     />
                   </div>
 
                   {/* البريد الإلكتروني */}
                   <div>
-                    <Label htmlFor="email" className="text-white">
+                    <Label htmlFor="email" className="text-white text-sm">
                       البريد الإلكتروني *
                     </Label>
                     <Input
@@ -493,14 +493,14 @@ export default function AdminPartnersPage() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="bg-white/10 border-white/20 text-white"
+                      className="bg-white/10 border-white/20 text-white h-9"
                       required
                     />
                   </div>
 
                   {/* رقم الهاتف */}
                   <div>
-                    <Label htmlFor="phone" className="text-white">
+                    <Label htmlFor="phone" className="text-white text-sm">
                       رقم الهاتف
                     </Label>
                     <Input
@@ -508,13 +508,13 @@ export default function AdminPartnersPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="bg-white/10 border-white/20 text-white"
+                      className="bg-white/10 border-white/20 text-white h-9"
                     />
                   </div>
 
                   {/* مبلغ رأس المال */}
                   <div>
-                    <Label htmlFor="capitalAmount" className="text-white">
+                    <Label htmlFor="capitalAmount" className="text-white text-sm">
                       مبلغ رأس المال (جنيه) *
                     </Label>
                     <Input
@@ -523,14 +523,14 @@ export default function AdminPartnersPage() {
                       step="0.01"
                       value={formData.capitalAmount}
                       onChange={(e) => setFormData({ ...formData, capitalAmount: e.target.value })}
-                      className="bg-white/10 border-white/20 text-white"
+                      className="bg-white/10 border-white/20 text-white h-9"
                       required
                     />
                   </div>
 
                   {/* نسبة المساهمة */}
                   <div>
-                    <Label htmlFor="capitalPercent" className="text-white">
+                    <Label htmlFor="capitalPercent" className="text-white text-sm">
                       نسبة المساهمة (%) *
                     </Label>
                     <Input
@@ -541,27 +541,24 @@ export default function AdminPartnersPage() {
                       max="100"
                       value={formData.capitalPercent}
                       onChange={(e) => setFormData({ ...formData, capitalPercent: e.target.value })}
-                      className="bg-white/10 border-white/20 text-white"
+                      className="bg-white/10 border-white/20 text-white h-9"
                       required
                     />
-                    <div className="flex items-start gap-2 mt-2">
-                      <div className="text-blue-400 mt-0.5">ℹ️</div>
-                      <p className="text-xs text-blue-300">
-                        سيتم حساب النسبة الفعلية تلقائياً بناءً على إجمالي رأس المال
-                      </p>
-                    </div>
+                    <p className="text-[11px] text-blue-300 mt-1">
+                      ℹ️ سيتم حساب النسبة الفعلية تلقائياً
+                    </p>
                   </div>
 
                   {/* نوع الشريك */}
                   <div>
-                    <Label htmlFor="partnerType" className="text-white">
+                    <Label htmlFor="partnerType" className="text-white text-sm">
                       نوع الشريك
                     </Label>
                     <select
                       id="partnerType"
                       value={formData.partnerType}
                       onChange={(e) => setFormData({ ...formData, partnerType: e.target.value })}
-                      className="w-full bg-white/10 border border-white/20 text-white rounded-md p-2"
+                      className="w-full bg-white/10 border border-white/20 text-white rounded-md p-2 h-9 text-sm"
                     >
                       <option value="PARTNER">شريك</option>
                       <option value="OWNER">مالك</option>
@@ -571,21 +568,21 @@ export default function AdminPartnersPage() {
 
                   {/* ملاحظات */}
                   <div>
-                    <Label htmlFor="notes" className="text-white">
+                    <Label htmlFor="notes" className="text-white text-sm">
                       ملاحظات
                     </Label>
                     <Textarea
                       id="notes"
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="bg-white/10 border-white/20 text-white"
-                      rows={3}
+                      className="bg-white/10 border-white/20 text-white text-sm min-h-[50px]"
+                      rows={2}
                     />
                   </div>
 
                   {/* إنشاء حساب */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 p-2 bg-purple-900/30 rounded-lg border border-purple-500/30">
                       <input
                         type="checkbox"
                         id="createUserAccount"
@@ -593,23 +590,19 @@ export default function AdminPartnersPage() {
                         onChange={(e) => setFormData({ ...formData, createUserAccount: e.target.checked })}
                         className="rounded"
                       />
-                      <Label htmlFor="createUserAccount" className="text-white cursor-pointer">
+                      <Label htmlFor="createUserAccount" className="text-white cursor-pointer text-sm">
                         إنشاء حساب VENDOR للشريك
                       </Label>
                     </div>
                     
-                    <div className="flex items-start gap-2 px-3">
-                      <div className="text-yellow-400 mt-0.5">⚠️</div>
-                      <div className="text-xs text-yellow-300 space-y-1">
-                        <p><strong>مع إنشاء حساب:</strong> البريد يجب أن يكون غير مستخدم في النظام</p>
-                        <p><strong>بدون إنشاء حساب:</strong> البريد للتواصل فقط (يمكن استخدام بريد موجود)</p>
-                      </div>
-                    </div>
+                    <p className="text-[11px] text-yellow-300 px-1">
+                      ⚠️ <strong>مع حساب:</strong> البريد غير مستخدم | <strong>بدون:</strong> للتواصل فقط
+                    </p>
                   </div>
 
                   {/* صلاحية حذف الطلبات */}
                   {formData.createUserAccount && (
-                    <div className="flex items-center gap-2 p-3 bg-red-900/30 rounded-lg border border-red-500/30">
+                    <div className="flex items-center gap-2 p-2 bg-red-900/30 rounded-lg border border-red-500/30">
                       <input
                         type="checkbox"
                         id="canDeleteOrders"
@@ -617,7 +610,7 @@ export default function AdminPartnersPage() {
                         onChange={(e) => setFormData({ ...formData, canDeleteOrders: e.target.checked })}
                         className="rounded"
                       />
-                      <Label htmlFor="canDeleteOrders" className="text-white cursor-pointer">
+                      <Label htmlFor="canDeleteOrders" className="text-white cursor-pointer text-sm">
                         🗑️ السماح بحذف الطلبات
                       </Label>
                     </div>
@@ -625,7 +618,7 @@ export default function AdminPartnersPage() {
 
                   {/* صلاحية رفع منتجات شي إن */}
                   {formData.createUserAccount && (
-                    <div className="flex items-center gap-2 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                    <div className="flex items-center gap-2 p-2 bg-purple-900/30 rounded-lg border border-purple-500/30">
                       <input
                         type="checkbox"
                         id="canUploadShein"
@@ -633,15 +626,15 @@ export default function AdminPartnersPage() {
                         onChange={(e) => setFormData({ ...formData, canUploadShein: e.target.checked })}
                         className="rounded"
                       />
-                      <Label htmlFor="canUploadShein" className="text-white cursor-pointer">
-                        🛍️ السماح برفع منتجات شي إن
+                      <Label htmlFor="canUploadShein" className="text-white cursor-pointer text-sm">
+                        🛍️ رفع منتجات شي إن
                       </Label>
                     </div>
                   )}
 
                   {/* صلاحية إضافة بضاعة خارج النظام */}
                   {formData.createUserAccount && (
-                    <div className="flex items-center gap-2 p-3 bg-orange-900/30 rounded-lg border border-orange-500/30">
+                    <div className="flex items-center gap-2 p-2 bg-orange-900/30 rounded-lg border border-orange-500/30">
                       <input
                         type="checkbox"
                         id="canAddOfflineProducts"
@@ -649,16 +642,16 @@ export default function AdminPartnersPage() {
                         onChange={(e) => setFormData({ ...formData, canAddOfflineProducts: e.target.checked })}
                         className="rounded"
                       />
-                      <Label htmlFor="canAddOfflineProducts" className="text-white cursor-pointer">
-                        📦 السماح بإضافة بضاعة خارج النظام
+                      <Label htmlFor="canAddOfflineProducts" className="text-white cursor-pointer text-sm">
+                        📦 إضافة بضاعة خارج النظام
                       </Label>
                     </div>
                   )}
 
                   {/* كلمة المرور - تظهر فقط إذا تم تفعيل إنشاء الحساب */}
                   {formData.createUserAccount && (
-                    <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/30">
-                      <Label htmlFor="password" className="text-white mb-2 block">
+                    <div className="bg-purple-900/20 p-2.5 rounded-lg border border-purple-500/30">
+                      <Label htmlFor="password" className="text-white mb-1.5 block text-sm">
                         كلمة المرور *
                       </Label>
                       <Input
@@ -666,30 +659,27 @@ export default function AdminPartnersPage() {
                         type="text"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="bg-white/10 border-white/20 text-white"
+                        className="bg-white/10 border-white/20 text-white h-9"
                         placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
                         required={formData.createUserAccount}
                         minLength={6}
                       />
-                      <div className="flex items-start gap-2 mt-2">
-                        <div className="text-yellow-400 mt-0.5">⚠️</div>
-                        <p className="text-xs text-yellow-300">
-                          احفظ كلمة المرور هذه! ستحتاجها لإعطائها للشريك للدخول إلى حسابه
-                        </p>
-                      </div>
+                      <p className="text-[11px] text-yellow-300 mt-1">
+                        ⚠️ احفظ كلمة المرور لإعطائها للشريك
+                      </p>
                     </div>
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-                  <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700 h-10 sm:h-auto">
+                <div className="flex gap-2 pt-3 sticky bottom-0 bg-gray-900 pb-1">
+                  <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700 h-9 text-sm">
                     إضافة الشريك
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
-                    className="border-white/20 text-white hover:bg-white/10 h-10 sm:h-auto"
+                    className="border-white/20 text-white hover:bg-white/10 h-9 text-sm px-6"
                   >
                     إلغاء
                   </Button>
