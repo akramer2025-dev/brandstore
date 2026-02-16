@@ -197,6 +197,15 @@ function InstallmentAgreementContent() {
   // Start camera for selfie
   const startCamera = async () => {
     try {
+      // التحقق من دعم الكاميرا في المتصفح
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error('❌ متصفحك لا يدعم الكاميرا. جرب Chrome أو Firefox الحديث', { 
+          id: 'camera', 
+          duration: 5000 
+        });
+        return;
+      }
+      
       toast.loading('جاري فتح الكاميرا...', { id: 'camera' });
       
       // طلب صلاحيات الكاميرا مع إعدادات محسّنة
@@ -252,6 +261,7 @@ function InstallmentAgreementContent() {
         errorMessage = '⚠️ الكاميرا مستخدمة من تطبيق آخر. أغلق التطبيقات الأخرى وحاول مرة أخرى';
       } else if (error.name === 'OverconstrainedError') {
         errorMessage = '🔧 إعدادات الكاميرا غير مدعومة. جاري المحاولة بإعدادات أبسط...';
+        toast.loading(errorMessage, { id: 'camera' });
         
         // محاولة مرة أخرى بإعدادات أبسط
         try {
@@ -260,22 +270,47 @@ function InstallmentAgreementContent() {
             audio: false
           });
           
+          console.log('✅ تم الحصول على stream بإعدادات بسيطة');
           setStream(simpleStream);
+          
           if (videoRef.current) {
             videoRef.current.srcObject = simpleStream;
-            await videoRef.current.play();
+            
+            // نفس logic الـ onloadedmetadata
+            videoRef.current.onloadedmetadata = async () => {
+              try {
+                if (videoRef.current) {
+                  videoRef.current.muted = true;
+                  await videoRef.current.play();
+                  console.log('✅ الكاميرا تعمل بإعدادات بسيطة');
+                  setCameraActive(true);
+                  toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
+                }
+              } catch (playErr) {
+                console.error('❌ خطأ في تشغيل الفيديو (retry):', playErr);
+                toast.error('فشل تشغيل الكاميرا', { id: 'camera' });
+              }
+            };
           }
-          setCameraActive(true);
-          toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
           return;
         } catch (retryError) {
           console.error('❌ فشلت المحاولة الثانية:', retryError);
+          toast.error('فشل فتح الكاميرا. جرب متصفح آخر', { id: 'camera' });
         }
       } else if (error.name === 'SecurityError') {
-        errorMessage = '🔒 خطأ أمني. تأكد من أنك تستخدم HTTPS أو localhost';
+        errorMessage = '🔒 خطأ أمني. تأكد من أنك تستخدم HTTPS (www.remostore.net)';
+      } else {
+        // أي خطأ آخر
+        errorMessage = `⚠️ فشل فتح الكاميرا: ${error.message || 'خطأ غير معروف'}`;
       }
       
-      toast.error(errorMessage, { id: 'camera', duration: 5000 });
+      console.error('📋 تفاصيل الخطأ:', {
+        name: error.name,
+        message: error.message,
+        constraint: error.constraint
+      });
+      
+      toast.error(errorMessage, { id: 'camera', duration: 6000 });
     }
   };
   
