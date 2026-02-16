@@ -1,13 +1,29 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-async function createAgreementForOrder() {
+async function deleteAndRecreateAgreement() {
   try {
-    console.log('🔍 جاري البحث عن الطلب التجريبي...\n');
+    const orderId = 'cmlotqj7b0002e3wgnjk7styt';
+    
+    console.log('🔍 جاري البحث عن الاتفاقية القديمة...\n');
 
-    // Find the test order
+    // Find and delete old agreement
+    const oldAgreement = await prisma.installmentAgreement.findUnique({
+      where: { orderId: orderId },
+    });
+
+    if (oldAgreement) {
+      await prisma.installmentAgreement.delete({
+        where: { id: oldAgreement.id },
+      });
+      console.log('✅ تم حذف الاتفاقية القديمة');
+    }
+
+    console.log('🔄 جاري إنشاء اتفاقية جديدة بصور واقعية...\n');
+
+    // Find the order
     const order = await prisma.order.findUnique({
-      where: { id: 'cmlotqj7b0002e3wgnjk7styt' },
+      where: { id: orderId },
       include: {
         customer: true,
         installmentPlan: true,
@@ -19,26 +35,11 @@ async function createAgreementForOrder() {
       return;
     }
 
-    console.log(`✅ الطلب موجود: ${order.orderNumber}`);
-    console.log(`   العميل: ${order.customer.name}`);
-    
-    // Check if agreement already exists
-    const existingAgreement = await prisma.installmentAgreement.findUnique({
-      where: { orderId: order.id },
-    });
-
-    if (existingAgreement) {
-      console.log(`\n✓ الاتفاقية موجودة بالفعل!`);
-      console.log(`   رقم الاتفاقية: ${existingAgreement.agreementNumber}`);
-      console.log(`   الحالة: ${existingAgreement.status}`);
-      return;
-    }
-
     // Generate agreement number
     const timestamp = Date.now().toString().slice(-8);
     const agreementNumber = `AGR-${timestamp}`;
 
-    // Create sample images URLs (using realistic random images)
+    // Create realistic random images
     const randomSeed = Math.floor(Math.random() * 1000);
     const sampleImages = {
       // صورة شخصية واقعية
@@ -59,7 +60,7 @@ async function createAgreementForOrder() {
         agreementNumber: agreementNumber,
         status: 'PENDING',
         
-        // Documents
+        // Documents with realistic images
         selfieImage: sampleImages.selfieImage,
         nationalIdImage: sampleImages.nationalIdImage,
         nationalIdBack: sampleImages.nationalIdBack,
@@ -83,22 +84,21 @@ async function createAgreementForOrder() {
       },
     });
 
-    console.log(`\n✅ تم إنشاء الاتفاقية بنجاح!\n`);
+    console.log(`\n✅ تم إنشاء اتفاقية جديدة بصور واقعية!\n`);
     console.log(`📋 تفاصيل الاتفاقية:`);
     console.log(`   🆔 رقم الاتفاقية: ${agreement.agreementNumber}`);
-    console.log(`   📦 رقم الطلب: ${order.orderNumber}`);
     console.log(`   👤 العميل: ${agreement.fullName}`);
     console.log(`   💰 المبلغ الإجمالي: ${agreement.totalAmount} جنيه`);
-    console.log(`   💳 المقدم: ${agreement.downPayment} جنيه`);
-    console.log(`   📅 عدد الأقساط: ${agreement.numberOfInstallments}`);
-    console.log(`   💵 القسط الشهري: ${agreement.monthlyInstallment} جنيه`);
-    console.log(`   📦 الحالة: ${agreement.status}`);
+    console.log(`\n🖼️ الصور المستخدمة:`);
+    console.log(`   📷 صورة شخصية: ${agreement.selfieImage}`);
+    console.log(`   🪪 بطاقة أمامية: ${agreement.nationalIdImage}`);
+    console.log(`   🪪 بطاقة خلفية: ${agreement.nationalIdBack}`);
+    console.log(`   ✍️ التوقيع: ${agreement.signature}`);
     
     console.log(`\n🎯 الآن يمكنك:`);
-    console.log(`   1. فتح صفحة الطلب: /admin/orders/${order.id}`);
-    console.log(`   2. مشاهدة اتفاقية التقسيط الكاملة مع جميع الصور`);
-    console.log(`   3. الموافقة أو رفض الاتفاقية`);
-    console.log(`   4. تحميل PDF أو إرسال واتساب`);
+    console.log(`   1. فتح: https://remostore.net/admin/orders/${orderId}`);
+    console.log(`   2. شاهد الصور الواقعية`);
+    console.log(`   3. اضغط "تحميل PDF" أو "طباعة"`);
 
   } catch (error) {
     console.error('❌ حدث خطأ:', error.message);
@@ -107,4 +107,4 @@ async function createAgreementForOrder() {
   }
 }
 
-createAgreementForOrder();
+deleteAndRecreateAgreement();

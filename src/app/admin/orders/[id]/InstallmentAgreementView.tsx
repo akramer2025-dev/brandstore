@@ -134,24 +134,14 @@ export function InstallmentAgreementView({
   };
 
   const handleDownloadPDF = async () => {
-    toast.info("جاري تحضير الملف...");
+    toast.info("جاري فتح الملف...");
     try {
-      const response = await fetch(`/api/admin/installment-agreements/${agreement.id}/pdf`);
-      if (!response.ok) throw new Error("فشل في تحميل الملف");
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `اتفاقية-تقسيط-${agreement.agreementNumber}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      toast.success("✅ تم تحميل الملف");
+      // فتح في نافذة جديدة بدلاً من التحميل
+      const url = `/api/admin/installment-agreements/${agreement.id}/pdf`;
+      window.open(url, '_blank');
+      toast.success("✅ تم فتح الملف في نافذة جديدة");
     } catch (error) {
-      toast.error("❌ حدث خطأ أثناء تحميل الملف");
+      toast.error("❌ حدث خطأ أثناء فتح الملف");
     }
   };
 

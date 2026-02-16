@@ -87,9 +87,9 @@ async function getCategories() {
       }
     });
     
+    // ترتيب حسب عدد المنتجات (الأكثر منتجات أولاً) ثم عرض جميع الفئات
     return categories
-      .sort((a, b) => b._count.products - a._count.products)
-      .slice(0, 8);
+      .sort((a, b) => b._count.products - a._count.products);
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
@@ -184,7 +184,7 @@ export default async function HomePage() {
           </div>
           <div className="container mx-auto px-3 sm:px-4 relative z-10">
             <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-hide py-2">
-              {categories.slice(0, 8).map((category) => (
+              {categories.map((category) => (
                 <Link
                   key={category.id}
                   href={`/categories/${category.id}`}
