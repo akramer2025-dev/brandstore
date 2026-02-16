@@ -1004,3 +1004,42 @@ svg, path, circle, ellipse {
 .fixed, .absolute {
   transform: translateZ(0);
 }
+
+/* Print Styles for PDF Generation */
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-content {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  nav, header, footer:not(.print-content footer) {
+    display: none !important;
+  }
+
+  /* تحسين الطباعة للصفحات */
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+
+  /* منع تقسيم العناصر المهمة */
+  .section, .card, .info-row, table {
+    page-break-inside: avoid;
+  }
+
+  /* تحسين الألوان للطباعة */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}

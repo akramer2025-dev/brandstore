@@ -230,19 +230,15 @@ export default async function InstallmentAgreementsPage() {
 
                     {/* Left Side: Actions */}
                     <div className="flex flex-col gap-2 w-full md:w-auto">
-                      {/* View PDF Button */}
+                      {/* View Agreement Button */}
                       <Button
                         asChild
                         className="bg-purple-600 hover:bg-purple-700 w-full md:w-auto"
                       >
-                        <a
-                          href={`/api/admin/installment-agreements/${agreement.id}/pdf`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
+                        <Link href={`/admin/installment-agreements/${agreement.id}`}>
                           <Eye className="w-4 h-4 ml-2" />
-                          عرض الاتفاقية PDF
-                        </a>
+                          عرض وتحميل الاتفاقية
+                        </Link>
                       </Button>
 
                       {/* View Order Button (if exists) */}
