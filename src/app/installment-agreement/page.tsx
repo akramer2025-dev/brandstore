@@ -647,31 +647,6 @@ function InstallmentAgreementContent() {
             </div>
           </CardContent>
         </Card>
-                  <p className="text-white font-bold text-lg">{monthlyAmount.toLocaleString()} ج</p>
-                  <p className="text-gray-400 text-xs mt-1">بعد شهر واحد</p>
-                </div>
-                
-                <div className="bg-gray-700/50 rounded-lg p-3">
-                  <p className="text-gray-400 mb-1 text-sm">الدفعة الثالثة</p>
-                  <p className="text-white font-bold text-lg">{monthlyAmount.toLocaleString()} ج</p>
-                  <p className="text-gray-400 text-xs mt-1">بعد شهرين</p>
-                </div>
-                
-                <div className="bg-gray-700/50 rounded-lg p-3 col-span-2">
-                  <p className="text-gray-400 mb-1 text-sm">الدفعة الرابعة (الأخيرة)</p>
-                  <p className="text-white font-bold text-lg">{monthlyAmount.toLocaleString()} ج</p>
-                  <p className="text-gray-400 text-xs mt-1">بعد 3 أشهر</p>
-                </div>
-              </div>
-              
-              <div className="mt-4 bg-green-900/30 border border-green-600 rounded-lg p-3 text-center">
-                <p className="text-green-100 text-base font-bold">
-                  ✅ يجب دفع الدفعة الأولى ({downPayment.toLocaleString()} ج) الآن لتأكيد الطلب
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         
         {/* Step 1: National ID */}
         {currentStep === 1 && (
@@ -950,8 +925,6 @@ function InstallmentAgreementContent() {
                       📸 التقط صورة سيلفي للتحقق من الهوية
                     </p>
                   </div>
-                </div>
-              </div>
               
               <div className="space-y-3">
                 <Label className="text-white font-bold flex items-center gap-2">
@@ -1121,6 +1094,8 @@ function InstallmentAgreementContent() {
                   />
                 </div>
               </div>
+                </>
+              )}
               
               {/* Accept Terms */}
               <div className="flex items-start gap-3 bg-gray-700/50 rounded-lg p-4">
