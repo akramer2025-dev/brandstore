@@ -624,6 +624,37 @@ export default function ProductDetailPage() {
               </div>
             )}
 
+            {/* توجيه للعميل - كيفية الشراء */}
+            {getCurrentStock() > 0 && (
+              <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border-2 border-purple-300/40 rounded-xl p-4 backdrop-blur-sm">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <div className="flex-1 space-y-1.5">
+                    <h4 className="text-white font-bold text-base sm:text-lg flex items-center gap-2">
+                      كيف تشتري المنتج؟
+                      <span className="text-xl">🛒</span>
+                    </h4>
+                    <div className="space-y-1 text-xs sm:text-sm text-gray-300">
+                      <p className="flex items-center gap-2">
+                        <span className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">1</span>
+                        اضغط على زر "إضافة للسلة" 👇
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <span className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">2</span>
+                        اذهب إلى السلة وراجع طلبك 🛍️
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <span className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">3</span>
+                        أكمل معلومات التوصيل والدفع ✅
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex gap-2 sm:gap-3">
               <Button
@@ -1036,6 +1067,7 @@ export default function ProductDetailPage() {
                   src={images[0] || '/placeholder.jpg'}
                   alt={product?.nameAr || ''}
                   fill
+                  sizes="64px"
                   className="object-cover"
                 />
               </div>

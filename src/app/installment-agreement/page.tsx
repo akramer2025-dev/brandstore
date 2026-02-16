@@ -479,20 +479,23 @@ function InstallmentAgreementContent() {
         completedAt: new Date().toISOString()
       };
       
-      // حاول رفع الصور إلى Cloudinary
+      // محاولة رفع الصور إلى Cloudinary (اختياري)
+      let cloudinaryUploadSuccess = false;
+      
       try {
-        const uploadImage = async (file: File) => {
+        toast.loading('جاري رفع الصور...', { id: 'upload' });
+        
+        const uploadImage = async (file: File): Promise<string> => {
           const formDataToUpload = new FormData();
           formDataToUpload.append('file', file);
           
           const response = await fetch('/api/upload-receipt', {
             method: 'POST',
-            body: formDataToUpload
+            body: formDataToUpload,
           });
           
           if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'فشل رفع الصورة');
+            throw new Error('Failed to upload');
           }
           
           const data = await response.json();
@@ -511,53 +514,86 @@ function InstallmentAgreementContent() {
         
         // رفع البطاقة (فقط إذا كانت جديدة)
         if (formData.nationalIdImage && !hasExistingProfile) {
-          uploadPromises.push(uploadImage(formData.nationalIdImage));
+          uploadPromises.push(
+            uploadImage(formData.nationalIdImage).catch(() => documentsData.nationalIdImage)
+          );
         } else {
           uploadPromises.push(Promise.resolve(documentsData.nationalIdImage));
         }
         
         if (formData.nationalIdBack && !hasExistingProfile) {
-          uploadPromises.push(uploadImage(formData.nationalIdBack));
+          uploadPromises.push(
+            uploadImage(formData.nationalIdBack).catch(() => documentsData.nationalIdBack)
+          );
         } else {
           uploadPromises.push(Promise.resolve(documentsData.nationalIdBack));
         }
         
         // رفع إيصال الدفعة (دائماً جديد)
         if (formData.firstPaymentReceipt) {
-          uploadPromises.push(uploadImage(formData.firstPaymentReceipt));
+          uploadPromises.push(
+            uploadImage(formData.firstPaymentReceipt).catch(() => documentsData.firstPaymentReceipt)
+          );
         } else {
           uploadPromises.push(Promise.resolve(''));
         }
         
         // رفع التوقيع (دائماً جديد)
         const signatureFile = await convertSignatureToFile(formData.signature);
-        uploadPromises.push(uploadImage(signatureFile));
+        uploadPromises.push(
+          uploadImage(signatureFile).catch(() => documentsData.signature)
+        );
         
         // رفع السيلفي (فقط إذا كانت جديدة)
         if (formData.selfieImage && !hasExistingProfile) {
-          uploadPromises.push(uploadImage(formData.selfieImage));
+          uploadPromises.push(
+            uploadImage(formData.selfieImage).catch(() => documentsData.selfieImage)
+          );
         } else {
           uploadPromises.push(Promise.resolve(documentsData.selfieImage));
         }
         
-        const [nationalIdUrl, nationalIdBackUrl, firstPaymentReceiptUrl, signatureUrl, selfieUrl] = await Promise.all(uploadPromises);
+        // انتظار رفع جميع الصور مع timeout
+        const uploadTimeout = new Promise<string[]>((_, reject) => 
+          setTimeout(() => reject(new Error('Upload timeout')), 30000)
+        );
         
-        // تحديث البيانات بالروابط
-        documentsData.nationalIdImage = nationalIdUrl || documentsData.nationalIdImage;
-        documentsData.nationalIdBack = nationalIdBackUrl || documentsData.nationalIdBack;
-        documentsData.firstPaymentReceipt = firstPaymentReceiptUrl || documentsData.firstPaymentReceipt;
-        documentsData.signature = signatureUrl || documentsData.signature;
-        documentsData.selfieImage = selfieUrl || documentsData.selfieImage;
+        const uploadResults = await Promise.race([
+          Promise.all(uploadPromises),
+          uploadTimeout
+        ]);
         
+        const [nationalIdUrl, nationalIdBackUrl, firstPaymentReceiptUrl, signatureUrl, selfieUrl] = uploadResults as string[];
+        
+        // تحديث البيانات بالروابط إذا نجح الرفع
+        if (nationalIdUrl && nationalIdUrl.startsWith('http')) {
+          documentsData.nationalIdImage = nationalIdUrl;
+        }
+        if (nationalIdBackUrl && nationalIdBackUrl.startsWith('http')) {
+          documentsData.nationalIdBack = nationalIdBackUrl;
+        }
+        if (firstPaymentReceiptUrl && firstPaymentReceiptUrl.startsWith('http')) {
+          documentsData.firstPaymentReceipt = firstPaymentReceiptUrl;
+        }
+        if (signatureUrl && signatureUrl.startsWith('http')) {
+          documentsData.signature = signatureUrl;
+        }
+        if (selfieUrl && selfieUrl.startsWith('http')) {
+          documentsData.selfieImage = selfieUrl;
+        }
+        
+        cloudinaryUploadSuccess = true;
         console.log('✅ تم رفع الصور إلى Cloudinary بنجاح');
-      } catch (uploadError) {
-        console.warn('⚠️ فشل رفع الصور إلى Cloudinary، سيتم استخدام النسخ المحلية:', uploadError);
-        toast.info('تم حفظ المستندات محليًا', { id: 'upload' });
+      } catch (uploadError: any) {
+        console.warn('⚠️ فشل رفع الصور إلى Cloudinary، سيتم استخدام النسخ المحلية:', uploadError.message);
+        // لا بأس - سنستخدم base64 فقط
       }
       
       // حفظ الاتفاقية في قاعدة البيانات (فقط إذا لم يكن عنده ملف سابق)
       if (!hasExistingProfile) {
         try {
+          toast.loading('جاري حفظ البيانات...', { id: 'upload' });
+          
           const saveResponse = await fetch('/api/installment/user-profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -567,16 +603,22 @@ function InstallmentAgreementContent() {
           if (saveResponse.ok) {
             const saveData = await saveResponse.json();
             console.log('✅ تم حفظ بيانات التقسيط في قاعدة البيانات:', saveData.agreementNumber);
+          } else {
+            console.warn('⚠️ فشل حفظ البيانات في قاعدة البيانات');
           }
-        } catch (dbError) {
-          console.error('⚠️ فشل حفظ البيانات في قاعدة البيانات:', dbError);
+        } catch (dbError: any) {
+          console.error('⚠️ خطأ في حفظ البيانات:', dbError.message);
+          // لا بأس - سنحفظ في sessionStorage على الأقل
         }
       }
       
-      // Save to sessionStorage for checkout
+      // Save to sessionStorage for checkout (دائماً نفعلها)
       sessionStorage.setItem('installmentDocuments', JSON.stringify(documentsData));
       
-      toast.success('✅ تم حفظ جميع المستندات بنجاح!', { id: 'upload' });
+      toast.success(
+        '✅ تم استلام طلبك بنجاح!\n📋 سيتم مراجعته من قبل الإدارة قريباً',
+        { id: 'upload', duration: 5000 }
+      );
       
       // Redirect back to checkout
       setTimeout(() => {
@@ -585,7 +627,7 @@ function InstallmentAgreementContent() {
       
     } catch (error: any) {
       console.error('Error submitting agreement:', error);
-      toast.error(error.message || 'حدث خطأ أثناء حفظ المستندات');
+      toast.error(error.message || 'حدث خطأ أثناء حفظ المستندات', { id: 'upload' });
       setIsSubmitting(false);
     }
   };

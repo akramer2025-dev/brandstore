@@ -50,12 +50,12 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';
     
-    // Create agreement
+    // Create agreement with PENDING status (simplified approval process)
     const agreement = await prisma.installmentAgreement.create({
       data: {
         userId: session.user.id,
         agreementNumber: generateAgreementNumber(),
-        status: 'DOCUMENTS_COMPLETE',
+        status: 'PENDING', // تغيير: القبول المبدئي - بانتظار مراجعة المدير
         nationalIdImage,
         signature,
         selfieImage,
@@ -72,6 +72,13 @@ export async function POST(req: NextRequest) {
         userAgent
       }
     });
+
+    // 🔔 إشعار للمدير: طلب تقسيط جديد
+    console.log('🔔 [ADMIN NOTIFICATION] طلب تقسيط جديد!');
+    console.log(`📝 رقم الطلب: ${agreement.agreementNumber}`);
+    console.log(`👤 العميل: ${fullName || session.user.name}`);
+    console.log(`💰 المبلغ: ${totalAmount} ج.م`);
+    console.log(`📅 التاريخ: ${new Date().toLocaleString('ar-EG')}`);
     
     return NextResponse.json({
       success: true,

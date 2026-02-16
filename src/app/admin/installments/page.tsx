@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AdminInstallmentNotifications } from '@/components/AdminInstallmentNotifications';
 
 type InstallmentStatus =
   | 'PENDING'
@@ -355,13 +356,67 @@ export default function AdminInstallmentsPage() {
                       {new Date(agreement.createdAt).toLocaleDateString('ar-EG')}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.push(`/admin/installments/${agreement.id}`)}
-                      >
-                        عرض التفاصيل
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/admin/installments/${agreement.id}`)}
+                        >
+                          عرض التفاصيل
+                        </Button>
+                        
+                        {/* أزرار سريعة للطلبات الجديدة */}
+                        {agreement.status === 'PENDING' && (
+                          <>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (confirm('هل أنت متأكد من الموافقة على هذا الطلب؟')) {
+                                  try {
+                                    const response = await fetch(`/api/admin/installments/${agreement.id}/approve`, {
+                                      method: 'POST',
+                                    });
+                                    if (response.ok) {
+                                      window.location.reload();
+                                    }
+                                  } catch (error) {
+                                    console.error('خطأ في الموافقة:', error);
+                                  }
+                                }
+                              }}
+                            >
+                              ✓ قبول
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                const reason = prompt('سبب الرفض (اختياري):');
+                                if (reason !== null) {
+                                  try {
+                                    const response = await fetch(`/api/admin/installments/${agreement.id}/reject`, {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ reason })
+                                    });
+                                    if (response.ok) {
+                                      window.location.reload();
+                                    }
+                                  } catch (error) {
+                                    console.error('خطأ في الرفض:', error);
+                                  }
+                                }
+                              }}
+                            >
+                              ✗ رفض
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -394,6 +449,9 @@ export default function AdminInstallmentsPage() {
         </div>
       )}
       </div>
+
+      {/* 🔔 نظام الإشعارات Real-time */}
+      <AdminInstallmentNotifications />
     </div>
   );
 }
