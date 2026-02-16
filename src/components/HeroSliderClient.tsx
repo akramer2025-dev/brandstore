@@ -93,12 +93,13 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
               alt={slide.titleAr}
               fill
               sizes="100vw"
-              className="object-cover brightness-90"
+              className="object-cover brightness-75"
               priority={index === 0}
+              quality={95}
             />
             
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/50 to-transparent"></div>
+            {/* Gradient Overlay - أقوى للموبايل */}
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/60 to-transparent md:from-gray-900/80 md:via-gray-900/50"></div>
             
             {/* Logo Watermark - Professional Branding */}
             <div className="absolute top-4 md:top-6 left-4 md:left-8 z-20 animate-fade-in">
@@ -117,55 +118,55 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
 
           {/* Content */}
           <div className="absolute inset-0 flex items-center">
-            <div className="container mx-auto px-3 md:px-8">
+            <div className="container mx-auto px-4 md:px-8">
               <div className="max-w-xl md:max-w-2xl">
                 {/* Category Badge with Logo */}
-                <div className="inline-flex items-center gap-1 md:gap-2 bg-white/20 backdrop-blur-md text-white px-2 py-1 md:px-4 md:py-2 rounded-full mb-1.5 md:mb-3 animate-fade-in-down border border-white/30">
-                  <div className="relative w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0">
+                <div className="inline-flex items-center gap-1.5 md:gap-2 bg-white/25 backdrop-blur-md text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full mb-2 md:mb-3 animate-fade-in-down border border-white/40 shadow-lg">
+                  <div className="relative w-4 h-4 md:w-5 md:h-5 flex-shrink-0">
                     <Image
                       src="/logo.png"
                       alt="SP"
                       fill
-                      sizes="(max-width: 768px) 14px, 20px"
+                      sizes="(max-width: 768px) 16px, 20px"
                       className="object-contain"
                     />
                   </div>
-                  <span className="text-[10px] md:text-sm font-semibold">من مصانع ريمو ستور</span>
+                  <span className="text-xs md:text-sm font-bold">ريمو ستور</span>
                 </div>
 
-                {/* Title */}
-                <h1 className="text-base sm:text-xl md:text-4xl lg:text-5xl font-bold text-white mb-1.5 md:mb-3 animate-fade-in-up leading-tight drop-shadow-2xl">
+                {/* Title - أوضح على الموبايل */}
+                <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black text-white mb-2 md:mb-3 animate-fade-in-up leading-tight drop-shadow-2xl">
                   {slide.titleAr}
                 </h1>
 
-                {/* Subtitle */}
+                {/* Subtitle - أوضح وأقصر */}
                 {slide.subtitleAr && (
-                  <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-gray-100 mb-2 md:mb-5 animate-fade-in-up animation-delay-200 drop-shadow-lg line-clamp-1 md:line-clamp-none">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/95 mb-3 md:mb-5 animate-fade-in-up animation-delay-200 drop-shadow-xl font-semibold line-clamp-2 md:line-clamp-none">
                     {slide.subtitleAr}
                   </p>
                 )}
 
-                {/* Made in Egypt Badge */}
-                <div className="flex flex-wrap gap-1.5 md:gap-2 mb-2 md:mb-5 animate-fade-in-up animation-delay-300">
-                  <div className="bg-white/95 backdrop-blur-sm px-2 py-1 md:px-4 md:py-2 rounded-lg shadow-lg">
-                    <p className="text-[9px] sm:text-xs md:text-sm font-semibold text-gray-800">
-                      🏭 صناعة محلية بجودة عالمية
+                {/* Made in Egypt Badge - أصغر على الموبايل */}
+                <div className="hidden sm:flex flex-wrap gap-2 mb-3 md:mb-5 animate-fade-in-up animation-delay-300">
+                  <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 md:px-4 md:py-2 rounded-lg shadow-lg">
+                    <p className="text-xs md:text-sm font-semibold text-gray-800">
+                      🏭 صناعة محلية
                     </p>
                   </div>
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-2 py-1 md:px-4 md:py-2 rounded-lg shadow-lg">
-                    <p className="text-[9px] sm:text-xs md:text-sm font-bold text-white">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1.5 md:px-4 md:py-2 rounded-lg shadow-lg">
+                    <p className="text-xs md:text-sm font-bold text-white">
                       ✅ ضمان الجودة
                     </p>
                   </div>
                 </div>
 
-                {/* CTA Button */}
+                {/* CTA Button - أكبر وأوضح */}
                 <Link
                   href={slide.link || '/products'}
-                  className="inline-flex items-center gap-1.5 md:gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-3 py-1.5 sm:px-4 sm:py-2.5 md:px-7 md:py-3.5 rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base font-bold shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 animate-fade-in-up animation-delay-400"
+                  className="inline-flex items-center gap-2 md:gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-3 sm:px-6 sm:py-3.5 md:px-8 md:py-4 rounded-xl text-sm sm:text-base md:text-lg font-black shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 animate-fade-in-up animation-delay-400"
                 >
                   <span>{slide.buttonTextAr || 'تسوق الآن'}</span>
-                  <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 animate-bounce-x" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 animate-bounce-x" />
                 </Link>
               </div>
             </div>

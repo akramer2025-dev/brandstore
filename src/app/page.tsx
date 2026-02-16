@@ -43,30 +43,111 @@ function getCategoryImage(categoryName: string, categoryImage?: string | null): 
     return categoryImage;
   }
 
-  // خريطة الصور الافتراضية حسب اسم الفئة
+  // خريطة الصور الافتراضية حسب اسم الفئة - صور محسّنة وأكثر وضوحاً
   const name = categoryName.toLowerCase().trim();
   
-  // فئات محددة
-  if (name.includes('تيشيرت') || name.includes('tshirt')) return 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop&q=80';
-  if (name.includes('أحذية') || name.includes('shoes') || name.includes('حذاء')) return 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=100&h=100&fit=crop&q=80';
-  if (name.includes('بناطيل') || name.includes('pants') || name.includes('بنطلون')) return 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=100&h=100&fit=crop&q=80';
-  if (name.includes('جواك') || name.includes('jackets') || name.includes('جاكت')) return 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=100&h=100&fit=crop&q=80';
-  if (name.includes('شي إن') || name.includes('shein')) return 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=100&h=100&fit=crop&q=80';
-  if (name.includes('ترينديول') || name.includes('trendyol')) return 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=100&h=100&fit=crop&q=80';
-  if (name.includes('تجميل') || name.includes('cosmetics') || name.includes('مكياج')) return 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=100&h=100&fit=crop&q=80';
-  if (name.includes('ذهب') || name.includes('فضه') || name.includes('gold') || name.includes('مجوهرات')) return 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100&h=100&fit=crop&q=80';
-  if (name.includes('اكسسوار') || name.includes('accessories')) return 'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=100&h=100&fit=crop&q=80';
+  // 📱 موبايلات وهواتف
+  if (name.includes('موبايل') || name.includes('هاتف') || name.includes('phone') || name.includes('mobile')) 
+    return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&h=200&fit=crop&q=90';
   
-  // فئات جديدة
-  if (name.includes('سيارة') || name.includes('سيارات') || name.includes('car')) return 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=100&h=100&fit=crop&q=80';
-  if (name.includes('إلكترون') || name.includes('electronic') || name.includes('موبايل')) return 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=100&h=100&fit=crop&q=80';
-  if (name.includes('ملابس') || name.includes('clothes')) return 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=100&h=100&fit=crop&q=80';
-  if (name.includes('رياضة') || name.includes('sport') || name.includes('رياضي')) return 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=100&h=100&fit=crop&q=80';
-  if (name.includes('كتب') || name.includes('book') || name.includes('قراءة')) return 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=100&h=100&fit=crop&q=80';
-  if (name.includes('أثاث') || name.includes('furniture') || name.includes('ديكور')) return 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=100&h=100&fit=crop&q=80';
+  // 💻 لاب توب وكمبيوتر
+  if (name.includes('لاب') || name.includes('كمبيوتر') || name.includes('laptop') || name.includes('computer')) 
+    return 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&h=200&fit=crop&q=90';
   
-  // صورة افتراضية للفئات العامة أو غير المعروفة
-  return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=100&h=100&fit=crop&q=80';
+  // 👕 تيشيرتات
+  if (name.includes('تيشيرت') || name.includes('tshirt') || name.includes('t-shirt')) 
+    return 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&h=200&fit=crop&q=90';
+  
+  // 👟 أحذية
+  if (name.includes('أحذية') || name.includes('shoes') || name.includes('حذاء') || name.includes('جزمة')) 
+    return 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=200&h=200&fit=crop&q=90';
+  
+  // 👖 بناطيل
+  if (name.includes('بناطيل') || name.includes('pants') || name.includes('بنطلون') || name.includes('جينز')) 
+    return 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=200&h=200&fit=crop&q=90';
+  
+  // 🧥 جواكت
+  if (name.includes('جواك') || name.includes('jackets') || name.includes('جاكت') || name.includes('معطف')) 
+    return 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=200&h=200&fit=crop&q=90';
+  
+  // 👗 ملابس عامة
+  if (name.includes('ملابس') || name.includes('clothes') || name.includes('fashion') || name.includes('أزياء')) 
+    return 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=200&h=200&fit=crop&q=90';
+  
+  // 🛍️ شي إن SHEIN
+  if (name.includes('شي إن') || name.includes('shein')) 
+    return 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=200&h=200&fit=crop&q=90';
+  
+  // 🛍️ ترينديول Trendyol
+  if (name.includes('ترينديول') || name.includes('trendyol')) 
+    return 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=200&h=200&fit=crop&q=90';
+  
+  // 💄 تجميل ومكياج
+  if (name.includes('تجميل') || name.includes('cosmetics') || name.includes('مكياج') || name.includes('makeup')) 
+    return 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=200&h=200&fit=crop&q=90';
+  
+  // 💍 ذهب وفضة ومجوهرات
+  if (name.includes('ذهب') || name.includes('فضه') || name.includes('gold') || name.includes('مجوهرات') || name.includes('jewelry')) 
+    return 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=200&h=200&fit=crop&q=90';
+  
+  // 👜 اكسسوارات
+  if (name.includes('اكسسوار') || name.includes('accessories') || name.includes('حقائب')) 
+    return 'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=200&h=200&fit=crop&q=90';
+  
+  // 🚗 سيارات
+  if (name.includes('سيارة') || name.includes('سيارات') || name.includes('car')) 
+    return 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=200&h=200&fit=crop&q=90';
+  
+  // 🏍️ موتوسيكلات
+  if (name.includes('موتوسيكل') || name.includes('دراجة') || name.includes('motorcycle')) 
+    return 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=200&h=200&fit=crop&q=90';
+  
+  // ⚡ إلكترونيات
+  if (name.includes('إلكترون') || name.includes('electronic') || name.includes('كهرب')) 
+    return 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=200&h=200&fit=crop&q=90';
+  
+  // 🎮 ألعاب
+  if (name.includes('ألعاب') || name.includes('toys') || name.includes('لعب')) 
+    return 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=200&h=200&fit=crop&q=90';
+  
+  // 🏃 رياضة
+  if (name.includes('رياضة') || name.includes('sport') || name.includes('رياضي')) 
+    return 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=200&h=200&fit=crop&q=90';
+  
+  // 📚 كتب
+  if (name.includes('كتب') || name.includes('book') || name.includes('قراءة')) 
+    return 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=200&h=200&fit=crop&q=90';
+  
+  // 🛋️ أثاث
+  if (name.includes('أثاث') || name.includes('furniture') || name.includes('ديكور')) 
+    return 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&h=200&fit=crop&q=90';
+  
+  // 🍳 مطبخ
+  if (name.includes('مطبخ') || name.includes('kitchen') || name.includes('طبخ')) 
+    return 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=200&h=200&fit=crop&q=90';
+  
+  // 🌙 رمضان
+  if (name.includes('رمضان') || name.includes('ramadan') || name.includes('فانوس')) 
+    return 'https://images.unsplash.com/photo-1603569283847-aa295f0d016a?w=200&h=200&fit=crop&q=90';
+  
+  // 🎧 سماعات
+  if (name.includes('سماعات') || name.includes('headphone') || name.includes('audio')) 
+    return 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=200&h=200&fit=crop&q=90';
+  
+  // 📺 شاشات وتلفزيون
+  if (name.includes('شاشة') || name.includes('تلفزيون') || name.includes('tv') || name.includes('screen')) 
+    return 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=200&h=200&fit=crop&q=90';
+  
+  // ⌚ ساعات
+  if (name.includes('ساعة') || name.includes('ساعات') || name.includes('watch')) 
+    return 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=200&h=200&fit=crop&q=90';
+  
+  // 🎒 حقائب مدرسية
+  if (name.includes('شنطة') || name.includes('حقيبة') || name.includes('bag') || name.includes('backpack')) 
+    return 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200&h=200&fit=crop&q=90';
+  
+  // صورة افتراضية عامة
+  return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200&h=200&fit=crop&q=90';
 }
 
 async function getProducts() {
