@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 
 export interface CartItem {
   id: string;
+  productId?: string; // للتوافق مع الكود القديم
   name: string;
   nameAr?: string;
   price: number;
@@ -15,19 +16,24 @@ export interface CartItem {
     nameAr: string;
     price: number;
   };
+  stock?: number;
+  isActive?: boolean;
 }
 
 interface CartStore {
   items: CartItem[];
   userId: string | null;
-  addItem: (item: Omit<CartItem, 'quantity'>) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
+  isLoading: boolean;
+  isSyncing: boolean; // للدلالة على جاري المزامنة
+  addItem: (item: Omit<CartItem, 'quantity'>) => Promise<void>;
+  removeItem: (id: string) => Promise<void>;
+  updateQuantity: (id: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   getTotalItems: () => number;
   getTotalPrice: () => number;
   setUserId: (userId: string | null) => void;
-  initializeCart: (userId: string | null) => void;
+  initializeCart: (userId: string | null) => Promise<void>;
+  syncWithServer: () => Promise<void>;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -35,51 +41,82 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       userId: null,
+      isLoading: false,
+      isSyncing: false,
       
       setUserId: (userId) => {
         const currentUserId = get().userId;
         
-        // إذا تغير المستخدم، امسح السلة القديمة
+        // إذا تغير المستخدم، امسح السلة المحلية وجلب من السيرفر
         if (currentUserId !== userId) {
           set({ userId, items: [] });
+          if (userId) {
+            get().syncWithServer();
+          }
         }
       },
       
-      initializeCart: (userId) => {
+      initializeCart: async (userId) => {
         const currentUserId = get().userId;
         
-        // إذا كان المستخدم مختلف عن المحفوظ، امسح السلة
+        // إذا كان المستخدم مختلف، امسح وجلب من السيرفر
         if (currentUserId !== userId) {
           set({ userId, items: [] });
-        } else if (!currentUserId && userId) {
-          // إذا كان المستخدم سجل دخول لأول مرة
-          set({ userId });
+          if (userId) {
+            await get().syncWithServer();
+          }
+        } else if (userId && get().items.length === 0) {
+          // إذا السلة فاضية، جلب من السيرفر
+          await get().syncWithServer();
         }
       },
       
-      addItem: (item) => {
+      // 🔄 المزامنة مع السيرفر
+      syncWithServer: async () => {
+        const userId = get().userId;
+        if (!userId) return;
+        
+        try {
+          set({ isSyncing: true });
+          
+          const response = await fetch('/api/cart');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.items) {
+              set({ items: data.items });
+              console.log('✅ [CART SYNC] تمت المزامنة:', data.items.length, 'منتج');
+            }
+          }
+        } catch (error) {
+          console.error('❌ [CART SYNC] فشل:', error);
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
+      
+      // ➕ إضافة منتج
+      addItem: async (item) => {
+        const userId = get().userId;
+        
+        // إضافة محلية أولاً للسرعة
         const items = get().items;
-        // البحث عن المنتج بنفس الـ id ونفس الـ variant (إن وجد)
         const existingItem = items.find((i) => {
           if (item.variant) {
-            // إذا كان المنتج له variant، نتحقق من id المنتج و id الـ variant
-            return i.id === item.id && i.variant?.id === item.variant.id;
+            return (i.productId || i.id) === (item.productId || item.id) && i.variant?.id === item.variant.id;
           } else {
-            // إذا لم يكن له variant، نتحقق من id المنتج فقط وأنه ليس له variant
-            return i.id === item.id && !i.variant;
+            return (i.productId || i.id) === (item.productId || item.id) && !i.variant;
           }
         });
         
         if (existingItem) {
           set({
             items: items.map((i) => {
-              // نفس المنطق في التحديث
               if (item.variant) {
-                return i.id === item.id && i.variant?.id === item.variant.id
+                return (i.productId || i.id) === (item.productId || item.id) && i.variant?.id === item.variant.id
                   ? { ...i, quantity: i.quantity + 1 }
                   : i;
               } else {
-                return i.id === item.id && !i.variant
+                return (i.productId || i.id) === (item.productId || item.id) && !i.variant
                   ? { ...i, quantity: i.quantity + 1 }
                   : i;
               }
@@ -88,26 +125,89 @@ export const useCartStore = create<CartStore>()(
         } else {
           set({ items: [...items, { ...item, quantity: 1 }] });
         }
+        
+        // المزامنة مع السيرفر
+        if (userId) {
+          try {
+            const response = await fetch('/api/cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: item.productId || item.id,
+                variantId: item.variant?.id,
+                price: item.price,
+                quantity: 1
+              })
+            });
+            
+            if (response.ok) {
+              // تحديث السلة بالبيانات من السيرفر
+              await get().syncWithServer();
+            }
+          } catch (error) {
+            console.error('❌ [CART] فشل حفظ في السيرفر:', error);
+          }
+        }
       },
       
-      removeItem: (id) => {
+      // 🗑️ حذف منتج
+      removeItem: async (id) => {
+        // حذف محلي أولاً
         set({ items: get().items.filter((item) => item.id !== id) });
+        
+        // المزامنة مع السيرفر
+        const userId = get().userId;
+        if (userId) {
+          try {
+            await fetch(`/api/cart/${id}`, { method: 'DELETE' });
+          } catch (error) {
+            console.error('❌ [CART] فشل الحذف من السيرفر:', error);
+          }
+        }
       },
       
-      updateQuantity: (id, quantity) => {
+      // ✏️ تعديل الكمية
+      updateQuantity: async (id, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(id);
+          await get().removeItem(id);
           return;
         }
         
+        // تعديل محلي أولاً
         set({
           items: get().items.map((item) =>
             item.id === id ? { ...item, quantity } : item
           ),
         });
+        
+        // المزامنة مع السيرفر
+        const userId = get().userId;
+        if (userId) {
+          try {
+            await fetch('/api/cart', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ cartItemId: id, quantity })
+            });
+          } catch (error) {
+            console.error('❌ [CART] فشل تعديل الكمية في السيرفر:', error);
+          }
+        }
       },
       
-      clearCart: () => set({ items: [] }),
+      // 🧹 مسح السلة
+      clearCart: async () => {
+        set({ items: [] });
+        
+        const userId = get().userId;
+        if (userId) {
+          try {
+            await fetch('/api/cart', { method: 'DELETE' });
+          } catch (error) {
+            console.error('❌ [CART] فشل مسح السلة من السيرفر:', error);
+          }
+        }
+      },
       
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);

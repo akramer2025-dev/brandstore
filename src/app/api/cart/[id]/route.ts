@@ -1,0 +1,54 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+
+// 🗑️ DELETE: حذف منتج واحد من السلة
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'يجب تسجيل الدخول أولاً' },
+        { status: 401 }
+      );
+    }
+
+    const { id: cartItemId } = await params;
+
+    // التحقق من ملكية العنصر قبل الحذف
+    const cartItem = await prisma.cart.findFirst({
+      where: {
+        id: cartItemId,
+        userId: session.user.id
+      }
+    });
+
+    if (!cartItem) {
+      return NextResponse.json(
+        { error: 'العنصر غير موجود في السلة' },
+        { status: 404 }
+      );
+    }
+
+    // حذف العنصر
+    await prisma.cart.delete({
+      where: { id: cartItemId }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'تم حذف المنتج من السلة'
+    });
+  } catch (error) {
+    console.error('❌ Error deleting cart item:', error);
+    return NextResponse.json(
+      { error: 'فشل حذف المنتج من السلة' },
+      { status: 500 }
+    );
+  }
+}
