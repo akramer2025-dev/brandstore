@@ -74,21 +74,31 @@ export const useCartStore = create<CartStore>()(
       // 🔄 المزامنة مع السيرفر
       syncWithServer: async () => {
         const userId = get().userId;
-        if (!userId) return;
+        if (!userId) {
+          console.log('⚠️ [CART SYNC] لا يوجد مستخدم - تخطي المزامنة');
+          return;
+        }
         
         try {
           set({ isSyncing: true });
+          console.log('🔄 [CART SYNC] بدء المزامنة للمستخدم:', userId);
           
           const response = await fetch('/api/cart');
+          
+          console.log('📡 [CART SYNC] Response status:', response.status);
+          
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.items) {
               set({ items: data.items });
               console.log('✅ [CART SYNC] تمت المزامنة:', data.items.length, 'منتج');
             }
+          } else {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('❌ [CART SYNC] فشل:', response.status, errorData);
           }
         } catch (error) {
-          console.error('❌ [CART SYNC] فشل:', error);
+          console.error('❌ [CART SYNC] خطأ:', error);
         } finally {
           set({ isSyncing: false });
         }

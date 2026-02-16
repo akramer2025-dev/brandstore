@@ -9,11 +9,14 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
+      console.log('🔒 [CART API] No session - user not logged in');
       return NextResponse.json(
         { error: 'يجب تسجيل الدخول أولاً' },
         { status: 401 }
       );
     }
+
+    console.log('✅ [CART API] Fetching cart for user:', session.user.id);
 
     const cartItems = await prisma.cart.findMany({
       where: { userId: session.user.id },
@@ -40,6 +43,8 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { createdAt: 'desc' }
     });
+
+    console.log(`📦 [CART API] Found ${cartItems.length} items in cart`);
 
     // تحويل البيانات للـ format المطلوب
     const formattedItems = cartItems.map(item => {
@@ -70,10 +75,18 @@ export async function GET(request: NextRequest) {
       totalItems: formattedItems.reduce((sum, item) => sum + item.quantity, 0),
       totalPrice: formattedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     });
-  } catch (error) {
-    console.error('❌ Error fetching cart:', error);
+  } catch (error: any) {
+    console.error('❌ [CART API ERROR] Details:', {
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta,
+      stack: error?.stack
+    });
     return NextResponse.json(
-      { error: 'فشل جلب السلة' },
+      { 
+        error: 'فشل جلب السلة',
+        details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+      },
       { status: 500 }
     );
   }
