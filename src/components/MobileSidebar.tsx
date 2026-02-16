@@ -53,12 +53,6 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     setMounted(true);
   }, []);
 
-  // Debug: Log when isOpen changes
-  useEffect(() => {
-    console.log('🚪 MobileSidebar isOpen:', isOpen);
-    console.log('📱 Sidebar element should be:', isOpen ? 'VISIBLE (translateX(0))' : 'HIDDEN (translateX(100%))');
-  }, [isOpen]);
-
   // Close sidebar when route changes only if it's open
   useEffect(() => {
     if (isOpen) {

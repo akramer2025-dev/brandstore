@@ -432,7 +432,6 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => {
-                console.log('Menu button clicked, opening sidebar...');
                 setIsSidebarOpen(true);
               }}
               className="md:hidden text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-9 h-9"

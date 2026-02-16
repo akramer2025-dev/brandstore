@@ -78,6 +78,15 @@ export default function InstallmentAgreementPage() {
     }
   }, [mounted, totalAmount, installments, router]);
   
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
+  
   if (!mounted || status === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -195,13 +204,6 @@ export default function InstallmentAgreementPage() {
       }
     }
   };
-  
-  // Cleanup camera on unmount
-  useEffect(() => {
-    return () => {
-      stopCamera();
-    };
-  }, []);
   
   // Handle signature completion
   const handleSignatureComplete = (signature: string) => {

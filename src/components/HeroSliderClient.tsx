@@ -20,18 +20,12 @@ export default function HeroSliderClient({ slides }: { slides: SliderImageData[]
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  // Debug: Log slider state
-  useEffect(() => {
-    console.log('🎬 Slider Auto-Play:', isAutoPlaying, '| Current Slide:', currentSlide, '| Total Slides:', slides.length);
-  }, [currentSlide, isAutoPlaying, slides.length]);
-
   useEffect(() => {
     if (!isAutoPlaying || slides.length === 0) return;
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => {
         const nextSlide = (prev + 1) % slides.length;
-        console.log('🔄 Auto-switching to slide:', nextSlide);
         return nextSlide;
       });
     }, 5000);
