@@ -1825,12 +1825,14 @@ model InstallmentAgreement {
   agreementNumber       String   @unique // رقم الاتفاقية
   status                InstallmentAgreementStatus @default(PENDING)
   
-  // 🆔 المستندات المطلوبة (الخطوات الثلاثة)
-  nationalIdImage       String?  // صورة البطاقة الشخصية (Cloudinary URL)
+  // 🆔 المستندات المطلوبة
+  nationalIdImage       String?  // صورة وجه البطاقة (Cloudinary URL)
+  nationalIdBack        String?  // صورة ظهر البطاقة (Cloudinary URL)
+  firstPaymentReceipt   String?  // إيصال الدفعة الأولى (Cloudinary URL)
   signature             String?  // التوقيع الإلكتروني (base64 أو Cloudinary URL)
   selfieImage           String?  // صورة السيلفي (Cloudinary URL)
   
-  // 📝 بيانات العميل من البطاقة
+  // 📝 بيانات العميل من البطاقة (يتم حفظها في المرة الأولى فقط)
   fullName              String?  // الاسم الكامل
   nationalId            String?  // رقم البطاقة
   address               String?  // العنوان

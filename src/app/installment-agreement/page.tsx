@@ -32,6 +32,8 @@ function InstallmentAgreementContent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [hasExistingProfile, setHasExistingProfile] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   
   // Agreement data from checkout
   const totalAmount = parseFloat(searchParams.get('totalAmount') || '0');
@@ -78,6 +80,48 @@ function InstallmentAgreementContent() {
     }
   }, [mounted, totalAmount, installments, router]);
   
+  // التحقق من وجود بيانات محفوظة للمستخدم
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (!session?.user) return;
+      
+      try {
+        const res = await fetch('/api/installment/user-profile');
+        const data = await res.json();
+        
+        if (data.hasProfile && data.profile) {
+          console.log('✅ تم العثور على بيانات محفوظة');
+          setHasExistingProfile(true);
+          
+          // تعبئة البيانات المحفوظة
+          setFormData(prev => ({
+            ...prev,
+            nationalIdPreview: data.profile.nationalIdImage,
+            nationalIdBackPreview: data.profile.nationalIdBack,
+            selfiePreview: data.profile.selfieImage,
+            fullName: data.profile.fullName || '',
+            nationalId: data.profile.nationalId || ''
+          }));
+          
+          // البدء من خطوة التوقيع مباشرة
+          setCurrentStep(2);
+          
+          toast.success('تم تحميل بياناتك المحفوظة ✓');
+        } else {
+          console.log('ℹ️ لا توجد بيانات محفوظة - مستخدم جديد');
+        }
+      } catch (error) {
+        console.error('خطأ في تحميل البيانات:', error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+    
+    if (mounted && session?.user) {
+      loadUserProfile();
+    }
+  }, [mounted, session]);
+  
   // Cleanup camera on unmount
   useEffect(() => {
     return () => {
@@ -87,7 +131,7 @@ function InstallmentAgreementContent() {
     };
   }, [stream]);
   
-  if (!mounted || status === 'loading') {
+  if (!mounted || status === 'loading' || isLoadingProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
@@ -313,12 +357,21 @@ function InstallmentAgreementContent() {
   const canProceedToNextStep = () => {
     switch (currentStep) {
       case 1:
+        // إذا كان عنده بيانات محفوظة، يكفي رفع إيصال الدفع
+        if (hasExistingProfile) {
+          return formData.firstPaymentReceipt !== null;
+        }
+        // مستخدم جديد: يحتاج البطاقة + الإيصال
         return formData.nationalIdImage !== null && 
                formData.nationalIdBack !== null && 
                formData.firstPaymentReceipt !== null;
       case 2:
         return formData.signature !== '';
       case 3:
+        // إذا عنده بيانات محفوظة، مش محتاج سيلفي تاني
+        if (hasExistingProfile) {
+          return formData.acceptedTerms;
+        }
         return formData.selfieImage !== null && formData.acceptedTerms;
       default:
         return false;
@@ -337,18 +390,8 @@ function InstallmentAgreementContent() {
     try {
       toast.loading('جاري حفظ المستندات...', { id: 'upload' });
       
-      // Convert file to base64 for local storage
-      const fileToBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-        });
-      };
-      
       // Prepare all document data as base64
-      const documentsData = {
+      let documentsData = {
         nationalIdImage: formData.nationalIdPreview || '',
         nationalIdBack: formData.nationalIdBackPreview || '',
         firstPaymentReceipt: formData.firstPaymentReceiptPreview || '',
@@ -363,7 +406,7 @@ function InstallmentAgreementContent() {
         completedAt: new Date().toISOString()
       };
       
-      // حاول رفع الصور إلى Cloudinary (اختياري)
+      // حاول رفع الصور إلى Cloudinary
       try {
         const uploadImage = async (file: File) => {
           const formDataToUpload = new FormData();
@@ -390,17 +433,43 @@ function InstallmentAgreementContent() {
           return new File([blob], 'signature.png', { type: 'image/png' });
         };
         
-        // Upload all images to Cloudinary
-        const signatureFile = await convertSignatureToFile(formData.signature);
-        const [nationalIdUrl, nationalIdBackUrl, firstPaymentReceiptUrl, signatureUrl, selfieUrl] = await Promise.all([
-          formData.nationalIdImage ? uploadImage(formData.nationalIdImage) : Promise.resolve(''),
-          formData.nationalIdBack ? uploadImage(formData.nationalIdBack) : Promise.resolve(''),
-          formData.firstPaymentReceipt ? uploadImage(formData.firstPaymentReceipt) : Promise.resolve(''),
-          uploadImage(signatureFile),
-          formData.selfieImage ? uploadImage(formData.selfieImage) : Promise.resolve('')
-        ]);
+        // Upload only NEW images (not already from Cloudinary URLs)
+        const uploadPromises: Promise<string>[] = [];
         
-        // إذا نجح الرفع، استخدم روابط Cloudinary
+        // رفع البطاقة (فقط إذا كانت جديدة)
+        if (formData.nationalIdImage && !hasExistingProfile) {
+          uploadPromises.push(uploadImage(formData.nationalIdImage));
+        } else {
+          uploadPromises.push(Promise.resolve(documentsData.nationalIdImage));
+        }
+        
+        if (formData.nationalIdBack && !hasExistingProfile) {
+          uploadPromises.push(uploadImage(formData.nationalIdBack));
+        } else {
+          uploadPromises.push(Promise.resolve(documentsData.nationalIdBack));
+        }
+        
+        // رفع إيصال الدفعة (دائماً جديد)
+        if (formData.firstPaymentReceipt) {
+          uploadPromises.push(uploadImage(formData.firstPaymentReceipt));
+        } else {
+          uploadPromises.push(Promise.resolve(''));
+        }
+        
+        // رفع التوقيع (دائماً جديد)
+        const signatureFile = await convertSignatureToFile(formData.signature);
+        uploadPromises.push(uploadImage(signatureFile));
+        
+        // رفع السيلفي (فقط إذا كانت جديدة)
+        if (formData.selfieImage && !hasExistingProfile) {
+          uploadPromises.push(uploadImage(formData.selfieImage));
+        } else {
+          uploadPromises.push(Promise.resolve(documentsData.selfieImage));
+        }
+        
+        const [nationalIdUrl, nationalIdBackUrl, firstPaymentReceiptUrl, signatureUrl, selfieUrl] = await Promise.all(uploadPromises);
+        
+        // تحديث البيانات بالروابط
         documentsData.nationalIdImage = nationalIdUrl || documentsData.nationalIdImage;
         documentsData.nationalIdBack = nationalIdBackUrl || documentsData.nationalIdBack;
         documentsData.firstPaymentReceipt = firstPaymentReceiptUrl || documentsData.firstPaymentReceipt;
@@ -409,17 +478,34 @@ function InstallmentAgreementContent() {
         
         console.log('✅ تم رفع الصور إلى Cloudinary بنجاح');
       } catch (uploadError) {
-        // في حالة فشل Cloudinary، استخدم base64 المحفوظة مسبقًا
         console.warn('⚠️ فشل رفع الصور إلى Cloudinary، سيتم استخدام النسخ المحلية:', uploadError);
         toast.info('تم حفظ المستندات محليًا', { id: 'upload' });
       }
       
-      // Save documents to sessionStorage
+      // حفظ الاتفاقية في قاعدة البيانات (فقط إذا لم يكن عنده ملف سابق)
+      if (!hasExistingProfile) {
+        try {
+          const saveResponse = await fetch('/api/installment/user-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(documentsData)
+          });
+          
+          if (saveResponse.ok) {
+            const saveData = await saveResponse.json();
+            console.log('✅ تم حفظ بيانات التقسيط في قاعدة البيانات:', saveData.agreementNumber);
+          }
+        } catch (dbError) {
+          console.error('⚠️ فشل حفظ البيانات في قاعدة البيانات:', dbError);
+        }
+      }
+      
+      // Save to sessionStorage for checkout
       sessionStorage.setItem('installmentDocuments', JSON.stringify(documentsData));
       
       toast.success('✅ تم حفظ جميع المستندات بنجاح!', { id: 'upload' });
       
-      // Redirect back to checkout with agreement completion flag
+      // Redirect back to checkout
       setTimeout(() => {
         router.push('/checkout?installmentAgreementCompleted=true');
       }, 1000);
@@ -484,54 +570,44 @@ function InstallmentAgreementContent() {
           ))}
         </div>
         
-        {/* Agreement Terms (shown on all steps) */}
+        {/* Agreement Terms - مبسط جداً */}
         <Card className="bg-gray-800/50 border-gray-700 mb-6">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-white flex items-center gap-2 text-base">
               <FileText className="w-5 h-5 text-blue-400" />
-              شروط الاتفاقية
+              تفاصيل التقسيط
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-amber-900/30 border border-amber-600 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-6 h-6 text-amber-400 flex-shrink-0 mt-1" />
-                <div className="text-amber-100 text-sm space-y-2">
-                  <p className="font-bold text-lg">⚠️ تحذير قانوني - نظام التقسيط:</p>
-                  <p className="font-bold text-blue-300 text-base">
-                    📋 سيتم تقسيم المبلغ إلى 4 دفعات متساوية، مع دفع الدفعة الأولى الآن لتأكيد الطلب
-                  </p>
-                  <p>
-                    بموجب القانون المصري، أنت ملتزم بسداد جميع الأقساط في المواعيد المحددة.
-                    عدم الالتزام بالسداد قد يعرضك للمساءلة القانونية والعقوبات التالية:
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 mr-4">
-                    <li>غرامات تأخير تصل إلى 10% من قيمة القسط</li>
-                    <li>الإبلاغ عن سجلك الائتماني</li>
-                    <li>اتخاذ إجراءات قانونية ضدك</li>
-                    <li>حجز الممتلكات في حالة عدم السداد</li>
-                  </ul>
-                </div>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gray-700/50 rounded-lg p-3">
+                <p className="text-gray-400 text-xs">المبلغ الكلي</p>
+                <p className="text-white font-bold text-lg">{totalAmount.toLocaleString()} ج</p>
+              </div>
+              
+              <div className="bg-green-600/30 border border-green-500 rounded-lg p-3">
+                <p className="text-green-200 text-xs">✓ الدفعة الأولى</p>
+                <p className="text-white font-bold text-lg">{downPayment.toLocaleString()} ج</p>
+              </div>
+              
+              <div className="bg-gray-700/50 rounded-lg p-3">
+                <p className="text-gray-400 text-xs">القسط الشهري</p>
+                <p className="text-white font-bold text-lg">{monthlyAmount.toLocaleString()} ج</p>
+              </div>
+              
+              <div className="bg-gray-700/50 rounded-lg p-3">
+                <p className="text-gray-400 text-xs">عدد الأقساط</p>
+                <p className="text-white font-bold text-lg">{installments} شهر</p>
               </div>
             </div>
             
-            <div className="bg-blue-900/30 border-2 border-blue-500 rounded-lg p-4">
-              <h3 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
-                💰 تفاصيل نظام التقسيط (4 دفعات)
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-700/50 rounded-lg p-3">
-                  <p className="text-gray-400 mb-1 text-sm">المبلغ الإجمالي</p>
-                  <p className="text-white font-bold text-lg">{totalAmount.toLocaleString()} ج</p>
-                </div>
-                
-                <div className="bg-green-600/30 border border-green-500 rounded-lg p-3">
-                  <p className="text-green-200 mb-1 text-sm">✓ الدفعة الأولى (الآن)</p>
-                  <p className="text-white font-bold text-lg">{downPayment.toLocaleString()} ج</p>
-                </div>
-                
-                <div className="bg-gray-700/50 rounded-lg p-3">
-                  <p className="text-gray-400 mb-1 text-sm">الدفعة الثانية</p>
+            <div className="bg-amber-900/20 border border-amber-600/50 rounded-lg p-3">
+              <p className="text-amber-200 text-xs">
+                ⚠️ <strong>ملتزم بالسداد:</strong> غرامة 10% عند التأخير + إجراءات قانونية
+              </p>
+            </div>
+          </CardContent>
+        </Card>
                   <p className="text-white font-bold text-lg">{monthlyAmount.toLocaleString()} ج</p>
                   <p className="text-gray-400 text-xs mt-1">بعد شهر واحد</p>
                 </div>
@@ -799,48 +875,41 @@ function InstallmentAgreementContent() {
                   )}
                 </div>
               )}
-              
-              {/* Tips Box */}
-              <div className="bg-blue-900/30 border border-blue-600 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <div className="text-blue-400 text-2xl">💡</div>
-                  <div className="text-blue-100 text-sm space-y-1">
-                    <p className="font-bold">نصائح لصورة مثالية:</p>
-                    <ul className="list-disc list-inside space-y-1 mr-4">
-                      <li>ضع البطاقة على سطح مستوٍ ذو لون غامق</li>
-                      <li>استخدم إضاءة جيدة من الأعلى (تجنب الفلاش المباشر)</li>
-                      <li>تأكد من عدم وجود ظلال أو انعكاسات</li>
-                      <li>التقط الصورة من مسافة قريبة لضمان وضوح النص</li>
-                      <li>تأكد أن البطاقة تملأ إطار الصورة</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         )}
         
         {/* Step 2: Signature */}
         {currentStep === 2 && (
-          <SignaturePad onSignatureComplete={handleSignatureComplete} required />
+          <Card className="bg-gray-800/50 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2 text-base">
+                <FileText className="w-5 h-5 text-green-400" />
+                التوقيع الإلكتروني
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SignaturePad onSignatureComplete={handleSignatureComplete} required />
+            </CardContent>
+          </Card>
         )}
         
-        {/* Step 3: Selfie & Accept Terms */}
+        {/* Step 3: Accept Terms (Selfie فقط للمستخدمين الجدد) */}
         {currentStep === 3 && (
           <Card className="bg-gray-800/50 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Camera className="w-5 h-5 text-blue-400" />
-                الخطوة 3: صورة شخصية (سيلفي) للتحقق من الهوية
+              <CardTitle className="text-white flex items-center gap-2 text-base">
+                <CheckCircle2 className="w-5 h-5 text-blue-400" />
+                {hasExistingProfile ? 'قبول الشروط' : 'صورة السيلفي وقبول الشروط'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-amber-900/30 border border-amber-500 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-1" />
-                  <div className="text-amber-100 text-sm">
-                    <p className="font-bold mb-2">⚠️ هام للغاية - التحقق من الهوية:</p>
-                    <p>يجب التقاط صورة سيلفي حقيقية الآن باستخدام الكاميرا للتأكد من أنك نفس الشخص صاحب البطاقة الشخصية.</p>
+              {!hasExistingProfile && (
+                <>
+                  <div className="bg-blue-900/20 border border-blue-600/50 rounded-lg p-3">
+                    <p className="text-blue-200 text-sm">
+                      📸 التقط صورة سيلفي للتحقق من الهوية
+                    </p>
                   </div>
                 </div>
               </div>
@@ -853,72 +922,60 @@ function InstallmentAgreementContent() {
                 </Label>
                 
                 {!cameraActive && !formData.selfiePreview && (
-                  <div className="space-y-3">
-                    <div className="bg-blue-900/30 border border-blue-500 rounded-lg p-4">
-                      <p className="text-blue-100 text-sm mb-3">📸 نصائح لصورة سيلفي مثالية:</p>
-                      <ul className="list-disc list-inside space-y-1 text-blue-200 text-sm mr-4">
-                        <li>تأكد من الإضاءة الجيدة على وجهك</li>
-                        <li>انظر مباشرة للكاميرا</li>
-                        <li>تأكد من ظهور وجهك بالكامل</li>
-                        <li>تجنب النظارات الشمسية أو القبعات</li>
-                        <li>استخدم خلفية واضحة</li>
-                      </ul>
+                  <div className="grid grid-cols-1 gap-3">
+                    <Button
+                      type="button"
+                      onClick={startCamera}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3"
+                    >
+                      <Camera className="w-5 h-5 ml-2" />
+                      📷 تشغيل الكاميرا
+                    </Button>
+                    
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-600"></div>
+                      </div>
+                      <div className="relative flex justify-center text-xs">
+                        <span className="px-2 bg-gray-800 text-gray-400">أو</span>
+                      </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 gap-3">
-                      <Button
-                        type="button"
-                        onClick={startCamera}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4"
-                      >
-                        <Camera className="w-5 h-5 ml-2" />
-                        📷 تشغيل الكاميرا والتقاط صورة
-                      </Button>
-                      
-                      <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-gray-600"></div>
-                        </div>
-                        <div className="relative flex justify-center text-xs">
-                          <span className="px-2 bg-gray-800 text-gray-400">أو</span>
-                        </div>
-                      </div>
-                      
-                      <Label
-                        htmlFor="selfieUpload"
-                        className="flex items-center justify-center gap-2 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-lg cursor-pointer transition-all"
-                      >
-                        <Upload className="w-5 h-5" />
-                        📂 رفع صورة سيلفي من الجهاز
-                      </Label>
-                      <Input
-                        id="selfieUpload"
-                        type="file"
-                        accept="image/*"
-                        capture="user"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          
-                          if (!file.type.startsWith('image/')) {
-                            toast.error('يرجى اختيار صورة صحيحة');
-                            return;
-                          }
-                          
-                          if (file.size > 5 * 1024 * 1024) {
-                            toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
-                            return;
-                          }
-                          
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setFormData(prev => ({
-                              ...prev,
-                              selfieImage: file,
-                              selfiePreview: reader.result as string
-                            }));
-                            toast.success('✓ تم رفع صورة السيلفي بنجاح');
-                          };
+                    <Label
+                      htmlFor="selfieUpload"
+                      className="flex items-center justify-center gap-2 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg cursor-pointer transition-all"
+                    >
+                      <Upload className="w-5 h-5" />
+                      📂 رفع صورة من الجهاز
+                    </Label>
+                    <Input
+                      id="selfieUpload"
+                      type="file"
+                      accept="image/*"
+                      capture="user"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        
+                        if (!file.type.startsWith('image/')) {
+                          toast.error('يرجى اختيار صورة صحيحة');
+                          return;
+                        }
+                        
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+                          return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData(prev => ({
+                            ...prev,
+                            selfieImage: file,
+                            selfiePreview: reader.result as string
+                          }));
+                          toast.success('✓ تم رفع صورة السيلفي بنجاح');
+                        };
                           reader.readAsDataURL(file);
                         }}
                         className="hidden"
