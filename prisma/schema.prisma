@@ -44,6 +44,9 @@ model User {
   activityLogs     UserActivityLog[] // سجل النشاط
   sheinOrders      SheinOrder[] // طلبات شي إن
   installmentAgreements InstallmentAgreement[] // اتفاقيات التقسيط
+  vehicleFinancingApplications VehicleFinancing[] // طلبات تمويل المركبات
+  vehicleInquiries VehicleInquiry[] // استفسارات المركبات
+  testDriveRequests TestDriveRequest[] // طلبات تجربة القيادة
   
   partner          PartnerCapital? @relation(fields: [partnerId], references: [id])
 
@@ -192,6 +195,7 @@ model Vendor {
   purchases          Purchase[]
   offlineProducts    OfflineProduct[]
   offlineSuppliers   OfflineSupplier[]
+  vehicles           Vehicle[] // المركبات (سيارات وموتوسيكلات)
   user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("vendors")
@@ -889,6 +893,7 @@ enum UserRole {
   MANUFACTURER
   MARKETING_STAFF // موظف تسويق للمنتجات المستوردة
   PARTNER_STAFF   // موظف شريك
+  VEHICLE_DEALER  // شريك معرض سيارات وموتوسيكلات
 }
 
 enum SaleType {
@@ -1904,5 +1909,286 @@ enum InstallmentAgreementStatus {
   APPROVED             // تمت الموافقة
   REJECTED             // مرفوض
   EXPIRED              // منتهي الصلاحية
+}
+
+// ============================================================
+// 🚗 نظام معرض السيارات والموتوسيكلات
+// ============================================================
+
+// 🚗 نموذج المركبات (سيارات وموتوسيكلات)
+model Vehicle {
+  id                    String           @id @default(cuid())
+  vendorId              String           // معرف المعرض (البائع)
+  vehicleNumber         String           @unique // رقم المركبة في النظام
+  
+  // 🔖 البيانات الأساسية
+  type                  VehicleType      // نوع المركبة: سيارة أو موتوسيكل
+  condition             VehicleCondition // حالة: جديد أو مستعمل
+  brand                 String           // الماركة (تويوتا، هوندا، إلخ)
+  model                 String           // الموديل (كامري، أكورد، إلخ)
+  year                  Int              // سنة الصنع
+  color                 String           // اللون
+  fuelType              FuelType         // نوع الوقود
+  transmission          TransmissionType // ناقل الحركة
+  
+  // 📊 بيانات المركبات المستعملة
+  mileage               Int?             // عداد الكيلومترات (للمستعمل)
+  previousOwners        Int?             // عدد الملاك السابقين
+  accidentHistory       Boolean          @default(false) // تاريخ حوادث
+  accidentDetails       String?          // تفاصيل الحوادث (إن وجدت)
+  maintenanceHistory    String?          // سجل الصيانة
+  licensePlate          String?          // رقم اللوحة
+  
+  // 🎨 المواصفات التقنية
+  engineCapacity        String?          // سعة المحرك (1600cc مثلاً)
+  horsepower            Int?             // قوة الحصان
+  seats                 Int?             // عدد المقاعد (للسيارات)
+  doors                 Int?             // عدد الأبواب (للسيارات)
+  bodyType              String?          // نوع الهيكل (سيدان، SUV، إلخ)
+  
+  // 💡 المميزات والإضافات
+  features              String?          // المميزات (مفصولة بفواصل): فتحة سقف،كاميرا،سنسر
+  hasWarranty           Boolean          @default(false) // ضمان
+  warrantyDetails       String?          // تفاصيل الضمان
+  hasFreeService        Boolean          @default(false) // صيانة مجانية
+  freeServiceDetails    String?          // تفاصيل الصيانة المجانية
+  
+  // 💰 الأسعار والتكاليف
+  purchasePrice         Float            // سعر الشراء (من المورد/المالك السابق)
+  sellingPrice          Float            // سعر البيع
+  marketingPrice        Float?           // سعر الإعلان (قد يختلف عن سعر البيع)
+  negotiable            Boolean          @default(true) // قابل للتفاوض
+  profitMargin          Float            // هامش الربح (محسوب تلقائياً)
+  profitAmount          Float            // مبلغ الربح (محسوب تلقائياً)
+  
+  // 🏦 نظام التمويل البنكي
+  allowBankFinancing    Boolean          @default(false) // يسمح بالتمويل البنكي
+  minDownPayment        Float?           // الحد الأدنى للدفعة المقدمة
+  maxFinancingYears     Int?             // أقصى مدة تمويل بالسنوات
+  partnerBanks          String?          // البنوك الشريكة (مفصولة بفواصل)
+  
+  // 📝 الوصف والملاحظات
+  description           String?          // وصف المركبة
+  descriptionAr         String?          // الوصف بالعربية
+  sellerNotes           String?          // ملاحظات البائع
+  internalNotes         String?          // ملاحظات داخلية (لا تظهر للعميل)
+  
+  // 🖼️ الصور والفيديوهات
+  images                String?          // الصور (مفصولة بفواصل)
+  featuredImage         String?          // الصورة الرئيسية
+  videoUrl              String?          // رابط فيديو (يوتيوب مثلاً)
+  
+  // 📍 الموقع والتوفر
+  location              String?          // موقع المركبة
+  showroom              String?          // المعرض
+  isAvailable           Boolean          @default(true) // متوفر للبيع
+  isFeatured            Boolean          @default(false) // مميز
+  isActive              Boolean          @default(true) // نشط
+  
+  // 📈 الإحصائيات
+  viewCount             Int              @default(0) // عدد المشاهدات
+  inquiryCount          Int              @default(0) // عدد الاستفسارات
+  testDriveCount        Int              @default(0) // عدد طلبات تجربة القيادة
+  
+  // 📅 التواريخ
+  soldAt                DateTime?        // تاريخ البيع
+  soldPrice             Float?           // سعر البيع الفعلي
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  
+  // العلاقات
+  vendor                Vendor           @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  financingApplications VehicleFinancing[]
+  inquiries             VehicleInquiry[]
+  testDrives            TestDriveRequest[]
+  
+  @@map("vehicles")
+  @@index([vendorId])
+  @@index([type])
+  @@index([condition])
+  @@index([isAvailable])
+  @@index([isActive])
+  @@index([createdAt(sort: Desc)])
+}
+
+// 🏦 نموذج طلبات التمويل البنكي للمركبات
+model VehicleFinancing {
+  id                    String                    @id @default(cuid())
+  vehicleId             String
+  customerId            String
+  bankName              String                    // اسم البنك (أمان، تمويل سيارة، إلخ)
+  applicationNumber     String                    @unique // رقم طلب التمويل
+  
+  // 💰 تفاصيل التمويل
+  vehiclePrice          Float                     // سعر المركبة
+  downPayment           Float                     // الدفعة المقدمة
+  financedAmount        Float                     // المبلغ الممول
+  installmentYears      Int                       // مدة التقسيط بالسنوات
+  monthlyInstallment    Float                     // القسط الشهري
+  interestRate          Float                     // نسبة الفائدة السنوية
+  totalPayable          Float                     // إجمالي المدفوع (مع الفوائد)
+  adminFees             Float                     @default(0) // رسوم إدارية
+  
+  // 📝 بيانات العميل
+  fullName              String
+  nationalId            String
+  phone                 String
+  email                 String?
+  address               String
+  employmentStatus      EmploymentStatus          // حالة التوظيف
+  monthlyIncome         Float                     // الدخل الشهري
+  employer              String?                   // جهة العمل
+  
+  // 📄 المستندات المطلوبة
+  nationalIdFront       String?                   // صورة البطاقة (أمامي)
+  nationalIdBack        String?                   // صورة البطاقة (خلفي)
+  salaryReceipt         String?                   // إيصال المرتب
+  bankStatement         String?                   // كشف حساب بنكي
+  employmentLetter      String?                   // خطاب من جهة العمل
+  utilityBill           String?                   // فاتورة خدمات
+  guarantorId           String?                   // بطاقة الضامن
+  otherDocuments        String?                   // مستندات أخرى
+  
+  // ✅ حالة الطلب
+  status                VehicleFinancingStatus    @default(PENDING)
+  bankResponse          String?                   // رد البنك
+  approvedAmount        Float?                    // المبلغ الموافق عليه
+  approvalDate          DateTime?                 // تاريخ الموافقة
+  rejectionReason       String?                   // سبب الرفض
+  
+  // 📅 التواريخ المهمة
+  submittedAt           DateTime                  @default(now())
+  processedAt           DateTime?                 // تاريخ المعالجة
+  completedAt           DateTime?                 // تاريخ الاكتمال
+  
+  // 📝 ملاحظات
+  customerNotes         String?                   // ملاحظات العميل
+  adminNotes            String?                   // ملاحظات الإدارة
+  
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  
+  // العلاقات
+  vehicle               Vehicle                   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  customer              User                      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@map("vehicle_financing")
+  @@index([vehicleId])
+  @@index([customerId])
+  @@index([status])
+  @@index([bankName])
+}
+
+// 🔍 استفسارات العملاء عن المركبات
+model VehicleInquiry {
+  id             String   @id @default(cuid())
+  vehicleId      String
+  customerId     String?  // قد يكون null للزوار غير المسجلين
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  message        String   // رسالة الاستفسار
+  isContacted    Boolean  @default(false) // تم التواصل
+  contactedAt    DateTime?
+  contactedBy    String?  // من تواصل (admin/vendor)
+  response       String?  // الرد على الاستفسار
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  vehicle        Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  customer       User?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  @@map("vehicle_inquiries")
+  @@index([vehicleId])
+  @@index([customerId])
+  @@index([isContacted])
+}
+
+// 🚗 طلبات تجربة القيادة
+model TestDriveRequest {
+  id               String            @id @default(cuid())
+  vehicleId        String
+  customerId       String
+  preferredDate    DateTime          // التاريخ المفضل
+  preferredTime    String            // الوقت المفضل
+  status           TestDriveStatus   @default(PENDING)
+  confirmedDate    DateTime?         // التاريخ المؤكد
+  confirmedTime    String?
+  meetingLocation  String?           // مكان الاجتماع
+  notes            String?           // ملاحظات العميل
+  adminNotes       String?           // ملاحظات الإدارة
+  completedAt      DateTime?         // تاريخ الإكمال
+  feedback         String?           // تقييم العميل بعد التجربة
+  rating           Int?              // تقييم من 1-5
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  
+  vehicle          Vehicle           @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  customer         User              @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  @@map("test_drive_requests")
+  @@index([vehicleId])
+  @@index([customerId])
+  @@index([status])
+  @@index([preferredDate])
+}
+
+// ============================================================
+// 🔧 Enums للنظام الجديد
+// ============================================================
+
+enum VehicleType {
+  CAR         // سيارة
+  MOTORCYCLE  // موتوسيكل
+  TRUCK       // شاحنة
+  BUS         // حافلة
+  VAN         // فان
+}
+
+enum VehicleCondition {
+  NEW         // جديد
+  USED        // مستعمل
+  CERTIFIED   // معتمد (مستعمل مع ضمان)
+}
+
+enum FuelType {
+  PETROL      // بنزين
+  DIESEL      // ديزل
+  ELECTRIC    // كهربائي
+  HYBRID      // هجين
+  LPG         // غاز طبيعي
+}
+
+enum TransmissionType {
+  MANUAL      // يدوي
+  AUTOMATIC   // أوتوماتيك
+  CVT         // CVT
+  SEMI_AUTO   // نصف أوتوماتيك
+}
+
+enum VehicleFinancingStatus {
+  PENDING           // قيد الانتظار
+  DOCUMENTS_REVIEW  // مراجعة المستندات
+  BANK_PROCESSING   // قيد المعالجة بالبنك
+  APPROVED          // موافق عليه
+  REJECTED          // مرفوض
+  COMPLETED         // مكتمل
+  CANCELLED         // ملغي
+}
+
+enum EmploymentStatus {
+  EMPLOYED          // موظف
+  SELF_EMPLOYED     // عمل حر
+  BUSINESS_OWNER    // صاحب عمل
+  RETIRED           // متقاعد
+  UNEMPLOYED        // عاطل
+}
+
+enum TestDriveStatus {
+  PENDING           // قيد الانتظار
+  CONFIRMED         // مؤكد
+  COMPLETED         // مكتمل
+  CANCELLED         // ملغي
+  NO_SHOW           // لم يحضر
 }
 
