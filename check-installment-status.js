@@ -7,29 +7,29 @@ async function checkInstallmentStatus() {
     console.log('\n🔍 جاري التحقق من حالة نظام التقسيط...\n');
     
     // 1. التحقق من الإعدادات
-    const settings = await prisma.settings.findUnique({
-      where: { id: 'global' }
-    });
+    const allSettings = await prisma.checkoutSettings.findMany();
+    const installmentSetting = allSettings.find(s => s.key === 'payment_method_installment');
+    const isInstallmentEnabled = installmentSetting?.value === 'true';
     
     console.log('📊 حالة الإعدادات:');
-    console.log(`   ✓ التقسيط مفعل: ${settings?.paymentMethodInstallment ? '✅ نعم' : '❌ لا'}`);
+    console.log(`   ${isInstallmentEnabled ? '✅' : '❌'} التقسيط مفعل: ${isInstallmentEnabled ? 'نعم' : 'لا'}`);
     
     // 2. عدد المنتجات المؤهلة
     const eligibleCount = await prisma.product.count({
       where: { 
-        allowInstallment: true,
+        installmentAvailable: true,
         isVisible: true,
         isActive: true
       }
     });
     
     console.log(`\n📦 المنتجات القابلة للتقسيط:`);
-    console.log(`   ✓ عدد المنتجات: ${eligibleCount} منتج`);
+    console.log(`   ${eligibleCount > 0 ? '✅' : '❌'} عدد المنتجات: ${eligibleCount} منتج`);
     
     // 3. أمثلة على المنتجات المؤهلة
     const sampleProducts = await prisma.product.findMany({
       where: {
-        allowInstallment: true,
+        installmentAvailable: true,
         isVisible: true,
         isActive: true
       },
@@ -38,7 +38,7 @@ async function checkInstallmentStatus() {
         id: true,
         name: true,
         price: true,
-        allowInstallment: true
+        installmentAvailable: true
       }
     });
     
@@ -49,30 +49,40 @@ async function checkInstallmentStatus() {
       });
     }
     
-    // 4. التحقق من API
-    console.log(`\n🌐 API Endpoint:`);
-    console.log(`   ✓ المسار: /api/products/check-installment`);
-    console.log(`   ✓ الحالة: جاهز للعمل`);
+    // 4. التحقق من خطط التقسيط
+    const plans = await prisma.installmentPlan.findMany({
+      where: { isActive: true }
+    });
+    console.log(`\n💳 خطط التقسيط النشطة: ${plans.length}`);
+    plans.forEach(p => {
+      console.log(`   ✓ ${p.name}: ${p.numberOfInstallments} أقساط`);
+    });
     
     // النتيجة النهائية
     console.log('\n' + '═'.repeat(60));
-    if (settings?.paymentMethodInstallment && eligibleCount > 0) {
+    if (isInstallmentEnabled && eligibleCount > 0 && plans.length > 0) {
       console.log('✅ نظام التقسيط يعمل بشكل صحيح!');
-      console.log('✅ المشكلة على اللاب توب سببها الكاش (Cache)');
-      console.log('✅ الحل: اضغط Ctrl + Shift + R على اللاب توب');
+      console.log('💡 إذا لم يظهر على الموبايل/اللاب توب:');
+      console.log('   1. تأكد من وجود منتجات في السلة');
+      console.log('   2. اضغط Ctrl + Shift + R لمسح الكاش');
+      console.log('   3. تحقق من console في المتصفح');
     } else {
       console.log('⚠️ نظام التقسيط يحتاج تفعيل:');
-      if (!settings?.paymentMethodInstallment) {
-        console.log('   ❌ الإعدادات غير مفعلة');
+      if (!isInstallmentEnabled) {
+        console.log('   ❌ الإعدادات غير مفعلة في CheckoutSettings');
       }
       if (eligibleCount === 0) {
-        console.log('   ❌ لا توجد منتجات مؤهلة');
+        console.log('   ❌ لا توجد منتجات مفعل عليها installmentAvailable');
+      }
+      if (plans.length === 0) {
+        console.log('   ❌ لا توجد خطط تقسيط نشطة');
       }
     }
     console.log('═'.repeat(60) + '\n');
     
   } catch (error) {
-    console.error('❌ خطأ:', error);
+    console.error('❌ خطأ:', error.message);
+    console.error(error);
   } finally {
     await prisma.$disconnect();
   }

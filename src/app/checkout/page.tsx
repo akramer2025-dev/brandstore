@@ -162,9 +162,12 @@ export default function CheckoutPage() {
 
   // التحقق من المنتجات القابلة للتقسيط
   useEffect(() => {
+    console.log('🔄 [INSTALLMENT USEEFFECT] تم تشغيل useEffect');
     const checkInstallmentEligibility = async () => {
+      console.log('🛒 [INSTALLMENT CHECK] بدء الفحص - عدد المنتجات:', items.length);
+      
       if (items.length === 0) {
-        console.log('🛒 [INSTALLMENT CHECK] السلة فاضية');
+        console.log('⚠️ [INSTALLMENT CHECK] السلة فاضية - إخفاء التقسيط');
         setHasInstallmentItems(false);
         setInstallmentEligibleItems([]);
         return;
@@ -206,6 +209,7 @@ export default function CheckoutPage() {
     };
     
     checkInstallmentEligibility();
+    console.log('✅ [INSTALLMENT USEEFFECT] انتهى useEffect');
   }, [items]);
 
   useEffect(() => {
@@ -369,6 +373,14 @@ export default function CheckoutPage() {
         }
         
         // Load checkout settings
+        const installmentSettingRaw = settings.find((s: any) => s.key === 'payment_method_installment');
+        console.log('🔍 [SETTINGS LOAD] payment_method_installment من Database:', {
+          found: !!installmentSettingRaw,
+          key: installmentSettingRaw?.key,
+          value: installmentSettingRaw?.value,
+          type: typeof installmentSettingRaw?.value
+        });
+        
         const checkoutSettingsData = {
           deliveryMethodHomeDelivery: settings.find((s: any) => s.key === 'delivery_method_home_delivery')?.value !== 'false',
           deliveryMethodStorePickup: settings.find((s: any) => s.key === 'delivery_method_store_pickup')?.value !== 'false',
@@ -381,7 +393,8 @@ export default function CheckoutPage() {
         console.log('⚙️ [SETTINGS] إعدادات Checkout:', checkoutSettingsData);
         console.log('💳 [INSTALLMENT SETTING] قيمة payment_method_installment:', {
           rawValue: settings.find((s: any) => s.key === 'payment_method_installment')?.value,
-          parsedValue: checkoutSettingsData.paymentMethodInstallment
+          parsedValue: checkoutSettingsData.paymentMethodInstallment,
+          willShow: checkoutSettingsData.paymentMethodInstallment ? 'نعم ✅' : 'لا ❌'
         });
         setCheckoutSettings(checkoutSettingsData);
         
@@ -1334,13 +1347,27 @@ export default function CheckoutPage() {
 
                     {/* 🏦 التقسيط على 4 دفعات - SIMPLE VERSION */}
                     {(() => {
-                      console.log('🔍 [RENDER CHECK] Installment Option Conditions:', {
+                      const shouldShowInstallment = checkoutSettings.paymentMethodInstallment && hasInstallmentItems;
+                      console.log('🔍 [RENDER CHECK] Installment Rendering:', {
+                        timestamp: new Date().toISOString(),
                         paymentMethodInstallment: checkoutSettings.paymentMethodInstallment,
                         hasInstallmentItems: hasInstallmentItems,
-                        shouldShow: checkoutSettings.paymentMethodInstallment && hasInstallmentItems,
-                        checkoutSettings: checkoutSettings
+                        itemsInCart: items.length,
+                        shouldShow: shouldShowInstallment,
+                        allSettings: checkoutSettings
                       });
-                      return checkoutSettings.paymentMethodInstallment && hasInstallmentItems;
+                      
+                      if (!shouldShowInstallment) {
+                        console.log('❌ [RENDER] التقسيط مخفي - السبب:', {
+                          settingDisabled: !checkoutSettings.paymentMethodInstallment,
+                          noEligibleItems: !hasInstallmentItems,
+                          cartEmpty: items.length === 0
+                        });
+                      } else {
+                        console.log('✅ [RENDER] التقسيط ظاهر!');
+                      }
+                      
+                      return shouldShowInstallment;
                     })() && (
                       <div
                         onClick={() => {
