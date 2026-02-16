@@ -123,6 +123,30 @@ function InstallmentAgreementContent() {
     }
   }, [mounted, session]);
   
+  // Assign stream to video element when both are ready
+  useEffect(() => {
+    if (stream && videoRef.current && cameraActive) {
+      console.log('✅ video element موجود، جاري تعيين الـ stream...');
+      
+      videoRef.current.srcObject = stream;
+      videoRef.current.muted = true;
+      
+      videoRef.current.onloadedmetadata = async () => {
+        console.log('📹 Video metadata loaded');
+        try {
+          if (videoRef.current) {
+            await videoRef.current.play();
+            console.log('✅ الكاميرا تعمل بنجاح');
+            setVideoPlaying(true);
+          }
+        } catch (playError) {
+          console.error('❌ خطأ في تشغيل الفيديو:', playError);
+          toast.error('فشل تشغيل الكاميرا. حاول مرة أخرى', { id: 'camera' });
+        }
+      };
+    }
+  }, [stream, cameraActive]);
+  
   // Cleanup camera on unmount
   useEffect(() => {
     return () => {
@@ -219,35 +243,12 @@ function InstallmentAgreementContent() {
       });
       
       console.log('✅ تم الحصول على stream الكاميرا');
+      
+      // ✅ الحل: نفعّل الكاميرا أولاً علشان الـ video element يظهر في الـ DOM
+      setCameraActive(true);
       setStream(mediaStream);
       
-      // تأكد من أن video element موجود
-      if (!videoRef.current) {
-        console.error('❌ video element غير موجود');
-        toast.error('خطأ في تهيئة الكاميرا', { id: 'camera' });
-        return;
-      }
-      
-      // تعيين الـ stream للفيديو
-      videoRef.current.srcObject = mediaStream;
-      
-      // ✅ الحل الأقوى: انتظر تحميل metadata ثم شغل الفيديو
-      videoRef.current.onloadedmetadata = async () => {
-        console.log('📹 Video metadata loaded');
-        try {
-          if (videoRef.current) {
-            // تأكد من أن الفيديو muted (مهم للـ autoplay)
-            videoRef.current.muted = true;
-            await videoRef.current.play();
-            console.log('✅ الكاميرا تعمل بنجاح');
-            setCameraActive(true);
-            toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
-          }
-        } catch (playError) {
-          console.error('❌ خطأ في تشغيل الفيديو:', playError);
-          toast.error('فشل تشغيل الكاميرا. حاول مرة أخرى', { id: 'camera' });
-        }
-      };
+      toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
     } catch (error: any) {
       console.error('❌ Error accessing camera:', error);
       
@@ -271,27 +272,12 @@ function InstallmentAgreementContent() {
           });
           
           console.log('✅ تم الحصول على stream بإعدادات بسيطة');
+          
+          // ✅ نفس الحل: نفعّل الكاميرا أولاً ثم نعين الـ stream
+          setCameraActive(true);
           setStream(simpleStream);
           
-          if (videoRef.current) {
-            videoRef.current.srcObject = simpleStream;
-            
-            // نفس logic الـ onloadedmetadata
-            videoRef.current.onloadedmetadata = async () => {
-              try {
-                if (videoRef.current) {
-                  videoRef.current.muted = true;
-                  await videoRef.current.play();
-                  console.log('✅ الكاميرا تعمل بإعدادات بسيطة');
-                  setCameraActive(true);
-                  toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
-                }
-              } catch (playErr) {
-                console.error('❌ خطأ في تشغيل الفيديو (retry):', playErr);
-                toast.error('فشل تشغيل الكاميرا', { id: 'camera' });
-              }
-            };
-          }
+          toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
           return;
         } catch (retryError) {
           console.error('❌ فشلت المحاولة الثانية:', retryError);
