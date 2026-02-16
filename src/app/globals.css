@@ -536,6 +536,28 @@
   background: rgba(20, 184, 166, 0.7);
 }
 
+/* Scrollbar utility classes */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-thumb-purple-500::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.6);
+}
+
+.scrollbar-thumb-purple-500::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.8);
+}
+
+.scrollbar-track-gray-800::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.5);
+}
+
 /* Logo Animations */
 @keyframes spin-slow {
   from {

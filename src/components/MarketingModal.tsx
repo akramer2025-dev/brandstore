@@ -130,7 +130,7 @@ export default function MarketingModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[92vw] sm:max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800 border-purple-500/30 p-3 sm:p-6">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800 bg-gradient-to-br from-gray-900 to-gray-800 border-purple-500/30 p-3 sm:p-6">
         <DialogHeader className="space-y-2 pb-3">
           <DialogTitle className="text-base sm:text-2xl font-bold text-white flex items-center gap-2">
             <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0" />
@@ -193,7 +193,7 @@ export default function MarketingModal({
             {/* Facebook Content */}
             <TabsContent value="facebook" className="space-y-3 sm:space-y-4 mt-3">
               <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700 overflow-hidden">
-                <pre className="text-white whitespace-pre-wrap break-words font-sans text-sm sm:text-base leading-relaxed overflow-x-auto max-w-full">
+                <pre className="text-white whitespace-pre-wrap break-words font-sans text-sm sm:text-base leading-relaxed max-w-full">
                   {content.facebook}
                 </pre>
               </div>
@@ -222,7 +222,7 @@ export default function MarketingModal({
             {/* Instagram Content */}
             <TabsContent value="instagram" className="space-y-3 sm:space-y-4 mt-3">
               <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700 overflow-hidden">
-                <pre className="text-white whitespace-pre-wrap break-words font-sans text-sm sm:text-base leading-relaxed overflow-x-auto max-w-full">
+                <pre className="text-white whitespace-pre-wrap break-words font-sans text-sm sm:text-base leading-relaxed max-w-full">
                   {content.instagram}
                 </pre>
               </div>
@@ -250,7 +250,7 @@ export default function MarketingModal({
             {/* Twitter Content */}
             <TabsContent value="twitter" className="space-y-3 sm:space-y-4 mt-3">
               <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700 overflow-hidden">
-                <pre className="text-white whitespace-pre-wrap break-words font-sans text-sm sm:text-base leading-relaxed overflow-x-auto max-w-full">
+                <pre className="text-white whitespace-pre-wrap break-words font-sans text-sm sm:text-base leading-relaxed max-w-full">
                   {content.twitter}
                 </pre>
               </div>
@@ -279,7 +279,7 @@ export default function MarketingModal({
             {/* WhatsApp Content */}
             <TabsContent value="whatsapp" className="space-y-3 sm:space-y-4 mt-3">
               <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700 overflow-hidden">
-                <pre className="text-white whitespace-pre-wrap break-words font-sans text-sm sm:text-base leading-relaxed overflow-x-auto max-w-full">
+                <pre className="text-white whitespace-pre-wrap break-words font-sans text-sm sm:text-base leading-relaxed max-w-full">
                   {content.whatsapp}
                 </pre>
               </div>

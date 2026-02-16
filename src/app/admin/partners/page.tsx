@@ -459,16 +459,16 @@ export default function AdminPartnersPage() {
                 إضافة شريك
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-900 border-purple-500/30 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="bg-gray-900 border-purple-500/30 text-white max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800">
               <DialogHeader>
-                <DialogTitle className="text-2xl text-white">إضافة شريك جديد</DialogTitle>
+                <DialogTitle className="text-xl sm:text-2xl text-white">إضافة شريك جديد</DialogTitle>
                 <DialogDescription className="text-gray-400">
                   أدخل بيانات الشريك الجديد
                 </DialogDescription>
               </DialogHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-                <div className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mt-3 sm:mt-4">
+                <div className="space-y-3 sm:space-y-4">
                   {/* الاسم */}
                   <div>
                     <Label htmlFor="partnerName" className="text-white">
@@ -681,15 +681,15 @@ export default function AdminPartnersPage() {
                   )}
                 </div>
 
-                <div className="flex gap-3">
-                  <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+                  <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700 h-10 sm:h-auto">
                     إضافة الشريك
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
-                    className="border-white/20 text-white hover:bg-white/10"
+                    className="border-white/20 text-white hover:bg-white/10 h-10 sm:h-auto"
                   >
                     إلغاء
                   </Button>
