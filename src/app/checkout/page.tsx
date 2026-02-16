@@ -1338,7 +1338,7 @@ export default function CheckoutPage() {
                         paymentMethodInstallment: checkoutSettings.paymentMethodInstallment,
                         hasInstallmentItems: hasInstallmentItems,
                         shouldShow: checkoutSettings.paymentMethodInstallment && hasInstallmentItems,
-                        checkout Settings: checkoutSettings
+                        checkoutSettings: checkoutSettings
                       });
                       return checkoutSettings.paymentMethodInstallment && hasInstallmentItems;
                     })() && (
