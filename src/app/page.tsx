@@ -218,7 +218,7 @@ async function getTopReviews() {
 
 export default async function HomePage() {
   try {
-    const [products, categories, topReviews] = await Promise.8l([
+    const [products, categories, topReviews] = await Promise.all([
       getProducts(),
       getCategories(),
       getTopReviews(),
