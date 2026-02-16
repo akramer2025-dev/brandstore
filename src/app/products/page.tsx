@@ -47,11 +47,17 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Read category from URL on mount
+  // Read category and search from URL on mount
   useEffect(() => {
     const categoryParam = searchParams.get('category');
+    const searchParam = searchParams.get('search');
+    
     if (categoryParam) {
       setSelectedCategory(categoryParam);
+    }
+    
+    if (searchParam) {
+      setSearchQuery(searchParam);
     }
   }, [searchParams]);
 
@@ -123,10 +129,13 @@ export default function ProductsPage() {
           
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent mb-2">
-              جميع المنتجات 🛍️
+              {searchQuery ? `نتائج البحث 🔍` : 'جميع المنتجات 🛍️'}
             </h1>
             <p className="text-gray-500 text-sm sm:text-base">
-              تصفح مجموعتنا الكاملة من المنتجات المميزة
+              {searchQuery 
+                ? <span>نتائج البحث عن: <span className="font-bold text-purple-600">"{searchQuery}"</span></span>
+                : 'تصفح مجموعتنا الكاملة من المنتجات المميزة'
+              }
             </p>
           </div>
         </div>
