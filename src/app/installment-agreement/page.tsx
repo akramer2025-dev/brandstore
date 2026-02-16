@@ -236,50 +236,25 @@ function InstallmentAgreementContent() {
     setIsSubmitting(true);
     
     try {
-      // Upload images using our API endpoint
-      const uploadImage = async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const response = await fetch('/api/upload-receipt', {
-          method: 'POST',
-          body: formData
+      toast.loading('جاري حفظ المستندات...', { id: 'upload' });
+      
+      // Convert file to base64 for local storage
+      const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
         });
-        
-        if (!response.ok) throw new Error('فشل رفع الصورة');
-        
-        const data = await response.json();
-        return data.url;
       };
       
-      // Convert signature to file
-      const convertSignatureToFile = async  (signatureDataUrl: string): Promise<File> => {
-        const response = await fetch(signatureDataUrl);
-        const blob = await response.blob();
-        return new File([blob], 'signature.png', { type: 'image/png' });
-      };
-      
-      toast.loading('جاري رفع المستندات...', { id: 'upload' });
-      
-      // Upload all images
-      const signatureFile = await convertSignatureToFile(formData.signature);
-      const [nationalIdUrl, nationalIdBackUrl, firstPaymentReceiptUrl, signatureUrl, selfieUrl] = await Promise.all([
-        formData.nationalIdImage ? uploadImage(formData.nationalIdImage) : Promise.resolve(''),
-        formData.nationalIdBack ? uploadImage(formData.nationalIdBack) : Promise.resolve(''),
-        formData.firstPaymentReceipt ? uploadImage(formData.firstPaymentReceipt) : Promise.resolve(''),
-        uploadImage(signatureFile),
-        formData.selfieImage ? uploadImage(formData.selfieImage) : Promise.resolve('')
-      ]);
-      
-      toast.success('تم رفع جميع المستندات بنجاح', { id: 'upload' });
-      
-      // Save documents to sessionStorage
-      sessionStorage.setItem('installmentDocuments', JSON.stringify({
-        nationalIdImage: nationalIdUrl,
-        nationalIdBack: nationalIdBackUrl,
-        firstPaymentReceipt: firstPaymentReceiptUrl,
-        signature: signatureUrl,
-        selfieImage: selfieUrl,
+      // Prepare all document data as base64
+      const documentsData = {
+        nationalIdImage: formData.nationalIdPreview || '',
+        nationalIdBack: formData.nationalIdBackPreview || '',
+        firstPaymentReceipt: formData.firstPaymentReceiptPreview || '',
+        signature: formData.signature,
+        selfieImage: formData.selfiePreview || '',
         fullName: formData.fullName,
         nationalId: formData.nationalId,
         totalAmount,
@@ -287,9 +262,63 @@ function InstallmentAgreementContent() {
         numberOfInstallments: installments,
         monthlyInstallment: monthlyAmount,
         completedAt: new Date().toISOString()
-      }));
+      };
       
-      toast.success('✅ تم توثيق الكمبيالة بنجاح!');
+      // حاول رفع الصور إلى Cloudinary (اختياري)
+      try {
+        const uploadImage = async (file: File) => {
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', file);
+          
+          const response = await fetch('/api/upload-receipt', {
+            method: 'POST',
+            body: formDataToUpload
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'فشل رفع الصورة');
+          }
+          
+          const data = await response.json();
+          return data.url;
+        };
+        
+        // Convert signature to file
+        const convertSignatureToFile = async (signatureDataUrl: string): Promise<File> => {
+          const response = await fetch(signatureDataUrl);
+          const blob = await response.blob();
+          return new File([blob], 'signature.png', { type: 'image/png' });
+        };
+        
+        // Upload all images to Cloudinary
+        const signatureFile = await convertSignatureToFile(formData.signature);
+        const [nationalIdUrl, nationalIdBackUrl, firstPaymentReceiptUrl, signatureUrl, selfieUrl] = await Promise.all([
+          formData.nationalIdImage ? uploadImage(formData.nationalIdImage) : Promise.resolve(''),
+          formData.nationalIdBack ? uploadImage(formData.nationalIdBack) : Promise.resolve(''),
+          formData.firstPaymentReceipt ? uploadImage(formData.firstPaymentReceipt) : Promise.resolve(''),
+          uploadImage(signatureFile),
+          formData.selfieImage ? uploadImage(formData.selfieImage) : Promise.resolve('')
+        ]);
+        
+        // إذا نجح الرفع، استخدم روابط Cloudinary
+        documentsData.nationalIdImage = nationalIdUrl || documentsData.nationalIdImage;
+        documentsData.nationalIdBack = nationalIdBackUrl || documentsData.nationalIdBack;
+        documentsData.firstPaymentReceipt = firstPaymentReceiptUrl || documentsData.firstPaymentReceipt;
+        documentsData.signature = signatureUrl || documentsData.signature;
+        documentsData.selfieImage = selfieUrl || documentsData.selfieImage;
+        
+        console.log('✅ تم رفع الصور إلى Cloudinary بنجاح');
+      } catch (uploadError) {
+        // في حالة فشل Cloudinary، استخدم base64 المحفوظة مسبقًا
+        console.warn('⚠️ فشل رفع الصور إلى Cloudinary، سيتم استخدام النسخ المحلية:', uploadError);
+        toast.info('تم حفظ المستندات محليًا', { id: 'upload' });
+      }
+      
+      // Save documents to sessionStorage
+      sessionStorage.setItem('installmentDocuments', JSON.stringify(documentsData));
+      
+      toast.success('✅ تم حفظ جميع المستندات بنجاح!', { id: 'upload' });
       
       // Redirect back to checkout with agreement completion flag
       setTimeout(() => {
@@ -298,7 +327,7 @@ function InstallmentAgreementContent() {
       
     } catch (error: any) {
       console.error('Error submitting agreement:', error);
-      toast.error(error.message || 'حدث خطأ أثناء رفع المستندات');
+      toast.error(error.message || 'حدث خطأ أثناء حفظ المستندات');
       setIsSubmitting(false);
     }
   };
