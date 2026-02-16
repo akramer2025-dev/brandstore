@@ -152,56 +152,155 @@ function InstallmentAgreementContent() {
   // Start camera for selfie
   const startCamera = async () => {
     try {
+      toast.loading('جاري فتح الكاميرا...', { id: 'camera' });
+      
+      // طلب صلاحيات الكاميرا مع إعدادات محسّنة
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' } 
+        video: { 
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
       });
+      
+      console.log('✅ تم الحصول على stream الكاميرا');
       setStream(mediaStream);
+      
+      // الانتظار قليلاً ثم تعيين الـ stream للفيديو
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        
+        // محاولة تشغيل الفيديو تلقائياً
+        try {
+          await videoRef.current.play();
+          console.log('✅ الكاميرا تعمل الآن');
+        } catch (playError) {
+          console.warn('تحذير: لم يتم تشغيل الفيديو تلقائياً:', playError);
+          // في بعض المتصفحات قد يحتاج المستخدم للتفاعل أولاً
+        }
       }
+      
       setCameraActive(true);
-      toast.success('تم تشغيل الكاميرا بنجاح');
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      toast.error('لا يمكن الوصول للكاميرا. يرجى التأكد من الأذونات');
+      toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
+    } catch (error: any) {
+      console.error('❌ Error accessing camera:', error);
+      
+      let errorMessage = 'لا يمكن الوصول للكاميرا';
+      
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMessage = '🚫 تم رفض الإذن. يرجى السماح للموقع باستخدام الكاميرا من إعدادات المتصفح';
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorMessage = '📷 لم يتم العثور على كاميرا. تأكد من توصيل الكاميرا';
+      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        errorMessage = '⚠️ الكاميرا مستخدمة من تطبيق آخر. أغلق التطبيقات الأخرى وحاول مرة أخرى';
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = '🔧 إعدادات الكاميرا غير مدعومة. جاري المحاولة بإعدادات أبسط...';
+        
+        // محاولة مرة أخرى بإعدادات أبسط
+        try {
+          const simpleStream = await navigator.mediaDevices.getUserMedia({ 
+            video: true,
+            audio: false
+          });
+          
+          setStream(simpleStream);
+          if (videoRef.current) {
+            videoRef.current.srcObject = simpleStream;
+            await videoRef.current.play();
+          }
+          setCameraActive(true);
+          toast.success('✓ تم تشغيل الكاميرا بنجاح', { id: 'camera' });
+          return;
+        } catch (retryError) {
+          console.error('❌ فشلت المحاولة الثانية:', retryError);
+        }
+      } else if (error.name === 'SecurityError') {
+        errorMessage = '🔒 خطأ أمني. تأكد من أنك تستخدم HTTPS أو localhost';
+      }
+      
+      toast.error(errorMessage, { id: 'camera', duration: 5000 });
     }
   };
   
   // Stop camera
   const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
+    try {
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          track.stop();
+          console.log('⏹️ تم إيقاف track:', track.kind);
+        });
+        setStream(null);
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      setCameraActive(false);
+      console.log('✅ تم إيقاف الكاميرا بنجاح');
+    } catch (error) {
+      console.error('❌ خطأ في إيقاف الكاميرا:', error);
     }
-    setCameraActive(false);
   };
   
   // Capture photo from camera
   const capturePhoto = () => {
-    if (videoRef.current) {
+    if (!videoRef.current) {
+      toast.error('الفيديو غير متاح');
+      return;
+    }
+    
+    // التحقق من أن الفيديو يعمل
+    if (videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
+      toast.error('الكاميرا لا تزال تُحمّل. يرجى الانتظار قليلاً');
+      return;
+    }
+    
+    try {
       const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
+      const video = videoRef.current;
+      
+      // استخدام أبعاد الفيديو الفعلية
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      
+      console.log('📸 التقاط صورة بأبعاد:', canvas.width, 'x', canvas.height);
+      
       const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0);
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const file = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              setFormData(prev => ({
-                ...prev,
-                selfieImage: file,
-                selfiePreview: reader.result as string
-              }));
-              stopCamera();
-              toast.success('✓ تم التقاط الصورة بنجاح');
-            };
-            reader.readAsDataURL(file);
-          }
-        }, 'image/jpeg', 0.95);
+      if (!ctx) {
+        toast.error('فشل إنشاء Canvas');
+        return;
       }
+      
+      // رسم الصورة
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // تحويل إلى blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setFormData(prev => ({
+              ...prev,
+              selfieImage: file,
+              selfiePreview: reader.result as string
+            }));
+            stopCamera();
+            toast.success('✓ تم التقاط الصورة بنجاح');
+            console.log('✅ تم حفظ الصورة:', file.size, 'bytes');
+          };
+          reader.onerror = () => {
+            toast.error('فشل قراءة الصورة');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          toast.error('فشل إنشاء الصورة');
+        }
+      }, 'image/jpeg', 0.92);
+    } catch (error) {
+      console.error('❌ خطأ في التقاط الصورة:', error);
+      toast.error('حدث خطأ أثناء التقاط الصورة');
     }
   };
   
@@ -766,14 +865,69 @@ function InstallmentAgreementContent() {
                       </ul>
                     </div>
                     
-                    <Button
-                      type="button"
-                      onClick={startCamera}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4"
-                    >
-                      <Camera className="w-5 h-5 ml-2" />
-                      تشغيل الكاميرا والتقاط صورة سيلفي
-                    </Button>
+                    <div className="grid grid-cols-1 gap-3">
+                      <Button
+                        type="button"
+                        onClick={startCamera}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4"
+                      >
+                        <Camera className="w-5 h-5 ml-2" />
+                        📷 تشغيل الكاميرا والتقاط صورة
+                      </Button>
+                      
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-gray-600"></div>
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                          <span className="px-2 bg-gray-800 text-gray-400">أو</span>
+                        </div>
+                      </div>
+                      
+                      <Label
+                        htmlFor="selfieUpload"
+                        className="flex items-center justify-center gap-2 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-4 rounded-lg cursor-pointer transition-all"
+                      >
+                        <Upload className="w-5 h-5" />
+                        📂 رفع صورة سيلفي من الجهاز
+                      </Label>
+                      <Input
+                        id="selfieUpload"
+                        type="file"
+                        accept="image/*"
+                        capture="user"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          if (!file.type.startsWith('image/')) {
+                            toast.error('يرجى اختيار صورة صحيحة');
+                            return;
+                          }
+                          
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast.error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+                            return;
+                          }
+                          
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setFormData(prev => ({
+                              ...prev,
+                              selfieImage: file,
+                              selfiePreview: reader.result as string
+                            }));
+                            toast.success('✓ تم رفع صورة السيلفي بنجاح');
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="hidden"
+                      />
+                      
+                      <p className="text-gray-400 text-xs text-center">
+                        💡 يمكنك استخدام الكاميرا مباشرة أو رفع صورة محفوظة
+                      </p>
+                    </div>
                   </div>
                 )}
                 
@@ -784,10 +938,28 @@ function InstallmentAgreementContent() {
                         ref={videoRef}
                         autoPlay
                         playsInline
-                        className="w-full h-96 object-cover"
+                        muted
+                        className="w-full h-96 object-cover mirror"
+                        style={{ transform: 'scaleX(-1)' }}
+                        onLoadedMetadata={(e) => {
+                          console.log('📹 الفيديو جاهز:', {
+                            width: e.currentTarget.videoWidth,
+                            height: e.currentTarget.videoHeight,
+                            readyState: e.currentTarget.readyState
+                          });
+                        }}
+                        onError={(e) => {
+                          console.error('❌ خطأ في الفيديو:', e);
+                          toast.error('حدث خطأ في تشغيل الكاميرا');
+                        }}
                       />
                       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse">
                         🔴 الكاميرا نشطة
+                      </div>
+                      
+                      {/* دليل لوضعية الوجه */}
+                      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                        <div className="w-64 h-80 border-4 border-white/30 rounded-full"></div>
                       </div>
                     </div>
                     
@@ -812,7 +984,7 @@ function InstallmentAgreementContent() {
                     </div>
                     
                     <p className="text-gray-400 text-sm text-center">
-                      💡 اضبط وضعية وجهك ثم اضغط "التقاط الصورة"
+                      💡 اضبط وضعية وجهك داخل الإطار ثم اضغط "التقاط الصورة"
                     </p>
                   </div>
                 )}
