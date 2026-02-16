@@ -421,9 +421,9 @@ function InstallmentAgreementContent() {
                 </div>
               </div>
               
-              <div className="mt-4 bg-green-900/30 border border-green-600 rounded-lg p-3">
-                <p className="text-green-100 text-sm">
-                  ✅ <strong>ملاحظة هامة:</strong> يجب دفع الدفعة الأولى ({downPayment.toLocaleString()} ج) الآن عبر WE Pay لتأكيد الطلب
+              <div className="mt-4 bg-green-900/30 border border-green-600 rounded-lg p-3 text-center">
+                <p className="text-green-100 text-base font-bold">
+                  ✅ يجب دفع الدفعة الأولى ({downPayment.toLocaleString()} ج) الآن لتأكيد الطلب
                 </p>
               </div>
             </div>
@@ -594,8 +594,8 @@ function InstallmentAgreementContent() {
               
               {/* First Payment Upload - Only show after both ID sides uploaded */}
               {formData.nationalIdPreview && formData.nationalIdBackPreview && (
-                <div className="space-y-3 bg-green-900/20 border-2 border-green-500 rounded-lg p-4 animate-in fade-in duration-500">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="space-y-4 bg-green-900/20 border-2 border-green-500 rounded-lg p-5 animate-in fade-in duration-500">
+                  <div className="flex items-center gap-2 mb-3">
                     <div className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">3</div>
                     <Label htmlFor="firstPayment" className="text-white font-bold text-lg">
                       💳 إيصال دفع الدفعة الأولى
@@ -603,69 +603,71 @@ function InstallmentAgreementContent() {
                     </Label>
                   </div>
                   
-                  <div className="bg-yellow-900/30 border border-yellow-500 rounded-lg p-3 mb-3">
-                    <p className="text-yellow-100 text-sm font-bold mb-2">⚠️ مطلوب: دفع الدفعة الأولى الآن</p>
-                    <div className="space-y-1 text-yellow-200 text-sm">
-                      <p>💰 <strong>المبلغ المطلوب:</strong> {downPayment.toLocaleString()} جنيه</p>
-                      <p>📱 <strong>رقم WE Pay:</strong> <span className="font-bold text-lg">01555512778</span></p>
-                      <p>📋 <strong>الخطوات:</strong></p>
-                      <ol className="list-decimal list-inside mr-4 space-y-1">
-                        <li>افتح تطبيق WE Pay على هاتفك</li>
-                        <li>اختر "تحويل أموال" أو "دفع"</li>
-                        <li>أدخل الرقم: 01555512778</li>
-                        <li>أدخل المبلغ: {downPayment.toLocaleString()} ج</li>
-                        <li>أكمل عملية الدفع</li>
-                        <li>التقط صورة لإيصال التحويل (screenshot)</li>
-                        <li>ارفع الصورة هنا بالأسفل</li>
-                      </ol>
+                  <div className="bg-gradient-to-r from-yellow-900/40 to-yellow-800/30 border-2 border-yellow-500 rounded-lg p-4">
+                    <p className="text-yellow-100 font-bold text-base mb-2">
+                      💰 الرجاء دفع الدفعة الأولى ({downPayment.toLocaleString()} ج) على رقم:
+                    </p>
+                    <div className="bg-white/10 rounded-lg p-3 text-center">
+                      <p className="text-yellow-300 text-2xl font-bold tracking-wider">
+                        📱 01555512778
+                      </p>
                     </div>
                   </div>
                   
-                  <p className="text-green-200 text-sm mb-3">
-                    📸 بعد إتمام الدفع عبر WE Pay، قم برفع صورة الإيصال (screenshot) هنا
-                  </p>
-                  
-                  <Input
-                    id="firstPayment"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFirstPaymentReceiptUpload}
-                    className="bg-gray-700 border-gray-600 text-white file:bg-green-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-md hover:file:bg-green-700"
-                  />
+                  <div className="text-center">
+                    <p className="text-green-200 font-medium text-base mb-3">
+                      📸 ورفع إيصال التحويل
+                    </p>
+                    
+                    <Label 
+                      htmlFor="firstPayment"
+                      className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-6 py-3 rounded-lg cursor-pointer transition-all shadow-lg hover:shadow-xl"
+                    >
+                      <Upload className="w-5 h-5" />
+                      اختيار ملف
+                    </Label>
+                    <Input
+                      id="firstPayment"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFirstPaymentReceiptUpload}
+                      className="hidden"
+                    />
+                  </div>
                   
                   {formData.firstPaymentReceiptPreview && (
-                    <div className="relative mt-3">
-                      <img
-                        src={formData.firstPaymentReceiptPreview}
-                        alt="إيصال الدفعة الأولى"
-                        className="w-full h-64 object-contain bg-gray-900 rounded-lg border-2 border-green-500"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setFormData(prev => ({ 
-                          ...prev, 
-                          firstPaymentReceipt: null, 
-                          firstPaymentReceiptPreview: null 
-                        }))}
-                        className="absolute top-2 right-2"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                      <div className="absolute bottom-2 left-2 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                        ✓ تم رفع إيصال الدفع
+                    <>
+                      <div className="relative mt-4">
+                        <img
+                          src={formData.firstPaymentReceiptPreview}
+                          alt="إيصال الدفعة الأولى"
+                          className="w-full h-64 object-contain bg-gray-900 rounded-lg border-2 border-green-500"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setFormData(prev => ({ 
+                            ...prev, 
+                            firstPaymentReceipt: null, 
+                            firstPaymentReceiptPreview: null 
+                          }))}
+                          className="absolute top-2 right-2"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                        <div className="absolute bottom-2 left-2 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          ✓ تم رفع إيصال الدفع
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  
-                  {formData.firstPaymentReceiptPreview && (
-                    <div className="bg-green-900/30 border border-green-500 rounded-lg p-3">
-                      <p className="text-green-100 text-sm flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5" />
-                        <strong>تم استلام إيصال الدفع بنجاح! يمكنك الآن الانتقال للخطوة التالية ✓</strong>
-                      </p>
-                    </div>
+                      
+                      <div className="bg-green-900/30 border border-green-500 rounded-lg p-3">
+                        <p className="text-green-100 text-sm flex items-center gap-2">
+                          <CheckCircle2 className="w-5 h-5" />
+                          <strong>تم استلام إيصال الدفع بنجاح! ✓</strong>
+                        </p>
+                      </div>
+                    </>
                   )}
                 </div>
               )}
