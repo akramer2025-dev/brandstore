@@ -110,6 +110,12 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           href: "/admin/ad-campaign",
           color: "text-cyan-600",
         },
+        {
+          icon: Wallet,
+          label: "📄 اتفاقيات التقسيط",
+          href: "/admin/installment-agreements",
+          color: "text-purple-600",
+        },
       ],
     });
   } else if (session?.user?.role === "VENDOR") {
