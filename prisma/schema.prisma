@@ -1878,6 +1878,12 @@ model InstallmentAgreement {
   verificationNotes     String?  // ملاحظات التدقيق
   rejectionReason       String?  // سبب الرفض (إن وجد)
   
+  // ✅ بيانات الموافقة/الرفض
+  approvedBy            String?  // معرف المسؤول الذي وافق
+  approvedAt            DateTime? // وقت الموافقة
+  rejectedBy            String?  // معرف المسؤول الذي رفض
+  rejectedAt            DateTime? // وقت الرفض
+  
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   

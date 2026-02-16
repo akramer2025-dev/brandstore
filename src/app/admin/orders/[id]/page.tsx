@@ -20,6 +20,7 @@ import Image from "next/image";
 import { OrderActions } from "./OrderActions";
 import { DeliveryLocationMap } from "./DeliveryLocationMap";
 import { BackButton } from "@/components/BackButton";
+import { InstallmentAgreementView } from "./InstallmentAgreementView";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -45,6 +46,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           user: true,
         },
       },
+      installmentPlan: {
+        include: {
+          payments: true,
+        },
+      },
+      installmentAgreement: true,
     },
   });
 
@@ -562,6 +569,18 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             </Card>
           </div>
         </div>
+
+        {/* Installment Agreement - Full Width Section */}
+        {order.installmentAgreement && (
+          <div className="mt-8">
+            <InstallmentAgreementView
+              agreement={order.installmentAgreement}
+              orderId={order.id}
+              customerEmail={order.customer.email}
+              customerPhone={order.customer.phone}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
