@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { ProductCardPro } from '@/components/ProductCardPro';
 import { HeroSlider } from '@/components/HeroSlider';
 import { AnimatedSection } from '@/components/AnimatedSection';
+import { CategoryProductsCarousel } from '@/components/CategoryProductsCarousel';
 import Link from 'next/link';
 import Image from 'next/image';
 import { TrendingUp, ShoppingBag, Sparkles } from 'lucide-react';
@@ -71,9 +72,14 @@ function getCategoryImage(categoryName: string, categoryImage?: string | null): 
 async function getProducts() {
   try {
     return await prisma.product.findMany({
-      take: 30, // زيادة العدد لعرض المزيد من المنتجات
+      take: 20, // تقليل العدد لتحسين الأداء
       include: {
-        category: true,
+        category: {
+          select: {
+            id: true,
+            nameAr: true,
+          }
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -85,14 +91,46 @@ async function getProducts() {
   }
 }
 
-async function getCategories() {
+async function getProductsByCategory(categoryId: string, limit = 12) {
   try {
-    const categories = await prisma.category.findMany({
+    return await prisma.product.findMany({
+      where: { categoryId },
+      take: limit,
       include: {
+        category: {
+          select: {
+            id: true,
+            nameAr: true,
+          }
+        },
+      },
+      orderBy: [
+        { createdAt: 'desc' },
+      ],
+    });
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    return [];
+  }
+}select: {
+        id: true,
+        nameAr: true,
+        image: true,
         _count: {
           select: { products: true }
         }
+      },
+      where: {
+        products: {
+          some: {} // فقط الفئات التي تحتوي على منتجات
+        }
       }
+    });
+    
+    // ترتيب حسب عدد المنتجات (الأكثر منتجات أولاً)
+    return categories
+      .sort((a, b) => b._count.products - a._count.products)
+      .slice(0, 12); // عرض أول 12 فئة فقط
     });
     
     // ترتيب حسب عدد المنتجات (الأكثر منتجات أولاً) ثم عرض جميع الفئات
@@ -128,11 +166,17 @@ async function getTopReviews() {
 
 export default async function HomePage() {
   try {
-    const [products, categories, topReviews] = await Promise.all([
+    const [products, categories, topReviews] = await Promise.8l([
       getProducts(),
       getCategories(),
       getTopReviews(),
     ]);
+
+    // جلب منتجات لأول 3 فئات (للأشرطة المتحركة)
+    const topCategories = categories.slice(0, 3);
+    const categoryProducts = await Promise.all(
+      topCategories.map(cat => getProductsByCategory(cat.id, 12))
+    );
 
     return (
       <>
@@ -255,10 +299,35 @@ export default async function HomePage() {
             <>
               {/* Grid View - احترافي نظيف مع عرض المزيد من المنتجات */}
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
-                {products.slice(0, 20).map((product, index) => (
+                {products.slice(0, 8).map((product, index) => (
                   <ProductCardPro key={product.id} product={product} index={index} />
                 ))}
               </div>
+
+              {/* Category Carousels - أشرطة متحركة للفئات */}
+              {topCategories.map((category, idx) => {
+                const catProducts = categoryProducts[idx];
+                if (catProducts.length === 0) return null;
+                
+                return (
+                  <div key={category.id} className="mb-8">
+                    <CategoryProductsCarousel 
+                      categoryId={category.id}
+                      categoryName={category.nameAr}
+                      initialProducts={catProducts as any}
+                    />
+                  </div>
+                );
+              })}
+
+              {/* More Products */}
+              {products.length > 8 && (
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
+                  {products.slice(8, 16).map((product, index) => (
+                    <ProductCardPro key={product.id} product={product} index={index + 8} />
+                  ))}
+                </div>
+              )}
 
               {/* View All Button */}
               <AnimatedSection animation="scaleIn" delay={200}>

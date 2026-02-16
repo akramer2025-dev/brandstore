@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// Cache configuration
+export const dynamic = 'force-dynamic'; 
+export const revalidate = 60; // Revalidate every 60 seconds
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -14,6 +18,7 @@ export async function GET(request: Request) {
     const inStock = searchParams.get("inStock");
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
+    const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined;
 
     // Build where clause - المنتجات النشطة والظاهرة فقط
     const where: any = { 
@@ -57,12 +62,23 @@ export async function GET(request: Request) {
     const products = await prisma.product.findMany({
       where,
       include: {
-        category: true,
+        category: {
+          select: {
+            id: true,
+            nameAr: true,
+          }
+        },
       },
       orderBy,
+      ...(limit && { take: limit }),
     });
 
-    return NextResponse.json({ products });
+    const response = NextResponse.json({ products });
+    
+    // Add caching headers
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+    
+    return response;
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json(
