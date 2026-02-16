@@ -641,8 +641,19 @@ export async function GET(
 
   } catch (error) {
     console.error("Error generating PDF:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      agreementId: await params.then(p => p.id).catch(() => 'unknown')
+    });
+    
     return NextResponse.json(
-      { error: "حدث خطأ أثناء إنشاء الملف" },
+      { 
+        error: "حدث خطأ أثناء إنشاء الملف",
+        details: process.env.NODE_ENV === 'development' 
+          ? (error instanceof Error ? error.message : String(error))
+          : undefined
+      },
       { status: 500 }
     );
   }
