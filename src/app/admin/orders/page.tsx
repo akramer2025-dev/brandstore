@@ -126,11 +126,20 @@ export default async function AdminOrdersPage({
                         العنوان: {order.deliveryAddress}
                       </p>
                     </div>
-                    <div className="text-left">
-                      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${status.bg} ${status.text} font-bold mb-2`}>
+                    <div className="text-left space-y-2">
+                      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${status.bg} ${status.text} font-bold`}>
                         <StatusIcon className="w-5 h-5" />
                         {statusLabels[order.status]}
                       </div>
+                      
+                      {/* Badge التقسيط */}
+                      {order.paymentMethod?.startsWith('INSTALLMENT_') && (
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-900 font-bold border-2 border-purple-400 ml-2">
+                          <span className="text-xl">🏦</span>
+                          تقسيط
+                        </div>
+                      )}
+                      
                       <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                         {order.finalAmount.toFixed(2)} جنيه
                       </p>

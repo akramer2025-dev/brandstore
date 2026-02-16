@@ -167,6 +167,19 @@ export class OrderService {
         customerName: order.customer.name || order.customer.username || 'عميل',
         totalAmount: order.totalAmount,
         itemsCount: data.items.length,
+        paymentMethod,
+      });
+    }
+
+    // إرسال إشعار للإدارة عند طلب تقسيط
+    if (paymentMethod.startsWith('INSTALLMENT_')) {
+      await this.sendAdminNotificationForInstallment({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        customerName: order.customer.name || order.customer.username || 'عميل',
+        totalAmount: order.totalAmount,
+        downPayment: data.downPayment || 0,
+        numberOfMonths: data.installmentPlan?.numberOfMonths || 4,
       });
     }
 
@@ -595,6 +608,7 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
     customerName: string;
     totalAmount: number;
     itemsCount: number;
+    paymentMethod?: string;
   }) {
     try {
       console.log(`🔔 [Order Service] إرسال إشعار للتاجر: ${data.vendorId}`);
@@ -603,15 +617,21 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
         orderNumber: data.orderNumber,
         customerName: data.customerName,
         totalAmount: data.totalAmount,
+        paymentMethod: data.paymentMethod,
       });
+      
+      // تحديد نوع الدفع للرسالة
+      const paymentMethodText = data.paymentMethod?.startsWith('INSTALLMENT_') 
+        ? '🏦 بالتقسيط' 
+        : '';
       
       // إنشاء إشعار في قاعدة البيانات
       await prisma.vendorNotification.create({
         data: {
           vendorId: data.vendorId,
           type: 'NEW_ORDER',
-          title: '🎉 طلب جديد!',
-          message: `لديك طلب جديد من ${data.customerName} بقيمة ${data.totalAmount.toFixed(2)} ج.م (${data.itemsCount} منتج). رقم الطلب: #${data.orderNumber.slice(0, 8).toUpperCase()}`,
+          title: data.paymentMethod?.startsWith('INSTALLMENT_') ? '🎉 طلب تقسيط جديد!' : '🎉 طلب جديد!',
+          message: `لديك طلب جديد ${paymentMethodText} من ${data.customerName} بقيمة ${data.totalAmount.toFixed(2)} ج.م (${data.itemsCount} منتج). رقم الطلب: #${data.orderNumber.slice(0, 8).toUpperCase()}`,
           orderId: data.orderId,
         },
       });
@@ -622,8 +642,8 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
       console.log(`🚀 [Order Service] جاري إرسال Push Notification...`);
       const { sendPushToVendor } = await import('./push-service');
       const result = await sendPushToVendor(data.vendorId, {
-        title: '🎉 طلب جديد!',
-        body: `طلب من ${data.customerName} بقيمة ${data.totalAmount.toFixed(2)} ج.م`,
+        title: data.paymentMethod?.startsWith('INSTALLMENT_') ? '🎉 طلب تقسيط جديد!' : '🎉 طلب جديد!',
+        body: `طلب ${paymentMethodText} من ${data.customerName} بقيمة ${data.totalAmount.toFixed(2)} ج.م`,
         data: {
           type: 'NEW_ORDER',
           orderId: data.orderId,
@@ -640,6 +660,51 @@ ${order.customerNotes || 'لا توجد ملاحظات'}
       console.log(`📊 [Order Service] نتيجة إرسال Push:`, result);
     } catch (error) {
       console.error('❌ [Order Service] Error sending vendor notification:', error);
+    }
+  }
+
+  /**
+   * إرسال إشعار للإدارة عند طلب تقسيط
+   */
+  private static async sendAdminNotificationForInstallment(data: {
+    orderId: string;
+    orderNumber: string;
+    customerName: string;
+    totalAmount: number;
+    downPayment: number;
+    numberOfMonths: number;
+  }) {
+    try {
+      console.log(`🔔 [Order Service] إرسال إشعار للإدارة - طلب تقسيط`);
+      
+      // الحصول على جميع مستخدمي الإدارة
+      const adminUsers = await prisma.user.findMany({
+        where: { role: 'ADMIN' },
+        select: { id: true }
+      });
+      
+      if (adminUsers.length === 0) {
+        console.warn('⚠️ [Order Service] لا يوجد مستخدمي إدارة لإرسال الإشعار');
+        return;
+      }
+
+      // إنشاء إشعارات لكل مسؤول (نحتاج لإضافة جدول AdminNotification أو استخدام Notification عامة)
+      // للآن سنستخدم console.log
+      console.log(`📊 [Order Service] تفاصيل طلب التقسيط:`, {
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+        customerName: data.customerName,
+        totalAmount: data.totalAmount,
+        downPayment: data.downPayment,
+        numberOfMonths: data.numberOfMonths,
+      });
+      
+      // TODO: إضافة جدول AdminNotification في المستقبل
+      // أو استخدام نظام الإشعارات الموجود
+      
+      console.log(`✅ [Order Service] تم تسجيل طلب التقسيط للإدارة`);
+    } catch (error) {
+      console.error('❌ [Order Service] Error sending admin notification:', error);
     }
   }
 

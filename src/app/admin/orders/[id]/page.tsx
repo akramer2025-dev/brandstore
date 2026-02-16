@@ -266,6 +266,71 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               </CardContent>
             </Card>
 
+            {/* Payment Method Card */}
+            <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">💳</span>
+                  طريقة الدفع
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`p-4 rounded-lg font-bold text-lg ${
+                  order.paymentMethod === 'INSTALLMENT_4' || order.paymentMethod === 'INSTALLMENT_6' || order.paymentMethod === 'INSTALLMENT_12' || order.paymentMethod === 'INSTALLMENT_24'
+                    ? 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-900 border-2 border-purple-400'
+                    : order.paymentMethod === 'CASH_ON_DELIVERY'
+                    ? 'bg-green-100 text-green-900'
+                    : order.paymentMethod === 'WE_PAY'
+                    ? 'bg-yellow-100 text-yellow-900'
+                    : order.paymentMethod === 'BANK_TRANSFER'
+                    ? 'bg-blue-100 text-blue-900'
+                    : 'bg-gray-100 text-gray-900'
+                }`}>
+                  {order.paymentMethod === 'INSTALLMENT_4' && '🏦 التقسيط على 4 دفعات'}
+                  {order.paymentMethod === 'INSTALLMENT_6' && '🏦 التقسيط على 6 أشهر'}
+                  {order.paymentMethod === 'INSTALLMENT_12' && '🏦 التقسيط على 12 شهر'}
+                  {order.paymentMethod === 'INSTALLMENT_24' && '🏦 التقسيط على 24 شهر'}
+                  {order.paymentMethod === 'CASH_ON_DELIVERY' && '💵 الدفع عند الاستلام'}
+                  {order.paymentMethod === 'WE_PAY' && '📱 WE Pay'}
+                  {order.paymentMethod === 'BANK_TRANSFER' && '🏦 تحويل بنكي'}
+                  {order.paymentMethod === 'E_WALLET_TRANSFER' && '💱 محفظة إلكترونية'}
+                  {order.paymentMethod === 'GOOGLE_PAY' && '🌐 Google Pay'}
+                  {order.paymentMethod === 'PARTIAL_PAYMENT_50' && '💰 دفع جزئي 50%'}
+                  {order.paymentMethod === 'FULL_PAYMENT' && '✅ دفع كامل'}
+                </div>
+
+                {/* Installment Plan Details */}
+                {order.paymentMethod.startsWith('INSTALLMENT_') && order.installmentPlan && (
+                  <div className="mt-4 space-y-2 bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
+                    <h4 className="font-bold text-purple-900 mb-3">📋 تفاصيل خطة التقسيط:</h4>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="bg-white p-3 rounded">
+                        <p className="text-gray-600">المبلغ الكلي</p>
+                        <p className="font-bold text-lg">{order.installmentPlan.totalAmount.toFixed(2)} ج</p>
+                      </div>
+                      <div className="bg-white p-3 rounded">
+                        <p className="text-gray-600">الدفعة الأولى</p>
+                        <p className="font-bold text-lg text-green-600">{order.installmentPlan.downPayment.toFixed(2)} ج</p>
+                      </div>
+                      <div className="bg-white p-3 rounded">
+                        <p className="text-gray-600">القسط الشهري</p>
+                        <p className="font-bold text-lg text-blue-600">{order.installmentPlan.monthlyAmount.toFixed(2)} ج</p>
+                      </div>
+                      <div className="bg-white p-3 rounded">
+                        <p className="text-gray-600">عدد الأقساط</p>
+                        <p className="font-bold text-lg">{order.installmentPlan.numberOfMonths} شهر</p>
+                      </div>
+                    </div>
+                    {order.installmentPlan.interestRate > 0 && (
+                      <div className="mt-2 text-sm text-purple-700 bg-purple-100 p-2 rounded">
+                        ℹ️ نسبة الفائدة: {order.installmentPlan.interestRate}%
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Notes */}
             {order.customerNotes && (
               <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl">
