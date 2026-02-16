@@ -44,8 +44,19 @@ export async function DELETE(
       success: true,
       message: 'تم حذف المنتج من السلة'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error deleting cart item:', error);
+    
+    // ⚠️ TEMPORARY FIX: If Cart table doesn't exist, return success
+    if (error?.code === 'P2021' || error?.message?.includes('does not exist')) {
+      console.log('⚠️ [CART API] Cart table not found - cart sync disabled');
+      return NextResponse.json({
+        success: true,
+        message: 'تم الحذف محلياً',
+        warning: 'Cart sync disabled'
+      });
+    }
+    
     return NextResponse.json(
       { error: 'فشل حذف المنتج من السلة' },
       { status: 500 }

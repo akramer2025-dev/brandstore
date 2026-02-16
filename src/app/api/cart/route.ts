@@ -82,6 +82,20 @@ export async function GET(request: NextRequest) {
       meta: error?.meta,
       stack: error?.stack
     });
+    
+    // ⚠️ TEMPORARY FIX: If Cart table doesn't exist on Vercel, return empty cart
+    // This happens when database migration hasn't run yet
+    if (error?.code === 'P2021' || error?.message?.includes('does not exist')) {
+      console.log('⚠️ [CART API] Cart table not found - returning empty cart (migration needed)');
+      return NextResponse.json({
+        success: true,
+        items: [],
+        totalItems: 0,
+        totalPrice: 0,
+        warning: 'Cart sync disabled - database migration required'
+      });
+    }
+    
     return NextResponse.json(
       { 
         error: 'فشل جلب السلة',
@@ -204,8 +218,19 @@ export async function POST(request: NextRequest) {
       message: `✅ تمت إضافة ${product.nameAr} إلى السلة`,
       item: cartItem
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error adding to cart:', error);
+    
+    // ⚠️ TEMPORARY FIX: If Cart table doesn't exist, return success but warn
+    if (error?.code === 'P2021' || error?.message?.includes('does not exist')) {
+      console.log('⚠️ [CART API] Cart table not found - cart sync disabled');
+      return NextResponse.json({
+        success: true,
+        message: 'تم الحفظ محلياً (المزامنة معطلة مؤقتاً)',
+        warning: 'Cart sync disabled - using localStorage only'
+      });
+    }
+    
     return NextResponse.json(
       { error: 'فشل إضافة المنتج إلى السلة' },
       { status: 500 }
@@ -287,8 +312,19 @@ export async function PUT(request: NextRequest) {
       message: 'تم تحديث الكمية',
       item: updatedItem
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error updating cart:', error);
+    
+    // ⚠️ TEMPORARY FIX: If Cart table doesn't exist, return success
+    if (error?.code === 'P2021' || error?.message?.includes('does not exist')) {
+      console.log('⚠️ [CART API] Cart table not found - cart sync disabled');
+      return NextResponse.json({
+        success: true,
+        message: 'تم التحديث محلياً',
+        warning: 'Cart sync disabled'
+      });
+    }
+    
     return NextResponse.json(
       { error: 'فشل تحديث السلة' },
       { status: 500 }
@@ -316,8 +352,19 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'تم إفراغ السلة'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error clearing cart:', error);
+    
+    // ⚠️ TEMPORARY FIX: If Cart table doesn't exist, return success
+    if (error?.code === 'P2021' || error?.message?.includes('does not exist')) {
+      console.log('⚠️ [CART API] Cart table not found - cart sync disabled');
+      return NextResponse.json({
+        success: true,
+        message: 'تم الحذف محلياً',
+        warning: 'Cart sync disabled'
+      });
+    }
+    
     return NextResponse.json(
       { error: 'فشل إفراغ السلة' },
       { status: 500 }
