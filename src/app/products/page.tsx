@@ -63,30 +63,33 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchData();
-  }, [selectedCategory, sortBy]);
+  }, [selectedCategory, sortBy, searchQuery]); // أضفنا searchQuery
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch products
-      const productsRes = await fetch('/api/products');
-      const productsJson = await productsRes.json();
-      let productsData = productsJson.products || [];
-
-      // Apply filters
+      // Fetch products - إرسال البحث للـ API
+      let apiUrl = '/api/products';
+      const params = new URLSearchParams();
+      
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
       if (selectedCategory) {
-        productsData = productsData.filter((p: Product) => p.categoryId === selectedCategory);
+        params.append('categoryId', selectedCategory);
       }
-
-      // Apply sorting
-      if (sortBy === 'price-asc') {
-        productsData.sort((a: Product, b: Product) => a.price - b.price);
-      } else if (sortBy === 'price-desc') {
-        productsData.sort((a: Product, b: Product) => b.price - a.price);
-      } else if (sortBy === 'name') {
-        productsData.sort((a: Product, b: Product) => a.nameAr.localeCompare(b.nameAr));
+      params.append('sortBy', sortBy === 'price-asc' || sortBy === 'price-desc' ? 'price' : sortBy);
+      params.append('sortOrder', sortBy === 'price-desc' ? 'desc' : 'asc');
+      
+      if (params.toString()) {
+        apiUrl += '?' + params.toString();
       }
+      
+      const productsRes = await fetch(apiUrl);
+      const productsJson = await productsRes.json();
+      const productsData = productsJson.products || [];
 
+      // لا حاجة للفلترة هنا - الـ API يتعامل معها
       setProducts(productsData);
 
       // Fetch categories
@@ -100,11 +103,10 @@ export default function ProductsPage() {
     }
   };
 
+  // فلترة محلية للسعر فقط (الـ API يتعامل مع البحث والفئة)
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.descriptionAr.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-    return matchesSearch && matchesPrice;
+    return matchesPrice;
   });
 
   const clearFilters = () => {

@@ -339,21 +339,21 @@ export function Header() {
             </nav>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="hidden sm:flex items-center gap-2 flex-1 max-w-md">
+            <form onSubmit={handleSearch} className="hidden sm:flex items-center gap-2 flex-1 max-w-lg">
               <div ref={searchRef} className="relative flex-1">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-teal-400 w-5 h-5" />
                 <Input
                   type="text"
-                  placeholder="ابحث عن منتج..."
+                  placeholder="ابحث عن منتج... (مثال: لاب توب، موبايل، شاشة)"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                  className="w-full pr-10 bg-gray-800/50 border-teal-700/50 text-white placeholder:text-gray-500 focus:border-teal-500 h-9 text-sm"
+                  className="w-full pr-12 pl-4 bg-gray-800/80 border-2 border-teal-700/50 text-white placeholder:text-gray-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 h-11 text-base font-medium rounded-xl shadow-lg transition-all duration-300"
                 />
                 
                 {/* الاقتراحات المنسدلة */}
                 {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-teal-700/50 rounded-lg shadow-xl max-h-96 overflow-y-auto z-50">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border-2 border-teal-700/50 rounded-xl shadow-2xl max-h-96 overflow-y-auto z-50">
                     {suggestions.map((product) => (
                       <button
                         key={product.id}
@@ -363,16 +363,16 @@ export function Header() {
                           setSearchTerm("");
                           setShowSuggestions(false);
                         }}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-700/50 transition-colors border-b border-gray-700 last:border-0"
+                        className="w-full flex items-center gap-3 p-3 hover:bg-teal-700/20 transition-colors border-b border-gray-700 last:border-0"
                       >
                         <img 
                           src={product.imageUrl} 
                           alt={product.name}
-                          className="w-12 h-12 object-cover rounded"
+                          className="w-14 h-14 object-cover rounded-lg"
                         />
                         <div className="flex-1 text-right">
-                          <p className="text-white text-sm font-medium">{product.name}</p>
-                          <p className="text-teal-400 text-xs">{product.price} جنيه</p>
+                          <p className="text-white text-base font-semibold">{product.name}</p>
+                          <p className="text-teal-400 text-sm font-bold">{product.price} جنيه</p>
                         </div>
                       </button>
                     ))}
@@ -380,16 +380,26 @@ export function Header() {
                 )}
               </div>
               
+              {/* زر البحث */}
+              <Button 
+                type="submit"
+                size="default"
+                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-6 h-11 rounded-xl font-bold shadow-lg transition-all duration-300"
+              >
+                <Search className="w-5 h-5 ml-2" />
+                بحث
+              </Button>
+              
               {/* زر البحث بالصورة */}
               <Button 
                 type="button"
-                size="sm"
+                size="default"
                 variant="outline"
                 onClick={() => imageInputRef.current?.click()}
-                className="border-teal-700/50 hover:bg-teal-700/20 text-teal-400 px-3"
+                className="border-2 border-teal-700/50 hover:bg-teal-700/20 text-teal-400 px-4 h-11 rounded-xl"
                 title="البحث بالصورة"
               >
-                <ImageIcon className="w-4 h-4" />
+                <ImageIcon className="w-5 h-5" />
               </Button>
               
               <input
