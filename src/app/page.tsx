@@ -447,34 +447,43 @@ export default async function HomePage() {
 
       {/* Auctions Section - المزادات النشطة */}
       {auctions.length > 0 && (
-        <section className="py-6 sm:py-8 bg-gradient-to-br from-purple-100/50 via-pink-50/50 to-indigo-100/50">
+        <section className="py-4 sm:py-6">
           <div className="container mx-auto px-3 sm:px-4">
             {/* Section Header */}
-            <AnimatedSection animation="fadeInDown" delay={0}>
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 bg-clip-text text-transparent flex items-center gap-3">
-                    <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
-                    </svg>
-                    المزادات النشطة 🔨
-                  </h2>
-                  <p className="text-gray-600 text-sm sm:text-base mt-2">شارك في المزايدة واحصل على أفضل الأسعار</p>
-                </div>
-                <Link 
-                  href="/auctions"
-                  className="hidden md:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 text-white rounded-full hover:shadow-lg hover:scale-105 transition-all font-semibold"
-                >
-                  عرض كل المزادات
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z"/>
+                    <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z"/>
+                    <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z"/>
                   </svg>
-                </Link>
+                </div>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">المزادات النشطة</h2>
+                  <p className="text-xs text-gray-500 hidden sm:block">شارك في المزايدة الآن</p>
+                </div>
               </div>
-            </AnimatedSection>
+              <Link 
+                href="/auctions"
+                className="text-sm font-semibold text-purple-600 hover:text-purple-700 flex items-center gap-1 transition-colors"
+              >
+                <span>عرض الكل</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+            </div>
 
-            {/* Auctions Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Auctions Horizontal Scroll */}
+            <div 
+              className="flex gap-3 sm:gap-4 overflow-x-scroll pb-2 scroll-smooth"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#9333ea #f3f4f6'
+              }}
+            >
               {auctions.map((auction: any) => {
                 const timeLeft = new Date(auction.endDate).getTime() - Date.now();
                 const hours = Math.floor(timeLeft / (1000 * 60 * 60));
@@ -486,88 +495,57 @@ export default async function HomePage() {
                   <Link 
                     key={auction.id} 
                     href={`/auctions/${auction.id}`}
-                    className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-purple-300 hover:-translate-y-2"
+                    className="group flex-shrink-0 w-64 sm:w-72 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-300"
                   >
-                    {/* Image */}
-                    <div className="relative h-48 sm:h-56 bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden">
-                      {auctionImage && (
-                        <Image
-                          src={auctionImage}
-                          alt={auction.titleAr || auction.title}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      )}
-                      
-                      {/* Badge */}
-                      {auction.featured && (
-                        <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                          </svg>
-                          مميز
-                        </div>
-                      )}
-
-                      {/* Countdown */}
-                      <div className={`absolute bottom-3 left-3 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg ${
-                        isEndingSoon 
-                          ? 'bg-red-500 text-white animate-pulse' 
-                          : 'bg-white/90 text-purple-700'
-                      }`}>
-                        {hours > 0 ? `${hours} ساعة ${minutes} دقيقة` : `${minutes} دقيقة`}
+                    <div className="flex gap-3 p-3">
+                      {/* Image */}
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                        {auctionImage && (
+                          <Image
+                            src={auctionImage}
+                            alt={auction.titleAr || auction.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            sizes="96px"
+                          />
+                        )}
+                        {auction.featured && (
+                          <div className="absolute top-1 right-1 bg-yellow-400 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">
+                            ⭐
+                          </div>
+                        )}
                       </div>
-                    </div>
 
-                    {/* Content */}
-                    <div className="p-4 sm:p-5">
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-1">
-                        {auction.titleAr || auction.title}
-                      </h3>
-
-                      {/* Price Info */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <p className="text-xs text-gray-500 mb-1">السعر الحالي</p>
-                          <p className="text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-purple-600 transition-colors">
+                          {auction.titleAr || auction.title}
+                        </h3>
+                        
+                        <div className="mb-2">
+                          <p className="text-xs text-gray-500">السعر الحالي</p>
+                          <p className="text-lg font-black text-purple-600">
                             {auction.currentPrice} ج.م
                           </p>
                         </div>
-                        <div className="text-left">
-                          <p className="text-xs text-gray-500 mb-1">عدد المزايدات</p>
-                          <p className="text-lg font-bold text-gray-700">
-                            {auction._count?.bids || 0}
-                          </p>
-                        </div>
-                      </div>
 
-                      {/* CTA */}
-                      <div className="pt-3 border-t border-gray-100">
-                        <div className="flex items-center justify-center gap-2 text-purple-600 font-semibold group-hover:text-pink-600 transition-colors">
-                          <span>زايد الآن</span>
-                          <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
+                        <div className="flex items-center justify-between text-xs">
+                          <div className={`px-2 py-1 rounded-full font-medium ${
+                            isEndingSoon 
+                              ? 'bg-red-100 text-red-700' 
+                              : 'bg-purple-100 text-purple-700'
+                          }`}>
+                            ⏱ {hours > 0 ? `${hours}س ${minutes}د` : `${minutes}د`}
+                          </div>
+                          <div className="text-gray-600">
+                            {auction._count?.bids || 0} مزايدة
+                          </div>
                         </div>
                       </div>
                     </div>
                   </Link>
                 );
               })}
-            </div>
-
-            {/* Mobile "View All" Button */}
-            <div className="mt-6 flex md:hidden justify-center">
-              <Link 
-                href="/auctions"
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 text-white rounded-full hover:shadow-lg active:scale-95 transition-all font-semibold"
-              >
-                عرض كل المزادات
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </Link>
             </div>
           </div>
         </section>
