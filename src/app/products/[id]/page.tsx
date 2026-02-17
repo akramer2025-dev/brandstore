@@ -40,6 +40,7 @@ interface Product {
   price: number;
   stock: number;
   images: string | null;
+  videoUrl?: string | null;
   categoryId: string;
   allowInstallment?: boolean;
   category: {
@@ -246,7 +247,7 @@ export default function ProductDetailPage() {
       name: product.nameAr,
       nameAr: product.nameAr,
       price: currentPrice,
-      image: images[0],
+      image: images[0], // نستخدم أول صورة فقط (ليس الفيديو)
       variant: selectedVariant ? {
         id: selectedVariant.id,
         nameAr: selectedVariant.nameAr,
@@ -298,6 +299,12 @@ export default function ProductDetailPage() {
   const images = product.images 
     ? product.images.split(',').map(img => img.trim()).filter(img => img)
     : ['https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600'];
+
+  // إضافة الفيديو إلى قائمة العرض
+  const mediaItems = [
+    ...(product.videoUrl ? [{type: 'video' as const, url: product.videoUrl}] : []),
+    ...images.map(img => ({type: 'image' as const, url: img}))
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white">
@@ -357,22 +364,37 @@ export default function ProductDetailPage() {
           <div className="space-y-4">
             <Card className="bg-white border-purple-200 overflow-hidden shadow-xl">
               <div className="aspect-square relative bg-purple-50">
-                <Image
-                  src={images[selectedImage] || '/placeholder.jpg'}
-                  alt={product.nameAr}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
-                  }}
-                />
+                {mediaItems[selectedImage]?.type === 'video' ? (
+                  <video
+                    src={mediaItems[selectedImage].url}
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('Error loading video');
+                    }}
+                  />
+                ) : (
+                  <Image
+                    src={mediaItems[selectedImage]?.url || '/placeholder.jpg'}
+                    alt={product.nameAr}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                    }}
+                  />
+                )}
               </div>
             </Card>
 
-            {images.length > 1 && (
+            {mediaItems.length > 1 && (
               <div className="grid grid-cols-4 gap-2 sm:gap-3">
-                {images.map((image, index) => (
+                {mediaItems.map((item, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -382,13 +404,28 @@ export default function ProductDetailPage() {
                         : 'border-purple-200 hover:border-purple-400'
                     }`}
                   >
-                    <Image
-                      src={image}
-                      alt={`${product.nameAr} ${index + 1}`}
-                      fill
-                      sizes="(max-width: 768px) 25vw, 15vw"
-                      className="object-cover"
-                    />
+                    {item.type === 'video' ? (
+                      <>
+                        <video
+                          src={item.url}
+                          className="w-full h-full object-cover"
+                          muted
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                        </div>
+                      </>
+                    ) : (
+                      <Image
+                        src={item.url}
+                        alt={`${product.nameAr} ${index + 1}`}
+                        fill
+                        sizes="(max-width: 768px) 25vw, 15vw"
+                        className="object-cover"
+                      />
+                    )}
                   </button>
                 ))}
               </div>

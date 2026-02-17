@@ -81,12 +81,46 @@ export default function ChatPage() {
   const [isTransitioning, setIsTransitioning] = useState(false)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+    // Also scroll the container
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
   }
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // مراقبة تغيير حجم الشاشة (للكيبورد)
+  useEffect(() => {
+    const handleResize = () => {
+      // عند فتح الكيبورد، نزل للأسفل
+      setTimeout(() => {
+        scrollToBottom()
+      }, 100)
+    }
+
+    const handleFocus = () => {
+      // عند التركيز على الإدخال
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+        scrollToBottom()
+      }, 300)
+    }
+
+    window.addEventListener('resize', handleResize)
+    inputRef.current?.addEventListener('focus', handleFocus)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      inputRef.current?.removeEventListener('focus', handleFocus)
+    }
+  }, [])
 
   // جلب صور السلايدر
   useEffect(() => {
@@ -235,7 +269,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen pb-20 md:pb-0 relative overflow-hidden">
+    <div className="flex h-[100dvh] md:h-screen relative overflow-hidden">
       {/* خلفية السلايدر المتحرك */}
       <div className="absolute inset-0 z-0">
         {slides.length > 0 ? (
@@ -397,8 +431,9 @@ export default function ChatPage() {
       {/* Chat Container - زي Messenger */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-3 md:px-4 py-4 space-y-3 pb-4 md:pb-4"
+        className="flex-1 overflow-y-auto overflow-x-hidden px-3 md:px-4 py-4 space-y-3"
         style={{
+          WebkitOverflowScrolling: 'touch',
           backgroundImage: `
             radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
             radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%)
@@ -562,7 +597,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area - بسيط زي Messenger */}
-      <div className="border-t border-purple-700/50 bg-gradient-to-r from-purple-900/95 via-purple-800/95 to-indigo-900/95 backdrop-blur-sm px-3 md:px-4 py-3 shadow-lg">
+      <div className="flex-shrink-0 border-t border-purple-700/50 bg-gradient-to-r from-purple-900/95 via-purple-800/95 to-indigo-900/95 backdrop-blur-sm px-3 md:px-4 py-3 shadow-lg safe-area-inset-bottom">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -572,12 +607,15 @@ export default function ChatPage() {
             placeholder="اكتب رسالة..."
             disabled={isLoading}
             className="flex-1 bg-purple-950/30 border border-purple-700/50 rounded-full px-4 py-2.5 text-white placeholder:text-purple-300 focus:outline-none focus:bg-purple-950/50 focus:border-purple-500 disabled:opacity-50 text-sm transition-all"
-            autoFocus
+            enterKeyHint="send"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="sentences"
           />
           <button
             type="submit"
             disabled={isLoading || !inputMessage.trim()}
-            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-2.5 rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-2.5 rounded-full transition-all disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

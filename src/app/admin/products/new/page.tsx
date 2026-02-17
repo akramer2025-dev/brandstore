@@ -39,6 +39,7 @@ export default function NewProductPage() {
     sizes: [] as string[],
     colors: [] as string[],
     allowInstallment: false, // هل المنتج قابل للتقسيط
+    videoUrl: "", // رابط فيديو المنتج
   });
 
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -277,6 +278,7 @@ export default function NewProductPage() {
           originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           stock: parseInt(formData.stock),
           images: images.join(','),
+          videoUrl: formData.videoUrl || null,
           sizes: formData.sizes.join(','),
           colors: formData.colors.join(','),
           allowInstallment: formData.allowInstallment, // إرسال حالة التقسيط
@@ -471,6 +473,19 @@ export default function NewProductPage() {
                     <strong>نصيحة:</strong> استخدم الكاميرا الذكية للتعرف التلقائي!
                   </p>
                 </div>
+              </div>
+
+              {/* فيديو المنتج */}
+              <div className="space-y-2">
+                <Label htmlFor="videoUrl">رابط فيديو المنتج (اختياري) 🎥</Label>
+                <Input
+                  id="videoUrl"
+                  type="url"
+                  placeholder="https://example.com/video.mp4"
+                  value={formData.videoUrl}
+                  onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                />
+                <p className="text-gray-500 text-xs">يظهر الفيديو في بداية معرض الصور، استخدم رابط فيديو مباشر (mp4)</p>
               </div>
 
               {/* Rest of form fields remain the same ... */}

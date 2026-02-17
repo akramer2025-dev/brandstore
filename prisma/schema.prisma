@@ -242,6 +242,7 @@ model Product {
   originalPrice   Float?
   categoryId      String
   images          String?
+  videoUrl        String?        // رابط فيديو المنتج
   stock           Int            @default(0)
   isActive        Boolean        @default(true)
   vendorId        String?
