@@ -21,7 +21,6 @@ import {
   Ban
 } from "lucide-react";
 import { toast } from "sonner";
-import OrderTracking from "@/components/OrderTracking";
 
 interface Order {
   id: string;
@@ -56,7 +55,6 @@ export default function OrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
   const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -299,6 +297,7 @@ export default function OrdersPage() {
                                   src={item.product.image}
                                   alt={item.product.nameAr}
                                   fill
+                                  sizes="64px"
                                   className="object-cover"
                                 />
                               ) : (
@@ -409,7 +408,7 @@ export default function OrdersPage() {
                     <div className="flex gap-3 flex-wrap">
                       {/* زر متابعة الطلب */}
                       <Button
-                        onClick={() => setTrackingOrder(order)}
+                        onClick={() => router.push(`/orders/${order.id}`)}
                         className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white"
                       >
                         <Eye className="w-4 h-4 ml-2" />
@@ -434,20 +433,6 @@ export default function OrdersPage() {
               );
             })}
           </div>
-        )}
-
-        {/* Order Tracking Modal */}
-        {trackingOrder && (
-          <OrderTracking
-            isOpen={!!trackingOrder}
-            onClose={() => setTrackingOrder(null)}
-            order={{
-              status: trackingOrder.status,
-              orderNumber: trackingOrder.orderNumber,
-              createdAt: trackingOrder.createdAt,
-              updatedAt: trackingOrder.createdAt, // يمكن تحديثه لاحقاً
-            }}
-          />
         )}
       </div>
     </div>
