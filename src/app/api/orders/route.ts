@@ -40,8 +40,11 @@ export async function POST(request: NextRequest) {
 
     // 🛡️ CSRF Protection
     const csrfCheck = await csrfProtection(request);
-    if (!csrfCheck.success) {
-      return csrfCheck.response!;
+    if (!csrfCheck.valid) {
+      return NextResponse.json(
+        { error: csrfCheck.error || 'CSRF validation failed' },
+        { status: 403 }
+      );
     }
 
     const session = await auth();
@@ -60,22 +63,22 @@ export async function POST(request: NextRequest) {
 
     // 🛡️ Input Validation
     if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
-      logInvalidInput(request, '/api/orders', { reason: 'Empty items array' });
+      logInvalidInput(request, 'Empty items array', session.user.id);
       return NextResponse.json({ error: "يجب اختيار منتج واحد على الأقل" }, { status: 400 });
     }
 
     if (body.items.length > 50) {
-      logInvalidInput(request, '/api/orders', { reason: 'Too many items', count: body.items.length });
+      logInvalidInput(request, `Too many items: ${body.items.length}`, session.user.id);
       return NextResponse.json({ error: "عدد المنتجات كبير جداً (الحد الأقصى 50)" }, { status: 400 });
     }
 
     if (!body.deliveryAddress || body.deliveryAddress.trim().length < 10) {
-      logInvalidInput(request, '/api/orders', { reason: 'Invalid delivery address' });
+      logInvalidInput(request, 'Invalid delivery address', session.user.id);
       return NextResponse.json({ error: "عنوان التسليم غير صالح" }, { status: 400 });
     }
 
     if (!validatePhone(body.deliveryPhone)) {
-      logInvalidInput(request, '/api/orders', { reason: 'Invalid phone number', phone: body.deliveryPhone });
+      logInvalidInput(request, `Invalid phone: ${body.deliveryPhone}`, session.user.id);
       return NextResponse.json({ error: "رقم الهاتف غير صالح" }, { status: 400 });
     }
 
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
       await fbCAPI.trackPurchase({
         orderId: order.id,
         productIds: body.items.map((item: any) => item.productId),
-        totalValue: order.total,
+        totalValue: body.totalPrice || 0,
         numItems: body.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
         phone: body.deliveryPhone,
         email: session.user.email || undefined,
@@ -137,7 +140,14 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("❌ Error creating order:", error);
-    request: NextRequest) {
+    return NextResponse.json(
+      { error: error.message || 'Failed to create order' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
   try {
     // 🛡️ Rate limiting
     const rateCheck = await apiRateLimit(request);
@@ -162,26 +172,10 @@ export async function POST(request: NextRequest) {
       count: orders.length,
       remaining: rateCheck.remaining,
     });
-  } catch (error) {
-    console.error("❌ 
-  }
-}
-
-export async function GET() {
-  try {
-    const session = await auth();
-
-    if (!session || !session.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const orders = await OrderService.getCustomerOrders(session.user.id);
-
-    return NextResponse.json(orders);
-  } catch (error) {
-    console.error("Error fetching orders:", error);
+  } catch (error: any) {
+    console.error("❌ Error fetching orders:", error);
     return NextResponse.json(
-      { error: "Failed to fetch orders" },
+      { error: error.message || 'Failed to fetch orders' },
       { status: 500 }
     );
   }

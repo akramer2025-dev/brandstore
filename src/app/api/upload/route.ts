@@ -80,7 +80,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "لا يمكن رفع أكثر من 10 ملفات في المرة الواحدة" },
         { status: 400 }
-      );🛡️ 4. التحقق من نوع الملف باستخدام Security Library
+      );
+    }
+
+    const uploadedUrls: string[] = [];
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    // في Production: استخدم Cloudinary
+    if (isCloudinaryEnabled) {
+      for (const file of files) {
+        // 🛡️ 4. التحقق من نوع الملف باستخدام Security Library
         if (!validateFileType(file.name, allowedExtensions)) {
           return NextResponse.json(
             { 
@@ -107,22 +116,21 @@ export async function POST(req: NextRequest) {
         // 🛡️ 6. تنظيف اسم الملف من المحارف الخطيرة
         const safeName = sanitizeFilename(file.name);
 
-        // Validate file size (10MB max)
-        const maxSize = 10 * 1024 * 1024;
-        if (file.size > maxSize) {
-          return NextResponse.json(
-            { error: `File ${file.name} exceeds 10MB limit` },
-            { status: 400 }
-          );
-        }
-
         try {
-          //public_id: safeName.split('.')[0], // استخدام الاسم الآمن
-            transformation: [
-              { width: 1000, height: 1000, crop: 'limit' },
-              { quality: 'auto:good' }
-            ]
-          });
+          const bytes = await file.arrayBuffer();
+          const buffer = Buffer.from(bytes);
+
+          const result = await cloudinary.uploader.upload(
+            `data:${file.type};base64,${buffer.toString('base64')}`,
+            {
+              folder: 'products',
+              public_id: safeName.split('.')[0],
+              transformation: [
+                { width: 1000, height: 1000, crop: 'limit' },
+                { quality: 'auto:good' }
+              ]
+            }
+          );
 
           uploadedUrls.push(result.secure_url);
           console.log(`✅ Uploaded to Cloudinary: ${safeName}`);
@@ -136,6 +144,11 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // استخدم التخزين المحلي في Development
+      const uploadsDir = join(process.cwd(), "public", "uploads");
+      if (!existsSync(uploadsDir)) {
+        await mkdir(uploadsDir, { recursive: true });
+      }
+
       for (const file of files) {
         // 🛡️ التحقق من نوع الملف
         if (!validateFileType(file.name, allowedExtensions)) {
@@ -159,10 +172,10 @@ export async function POST(req: NextRequest) {
         // 🛡️ تنظيف اسم الملف
         const safeName = sanitizeFilename(file.name);
 
-        // Validate file size (10MB max)
-        const maxSize = 10 * 1024 * 1024;
-        if (file.size > maxSize) {
-          return NexsafeName.split(".").pop();
+        // Generate unique filename
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(7);
+        const ext = safeName.split(".").pop();
         const filename = `product-${timestamp}-${random}.${ext}`;
         const filepath = join(uploadsDir, filename);
 
@@ -187,21 +200,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("❌ Error uploading file:", error);
-    return handleError(error    // Add to uploaded URLs
-        uploadedUrls.push(`/uploads/${filename}`);
-      }
-    }
-
-    // Return the public URLs
-    return NextResponse.json({
-      success: true,
-      urls: uploadedUrls,
-    });
-  } catch (error: any) {
-    console.error("Error uploading file:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to upload file" },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 }
