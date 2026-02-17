@@ -150,6 +150,78 @@ function getCategoryImage(categoryName: string, categoryImage?: string | null): 
   return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200&h=200&fit=crop&q=90';
 }
 
+// Helper function to safely get first product image
+function getFirstImage(images: any): string | null {
+  if (!images) return null;
+  
+  try {
+    // If it's already an array
+    if (Array.isArray(images)) {
+      return images[0] || null;
+    }
+    
+    // If it's a string
+    if (typeof images === 'string') {
+      // Check if it's a comma-separated list of URLs
+      if (images.includes(',') && images.includes('http')) {
+        const urls = images.split(',').map(url => url.trim());
+        return urls[0] || null;
+      }
+      
+      // Check if it's a single URL
+      if (images.startsWith('http')) {
+        return images;
+      }
+      
+      // Try to parse as JSON
+      const parsed = JSON.parse(images);
+      return Array.isArray(parsed) ? parsed[0] : null;
+    }
+    
+    return null;
+  } catch (error) {
+    // If parsing fails, return the string if it looks like a URL
+    if (typeof images === 'string' && images.startsWith('http')) {
+      return images;
+    }
+    return null;
+  }
+}
+
+async function getActiveAuctions() {
+  try {
+    // @ts-ignore - Temporarily ignore until migration applied
+    return await prisma.auction.findMany({
+      where: {
+        status: 'ACTIVE',
+      },
+      take: 6,
+      orderBy: [
+        { featured: 'desc' },
+        { endDate: 'asc' }
+      ],
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            nameAr: true,
+            images: true,
+          }
+        },
+        _count: {
+          select: {
+            bids: true
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching auctions:', error);
+    return [];
+  }
+}
+
 async function getProducts() {
   try {
     return await prisma.product.findMany({
@@ -259,10 +331,11 @@ async function getTopReviews() {
 
 export default async function HomePage() {
   try {
-    const [products, categories, topReviews] = await Promise.all([
+    const [products, categories, topReviews, auctions] = await Promise.all([
       getProducts(),
       getCategories(),
       getTopReviews(),
+      getActiveAuctions(),
     ]);
 
     // جلب منتجات لأول 3 فئات (للأشرطة المتحركة)
@@ -330,7 +403,11 @@ export default async function HomePage() {
             />
           </div>
           <div className="container mx-auto px-3 sm:px-4 relative z-10">
-            <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-hide py-2">
+            <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-scroll overflow-y-hidden py-2 scroll-smooth" style={{
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#9333ea #f3e8ff'
+            }}>
               {categories.map((category) => (
                 <Link
                   key={category.id}
@@ -363,6 +440,134 @@ export default async function HomePage() {
                     </span>
                   </Link>
                 ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Auctions Section - المزادات النشطة */}
+      {auctions.length > 0 && (
+        <section className="py-6 sm:py-8 bg-gradient-to-br from-purple-100/50 via-pink-50/50 to-indigo-100/50">
+          <div className="container mx-auto px-3 sm:px-4">
+            {/* Section Header */}
+            <AnimatedSection animation="fadeInDown" delay={0}>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 bg-clip-text text-transparent flex items-center gap-3">
+                    <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                    </svg>
+                    المزادات النشطة 🔨
+                  </h2>
+                  <p className="text-gray-600 text-sm sm:text-base mt-2">شارك في المزايدة واحصل على أفضل الأسعار</p>
+                </div>
+                <Link 
+                  href="/auctions"
+                  className="hidden md:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 text-white rounded-full hover:shadow-lg hover:scale-105 transition-all font-semibold"
+                >
+                  عرض كل المزادات
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </Link>
+              </div>
+            </AnimatedSection>
+
+            {/* Auctions Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {auctions.map((auction: any) => {
+                const timeLeft = new Date(auction.endDate).getTime() - Date.now();
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const isEndingSoon = hours < 24;
+                const auctionImage = getFirstImage(auction.product?.images);
+
+                return (
+                  <Link 
+                    key={auction.id} 
+                    href={`/auctions/${auction.id}`}
+                    className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-purple-300 hover:-translate-y-2"
+                  >
+                    {/* Image */}
+                    <div className="relative h-48 sm:h-56 bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden">
+                      {auctionImage && (
+                        <Image
+                          src={auctionImage}
+                          alt={auction.titleAr || auction.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                      )}
+                      
+                      {/* Badge */}
+                      {auction.featured && (
+                        <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                          </svg>
+                          مميز
+                        </div>
+                      )}
+
+                      {/* Countdown */}
+                      <div className={`absolute bottom-3 left-3 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg ${
+                        isEndingSoon 
+                          ? 'bg-red-500 text-white animate-pulse' 
+                          : 'bg-white/90 text-purple-700'
+                      }`}>
+                        {hours > 0 ? `${hours} ساعة ${minutes} دقيقة` : `${minutes} دقيقة`}
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 sm:p-5">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-1">
+                        {auction.titleAr || auction.title}
+                      </h3>
+
+                      {/* Price Info */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">السعر الحالي</p>
+                          <p className="text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            {auction.currentPrice} ج.م
+                          </p>
+                        </div>
+                        <div className="text-left">
+                          <p className="text-xs text-gray-500 mb-1">عدد المزايدات</p>
+                          <p className="text-lg font-bold text-gray-700">
+                            {auction._count?.bids || 0}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* CTA */}
+                      <div className="pt-3 border-t border-gray-100">
+                        <div className="flex items-center justify-center gap-2 text-purple-600 font-semibold group-hover:text-pink-600 transition-colors">
+                          <span>زايد الآن</span>
+                          <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Mobile "View All" Button */}
+            <div className="mt-6 flex md:hidden justify-center">
+              <Link 
+                href="/auctions"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 text-white rounded-full hover:shadow-lg active:scale-95 transition-all font-semibold"
+              >
+                عرض كل المزادات
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
             </div>
           </div>
         </section>
