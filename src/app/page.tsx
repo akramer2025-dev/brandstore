@@ -6,7 +6,7 @@ import { AnimatedSection } from '@/components/AnimatedSection';
 import { CategoryProductsCarousel } from '@/components/CategoryProductsCarousel';
 import Link from 'next/link';
 import Image from 'next/image';
-import { TrendingUp, ShoppingBag, Sparkles } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Sparkles, Shield, CheckCircle } from 'lucide-react';
 import { Metadata } from 'next';
 import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
 import BrandBackgroundPattern from '@/components/BrandBackgroundPattern';
@@ -21,6 +21,7 @@ import FlashDeals from '@/components/FlashDeals';
 import { LogoBanner } from '@/components/LogoBanner';
 import ChatButton from '@/components/ChatButton';
 import CustomerAssistant from '@/components/customer-assistant';
+import { TrustBadgesCompact } from '@/components/TrustBadges';
 
 export const dynamic = 'force-dynamic';
 
@@ -665,6 +666,11 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="bg-gradient-to-b from-purple-950 to-gray-950 text-white py-8 md:py-12 mt-8 md:mt-16 border-t-4 border-purple-500">
         <div className="container mx-auto px-4">
+          {/* Trust Badges */}
+          <div className="mb-8 pb-8 border-b border-gray-800">
+            <TrustBadgesCompact />
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-8">
             {/* About Store */}
             <div className="col-span-2 md:col-span-1">
@@ -672,9 +678,13 @@ export default async function HomePage() {
                 <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
                 <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">Remo Store</h3>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-400 text-sm leading-relaxed mb-3">
                 وجهتك الأولى للتسوق الإلكتروني - نوفر لك أفضل المنتجات بأفضل الأسعار مع خدمة توصيل سريعة.
               </p>
+              <div className="flex items-center gap-2 text-xs text-green-400">
+                <Shield className="w-4 h-4" />
+                <span>موقع آمن ومحمي 🔒</span>
+              </div>
             </div>
             
             {/* Quick Links */}
@@ -696,9 +706,9 @@ export default async function HomePage() {
               </div>
             </div>
             
-            {/* Customer Service */}
+            {/* Policies & Support */}
             <div>
-              <h4 className="font-semibold mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">خدمة العملاء</h4>
+              <h4 className="font-semibold mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">السياسات والدعم</h4>
               <div className="flex flex-col gap-2 text-sm text-gray-400">
                 <Link href="/about" className="hover:text-white hover:translate-x-[-2px] transition-all">
                   من نحن
@@ -706,11 +716,17 @@ export default async function HomePage() {
                 <Link href="/contact" className="hover:text-white hover:translate-x-[-2px] transition-all">
                   اتصل بنا
                 </Link>
-                <Link href="/faq" className="hover:text-white hover:translate-x-[-2px] transition-all">
-                  الأسئلة الشائعة
-                </Link>
                 <Link href="/privacy" className="hover:text-white hover:translate-x-[-2px] transition-all">
                   سياسة الخصوصية
+                </Link>
+                <Link href="/terms" className="hover:text-white hover:translate-x-[-2px] transition-all">
+                  الشروط والأحكام
+                </Link>
+                <Link href="/refund-policy" className="hover:text-white hover:translate-x-[-2px] transition-all">
+                  سياسة الاسترجاع
+                </Link>
+                <Link href="/shipping-policy" className="hover:text-white hover:translate-x-[-2px] transition-all">
+                  سياسة الشحن
                 </Link>
               </div>
             </div>
@@ -719,19 +735,39 @@ export default async function HomePage() {
             <div>
               <h4 className="font-semibold mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">تواصل معنا</h4>
               <div className="flex flex-col gap-2 text-sm text-gray-400">
-                <p className="flex items-center gap-2">📱 01555512778</p>
-                <p className="flex items-center gap-2">📧 remostore.egy@gmail.com</p>
+                <a href="tel:01555512778" className="flex items-center gap-2 hover:text-white transition-colors">
+                  📱 01555512778
+                </a>
+                <a href="https://wa.me/201555512778" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors">
+                  💬 WhatsApp
+                </a>
+                <a href="mailto:remostore.egy@gmail.com" className="flex items-center gap-2 hover:text-white transition-colors">
+                  📧 remostore.egy@gmail.com
+                </a>
                 <p className="flex items-center gap-2">📍 مصر - القاهرة</p>
               </div>
             </div>
           </div>
           
-          <div className="pt-6 border-t border-gray-800 text-center">
-            <p className="text-sm text-gray-400 mb-2">
-              © 2026 <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent font-semibold">Remo Store</span>. جميع الحقوق محفوظة.
-            </p>
-            <p className="text-xs text-gray-500">
-              Developed by <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent font-semibold">Eng/ Akram Elmasry</span>
+          {/* Bottom Bar */}
+          <div className="pt-6 border-t border-gray-800">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-gray-400 text-center md:text-right">
+                © 2026 <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent font-semibold">Remo Store</span>. جميع الحقوق محفوظة.
+              </p>
+              <div className="flex items-center gap-4 text-xs text-gray-500">
+                <div className="flex items-center gap-1">
+                  <Shield className="w-3 h-3 text-green-400" />
+                  <span>SSL Certified</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3 text-blue-400" />
+                  <span>Verified Business</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 text-center mt-3">
+              Developed with ❤️ by <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent font-semibold">Eng/ Akram Elmasry</span>
             </p>
           </div>
         </div>

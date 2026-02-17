@@ -19,10 +19,27 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "Remostore - متجر ريموستور",
-  description: "Remostore - متجر إلكتروني احترافي للملابس مع نظام إدارة متقدم",
-  keywords: ['تسوق', 'ملابس', 'أزياء', 'موضة', 'تجارة إلكترونية'],
-  authors: [{ name: 'Remostore' }],
+  metadataBase: new URL('https://www.remostore.net'),
+  title: {
+    default: 'Remostore - متجر ريموستور | تسوق أونلاين في مصر',
+    template: '%s | Remostore'
+  },
+  description: 'ريموستور - متجر إلكتروني موثوق في مصر. منتجات أصلية 100%، شحن سريع لجميع المحافظات، دفع آمن عند الاستلام، سياسة استرجاع مرنة. تسوق الآن!',
+  keywords: [
+    'تسوق أونلاين مصر',
+    'ريموستور',
+    'متجر إلكتروني موثوق',
+    'ملابس أصلية',
+    'شحن سريع',
+    'دفع عند الاستلام',
+    'COD مصر',
+    'تسوق آمن',
+    'Remostore',
+    'Egyptian online store'
+  ],
+  authors: [{ name: 'Remostore', url: 'https://www.remostore.net' }],
+  creator: 'Remostore',
+  publisher: 'Remostore',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -34,15 +51,47 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
+    locale: 'ar_EG',
+    url: 'https://www.remostore.net',
     siteName: 'Remostore',
+    title: 'Remostore - متجر ريموستور | تسوق أونلاين في مصر',
+    description: 'متجر إلكتروني موثوق - منتجات أصلية، شحن سريع، دفع آمن عند الاستلام',
+    images: [
+      {
+        url: '/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Remostore Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
     title: 'Remostore - متجر ريموستور',
-    description: 'متجر إلكتروني احترافي للملابس',
+    description: 'متجر إلكتروني موثوق في مصر - منتجات أصلية وشحن سريع',
+    images: ['/logo.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    // سيتم إضافة Google Search Console Verification هنا لاحقاً
+    // google: 'your-google-verification-code',
   },
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
     shortcut: '/logo.png'
   },
+  category: 'E-commerce',
 };
 
 export const viewport: Viewport = {
