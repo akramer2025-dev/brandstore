@@ -246,8 +246,14 @@ model Product {
   isActive        Boolean        @default(true)
   vendorId        String?
   isOwnProduct    Boolean        @default(false)
+  
+  // ============ نظام العروض الخاطفة (Flash Deals) ============
   isFlashDeal     Boolean        @default(false)
-  flashDealEndsAt DateTime?
+  flashDealStartsAt DateTime?    // تاريخ بدء العرض الخاطف
+  flashDealEndsAt DateTime?      // تاريخ انتهاء العرض الخاطف
+  flashDealPrice  Float?         // السعر الخاص بالعرض الخاطف
+  flashDealStock  Int?           // الكمية المتاحة للعرض الخاطف فقط
+  
   badge           String?
   soldCount       Int            @default(0)
   viewCount       Int            @default(0)
