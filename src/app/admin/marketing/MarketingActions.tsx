@@ -115,7 +115,7 @@ export function AddCampaignButton() {
           إنشاء حملة
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">إنشاء حملة تسويقية جديدة</DialogTitle>
           <DialogDescription>
@@ -280,7 +280,7 @@ export function AddCampaignButton() {
 
       {/* AI Assistant Dialog */}
       <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-orange-500" />
@@ -411,7 +411,7 @@ export function AddKeywordButton() {
           إضافة كلمة مفتاحية
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">إضافة كلمة SEO جديدة</DialogTitle>
         </DialogHeader>

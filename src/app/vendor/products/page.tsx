@@ -12,7 +12,7 @@ import ResetCapitalButton from "./ResetCapitalButton";
 export default async function VendorProductsPage({
   searchParams,
 }: {
-  searchParams: { type?: string }
+  searchParams: Promise<{ type?: string }>
 }) {
   const session = await auth();
 
@@ -28,6 +28,10 @@ export default async function VendorProductsPage({
     redirect("/");
   }
 
+  // Await searchParams
+  const resolvedParams = await searchParams;
+  const filterType = resolvedParams.type;
+
   // بناء شروط البحث
   const whereCondition: any = { 
     vendorId: vendor.id,
@@ -35,9 +39,9 @@ export default async function VendorProductsPage({
   };
 
   // إضافة فلتر نوع المنتج إذا كان موجود
-  if (searchParams.type === 'owned') {
+  if (filterType === 'owned') {
     whereCondition.productSource = 'OWNED';
-  } else if (searchParams.type === 'consignment') {
+  } else if (filterType === 'consignment') {
     whereCondition.productSource = 'CONSIGNMENT';
   }
 
@@ -94,15 +98,15 @@ export default async function VendorProductsPage({
     : 0;
 
   // تحديد العنوان بناءً على نوع الفلتر
-  const pageTitle = searchParams.type === 'owned' 
+  const pageTitle = filterType === 'owned' 
     ? 'المنتجات المملوكة' 
-    : searchParams.type === 'consignment' 
+    : filterType === 'consignment' 
     ? 'منتجات الوسيط' 
     : 'إدارة المنتجات';
 
-  const pageDescription = searchParams.type === 'owned'
+  const pageDescription = filterType === 'owned'
     ? 'المنتجات التي تم شراؤها من رأس المال'
-    : searchParams.type === 'consignment'
+    : filterType === 'consignment'
     ? 'المنتجات المعروضة بنظام الوسيط (العمولة)'
     : 'عرض وإدارة جميع منتجاتك';
 
@@ -146,8 +150,8 @@ export default async function VendorProductsPage({
         <div className="flex gap-2 mb-6 flex-wrap">
           <Link href="/vendor/products">
             <Button 
-              variant={!searchParams.type ? "default" : "outline"}
-              className={!searchParams.type 
+              variant={!filterType ? "default" : "outline"}
+              className={!filterType 
                 ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white" 
                 : "bg-white/10 border-white/20 text-white hover:bg-white/20"
               }
@@ -158,8 +162,8 @@ export default async function VendorProductsPage({
           </Link>
           <Link href="/vendor/products?type=owned">
             <Button 
-              variant={searchParams.type === 'owned' ? "default" : "outline"}
-              className={searchParams.type === 'owned'
+              variant={filterType === 'owned' ? "default" : "outline"}
+              className={filterType === 'owned'
                 ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white" 
                 : "bg-white/10 border-white/20 text-white hover:bg-white/20"
               }
@@ -170,8 +174,8 @@ export default async function VendorProductsPage({
           </Link>
           <Link href="/vendor/products?type=consignment">
             <Button 
-              variant={searchParams.type === 'consignment' ? "default" : "outline"}
-              className={searchParams.type === 'consignment'
+              variant={filterType === 'consignment' ? "default" : "outline"}
+              className={filterType === 'consignment'
                 ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white" 
                 : "bg-white/10 border-white/20 text-white hover:bg-white/20"
               }
@@ -300,6 +304,7 @@ export default async function VendorProductsPage({
                       src={product.images.split(',')[0]}
                       alt={product.nameAr || product.name || 'منتج'}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
                     />
                   ) : (

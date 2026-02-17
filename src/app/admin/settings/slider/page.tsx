@@ -272,7 +272,7 @@ export default function SliderManagementPage() {
                   إضافة صورة جديدة
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-2xl max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingSlider ? 'تعديل الصورة' : 'إضافة صورة جديدة'}

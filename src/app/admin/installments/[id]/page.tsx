@@ -617,7 +617,7 @@ export default function InstallmentDetailPage() {
       {/* Image Preview Dialog */}
       {imagePreview && (
         <Dialog open={!!imagePreview} onOpenChange={() => setImagePreview(null)}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>معاينة الصورة</DialogTitle>
             </DialogHeader>

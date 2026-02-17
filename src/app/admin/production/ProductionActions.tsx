@@ -102,7 +102,7 @@ export function CreateProductionButton() {
           أمر إنتاج جديد
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>إنشاء أمر إنتاج جديد</DialogTitle>
         </DialogHeader>

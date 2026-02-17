@@ -452,14 +452,241 @@ export default function AdminPartnersPage() {
             </div>
           </div>
 
-          <Link href="/admin/partners/new">
-            <Button 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              إضافة شريك جديد
-            </Button>
-          </Link>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                إضافة شريك
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-gray-900 border-purple-500/30 text-white w-[calc(100vw-16px)] sm:w-[calc(100vw-32px)] sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800 p-4 sm:p-6">
+              <DialogHeader className="pb-2">
+                <DialogTitle className="text-lg sm:text-xl text-white">إضافة شريك جديد</DialogTitle>
+                <DialogDescription className="text-gray-400 text-sm">
+                  أدخل بيانات الشريك الجديد
+                </DialogDescription>
+              </DialogHeader>
+
+              <form onSubmit={handleSubmit} className="space-y-3 mt-2">
+                <div className="space-y-2.5">
+                  {/* الاسم */}
+                  <div>
+                    <Label htmlFor="partnerName" className="text-white text-sm">
+                      اسم الشريك *
+                    </Label>
+                    <Input
+                      id="partnerName"
+                      value={formData.partnerName}
+                      onChange={(e) => setFormData({ ...formData, partnerName: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white h-9"
+                      required
+                    />
+                  </div>
+
+                  {/* البريد الإلكتروني */}
+                  <div>
+                    <Label htmlFor="email" className="text-white text-sm">
+                      البريد الإلكتروني *
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white h-9"
+                      required
+                    />
+                  </div>
+
+                  {/* رقم الهاتف */}
+                  <div>
+                    <Label htmlFor="phone" className="text-white text-sm">
+                      رقم الهاتف
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white h-9"
+                    />
+                  </div>
+
+                  {/* مبلغ رأس المال */}
+                  <div>
+                    <Label htmlFor="capitalAmount" className="text-white text-sm">
+                      مبلغ رأس المال (جنيه) *
+                    </Label>
+                    <Input
+                      id="capitalAmount"
+                      type="number"
+                      step="0.01"
+                      value={formData.capitalAmount}
+                      onChange={(e) => setFormData({ ...formData, capitalAmount: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white h-9"
+                      required
+                    />
+                  </div>
+
+                  {/* نسبة المساهمة */}
+                  <div>
+                    <Label htmlFor="capitalPercent" className="text-white text-sm">
+                      نسبة المساهمة (%) *
+                    </Label>
+                    <Input
+                      id="capitalPercent"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={formData.capitalPercent}
+                      onChange={(e) => setFormData({ ...formData, capitalPercent: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white h-9"
+                      required
+                    />
+                    <p className="text-[11px] text-blue-300 mt-1">
+                      ℹ️ سيتم حساب النسبة الفعلية تلقائياً
+                    </p>
+                  </div>
+
+                  {/* نوع الشريك */}
+                  <div>
+                    <Label htmlFor="partnerType" className="text-white text-sm">
+                      نوع الشريك
+                    </Label>
+                    <select
+                      id="partnerType"
+                      value={formData.partnerType}
+                      onChange={(e) => setFormData({ ...formData, partnerType: e.target.value })}
+                      className="w-full bg-white/10 border border-white/20 text-white rounded-md p-2 h-9 text-sm"
+                    >
+                      <option value="PARTNER">شريك</option>
+                      <option value="OWNER">مالك</option>
+                      <option value="INVESTOR">مستثمر</option>
+                    </select>
+                  </div>
+
+                  {/* ملاحظات */}
+                  <div>
+                    <Label htmlFor="notes" className="text-white text-sm">
+                      ملاحظات
+                    </Label>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white text-sm min-h-[50px]"
+                      rows={2}
+                    />
+                  </div>
+
+                  {/* إنشاء حساب */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 p-2 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                      <input
+                        type="checkbox"
+                        id="createUserAccount"
+                        checked={formData.createUserAccount}
+                        onChange={(e) => setFormData({ ...formData, createUserAccount: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="createUserAccount" className="text-white cursor-pointer text-sm">
+                        إنشاء حساب VENDOR للشريك
+                      </Label>
+                    </div>
+                    
+                    <p className="text-[11px] text-yellow-300 px-1">
+                      ⚠️ <strong>مع حساب:</strong> البريد غير مستخدم | <strong>بدون:</strong> للتواصل فقط
+                    </p>
+                  </div>
+
+                  {/* صلاحية حذف الطلبات */}
+                  {formData.createUserAccount && (
+                    <div className="flex items-center gap-2 p-2 bg-red-900/30 rounded-lg border border-red-500/30">
+                      <input
+                        type="checkbox"
+                        id="canDeleteOrders"
+                        checked={formData.canDeleteOrders}
+                        onChange={(e) => setFormData({ ...formData, canDeleteOrders: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="canDeleteOrders" className="text-white cursor-pointer text-sm">
+                        🗑️ السماح بحذف الطلبات
+                      </Label>
+                    </div>
+                  )}
+
+                  {/* صلاحية رفع منتجات شي إن */}
+                  {formData.createUserAccount && (
+                    <div className="flex items-center gap-2 p-2 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                      <input
+                        type="checkbox"
+                        id="canUploadShein"
+                        checked={formData.canUploadShein}
+                        onChange={(e) => setFormData({ ...formData, canUploadShein: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="canUploadShein" className="text-white cursor-pointer text-sm">
+                        🛍️ رفع منتجات شي إن
+                      </Label>
+                    </div>
+                  )}
+
+                  {/* صلاحية إضافة بضاعة خارج النظام */}
+                  {formData.createUserAccount && (
+                    <div className="flex items-center gap-2 p-2 bg-orange-900/30 rounded-lg border border-orange-500/30">
+                      <input
+                        type="checkbox"
+                        id="canAddOfflineProducts"
+                        checked={formData.canAddOfflineProducts}
+                        onChange={(e) => setFormData({ ...formData, canAddOfflineProducts: e.target.checked })}
+                        className="rounded"
+                      />
+                      <Label htmlFor="canAddOfflineProducts" className="text-white cursor-pointer text-sm">
+                        📦 إضافة بضاعة خارج النظام
+                      </Label>
+                    </div>
+                  )}
+
+                  {/* كلمة المرور - تظهر فقط إذا تم تفعيل إنشاء الحساب */}
+                  {formData.createUserAccount && (
+                    <div className="bg-purple-900/20 p-2.5 rounded-lg border border-purple-500/30">
+                      <Label htmlFor="password" className="text-white mb-1.5 block text-sm">
+                        كلمة المرور *
+                      </Label>
+                      <Input
+                        id="password"
+                        type="text"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className="bg-white/10 border-white/20 text-white h-9"
+                        placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
+                        required={formData.createUserAccount}
+                        minLength={6}
+                      />
+                      <p className="text-[11px] text-yellow-300 mt-1">
+                        ⚠️ احفظ كلمة المرور لإعطائها للشريك
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-3 sticky bottom-0 bg-gray-900 pb-1">
+                  <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700 h-9 text-sm">
+                    إضافة الشريك
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    className="border-white/20 text-white hover:bg-white/10 h-9 text-sm px-6"
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Statistics */}
@@ -674,7 +901,7 @@ export default function AdminPartnersPage() {
 
         {/* Edit Partner Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="bg-gray-900 border-purple-500/30 text-white w-[95vw] sm:w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="bg-gray-900 border-purple-500/30 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl text-white">تعديل بيانات الشريك</DialogTitle>
               <DialogDescription className="text-gray-400">
@@ -906,7 +1133,7 @@ export default function AdminPartnersPage() {
 
         {/* Delete Confirmation Dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent className="bg-gray-900 border-red-500/30 text-white w-[95vw] sm:w-[90vw] md:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogContent className="bg-gray-900 border-red-500/30 text-white">
             <DialogHeader>
               <DialogTitle className="text-2xl text-red-400 flex items-center gap-2">
                 <Trash2 className="h-6 w-6" />
@@ -949,7 +1176,7 @@ export default function AdminPartnersPage() {
 
         {/* Add Staff Dialog */}
         <Dialog open={isStaffDialogOpen} onOpenChange={setIsStaffDialogOpen}>
-          <DialogContent className="bg-gray-900 border-green-500/30 text-white w-[95vw] sm:w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="bg-gray-900 border-green-500/30 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl text-white flex items-center gap-2">
                 <UserPlus className="h-6 w-6 text-green-400" />
@@ -1114,7 +1341,7 @@ export default function AdminPartnersPage() {
 
         {/* Suspension Dialog - إيقاف مؤقت */}
         <Dialog open={isSuspensionDialogOpen} onOpenChange={setIsSuspensionDialogOpen}>
-          <DialogContent className="bg-gray-900 border-yellow-500/30 text-white w-[95vw] sm:w-[90vw] md:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="bg-gray-900 border-yellow-500/30 text-white max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-2xl text-yellow-400 flex items-center gap-2">
                 <Shield className="h-6 w-6" />

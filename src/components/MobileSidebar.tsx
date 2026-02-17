@@ -1,4 +1,3 @@
-"use client";
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -134,6 +133,25 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           label: "📈 الإحصائيات",
           href: "/vendor/analytics",
           color: "text-cyan-600",
+        },
+      ],
+    });
+  } else if (session?.user?.role === "VEHICLE_DEALER") {
+    menuSections.push({
+      title: "🚗 لوحة معرض السيارات",
+      items: [
+        {
+          icon: LayoutDashboard,
+          label: "🎯 لوحة التحكم",
+          href: "/vehicle-dealer/dashboard",
+          color: "text-blue-600",
+          isSpecial: true,
+        },
+        {
+          icon: TrendingUp,
+          label: "📊 إدارة المركبات",
+          href: "/vehicle-dealer/vehicles",
+          color: "text-green-600",
         },
       ],
     });

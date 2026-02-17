@@ -241,7 +241,7 @@ export function FacebookIntegration({
               {translations.linkToFacebook}
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-700 text-gray-100 max-w-2xl">
+          <DialogContent className="bg-gray-900 border-gray-700 text-gray-100 w-[95vw] sm:w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl flex items-center gap-2">
                 <Facebook className="w-6 h-6 text-blue-400" />

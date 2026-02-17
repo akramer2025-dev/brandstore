@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, Download, Printer, FileText, ArrowRight } from "lucide-react";
+import { Eye, Download, Printer, FileText, ArrowRight, Share2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
@@ -71,159 +71,67 @@ export default function InstallmentAgreementViewPage() {
   };
 
   const handlePrint = () => {
+    // Hide buttons and print directly
+    const style = document.createElement('style');
+    style.textContent = '.no-print { display: none !important; }';
+    document.head.appendChild(style);
+    
     window.print();
+    
+    // Remove style after print
+    setTimeout(() => {
+      document.head.removeChild(style);
+    }, 1000);
+    
+    toast.success("تم فتح نافذة الطباعة");
   };
 
   const handleDownloadPDF = async () => {
     try {
-      toast.info("جاري تحضير ملف PDF...");
+      toast.info("📄 جاري تحضير ملف PDF...");
       
-      // Use browser's print to PDF functionality
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) {
-        toast.error("يرجى السماح للنوافذ المنبثقة");
-        return;
-      }
-
-      const content = printRef.current?.innerHTML || "";
+      // Hide buttons before generating PDF
+      const style = document.createElement('style');
+      style.textContent = `
+        .no-print { display: none !important; }
+        @page { margin: 1cm; }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      `;
+      document.head.appendChild(style);
       
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html dir="rtl" lang="ar">
-        <head>
-          <meta charset="UTF-8">
-          <title>اتفاقية تقسيط - ${agreement?.agreementNumber}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              direction: rtl;
-              padding: 30px;
-              background: white;
-              color: #111827;
-              line-height: 1.8;
-            }
-            .container { max-width: 900px; margin: 0 auto; }
-            .header {
-              text-align: center;
-              padding: 30px;
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              border-radius: 16px;
-              margin-bottom: 40px;
-              color: white;
-            }
-            .logo { max-width: 180px; background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-            .agreement-number {
-              background: white;
-              color: #667eea;
-              padding: 12px 30px;
-              border-radius: 50px;
-              font-size: 18px;
-              font-weight: bold;
-              display: inline-block;
-              margin: 10px 0;
-            }
-            .section {
-              margin-bottom: 30px;
-              padding: 25px;
-              background: #f9fafb;
-              border-radius: 12px;
-              border: 2px solid #e5e7eb;
-            }
-            .section h2 {
-              color: #667eea;
-              border-bottom: 3px solid #667eea;
-              padding-bottom: 12px;
-              margin-bottom: 20px;
-              font-size: 22px;
-            }
-            .info-row {
-              display: flex;
-              justify-content: space-between;
-              padding: 15px 20px;
-              margin-bottom: 8px;
-              background: white;
-              border-radius: 8px;
-              border-right: 4px solid #667eea;
-            }
-            .info-label { font-weight: 600; color: #4b5563; }
-            .info-value { font-weight: 700; color: #667eea; }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 20px;
-            }
-            th {
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              color: white;
-              padding: 15px;
-              font-weight: 600;
-              text-align: center;
-            }
-            td {
-              padding: 12px 15px;
-              text-align: center;
-              background: white;
-              border-bottom: 1px solid #e5e7eb;
-            }
-            tr:nth-child(even) td { background: #f9fafb; }
-            .terms {
-              background: #fef3c7;
-              padding: 25px;
-              border-radius: 12px;
-              border: 2px solid #f59e0b;
-              margin-top: 30px;
-            }
-            .terms-title { color: #92400e; font-size: 20px; font-weight: bold; margin-bottom: 15px; }
-            .terms-content { color: #78350f; line-height: 2; }
-            .image-container {
-              page-break-before: always;
-              margin: 30px 0;
-              text-align: center;
-              padding: 25px;
-              background: white;
-              border-radius: 12px;
-            }
-            .image-label {
-              font-weight: bold;
-              color: #667eea;
-              margin-bottom: 15px;
-              font-size: 18px;
-              display: block;
-            }
-            img { max-width: 100%; border-radius: 12px; }
-            .footer {
-              margin-top: 60px;
-              padding: 30px;
-              text-align: center;
-              background: #f9fafb;
-              border-radius: 12px;
-              border: 2px dashed #d1d5db;
-            }
-            @media print {
-              body { padding: 15px; }
-              .no-print { display: none !important; }
-            }
-          </style>
-        </head>
-        <body>
-          ${content}
-        </body>
-        </html>
-      `);
-      
-      printWindow.document.close();
-      
-      // Auto-trigger print dialog after a short delay
+      // Trigger print dialog (user can select "Save as PDF")
       setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-      }, 500);
+        window.print();
+        toast.success("✅ اختر 'حفظ بصيغة PDF' من نافذة الطباعة");
+        
+        // Remove style after print
+        setTimeout(() => {
+          document.head.removeChild(style);
+        }, 1000);
+      }, 300);
       
     } catch (error) {
       console.error("Error generating PDF:", error);
-      toast.error("حدث خطأ أثناء إنشاء ملف PDF");
+      toast.error("❌ حدث خطأ أثناء إنشاء ملف PDF");
     }
+  };
+  
+  const handleShareWhatsApp = () => {
+    const message = `
+🏦 *اتفاقية تقسيط - Rimo Store*
+
+📋 رقم الاتفاقية: ${agreement?.agreementNumber}
+👤 العميل: ${agreement?.fullName || "غير متوفر"}
+💰 المبلغ الإجمالي: ${agreement?.totalAmount.toLocaleString()} جنيه
+📅 تاريخ الإصدار: ${new Date(agreement?.createdAt || "").toLocaleDateString("ar-EG")}
+
+🔗 لعرض الاتفاقية كاملة:
+${window.location.href}
+    `.trim();
+    
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    toast.success("تم فتح واتساب");
   };
 
   if (loading) {
@@ -270,21 +178,26 @@ export default function InstallmentAgreementViewPage() {
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       {/* Action Buttons - Hidden in Print */}
-      <div className="no-print flex gap-3 mb-6 justify-between items-center">
-        <Button variant="outline" onClick={() => router.back()}>
+      <div className="no-print flex gap-3 mb-6 justify-between items-center flex-wrap">
+        <Button variant="outline" onClick={() => router.back()} className="bg-white hover:bg-gray-50">
           <ArrowRight className="w-4 h-4 ml-2" />
           العودة
         </Button>
         
-        <div className="flex gap-3">
-          <Button onClick={handlePrint} variant="outline" className="bg-white">
+        <div className="flex gap-2 flex-wrap">
+          <Button onClick={handlePrint} variant="outline" className="bg-white hover:bg-gray-50">
             <Printer className="w-4 h-4 ml-2" />
             طباعة
           </Button>
           
-          <Button onClick={handleDownloadPDF} className="bg-purple-600 hover:bg-purple-700">
+          <Button onClick={handleDownloadPDF} className="bg-purple-600 hover:bg-purple-700 text-white">
             <Download className="w-4 h-4 ml-2" />
             تحميل PDF
+          </Button>
+          
+          <Button onClick={handleShareWhatsApp} className="bg-green-600 hover:bg-green-700 text-white">
+            <Share2 className="w-4 h-4 ml-2" />
+            إرسال واتساب
           </Button>
         </div>
       </div>
@@ -417,7 +330,7 @@ export default function InstallmentAgreementViewPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {agreement.order.items.map((item, index) => (
+                    {agreement.order.items.map((item: any, index: number) => (
                       <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                         <td className="p-4 text-right font-semibold">
                           {item.product.nameAr || item.product.name}

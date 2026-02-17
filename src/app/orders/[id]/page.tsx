@@ -192,6 +192,7 @@ export default function OrderDetailsPage() {
                           src={mainImage}
                           alt={item.product.nameAr}
                           fill
+                          sizes="80px"
                           className="object-cover"
                         />
                       ) : (

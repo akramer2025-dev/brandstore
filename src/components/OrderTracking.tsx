@@ -35,7 +35,7 @@ export default function OrderTracking({ isOpen, onClose, order }: OrderTrackingP
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 border-purple-500/30 text-white max-w-2xl">
+      <DialogContent className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 border-purple-500/30 text-white w-[95vw] sm:w-[90vw] md:max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center mb-2">
             تتبع الطلب #{order.orderNumber.slice(0, 8)}

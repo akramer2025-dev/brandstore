@@ -325,7 +325,7 @@ export default function AdminSheinOrdersPage() {
                         عرض التفاصيل
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
+                    <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-y-auto" dir="rtl">
                       <DialogHeader>
                         <DialogTitle>تفاصيل الطلب</DialogTitle>
                         <DialogDescription>

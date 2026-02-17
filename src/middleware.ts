@@ -20,6 +20,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin', request.url));
     } else if (role === 'VENDOR') {
       return NextResponse.redirect(new URL('/vendor/dashboard', request.url));
+    } else if (role === 'VEHICLE_DEALER') {
+      return NextResponse.redirect(new URL('/vehicle-dealer/dashboard', request.url));
     } else if (role === 'MANUFACTURER') {
       return NextResponse.redirect(new URL('/manufacturer/dashboard', request.url));
     } else if (role === 'DELIVERY_STAFF') {

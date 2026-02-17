@@ -66,7 +66,7 @@ export function AddMaterialButton() {
           إضافة مادة جديدة
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>إضافة مادة جديدة للمخزون</DialogTitle>
         </DialogHeader>
@@ -218,7 +218,7 @@ export function MaterialMovementButton({
           تسجيل حركة
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>تسجيل حركة - {materialName}</DialogTitle>
         </DialogHeader>

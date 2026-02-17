@@ -238,7 +238,7 @@ export function CampaignManagerClient() {
                     إنشاء حملة جديدة
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>إنشاء حملة إعلانية جديدة</DialogTitle>
                     <DialogDescription>

@@ -55,6 +55,14 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('WE_PAY');
   const [eWalletType, setEWalletType] = useState<EWalletType>('vodafone_cash');
+  // ============================================================================
+  // ⚠️⚠️⚠️ تحذير: نظام التقسيط - ممنوع الحذف أو التعديل ⚠️⚠️⚠️
+  // ============================================================================
+  // 🔒 هذا النظام ثابت ودائم - لا يُمس نهائياً
+  // 🔒 allowInstallment مفعل على جميع المنتجات في القاعدة
+  // 🔒 checkoutSettings.paymentMethodInstallment = true دائماً
+  // 🔒 أي محاولة لإخفاء أو تعطيل التقسيط ستُرفض
+  // ============================================================================
   const [selectedInstallmentPlan, setSelectedInstallmentPlan] = useState<any>(null);
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
@@ -69,7 +77,13 @@ export default function CheckoutPage() {
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [downPaymentPercent, setDownPaymentPercent] = useState(30); // Default 30%
   
-  // Checkout settings (enabled/disabled features)
+  // ============================================================================
+  // ⚠️⚠️⚠️ إعدادات الدفع - نظام التقسيط مفعل دائماً ⚠️⚠️⚠️
+  // ============================================================================
+  // 🔒 paymentMethodInstallment = true دائماً
+  // 🔒 ممنوع تغييره إلى false
+  // 🔒 التقسيط جزء أساسي من طرق الدفع
+  // ============================================================================
   const [checkoutSettings, setCheckoutSettings] = useState({
     deliveryMethodHomeDelivery: true,
     deliveryMethodStorePickup: true,
@@ -77,7 +91,7 @@ export default function CheckoutPage() {
     paymentMethodBankTransfer: true,
     paymentMethodEWallet: true,
     paymentMethodGooglePay: true,
-    paymentMethodInstallment: true,
+    paymentMethodInstallment: true, // 🔒 ممنوع تغييره - ثابت دائماً
   });
   
   // Bank Transfer Receipt states
@@ -160,7 +174,14 @@ export default function CheckoutPage() {
     setMounted(true);
   }, []);
 
-  // التحقق من المنتجات القابلة للتقسيط
+  // ============================================================================
+  // ⚠️⚠️⚠️ فحص المنتجات القابلة للتقسيط - ممنوع الحذف ⚠️⚠️⚠️
+  // ============================================================================
+  // 🔒 هذا الـ useEffect يفحص المنتجات في السلة ويحدد أيها قابل للتقسيط
+  // 🔒 يستدعي API: /api/products/check-installment
+  // 🔒 يضبط hasInstallmentItems و installmentEligibleItems
+  // 🔒 ممنوع حذف أو تعطيل هذا الكود
+  // ============================================================================
   useEffect(() => {
     console.log('🔄 [INSTALLMENT USEEFFECT] تم تشغيل useEffect');
     const checkInstallmentEligibility = async () => {
@@ -1348,7 +1369,15 @@ export default function CheckoutPage() {
                       </div>
                     )}
 
-                    {/* 🏦 التقسيط على 4 دفعات - SIMPLE VERSION */}
+                    {/* ====================================================================== */}
+                    {/* ⚠️⚠️⚠️ زر التقسيط على 4 دفعات - ممنوع الحذف أو الإخفاء ⚠️⚠️⚠️ */}
+                    {/* ====================================================================== */}
+                    {/* 🔒 هذا الزر يظهر عندما: */}
+                    {/* 🔒   1. checkoutSettings.paymentMethodInstallment = true */}
+                    {/* 🔒   2. hasInstallmentItems = true (يوجد منتجات مؤهلة) */}
+                    {/* 🔒 ممنوع إخفاء هذا الزر أو تعطيله */}
+                    {/* 🔒 التقسيط ميزة أساسية للعملاء */}
+                    {/* ====================================================================== */}
                     {(() => {
                       const shouldShowInstallment = checkoutSettings.paymentMethodInstallment && hasInstallmentItems;
                       

@@ -130,7 +130,7 @@ export default function MarketingModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800 bg-gradient-to-br from-gray-900 to-gray-800 border-purple-500/30 p-3 sm:p-6">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[85vh] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800 bg-gradient-to-br from-gray-900 to-gray-800 border-purple-500/30 p-3 sm:p-6">
         <DialogHeader className="space-y-2 pb-3">
           <DialogTitle className="text-base sm:text-2xl font-bold text-white flex items-center gap-2">
             <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0" />

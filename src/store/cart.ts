@@ -80,8 +80,7 @@ export const useCartStore = create<CartStore>()(
         }
         
         // ⚠️ TEMPORARY: Disable server sync until Cart table is deployed on Vercel
-        console.log('⚠️ [CART SYNC] معطل مؤقتاً - استخدام localStorage فقط');
-        console.log('💡 السلة تعمل محلياً، التقسيط متاح');
+        // Silent mode - cart works locally
         return;
         
         try {

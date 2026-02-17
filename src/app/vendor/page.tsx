@@ -8,6 +8,11 @@ export default async function VendorDashboard() {
     redirect('/auth/login');
   }
 
+  // توجيه حسب نوع الحساب
+  if (session.user.role === 'VEHICLE_DEALER') {
+    redirect('/vehicle-dealer/dashboard');
+  }
+
   if (session.user.role !== 'VENDOR' || !session.user.vendorType) {
     redirect('/');
   }

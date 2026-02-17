@@ -198,6 +198,13 @@ export async function POST(request: NextRequest) {
 
         console.log('👤 إنشاء حساب مستخدم...');
 
+        // تحديد الـ role بناءً على نوع الشريك
+        let userRole: 'VENDOR' | 'VEHICLE_DEALER' = 'VENDOR';
+        if (partnerType === 'CARS' || partnerType === 'MOTORCYCLES') {
+          userRole = 'VEHICLE_DEALER';
+          console.log('🚗 شريك سيارات - سيتم إنشاء حساب VEHICLE_DEALER');
+        }
+
         // إنشاء المستخدم
         const user = await tx.user.create({
           data: {
@@ -205,7 +212,7 @@ export async function POST(request: NextRequest) {
             email,
             phone,
             password: hashedPassword,
-            role: 'VENDOR',
+            role: userRole, // استخدام الـ role المناسب
           },
         });
 

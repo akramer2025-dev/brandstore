@@ -112,30 +112,39 @@ export default function AddVehiclePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4 sm:p-6 lg:p-8">
+      {/* Background Decoration */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
         <div className="mb-8">
           <Link href="/vehicle-dealer/dashboard">
-            <Button variant="ghost" className="mb-4">
+            <Button variant="ghost" className="mb-4 hover:bg-white/50">
               <ArrowLeft className="w-4 h-4 ml-2" />
               العودة للوحة التحكم
             </Button>
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            🚗 إضافة مركبة جديدة
-          </h1>
-          <p className="text-gray-600 mt-2">
-            املأ البيانات التالية لإضافة سيارة أو موتوسيكل جديد لمعرضك
-          </p>
+          <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-6 border border-white/40 shadow-xl">
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+              🚗 إضافة مركبة جديدة
+            </h1>
+            <p className="text-gray-700 mt-2 font-medium">
+              املأ جميع البيانات التفصيلية لإضافة سيارة أو موتوسيكل جديد لمعرضك
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>المعلومات الأساسية</CardTitle>
-              <CardDescription>بيانات المركبة الرئيسية</CardDescription>
+          <Card className="bg-white/60 backdrop-blur-lg border-2 border-purple-200/50 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10">
+              <CardTitle className="text-purple-700 text-xl">🎯 المعلومات الأساسية</CardTitle>
+              <CardDescription className="text-gray-700">بيانات المركبة الرئيسية</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -255,84 +264,275 @@ export default function AddVehiclePage() {
             </CardContent>
           </Card>
 
+          {/* Technical Specifications */}
+          <Card className="bg-white/60 backdrop-blur-lg border-2 border-blue-200/50 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-teal-500/10">
+              <CardTitle className="text-blue-700 text-xl">⚙️ المواصفات التقنية</CardTitle>
+              <CardDescription className="text-gray-700">المواصفات الفنية والتقنية للمركبة</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label>سعة المحرك 🔧</Label>
+                <Input
+                  value={formData.engineCapacity}
+                  onChange={(e) => handleChange('engineCapacity', e.target.value)}
+                  placeholder="مثال: 1600cc أو 2.0L"
+                />
+              </div>
+
+              <div>
+                <Label>قوة الحصان 🏇</Label>
+                <Input
+                  type="number"
+                  value={formData.horsepower}
+                  onChange={(e) => handleChange('horsepower', e.target.value)}
+                  placeholder="مثال: 150"
+                />
+              </div>
+
+              {formData.type === 'CAR' && (
+                <>
+                  <div>
+                    <Label>عدد المقاعد 💺</Label>
+                    <Input
+                      type="number"
+                      value={formData.seats}
+                      onChange={(e) => handleChange('seats', e.target.value)}
+                      placeholder="مثال: 5"
+                      min="2"
+                      max="50"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>عدد الأبواب 🚪</Label>
+                    <Input
+                      type="number"
+                      value={formData.doors}
+                      onChange={(e) => handleChange('doors', e.target.value)}
+                      placeholder="مثال: 4"
+                      min="2"
+                      max="6"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>نوع الهيكل 🚘</Label>
+                    <Select
+                      value={formData.bodyType}
+                      onValueChange={(value) => handleChange('bodyType', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر نوع الهيكل" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SEDAN">سيدان</SelectItem>
+                        <SelectItem value="SUV">SUV</SelectItem>
+                        <SelectItem value="HATCHBACK">هاتشباك</SelectItem>
+                        <SelectItem value="COUPE">كوبيه</SelectItem>
+                        <SelectItem value="PICKUP">بيك أب</SelectItem>
+                        <SelectItem value="VAN">فان</SelectItem>
+                        <SelectItem value="WAGON">ستيشن واجن</SelectItem>
+                        <SelectItem value="CONVERTIBLE">مكشوفة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              <div className="md:col-span-2">
+                <Label>المميزات والإضافات ✨</Label>
+                <Textarea
+                  value={formData.features}
+                  onChange={(e) => handleChange('features', e.target.value)}
+                  placeholder="مثال: فتحة سقف، شاشة لمس، كاميرا 360، سنسر، مقاعد جلد، تحكم مناخي، نظام ملاحة"
+                  rows={3}
+                  className="bg-white/80"
+                />
+                <p className="text-xs text-gray-600 mt-1">💡 اذكر كل المميزات مفصولة بفواصل</p>
+              </div>
+
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-green-50/80 backdrop-blur-sm p-4 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <input
+                      type="checkbox"
+                      id="hasWarranty"
+                      checked={formData.hasWarranty}
+                      onChange={(e) => handleChange('hasWarranty', e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="hasWarranty" className="font-bold text-green-700">🛡️ يوجد ضمان</Label>
+                  </div>
+                  {formData.hasWarranty && (
+                    <Input
+                      value={formData.warrantyDetails}
+                      onChange={(e) => handleChange('warrantyDetails', e.target.value)}
+                      placeholder="تفاصيل الضمان (مثال: سنة أو 100,000 كم)"
+                      className="mt-2"
+                    />
+                  )}
+                </div>
+
+                <div className="bg-blue-50/80 backdrop-blur-sm p-4 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <input
+                      type="checkbox"
+                      id="hasFreeService"
+                      checked={formData.hasFreeService}
+                      onChange={(e) => handleChange('hasFreeService', e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="hasFreeService" className="font-bold text-blue-700">🔧 صيانة مجانية</Label>
+                  </div>
+                  {formData.hasFreeService && (
+                    <Input
+                      value={formData.freeServiceDetails}
+                      onChange={(e) => handleChange('freeServiceDetails', e.target.value)}
+                      placeholder="تفاصيل الصيانة (مثال: 3 صيانات مجانية)"
+                      className="mt-2"
+                    />
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Used Vehicle Data */}
           {formData.condition === 'USED' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>بيانات المركبة المستعملة</CardTitle>
-                <CardDescription>معلومات خاصة بالمركبات المستعملة</CardDescription>
+            <Card className="bg-white/60 backdrop-blur-lg border-2 border-orange-200/50 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-yellow-500/10">
+                <CardTitle className="text-orange-700 text-xl">📊 بيانات المركبة المستعملة</CardTitle>
+                <CardDescription className="text-gray-700">معلومات خاصة بالمركبات المستعملة</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label>عداد الكيلومترات *</Label>
+                  <Label>عداد الكيلومترات * 🛣️</Label>
                   <Input
                     type="number"
                     value={formData.mileage}
                     onChange={(e) => handleChange('mileage', e.target.value)}
                     placeholder="مثال: 50000"
                     required
+                    className="bg-white/80"
                   />
+                  <p className="text-xs text-gray-600 mt-1">كم قطعت المركبة من الكيلومترات</p>
                 </div>
 
                 <div>
-                  <Label>عدد الملاك السابقين</Label>
+                  <Label>عدد الملاك السابقين 👤</Label>
                   <Input
                     type="number"
                     value={formData.previousOwners}
                     onChange={(e) => handleChange('previousOwners', e.target.value)}
                     placeholder="مثال: 1"
                     min="0"
+                    className="bg-white/80"
                   />
+                  <p className="text-xs text-gray-600 mt-1">كم مالك امتلك هذه المركبة من قبل</p>
                 </div>
 
                 <div className="md:col-span-2">
-                  <div className="flex items-center gap-2 mb-2">
+                  <Label>رقم اللوحة 🔢</Label>
+                  <Input
+                    value={formData.licensePlate}
+                    onChange={(e) => handleChange('licensePlate', e.target.value)}
+                    placeholder="مثال: أ ب ج 1234"
+                    className="bg-white/80"
+                  />
+                </div>
+
+                {/* Accident History Section */}
+                <div className="md:col-span-2 bg-red-50/60 backdrop-blur-sm p-5 rounded-xl border-2 border-red-200">
+                  <div className="flex items-center gap-2 mb-3">
                     <input
                       type="checkbox"
                       id="accidentHistory"
                       checked={formData.accidentHistory}
                       onChange={(e) => handleChange('accidentHistory', e.target.checked)}
-                      className="w-4 h-4"
+                      className="w-5 h-5"
                     />
-                    <Label htmlFor="accidentHistory">المركبة لها تاريخ حوادث</Label>
+                    <Label htmlFor="accidentHistory" className="text-lg font-bold text-red-700">
+                      ⚠️ المركبة لها تاريخ حوادث أو خبطات
+                    </Label>
                   </div>
                   {formData.accidentHistory && (
-                    <Textarea
-                      value={formData.accidentDetails}
-                      onChange={(e) => handleChange('accidentDetails', e.target.value)}
-                      placeholder="اذكر تفاصيل الحوادث..."
-                      rows={3}
-                    />
+                    <div className="space-y-3 mt-4">
+                      <Textarea
+                        value={formData.accidentDetails}
+                        onChange={(e) => handleChange('accidentDetails', e.target.value)}
+                        placeholder="اذكر تفاصيل الحوادث بالكامل:&#10;- نوع الحادث (خبطة خفيفة، متوسطة، شديدة)&#10;- مكان الإصابة (أمامي، خلفي، جانبي)&#10;- هل تم التصليح؟&#10;- المبلغ المصروف على التصليح&#10;- في أي ورشة تم التصليح&#10;- هل تم تغيير قطع؟"
+                        rows={6}
+                        className="bg-white/90"
+                      />
+                      <p className="text-sm text-red-600 font-semibold">
+                        ⚡ مهم: كن صادقاً في ذكر تفاصيل الحوادث - الشفافية تبني الثقة مع العملاء
+                      </p>
+                    </div>
                   )}
                 </div>
 
-                <div className="md:col-span-2">
-                  <Label>سجل الصيانة</Label>
+                {/* Maintenance & Replacements */}
+                <div className="md:col-span-2 bg-blue-50/60 backdrop-blur-sm p-5 rounded-xl border-2 border-blue-200">
+                  <Label className="text-lg font-bold text-blue-700 mb-3 block">🔧 سجل الصيانة والتصليحات</Label>
                   <Textarea
                     value={formData.maintenanceHistory}
                     onChange={(e) => handleChange('maintenanceHistory', e.target.value)}
-                    placeholder="اكتب سجل الصيانة..."
-                    rows={4}
+                    placeholder="اكتب سجل الصيانة بالتفصيل:&#10;&#10;📅 تاريخ آخر صيانة دورية:&#10;🔧 الأعمال المنفذة:&#10;  - تغيير زيت المحرك&#10;  - فلاتر الهواء والزيت&#10;  - فحص الفرامل&#10;  - إلخ...&#10;&#10;🔩 القطع التي تم استبدالها:&#10;  - البطارية (تاريخ التغيير)&#10;  - الإطارات (4 إطارات جديدة)&#10;  - وسادات الفرامل&#10;  - أي قطع أخرى...&#10;&#10;💰 المبالغ المصروفة على الصيانة:&#10;&#10;📍 أماكن الصيانة (توكيل رسمي أو ورشة):"
+                    rows={10}
+                    className="bg-white/90"
                   />
                 </div>
 
-                <div>
-                  <Label>رقم اللوحة</Label>
-                  <Input
-                    value={formData.licensePlate}
-                    onChange={(e) => handleChange('licensePlate', e.target.value)}
-                    placeholder="مثال: أ ب ج 1234"
-                  />
+                {/* Color Options */}
+                <div className="md:col-span-2 bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-xl border-2 border-purple-200">
+                  <Label className="text-lg font-bold text-purple-700 mb-3 block">🎨 لون المركبة بالتفصيل</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label>اللون الأساسي *</Label>
+                      <Select
+                        value={formData.color}
+                        onValueChange={(value) => handleChange('color', value)}
+                      >
+                        <SelectTrigger className="bg-white/90">
+                          <SelectValue placeholder="اختر اللون" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="أبيض">⚪ أبيض</SelectItem>
+                          <SelectItem value="أسود">⚫ أسود</SelectItem>
+                          <SelectItem value="فضي">🔘 فضي</SelectItem>
+                          <SelectItem value="رمادي">⚫ رمادي</SelectItem>
+                          <SelectItem value="أحمر">🔴 أحمر</SelectItem>
+                          <SelectItem value="أزرق">🔵 أزرق</SelectItem>
+                          <SelectItem value="أخضر">🟢 أخضر</SelectItem>
+                          <SelectItem value="أصفر">🟡 أصفر</SelectItem>
+                          <SelectItem value="برتقالي">🟠 برتقالي</SelectItem>
+                          <SelectItem value="بني">🟤 بني</SelectItem>
+                          <SelectItem value="ذهبي">🟡 ذهبي</SelectItem>
+                          <SelectItem value="بيج">🟤 بيج</SelectItem>
+                          <SelectItem value="زيتي">🟢 زيتي</SelectItem>
+                          <SelectItem value="بنفسجي">🟣 بنفسجي</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label>وصف تفصيلي للون</Label>
+                      <Input
+                        placeholder="مثال: أبيض لؤلؤي لامع، أزرق سماوي متاليك، أسود مط"
+                        className="bg-white/90"
+                      />
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           )}
 
           {/* Pricing */}
-          <Card>
-            <CardHeader>
-              <CardTitle>الأسعار والتكاليف</CardTitle>
-              <CardDescription>حدد أسعار الشراء والبيع</CardDescription>
+          <Card className="bg-white/60 backdrop-blur-lg border-2 border-green-200/50 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10">
+              <CardTitle className="text-green-700 text-xl">💰 الأسعار والتكاليف</CardTitle>
+              <CardDescription className="text-gray-700">حدد أسعار الشراء والبيع وهامش الربح</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -405,10 +605,10 @@ export default function AddVehiclePage() {
           </Card>
 
           {/* Bank Financing */}
-          <Card>
-            <CardHeader>
-              <CardTitle>نظام التمويل البنكي 🏦</CardTitle>
-              <CardDescription>إعدادات التمويل المصرفي للمركبة</CardDescription>
+          <Card className="bg-white/60 backdrop-blur-lg border-2 border-indigo-200/50 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10">
+              <CardTitle className="text-indigo-700 text-xl">🏦 نظام التمويل البنكي</CardTitle>
+              <CardDescription className="text-gray-700">إعدادات التمويل المصرفي للمركبة</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-2">
@@ -463,10 +663,10 @@ export default function AddVehiclePage() {
           </Card>
 
           {/* Description */}
-          <Card>
-            <CardHeader>
-              <CardTitle>الوصف والملاحظات</CardTitle>
-              <CardDescription>وصف تفصيلي للمركبة</CardDescription>
+          <Card className="bg-white/60 backdrop-blur-lg border-2 border-pink-200/50 shadow-xl">
+            <CardHeader className="bg-gradient-to-r from-pink-500/10 via-rose-500/10 to-red-500/10">
+              <CardTitle className="text-pink-700 text-xl">📝 الوصف والملاحظات</CardTitle>
+              <CardDescription className="text-gray-700">وصف تفصيلي وملاحظات إضافية عن المركبة</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>

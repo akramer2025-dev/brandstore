@@ -65,7 +65,7 @@ export function AddVoucherButton({ type }: { type: "RECEIPT" | "PAYMENT" }) {
           {type === "RECEIPT" ? "سند قبض جديد" : "سند صرف جديد"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{type === "RECEIPT" ? "إنشاء سند قبض" : "إنشاء سند صرف"}</DialogTitle>
         </DialogHeader>

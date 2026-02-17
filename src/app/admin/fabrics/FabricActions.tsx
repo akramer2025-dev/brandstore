@@ -62,7 +62,7 @@ export function AddFabricButton() {
           شراء قماش جديد
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>شراء قماش جديد</DialogTitle>
         </DialogHeader>
@@ -184,7 +184,7 @@ export function CutFabricButton({
           تفصيل قطعة جديدة
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] sm:w-[90vw] md:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>تفصيل قطعة من القماش</DialogTitle>
         </DialogHeader>

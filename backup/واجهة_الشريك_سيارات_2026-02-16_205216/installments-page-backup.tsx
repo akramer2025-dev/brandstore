@@ -24,8 +24,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AdminInstallmentNotifications } from '@/components/AdminInstallmentNotifications';
-import { ArrowRight } from 'lucide-react';
 
 type InstallmentStatus =
   | 'PENDING'
@@ -210,19 +208,9 @@ export default function AdminInstallmentsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <div className="container mx-auto p-6 space-y-6">
-      {/* Header with Back Button */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Button 
-              variant="outline" 
-              onClick={() => router.push('/admin')}
-              className="bg-white/10 text-white hover:bg-white/20 border-white/30"
-            >
-              <ArrowRight className="w-4 h-4 ml-2" />
-              العودة للوحة التحكم
-            </Button>
-          </div>
           <h1 className="text-3xl font-bold text-white">🏦 إدارة اتفاقيات التقسيط</h1>
           <p className="text-blue-200 mt-1">
             مراجعة وإدارة طلبات التقسيط من العملاء
@@ -367,67 +355,13 @@ export default function AdminInstallmentsPage() {
                       {new Date(agreement.createdAt).toLocaleDateString('ar-EG')}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(`/admin/installments/${agreement.id}`)}
-                        >
-                          عرض التفاصيل
-                        </Button>
-                        
-                        {/* أزرار سريعة للطلبات الجديدة */}
-                        {agreement.status === 'PENDING' && (
-                          <>
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                if (confirm('هل أنت متأكد من الموافقة على هذا الطلب؟')) {
-                                  try {
-                                    const response = await fetch(`/api/admin/installments/${agreement.id}/approve`, {
-                                      method: 'POST',
-                                    });
-                                    if (response.ok) {
-                                      window.location.reload();
-                                    }
-                                  } catch (error) {
-                                    console.error('خطأ في الموافقة:', error);
-                                  }
-                                }
-                              }}
-                            >
-                              ✓ قبول
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                const reason = prompt('سبب الرفض (اختياري):');
-                                if (reason !== null) {
-                                  try {
-                                    const response = await fetch(`/api/admin/installments/${agreement.id}/reject`, {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({ reason })
-                                    });
-                                    if (response.ok) {
-                                      window.location.reload();
-                                    }
-                                  } catch (error) {
-                                    console.error('خطأ في الرفض:', error);
-                                  }
-                                }
-                              }}
-                            >
-                              ✗ رفض
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/admin/installments/${agreement.id}`)}
+                      >
+                        عرض التفاصيل
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -460,9 +394,6 @@ export default function AdminInstallmentsPage() {
         </div>
       )}
       </div>
-
-      {/* 🔔 نظام الإشعارات Real-time */}
-      <AdminInstallmentNotifications />
     </div>
   );
 }

@@ -603,6 +603,17 @@ export function Header() {
                       </DropdownMenuItem>
                     </>
                   )}
+                  {session.user?.role === 'VEHICLE_DEALER' && (
+                    <>
+                      <DropdownMenuSeparator className="bg-teal-500/20" />
+                      <DropdownMenuItem asChild>
+                        <Link href="/vehicle-dealer/dashboard" className="cursor-pointer text-gray-300 hover:text-blue-400">
+                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          🚗 لوحة معرض السيارات
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   {session.user?.role === 'ADMIN' && (
                     <>
                       <DropdownMenuSeparator className="bg-teal-500/20" />
