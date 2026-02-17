@@ -437,8 +437,8 @@ ${window.location.href}
                         </td>
                         <td className="p-4 text-center font-bold">{agreement.monthlyInstallment.toLocaleString()} ج.م</td>
                         <td className="p-4 text-center">
-                          <span className={index === 0 ? "text-orange-600 font-semibold" : "text-gray-500"}>
-                            {index === 0 ? "⏳ قيد الانتظار" : "⏱️ مستقبلي"}
+                          <span className={index === 0 ? "text-green-600 font-semibold" : "text-orange-600 font-semibold"}>
+                            {index === 0 ? "✅ تم السداد" : "⏳ دفعة قادمة"}
                           </span>
                         </td>
                       </tr>
