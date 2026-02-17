@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cart";
@@ -81,6 +81,7 @@ interface Review {
 
 export default function ProductDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const productId = params?.id as string;
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -626,29 +627,29 @@ export default function ProductDetailPage() {
 
             {/* توجيه للعميل - كيفية الشراء */}
             {getCurrentStock() > 0 && (
-              <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border-2 border-purple-300/40 rounded-xl p-4 backdrop-blur-sm">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                  <div className="flex-1 space-y-1.5">
-                    <h4 className="text-white font-bold text-base sm:text-lg flex items-center gap-2">
-                      كيف تشتري المنتج؟
-                      <span className="text-xl">🛒</span>
+              <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-3 sm:p-4 shadow-lg">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 justify-center mb-2">
+                    <ShoppingCart className="w-5 h-5 text-purple-600" />
+                    <h4 className="text-gray-800 font-bold text-sm sm:text-base">
+                      كيف تشتري المنتج؟ 🛒
                     </h4>
-                    <div className="space-y-1 text-xs sm:text-sm text-gray-300">
-                      <p className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">1</span>
-                        اضغط على زر "إضافة للسلة" 👇
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">2</span>
-                        اذهب إلى السلة وراجع طلبك 🛍️
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">3</span>
-                        أكمل معلومات التوصيل والدفع ✅
-                      </p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-white rounded-xl p-2 shadow-sm border border-purple-100">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold mx-auto mb-1">1</div>
+                      <p className="text-[9px] sm:text-xs text-gray-700 font-medium leading-tight">إضافة للسلة</p>
+                      <p className="text-lg">👇</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-2 shadow-sm border border-purple-100">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold mx-auto mb-1">2</div>
+                      <p className="text-[9px] sm:text-xs text-gray-700 font-medium leading-tight">راجع طلبك</p>
+                      <p className="text-lg">🛍️</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-2 shadow-sm border border-purple-100">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold mx-auto mb-1">3</div>
+                      <p className="text-[9px] sm:text-xs text-gray-700 font-medium leading-tight">أكمل الدفع</p>
+                      <p className="text-lg">✅</p>
                     </div>
                   </div>
                 </div>
@@ -660,17 +661,35 @@ export default function ProductDetailPage() {
               <Button
                 onClick={handleAddToCart}
                 disabled={getCurrentStock() === 0}
-                className="flex-1 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold py-4 sm:py-6 text-sm sm:text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+                className="flex-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 hover:from-purple-700 hover:via-pink-600 hover:to-purple-700 text-white font-bold py-4 sm:py-6 text-sm sm:text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
               >
                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-2" />
                 إضافة للسلة
               </Button>
+              <Button
+                onClick={() => {
+                  handleAddToCart()
+                  setTimeout(() => router.push('/cart'), 100)
+                }}
+                disabled={getCurrentStock() === 0}
+                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-4 sm:py-6 text-sm sm:text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                </svg>
+                اشتري الآن
+              </Button>
+            </div>
+            
+            {/* Wishlist & Share */}
+            <div className="flex gap-2 sm:gap-3">
               <Button 
                 variant="outline" 
-                className={`border-purple-300 hover:bg-purple-100 p-3 sm:p-4 md:p-6 transition-all ${isInWishlist(product.id) ? 'bg-red-100 border-red-300' : ''}`}
+                className={`flex-1 border-purple-300 hover:bg-purple-100 p-3 sm:p-4 transition-all ${isInWishlist(product.id) ? 'bg-red-100 border-red-300' : ''}`}
                 onClick={handleToggleWishlist}
               >
-                <Heart className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-all ${isInWishlist(product.id) ? 'text-red-500 fill-red-500' : 'text-purple-600'}`} />
+                <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ml-2 transition-all ${isInWishlist(product.id) ? 'text-red-500 fill-red-500' : 'text-purple-600'}`} />
+                {isInWishlist(product.id) ? 'في المفضلة' : 'أضف للمفضلة'}
               </Button>
               <div className="relative">
                 <Button 

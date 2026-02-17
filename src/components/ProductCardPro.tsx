@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ShoppingCart, Heart, Star, Zap, TrendingUp, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,7 @@ function generateSoldCount(productId: string): number {
 export function ProductCardPro({ product, index = 0, isCompact = false }: ProductCardProps) {
   const { addItem } = useCartStore();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const router = useRouter();
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -139,7 +141,53 @@ export function ProductCardPro({ product, index = 0, isCompact = false }: Produc
       originalPrice: product.originalPrice || undefined,
       image: firstImage,
     });
-    toast.success("تمت الإضافة إلى السلة 🛒");
+    
+    toast.success(
+      <div className="flex flex-col gap-2">
+        <p className="font-bold">تمت الإضافة إلى السلة 🛒</p>
+        <div className="flex gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push('/cart');
+            }}
+            className="flex-1 px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
+          >
+            عرض السلة
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push('/cart');
+            }}
+            className="flex-1 px-3 py-1.5 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700"
+          >
+            إكمال الشراء
+          </button>
+        </div>
+      </div>,
+      { duration: 5000 }
+    );
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (product.stock === 0) {
+      toast.error("المنتج غير متوفر حالياً");
+      return;
+    }
+
+    addItem({
+      id: product.id,
+      name: product.nameAr,
+      price: product.price,
+      originalPrice: product.originalPrice || undefined,
+      image: firstImage,
+    });
+    
+    router.push('/cart');
   };
 
   const handleToggleWishlist = async (e: React.MouseEvent) => {
@@ -331,14 +379,26 @@ export function ProductCardPro({ product, index = 0, isCompact = false }: Produc
           </div>
 
           {/* Add to Cart Button */}
-          <Button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="w-full bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold text-[10px] sm:text-xs py-1.5 sm:py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl rounded-xl group/btn"
-          >
-            <ShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5 group-hover/btn:scale-110 transition-transform" />
-            أضف للسلة
-          </Button>
+          <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
+            <Button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-bold text-[9px] sm:text-xs py-1.5 sm:py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl rounded-xl group/btn"
+            >
+              <ShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 group-hover/btn:scale-110 transition-transform" />
+              للسلة
+            </Button>
+            <Button
+              onClick={handleBuyNow}
+              disabled={product.stock === 0}
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-[9px] sm:text-xs py-1.5 sm:py-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl rounded-xl group/btn"
+            >
+              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 group-hover/btn:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+              </svg>
+              اشتري
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </Link>
