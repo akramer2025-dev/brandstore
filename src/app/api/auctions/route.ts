@@ -80,12 +80,12 @@ export async function GET(request: Request) {
   }
 }
 
-// POST - إنشاء مزاد جديد (Admin أو Vendor)
+// POST - إنشاء مزاد جديد (Admin أو Vendor أو Partner)
 export async function POST(request: Request) {
   try {
     const session = await auth();
 
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'VENDOR')) {
+    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'VENDOR' && session.user.role !== 'PARTNER')) {
       return NextResponse.json(
         { error: 'غير مصرح لك بهذا الإجراء' },
         { status: 403 }
