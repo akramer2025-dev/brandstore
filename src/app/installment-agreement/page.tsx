@@ -589,41 +589,100 @@ function InstallmentAgreementContent() {
         // لا بأس - سنستخدم base64 فقط
       }
       
-      // حفظ الاتفاقية في قاعدة البيانات (فقط إذا لم يكن عنده ملف سابق)
+      // حفظ بيانات المستخدم للاستخدام المستقبلي (فقط إذا كان مستخدم جديد)
       if (!hasExistingProfile) {
         try {
-          toast.loading('جاري حفظ البيانات...', { id: 'upload' });
-          
-          const saveResponse = await fetch('/api/installment/user-profile', {
+          await fetch('/api/installment/user-profile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(documentsData)
           });
-          
-          if (saveResponse.ok) {
-            const saveData = await saveResponse.json();
-            console.log('✅ تم حفظ بيانات التقسيط في قاعدة البيانات:', saveData.agreementNumber);
-          } else {
-            console.warn('⚠️ فشل حفظ البيانات في قاعدة البيانات');
-          }
+          console.log('✅ تم حفظ بيانات المستخدم للاستخدام المستقبلي');
         } catch (dbError: any) {
-          console.error('⚠️ خطأ في حفظ البيانات:', dbError.message);
-          // لا بأس - سنحفظ في sessionStorage على الأقل
+          console.error('⚠️ خطأ في حفظ بيانات المستخدم:', dbError.message);
         }
       }
       
-      // Save to sessionStorage for checkout (دائماً نفعلها)
-      sessionStorage.setItem('installmentDocuments', JSON.stringify(documentsData));
+      // جلب بيانات السلة والتوصيل من sessionStorage
+      const checkoutDataStr = sessionStorage.getItem('checkoutData');
+      if (!checkoutDataStr) {
+        toast.error('بيانات الطلب غير موجودة. يرجى البدء من صفحة الدفع');
+        router.push('/checkout');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const checkoutData = JSON.parse(checkoutDataStr);
       
-      toast.success(
-        '✅ تم استلام طلبك بنجاح!\n📋 سيتم مراجعته من قبل الإدارة قريباً',
-        { id: 'upload', duration: 5000 }
-      );
-      
-      // Redirect back to checkout
-      setTimeout(() => {
-        router.push('/checkout?installmentAgreementCompleted=true');
-      }, 1000);
+      // إنشاء اتفاقية التقسيط + الطلب مباشرة
+      try {
+        toast.loading('جاري إنشاء طلبك...', { id: 'upload' });
+        
+        const agreementData = {
+          nationalIdImage: documentsData.nationalIdImage,
+          signature: documentsData.signature,
+          selfieImage: documentsData.selfieImage,
+          fullName: formData.fullName,
+          nationalId: formData.nationalId,
+          totalAmount,
+          downPayment,
+          numberOfInstallments: installments,
+          monthlyInstallment: monthlyAmount,
+          // بيانات السلة والتوصيل
+          cartItems: checkoutData.items.map((item: any) => ({
+            productId: item.id,
+            quantity: item.quantity,
+            price: item.price,
+            vendorId: item.vendorId
+          })),
+          deliveryAddress: checkoutData.formData.street + ', ' + 
+                          checkoutData.formData.district + ', ' + 
+                          checkoutData.formData.city + ', ' + 
+                          checkoutData.formData.governorate,
+          deliveryPhone: checkoutData.formData.phone,
+          deliveryMethod: checkoutData.deliveryMethod,
+          deliveryFee: checkoutData.deliveryFee || 0,
+          governorate: checkoutData.formData.governorate,
+          customerNotes: checkoutData.formData.notes || ''
+        };
+
+        const createResponse = await fetch('/api/installment/agreement', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(agreementData)
+        });
+
+        if (!createResponse.ok) {
+          const error = await createResponse.json();
+          throw new Error(error.error || 'فشل إنشاء الطلب');
+        }
+
+        const result = await createResponse.json();
+        
+        toast.success(
+          `✅ تم إنشاء طلبك بنجاح!\n📦 رقم الطلب: ${result.order.orderNumber}\n📋 سيتم مراجعته من قبل الإدارة`,
+          { id: 'upload', duration: 5000 }
+        );
+
+        // تنظيف البيانات المحفوظة
+        sessionStorage.removeItem('installmentDocuments');
+        sessionStorage.removeItem('checkoutData');
+        
+        // مسح السلة من localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cart-storage');
+        }
+
+        // التوجيه لصفحة الطلب
+        setTimeout(() => {
+          router.push(`/orders/${result.order.id}`);
+        }, 1500);
+
+      } catch (createError: any) {
+        console.error('❌ خطأ في إنشاء الطلب:', createError);
+        toast.error(createError.message || 'فشل إنشاء الطلب. حاول مرة أخرى');
+        setIsSubmitting(false);
+      }
       
     } catch (error: any) {
       console.error('Error submitting agreement:', error);
