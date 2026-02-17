@@ -25,6 +25,7 @@ interface Agreement {
   nationalIdImage: string | null;
   nationalIdBack: string | null;
   signature: string | null;
+  paymentReceiptImage: string | null;
   user: {
     name: string | null;
     email: string | null;
@@ -266,6 +267,11 @@ ${publicUrl}
               />
             </div>
             <h1 className="text-4xl font-bold mb-4">📄 اتفاقية تقسيط</h1>
+            {agreement.fullName && (
+              <p className="text-2xl font-semibold mb-4 text-purple-100">
+                👤 باسم: {agreement.fullName}
+              </p>
+            )}
             <div className="bg-white text-purple-600 px-8 py-3 rounded-full inline-block font-bold text-lg shadow-lg">
               🔖 رقم الاتفاقية: {agreement.agreementNumber}
             </div>
@@ -482,7 +488,7 @@ ${publicUrl}
         </Card>
 
         {/* Documents and Images */}
-        {(agreement.selfieImage || agreement.nationalIdImage || agreement.nationalIdBack || agreement.signature) && (
+        {(agreement.selfieImage || agreement.nationalIdImage || agreement.nationalIdBack || agreement.signature || agreement.paymentReceiptImage) && (
           <Card className="mb-6">
             <CardHeader className="bg-gradient-to-r from-pink-50 to-purple-50">
               <CardTitle className="text-pink-700 flex items-center gap-2">
@@ -500,6 +506,7 @@ ${publicUrl}
                       width={400}
                       height={400}
                       className="rounded-lg border-2 border-purple-200 w-full"
+                      unoptimized
                     />
                   </div>
                 )}
@@ -513,6 +520,7 @@ ${publicUrl}
                       width={400}
                       height={400}
                       className="rounded-lg border-2 border-purple-200 w-full"
+                      unoptimized
                     />
                   </div>
                 )}
@@ -526,6 +534,21 @@ ${publicUrl}
                       width={400}
                       height={400}
                       className="rounded-lg border-2 border-purple-200 w-full"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                
+                {agreement.paymentReceiptImage && (
+                  <div className="text-center bg-white p-4 rounded-lg shadow">
+                    <p className="font-bold text-purple-700 mb-3">💳 إيصال الدفعة المقدمة</p>
+                    <Image
+                      src={agreement.paymentReceiptImage}
+                      alt="إيصال الدفع"
+                      width={400}
+                      height={400}
+                      className="rounded-lg border-2 border-purple-200 w-full"
+                      unoptimized
                     />
                   </div>
                 )}
@@ -539,6 +562,7 @@ ${publicUrl}
                       width={400}
                       height={200}
                       className="rounded-lg border-2 border-purple-200 w-full"
+                      unoptimized
                     />
                   </div>
                 )}

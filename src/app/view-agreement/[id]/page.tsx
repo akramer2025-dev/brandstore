@@ -25,6 +25,7 @@ interface Agreement {
   nationalIdImage: string | null;
   nationalIdBack: string | null;
   signature: string | null;
+  paymentReceiptImage: string | null;
   user: {
     name: string | null;
     email: string | null;
@@ -266,6 +267,11 @@ ${window.location.href}
                 />
               </div>
               <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4">📄 اتفاقية تقسيط</h1>
+              {agreement.fullName && (
+                <p className="text-xl sm:text-2xl font-semibold mb-3 text-purple-100">
+                  👤 باسم: {agreement.fullName}
+                </p>
+              )}
               <div className="bg-white text-purple-600 px-4 sm:px-8 py-2 sm:py-3 rounded-full inline-block font-bold text-base sm:text-lg shadow-lg">
                 🔖 رقم الاتفاقية: {agreement.agreementNumber}
               </div>
@@ -480,6 +486,90 @@ ${window.location.href}
               </div>
             </CardContent>
           </Card>
+
+          {/* Documents and Images */}
+          {(agreement.selfieImage || agreement.nationalIdImage || agreement.nationalIdBack || agreement.signature || agreement.paymentReceiptImage) && (
+            <Card className="mb-4 sm:mb-6">
+              <CardHeader className="bg-gradient-to-r from-pink-50 to-purple-50">
+                <CardTitle className="text-pink-700 flex items-center gap-2 text-lg sm:text-xl">
+                  📸 المستندات والصور المرفقة
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  {agreement.selfieImage && (
+                    <div className="text-center bg-white p-3 sm:p-4 rounded-lg shadow-md">
+                      <p className="font-bold text-purple-700 mb-2 sm:mb-3 text-sm sm:text-base">🤳 صورة شخصية (سيلفي)</p>
+                      <Image
+                        src={agreement.selfieImage}
+                        alt="صورة شخصية"
+                        width={400}
+                        height={400}
+                        className="rounded-lg border-2 border-purple-200 w-full h-auto"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                  
+                  {agreement.nationalIdImage && (
+                    <div className="text-center bg-white p-3 sm:p-4 rounded-lg shadow-md">
+                      <p className="font-bold text-purple-700 mb-2 sm:mb-3 text-sm sm:text-base">🪪 البطاقة الشخصية (الأمامية)</p>
+                      <Image
+                        src={agreement.nationalIdImage}
+                        alt="البطاقة الأمامية"
+                        width={400}
+                        height={400}
+                        className="rounded-lg border-2 border-purple-200 w-full h-auto"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                  
+                  {agreement.nationalIdBack && (
+                    <div className="text-center bg-white p-3 sm:p-4 rounded-lg shadow-md">
+                      <p className="font-bold text-purple-700 mb-2 sm:mb-3 text-sm sm:text-base">🪪 البطاقة الشخصية (الخلفية)</p>
+                      <Image
+                        src={agreement.nationalIdBack}
+                        alt="البطاقة الخلفية"
+                        width={400}
+                        height={400}
+                        className="rounded-lg border-2 border-purple-200 w-full h-auto"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                  
+                  {agreement.paymentReceiptImage && (
+                    <div className="text-center bg-white p-3 sm:p-4 rounded-lg shadow-md">
+                      <p className="font-bold text-purple-700 mb-2 sm:mb-3 text-sm sm:text-base">💳 إيصال الدفعة المقدمة</p>
+                      <Image
+                        src={agreement.paymentReceiptImage}
+                        alt="إيصال الدفع"
+                        width={400}
+                        height={400}
+                        className="rounded-lg border-2 border-purple-200 w-full h-auto"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                  
+                  {agreement.signature && (
+                    <div className="text-center bg-white p-3 sm:p-4 rounded-lg shadow-md">
+                      <p className="font-bold text-purple-700 mb-2 sm:mb-3 text-sm sm:text-base">✍️ التوقيع الإلكتروني</p>
+                      <Image
+                        src={agreement.signature}
+                        alt="التوقيع"
+                        width={400}
+                        height={200}
+                        className="rounded-lg border-2 border-purple-200 w-full h-auto"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Footer */}
           <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300">
