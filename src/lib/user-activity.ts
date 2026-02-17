@@ -31,6 +31,23 @@ export async function logUserActivity(data: ActivityLogData) {
       };
     }
 
+    // 🌍 الحصول على الموقع الجغرافي من IP
+    let location: string | null = null;
+    if (ip && ip !== '::1' && ip !== '127.0.0.1' && !ip.startsWith('192.168.') && !ip.startsWith('10.')) {
+      try {
+        const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+          next: { revalidate: 3600 } // كاش لمدة ساعة
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          location = `${data.city || 'Unknown'}, ${data.country_name || 'Unknown'}`;
+        }
+      } catch (error) {
+        console.log('⚠️ Could not fetch location for IP:', ip);
+      }
+    }
+
     // حفظ السجل
     const log = await prisma.userActivityLog.create({
       data: {
@@ -42,6 +59,7 @@ export async function logUserActivity(data: ActivityLogData) {
         os: deviceInfo.os,
         deviceType: deviceInfo.deviceType?.toUpperCase(),
         deviceModel: deviceInfo.deviceModel,
+        location,
         metadata: metadata || {},
       },
     });
@@ -141,4 +159,109 @@ export async function cleanOldActivityLogs(daysToKeep: number = 90) {
   });
 
   return deleted.count;
+}
+
+/**
+ * 🕵️ إحصائيات متقدمة لنشاط الشركاء (للأدمن فقط)
+ */
+export async function getAllPartnersActivityStats() {
+  const vendors = await prisma.vendor.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          lastLoginAt: true,
+          lastLoginDevice: true,
+        },
+      },
+    },
+  });
+  
+  const stats = await Promise.all(
+    vendors.map(async (vendor) => {
+      if (!vendor.user) return null;
+      
+      const logs = await prisma.userActivityLog.findMany({
+        where: { userId: vendor.user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      });
+      
+      if (logs.length === 0) {
+        return {
+          vendorId: vendor.id,
+          vendorName: vendor.storeName || vendor.user.name || 'غير محدد',
+          userId: vendor.user.id,
+          email: vendor.user.email,
+          totalLogins: 0,
+          lastLogin: null,
+          devices: [],
+          browsers: [],
+          locations: [],
+          activityLevel: 'خامل',
+          recentActivities: [],
+        };
+      }
+      
+      const loginLogs = logs.filter(log => log.action === 'LOGIN');
+      
+      // حساب الأجهزة
+      const devicesMap = new Map<string, number>();
+      logs.forEach(log => {
+        if (log.deviceType) {
+          devicesMap.set(log.deviceType, (devicesMap.get(log.deviceType) || 0) + 1);
+        }
+      });
+      
+      // حساب المتصفحات
+      const browsersMap = new Map<string, number>();
+      logs.forEach(log => {
+        if (log.browser) {
+          browsersMap.set(log.browser, (browsersMap.get(log.browser) || 0) + 1);
+        }
+      });
+      
+      // حساب المواقع
+      const locationsMap = new Map<string, number>();
+      logs.forEach(log => {
+        if (log.location) {
+          locationsMap.set(log.location, (locationsMap.get(log.location) || 0) + 1);
+        }
+      });
+      
+      // تحديد مستوى النشاط
+      const last7Days = new Date();
+      last7Days.setDate(last7Days.getDate() - 7);
+      const recentLogins = loginLogs.filter(log => new Date(log.createdAt) > last7Days);
+      
+      let activityLevel = 'خامل';
+      if (recentLogins.length >= 10) activityLevel = 'نشط جداً';
+      else if (recentLogins.length >= 5) activityLevel = 'نشط';
+      else if (recentLogins.length >= 2) activityLevel = 'متوسط';
+      
+      return {
+        vendorId: vendor.id,
+        vendorName: vendor.storeName || vendor.user.name || 'غير محدد',
+        userId: vendor.user.id,
+        email: vendor.user.email,
+        totalLogins: loginLogs.length,
+        lastLogin: loginLogs[0]?.createdAt || null,
+        devices: Array.from(devicesMap.entries()).map(([name, count]) => ({ name, count })),
+        browsers: Array.from(browsersMap.entries()).map(([name, count]) => ({ name, count })),
+        locations: Array.from(locationsMap.entries()).map(([name, count]) => ({ name, count })),
+        activityLevel,
+        recentActivities: logs.slice(0, 20).map(log => ({
+          action: log.action,
+          device: log.deviceType,
+          browser: log.browser,
+          location: log.location,
+          createdAt: log.createdAt,
+        })),
+      };
+    })
+  );
+  
+  return stats.filter(Boolean);
 }

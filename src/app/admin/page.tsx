@@ -381,6 +381,13 @@ export default async function AdminDashboard() {
             color="text-emerald-600"
           />
           <ActionCard
+            title="📊 نشاط الشركاء"
+            description="مراقبة نشاط الشركاء - تسجيل الدخول، الأجهزة، المواقع"
+            href="/admin/partners/activity"
+            icon={<Eye className="w-12 h-12" />}
+            color="text-teal-600"
+          />
+          <ActionCard
             title="⚙️ إعدادات الموقع"
             description="إعدادات الموقع والسلايدر وSEO"
             href="/admin/settings"
