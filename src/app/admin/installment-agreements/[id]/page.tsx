@@ -83,6 +83,9 @@ export default function InstallmentAgreementViewPage() {
   };
 
   const handleShareWhatsApp = () => {
+    // استخدام رابط عام للعملاء بدلاً من رابط الـ Admin
+    const publicUrl = `${window.location.origin}/view-agreement/${agreement?.id}`;
+    
     const message = `
 🏦 *اتفاقية تقسيط - Rimo Store*
 
@@ -92,7 +95,7 @@ export default function InstallmentAgreementViewPage() {
 📅 تاريخ الإصدار: ${new Date(agreement?.createdAt || "").toLocaleDateString("ar-EG")}
 
 🔗 لعرض الاتفاقية كاملة:
-${window.location.href}
+${publicUrl}
     `.trim();
     
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
