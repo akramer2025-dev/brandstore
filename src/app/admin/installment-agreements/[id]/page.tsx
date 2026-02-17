@@ -71,106 +71,17 @@ export default function InstallmentAgreementViewPage() {
   };
 
   const handlePrint = () => {
-    // Add comprehensive print styles
-    const style = document.createElement('style');
-    style.id = 'print-styles';
-    style.textContent = `
-      @media print {
-        body * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          color-adjust: exact !important;
-        }
-        .no-print {
-          display: none !important;
-        }
-        @page {
-          margin: 1.5cm;
-          size: A4;
-        }
-        body {
-          margin: 0;
-          padding: 20px;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .print-content {
-          display: block !important;
-        }
-        /* Ensure colors print */
-        * {
-          -webkit-print-color-adjust: exact !important;
-          color-adjust: exact !important;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Small delay to ensure styles are applied
-    setTimeout(() => {
-      window.print();
-      
-      // Remove style after print
-      setTimeout(() => {
-        const styleEl = document.getElementById('print-styles');
-        if (styleEl) {
-          document.head.removeChild(styleEl);
-        }
-      }, 1000);
-    }, 100);
-    
+    window.print();
     toast.success("تم فتح نافذة الطباعة");
   };
 
-  const handleDownloadPDF = async () => {
-    try {
-      toast.info("📄 جاري تحضير ملف PDF...");
-      toast.info("💡 اختر 'حفظ بصيغة PDF' من نافذة الطباعة");
-      
-      // Add print styles
-      const style = document.createElement('style');
-      style.id = 'pdf-print-styles';
-      style.textContent = `
-        @media print {
-          body * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-          @page {
-            margin: 1cm;
-            size: A4;
-          }
-          body {
-            margin: 0;
-            padding: 15px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-      
-      // Trigger print dialog
-      setTimeout(() => {
-        window.print();
-        
-        // Remove style after print
-        setTimeout(() => {
-          const styleEl = document.getElementById('pdf-print-styles');
-          if (styleEl) {
-            document.head.removeChild(styleEl);
-          }
-        }, 1000);
-      }, 300);
-      
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("❌ حدث خطأ أثناء إنشاء ملف PDF");
-    }
+  const handleDownloadPDF = () => {
+    toast.info("📌 استخدم زر 'الطباعة' ثم اختر 'حفظ بصيغة PDF'");
+    setTimeout(() => {
+      window.print();
+    }, 500);
   };
-  
+
   const handleShareWhatsApp = () => {
     const message = `
 🏦 *اتفاقية تقسيط - Rimo Store*
@@ -190,6 +101,7 @@ ${window.location.href}
   };
 
   if (loading) {
+
     return (
       <div className="flex items-center justify-center min-h-[500px]">
         <div className="text-center">
