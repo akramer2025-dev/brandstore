@@ -90,15 +90,15 @@ export default function EditPartnerPage() {
       
       if (response.ok) {
         console.log('✅ تم جلب بيانات الشريك:', data)
-        setPartner(data.partner)
+        setPartner(data)
         
         setFormData({
-          partnerName: data.partner.partnerName,
-          capitalAmount: data.partner.capitalAmount.toString(),
-          capitalPercent: data.partner.capitalPercent.toString(),
-          partnerType: data.partner.partnerType,
-          notes: data.partner.notes || '',
-          isActive: data.partner.isActive,
+          partnerName: data.partnerName,
+          capitalAmount: data.capitalAmount.toString(),
+          capitalPercent: data.capitalPercent.toString(),
+          partnerType: data.partnerType,
+          notes: data.notes || '',
+          isActive: data.isActive,
           changePassword: false,
           newPassword: '',
           email: data.email || '',
