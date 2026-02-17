@@ -15,11 +15,24 @@ interface Star {
 
 export default function RamadanBanner() {
   const [isVisible, setIsVisible] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(true);
   const [stars, setStars] = useState<Star[]>([]);
+
+  const dismiss = () => {
+    setIsAnimating(false);
+    // انتظر انتهاء الـ animation ثم احذف من DOM
+    setTimeout(() => {
+      setIsVisible(false);
+      sessionStorage.setItem('ramadanBannerDismissed', 'true');
+    }, 500);
+  };
 
   useEffect(() => {
     const dismissed = sessionStorage.getItem('ramadanBannerDismissed');
-    if (dismissed) setIsVisible(false);
+    if (dismissed) {
+      setIsVisible(false);
+      return;
+    }
     
     // إنشاء النجوم على جانب العميل فقط
     setStars(
@@ -33,17 +46,23 @@ export default function RamadanBanner() {
         delay: Math.random() * 2,
       }))
     );
-  }, []);
 
-  const dismiss = () => {
-    setIsVisible(false);
-    sessionStorage.setItem('ramadanBannerDismissed', 'true');
-  };
+    // إخفاء البانر بعد 5 ثواني
+    const timer = setTimeout(() => {
+      dismiss();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!isVisible) return null;
 
   return (
-    <div className="relative bg-gradient-to-r from-[#1a0a2e] via-[#16213e] to-[#1a0a2e] overflow-hidden">
+    <div 
+      className={`relative bg-gradient-to-r from-[#1a0a2e] via-[#16213e] to-[#1a0a2e] overflow-hidden transition-all duration-500 ${
+        isAnimating ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+      }`}
+    >
       {/* نجوم خلفية */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         {stars.map((star, i) => (
