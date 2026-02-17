@@ -901,6 +901,20 @@ export default function VendorDashboard() {
               </CardContent>
             </Card>
           </Link>
+          <Link href="/admin/auctions/new">
+            <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-purple-500/60 group">
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-purple-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <svg className="w-6 h-6 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z"/>
+                    <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z"/>
+                    <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z"/>
+                  </svg>
+                </div>
+                <p className="text-white font-black group-hover:text-purple-300 transition-all text-sm md:text-base">🔨 مزاد جديد</p>
+              </CardContent>
+            </Card>
+          </Link>
           <Link href="/vendor/suppliers">
             <Card className="backdrop-blur-sm bg-slate-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-slate-900/95 hover:border-orange-500/60 group">
               <CardContent className="p-3 md:p-4 text-center">

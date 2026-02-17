@@ -117,7 +117,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         },
       ],
     });
-  } else if (session?.user?.role === "VENDOR") {
+  } else if (session?.user?.role === "VENDOR" || session?.user?.role === "PARTNER") {
     menuSections.push({
       title: "⭐ لوحة الشريك",
       items: [
@@ -126,6 +126,13 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           label: "🎯 لوحة التحكم",
           href: "/vendor/dashboard",
           color: "text-violet-600",
+          isSpecial: true,
+        },
+        {
+          icon: Package,
+          label: "🔨 إنشاء مزاد",
+          href: "/admin/auctions/new",
+          color: "text-purple-600",
           isSpecial: true,
         },
         {
