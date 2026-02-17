@@ -84,6 +84,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log('📦 البيانات المستلمة:', JSON.stringify(body, null, 2));
+    
     const {
       partnerName,
       email,
@@ -99,13 +101,43 @@ export async function POST(request: NextRequest) {
       canAddOfflineProducts = false,
     } = body;
 
-    console.log('📝 محاولة إضافة شريك جديد:', { partnerName, email, createUserAccount });
+    console.log('📝 محاولة إضافة شريك جديد:', { 
+      partnerName, 
+      email, 
+      capitalAmount, 
+      capitalPercent,
+      createUserAccount 
+    });
 
     // التحقق من البيانات المطلوبة (البريد إجباري دائماً)
-    if (!partnerName || !email || !capitalAmount || !capitalPercent) {
-      console.log('❌ بيانات ناقصة');
+    if (!partnerName || typeof partnerName !== 'string' || !partnerName.trim()) {
+      console.log('❌ اسم الشريك مفقود أو غير صحيح');
       return NextResponse.json(
-        { error: 'الاسم، البريد الإلكتروني، المبلغ والنسبة مطلوبة' },
+        { error: 'اسم الشريك مطلوب' },
+        { status: 400 }
+      );
+    }
+
+    if (!email || typeof email !== 'string' || !email.trim()) {
+      console.log('❌ البريد الإلكتروني مفقود أو غير صحيح');
+      return NextResponse.json(
+        { error: 'البريد الإلكتروني مطلوب' },
+        { status: 400 }
+      );
+    }
+
+    if (capitalAmount === undefined || capitalAmount === null) {
+      console.log('❌ المبلغ مفقود');
+      return NextResponse.json(
+        { error: 'مبلغ رأس المال مطلوب' },
+        { status: 400 }
+      );
+    }
+
+    if (capitalPercent === undefined || capitalPercent === null) {
+      console.log('❌ النسبة مفقودة');
+      return NextResponse.json(
+        { error: 'نسبة المساهمة مطلوبة' },
         { status: 400 }
       );
     }

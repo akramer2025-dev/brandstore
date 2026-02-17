@@ -60,13 +60,43 @@ export default function NewPartnerPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.partnerName || !formData.email || !formData.capitalAmount || !formData.capitalPercent) {
-      toast.error('من فضلك املأ جميع الحقول المطلوبة')
+    // التحقق من الحقول المطلوبة
+    if (!formData.partnerName || !formData.partnerName.trim()) {
+      toast.error('⚠️ اسم الشريك مطلوب')
+      return
+    }
+
+    if (!formData.email || !formData.email.trim()) {
+      toast.error('⚠️ البريد الإلكتروني مطلوب')
+      return
+    }
+
+    if (!formData.capitalAmount || formData.capitalAmount.trim() === '') {
+      toast.error('⚠️ مبلغ رأس المال مطلوب')
+      return
+    }
+
+    if (!formData.capitalPercent || formData.capitalPercent.trim() === '') {
+      toast.error('⚠️ نسبة المساهمة مطلوبة')
+      return
+    }
+
+    // التحقق من صحة الأرقام
+    const capitalAmount = parseFloat(formData.capitalAmount)
+    const capitalPercent = parseFloat(formData.capitalPercent)
+
+    if (isNaN(capitalAmount) || capitalAmount < 0) {
+      toast.error('⚠️ المبلغ يجب أن يكون رقم صحيح')
+      return
+    }
+
+    if (isNaN(capitalPercent) || capitalPercent < 0 || capitalPercent > 100) {
+      toast.error('⚠️ النسبة يجب أن تكون بين 0 و 100')
       return
     }
 
     if (formData.createUserAccount && (!formData.password || formData.password.length < 6)) {
-      toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل')
+      toast.error('⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل')
       return
     }
 
@@ -77,14 +107,14 @@ export default function NewPartnerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          partnerName: formData.partnerName,
-          email: formData.email,
-          phone: formData.phone,
+          partnerName: formData.partnerName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
           password: formData.password,
-          capitalAmount: parseFloat(formData.capitalAmount),
-          capitalPercent: parseFloat(formData.capitalPercent),
+          capitalAmount: capitalAmount,
+          capitalPercent: capitalPercent,
           partnerType: formData.partnerType,
-          notes: formData.notes,
+          notes: formData.notes.trim(),
           createUserAccount: formData.createUserAccount,
           canDeleteOrders: formData.canDeleteOrders,
           canUploadShein: formData.canUploadShein,
