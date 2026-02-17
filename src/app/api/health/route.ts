@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSecurityStats, getAllSecurityEvents } from '@/lib/security';
 
 const requiredEnvVars = {
-  critical: ['DATABASE_URL', 'NEXTAUTH_SECRET', 'NEXTAUTH_URL'],
+  critical: ['DATABASE_URL', 'NEXTAUTH_SECRET', 'NEXTAUTH_URL', 'CSRF_SECRET'],
   important: [
     'GOOGLE_CLIENT_ID',
     'GOOGLE_CLIENT_SECRET',
@@ -38,12 +39,32 @@ export async function GET() {
     errors.push(`Database error: ${error instanceof Error ? error.message : 'Unknown'}`);
   }
 
+  // Security system status
+  const securityStats = getSecurityStats(24); // Last 24 hours
+  const recentSecurityEvents = getAllSecurityEvents(10); // Last 10 events
+  
+  const securityStatus = {
+    enabled: true,
+    csrfProtection: process.env.CSRF_SECRET ? 'active' : 'missing',
+    rateLimiting: 'active',
+    monitoring: 'active',
+    eventsLast24h: securityStats.total,
+    criticalEventsLast24h: securityStats.bySeverity.critical || 0,
+    recentEvents: recentSecurityEvents.slice(0, 5).map(e => ({
+      type: e.type,
+      severity: e.severity,
+      timestamp: e.timestamp,
+      endpoint: e.endpoint,
+    })),
+  };
+
   const hasErrors = errors.length > 0;
   
   return NextResponse.json(
     { 
       status: hasErrors ? 'error' : 'ok',
       database: databaseStatus,
+      security: securityStatus,
       errors: errors.length > 0 ? errors : undefined,
       warnings: warnings.length > 0 ? warnings : undefined,
       environment: process.env.NODE_ENV,

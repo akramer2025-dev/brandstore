@@ -59,5 +59,22 @@ export {
   secureResponse,
 } from './api-protection';
 
+// Security Monitoring
+export {
+  logSecurityEvent,
+  getSecurityStats,
+  checkSuspiciousActivity,
+  extractRequestInfo,
+  logRateLimitExceeded,
+  logCSRFTokenInvalid,
+  logUnauthorizedAccess,
+  logInvalidInput,
+  logXSSAttempt,
+  logSQLInjectionAttempt,
+  getAllSecurityEvents,
+  clearSecurityEvents,
+} from './monitoring';
+
 // Types
 export type { RateLimitOptions } from './rate-limit';
+export type { SecurityEvent, SecurityEventType } from './monitoring';
