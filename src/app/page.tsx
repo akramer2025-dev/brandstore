@@ -6,7 +6,7 @@ import { AnimatedSection } from '@/components/AnimatedSection';
 import { CategoryProductsCarousel } from '@/components/CategoryProductsCarousel';
 import Link from 'next/link';
 import Image from 'next/image';
-import { TrendingUp, ShoppingBag, Sparkles, Shield, CheckCircle } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Sparkles, Shield, CheckCircle, Phone, Mail, MapPin, Facebook, Instagram, CreditCard } from 'lucide-react';
 import { Metadata } from 'next';
 import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
 import BrandBackgroundPattern from '@/components/BrandBackgroundPattern';
@@ -734,17 +734,127 @@ export default async function HomePage() {
             {/* Contact Info */}
             <div>
               <h4 className="font-semibold mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">تواصل معنا</h4>
-              <div className="flex flex-col gap-2 text-sm text-gray-400">
-                <a href="tel:01555512778" className="flex items-center gap-2 hover:text-white transition-colors">
-                  📱 01555512778
+              <div className="flex flex-col gap-3 text-sm">
+                <a 
+                  href="tel:01555512778" 
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  <Phone className="w-4 h-4 text-blue-400" />
+                  <span>01555512778</span>
                 </a>
-                <a href="https://wa.me/201555512778" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors">
-                  💬 WhatsApp
+                <a 
+                  href="https://wa.me/201555512778" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-2 text-gray-400 hover:text-green-400 transition-colors group"
+                >
+                  <svg className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg>
+                  <span>واتساب: 01555512778</span>
                 </a>
-                <a href="mailto:remostore.egy@gmail.com" className="flex items-center gap-2 hover:text-white transition-colors">
-                  📧 remostore.egy@gmail.com
+                <a 
+                  href="mailto:remostore.egy@gmail.com" 
+                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  <Mail className="w-4 h-4 text-red-400" />
+                  <span>remostore.egy@gmail.com</span>
                 </a>
-                <p className="flex items-center gap-2">📍 مصر - القاهرة</p>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <MapPin className="w-4 h-4 text-orange-400" />
+                  <span>مصر - القاهرة</span>
+                </div>
+              </div>
+
+              {/* Social Media Links */}
+              <div className="mt-4 pt-4 border-t border-gray-800">
+                <h5 className="text-xs font-semibold text-gray-400 mb-3">تابعنا على</h5>
+                <div className="flex items-center gap-3">
+                  <a 
+                    href="https://facebook.com/remostore" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                    aria-label="Facebook"
+                  >
+                    <Facebook className="w-5 h-5 text-white" />
+                  </a>
+                  <a 
+                    href="https://instagram.com/remostore" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="w-5 h-5 text-white" />
+                  </a>
+                  <a 
+                    href="https://tiktok.com/@remostore" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 bg-black hover:bg-gray-900 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                    aria-label="TikTok"
+                  >
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Methods Section */}
+          <div className="mb-8 pb-8 border-t border-b border-gray-800 pt-8">
+            <h4 className="text-center font-semibold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">طرق الدفع المتاحة</h4>
+            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+              {/* Cash on Delivery */}
+              <div className="bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50 hover:border-green-500/50 transition-all">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-green-400" />
+                  <span className="text-sm text-gray-300 font-semibold">الدفع عند الاستلام</span>
+                </div>
+              </div>
+
+              {/* Paymob */}
+              <div className="bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50 hover:border-blue-500/50 transition-all">
+                <div className="flex items-center gap-2">
+                  <div className="bg-white rounded px-2 py-1">
+                    <span className="text-xs font-bold text-blue-600">Paymob</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visa */}
+              <div className="bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50 hover:border-blue-500/50 transition-all">
+                <svg className="h-6 w-auto" viewBox="0 0 48 32" fill="none">
+                  <rect width="48" height="32" rx="4" fill="white"/>
+                  <path d="M20.176 23.238h-3.162l1.968-12.143h3.162l-1.968 12.143zm11.126-11.827c-.627-.243-1.605-.507-2.829-.507-3.117 0-5.311 1.623-5.328 3.949-.017 1.719 1.571 2.678 2.77 3.251 1.232.587 1.646 0.964 1.641 1.488-.006 0.803-0.985 1.17-1.895 1.17-1.266 0-1.938-0.181-2.975-0.628l-0.407-0.191-0.444 2.689c0.742 0.336 2.115 0.628 3.539 0.642 3.316 0 5.468-1.605 5.49-4.088 0.012-1.362-0.831-2.398-2.655-3.251-1.105-0.553-1.783-0.921-1.777-1.481 0-0.497 0.573-1.029 1.811-1.029 1.033-0.017 1.783 0.217 2.366 0.459l0.284 0.137 0.431-2.611zm7.477-0.316h-2.441c-0.757 0-1.322 0.214-1.654 0.995l-4.694 10.948h3.312l0.659-1.785h4.049l0.382 1.785h2.921l-2.534-12.143zm-3.911 7.857c0.026-0.068 1.264-3.357 1.264-3.357-0.017 0.029 0.260-0.697 0.420-1.149l0.214 1.032s0.606 2.858 0.733 3.474h-2.631zm-18.253-7.857l-3.091 8.278-0.331-1.643c-0.576-1.918-2.366-3.998-4.369-5.037l2.833 10.539h3.336l4.962-12.137h-3.340z" fill="#1434CB"/>
+                </svg>
+              </div>
+
+              {/* Mastercard */}
+              <div className="bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50 hover:border-red-500/50 transition-all">
+                <svg className="h-6 w-auto" viewBox="0 0 48 32" fill="none">
+                  <rect width="48" height="32" rx="4" fill="white"/>
+                  <circle cx="18" cy="16" r="9" fill="#EB001B"/>
+                  <circle cx="30" cy="16" r="9" fill="#F79E1B"/>
+                  <path d="M24 9.5c-1.657 1.449-2.7 3.576-2.7 5.985s1.043 4.536 2.7 5.985c1.657-1.449 2.7-3.576 2.7-5.985S25.657 10.949 24 9.5z" fill="#FF5F00"/>
+                </svg>
+              </div>
+
+              {/* Fawry */}
+              <div className="bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50 hover:border-orange-500/50 transition-all">
+                <div className="bg-white rounded px-2 py-1">
+                  <span className="text-xs font-bold text-orange-600">Fawry</span>
+                </div>
+              </div>
+
+              {/* Vodafone Cash */}
+              <div className="bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50 hover:border-red-500/50 transition-all">
+                <div className="bg-white rounded px-2 py-1">
+                  <span className="text-xs font-bold text-red-600">Vodafone Cash</span>
+                </div>
               </div>
             </div>
           </div>
