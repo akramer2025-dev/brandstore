@@ -50,6 +50,8 @@ interface Agreement {
   monthlyInstallment: number;
   interestRate: number;
   nationalIdImage: string | null;
+  nationalIdBack: string | null;
+  firstPaymentReceipt: string | null;
   signature: string | null;
   selfieImage: string | null;
   fullName: string | null;
@@ -254,14 +256,14 @@ export default function InstallmentDetailPage() {
               <CardDescription>جميع المستندات المطلوبة للاتفاقية</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* البطاقة الشخصية */}
+              {/* البطاقة الشخصية - وجه */}
               <div>
-                <Label className="text-base font-semibold">1. صورة البطاقة الشخصية</Label>
+                <Label className="text-base font-semibold">1. صورة البطاقة الشخصية (وجه)</Label>
                 {agreement.nationalIdImage ? (
                   <div className="mt-2 relative group">
                     <Image
                       src={agreement.nationalIdImage}
-                      alt="National ID"
+                      alt="National ID Front"
                       width={400}
                       height={250}
                       className="rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-500 transition"
@@ -282,9 +284,65 @@ export default function InstallmentDetailPage() {
 
               <Separator />
 
+              {/* البطاقة الشخصية - ظهر */}
+              <div>
+                <Label className="text-base font-semibold">2. صورة البطاقة الشخصية (ظهر)</Label>
+                {agreement.nationalIdBack ? (
+                  <div className="mt-2 relative group">
+                    <Image
+                      src={agreement.nationalIdBack}
+                      alt="National ID Back"
+                      width={400}
+                      height={250}
+                      className="rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-500 transition"
+                      onClick={() => setImagePreview(agreement.nationalIdBack)}
+                    />
+                    <Button
+                      size="sm"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition"
+                      onClick={() => window.open(agreement.nationalIdBack!, '_blank')}
+                    >
+                      🔍 عرض بالحجم الكامل
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-red-500 text-sm mt-2">❌ لم يتم رفع الصورة</p>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* إيصال الدفع الأول */}
+              <div>
+                <Label className="text-base font-semibold">3. إيصال الدفعة الأولى (المقدم)</Label>
+                {agreement.firstPaymentReceipt ? (
+                  <div className="mt-2 relative group">
+                    <Image
+                      src={agreement.firstPaymentReceipt}
+                      alt="First Payment Receipt"
+                      width={400}
+                      height={500}
+                      className="rounded-lg border-2 border-green-200 cursor-pointer hover:border-green-500 transition"
+                      onClick={() => setImagePreview(agreement.firstPaymentReceipt)}
+                    />
+                    <Button
+                      size="sm"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition bg-green-500 hover:bg-green-600"
+                      onClick={() => window.open(agreement.firstPaymentReceipt!, '_blank')}
+                    >
+                      🔍 عرض بالحجم الكامل
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-red-500 text-sm mt-2">❌ لم يتم رفع إيصال الدفع</p>
+                )}
+              </div>
+
+              <Separator />
+
               {/* التوقيع */}
               <div>
-                <Label className="text-base font-semibold">2. التوقيع الإلكتروني</Label>
+                <Label className="text-base font-semibold">4. التوقيع الإلكتروني</Label>
                 {agreement.signature ? (
                   <div className="mt-2 relative group">
                     <div className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
@@ -307,7 +365,7 @@ export default function InstallmentDetailPage() {
 
               {/* الصورة الشخصية */}
               <div>
-                <Label className="text-base font-semibold">3. الصورة الشخصية (سيلفي)</Label>
+                <Label className="text-base font-semibold">5. الصورة الشخصية (سيلفي)</Label>
                 {agreement.selfieImage ? (
                   <div className="mt-2 relative group">
                     <Image
