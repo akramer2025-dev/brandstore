@@ -771,7 +771,7 @@ export default async function HomePage() {
                 <h5 className="text-xs font-semibold text-gray-400 mb-3">تابعنا على</h5>
                 <div className="flex items-center gap-3">
                   <a 
-                    href="https://facebook.com/remostore" 
+                    href="https://www.facebook.com/share/182kW5HPmz/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="w-9 h-9 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all hover:scale-110"
@@ -780,7 +780,7 @@ export default async function HomePage() {
                     <Facebook className="w-5 h-5 text-white" />
                   </a>
                   <a 
-                    href="https://instagram.com/remostore" 
+                    href="https://www.instagram.com/remostore.egy?utm_source=qr&igsh=MWZiZG0zYzhtOW1ieA%3D%3D" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="w-9 h-9 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 rounded-full flex items-center justify-center transition-all hover:scale-110"
@@ -789,7 +789,7 @@ export default async function HomePage() {
                     <Instagram className="w-5 h-5 text-white" />
                   </a>
                   <a 
-                    href="https://tiktok.com/@remostore" 
+                    href="https://www.tiktok.com/@remo.store37?_r=1&_t=ZS-940eVJUQJgi" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="w-9 h-9 bg-black hover:bg-gray-900 rounded-full flex items-center justify-center transition-all hover:scale-110"
