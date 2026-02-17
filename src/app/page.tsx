@@ -639,39 +639,6 @@ export default async function HomePage() {
 
 
 
-      {/* 🔥 بانر عروض خاصة */}
-      <section className="py-6 sm:py-8 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 relative overflow-hidden">
-        {/* خلفية زخرفية */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute bottom-0 right-0 w-56 h-56 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
-          <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-        </div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-center sm:text-right">
-              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mb-2">
-                <span className="text-white text-xs font-bold">🔥 عروض محدودة</span>
-              </div>
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 drop-shadow-lg">
-                خصومات تصل لـ 50% 🎉
-              </h3>
-              <p className="text-white/85 text-sm sm:text-base">
-                استغل الفرصة قبل ما العرض ينتهي!
-              </p>
-            </div>
-            <Link
-              href="/products"
-              className="flex-shrink-0 inline-flex items-center gap-2 bg-white text-purple-700 px-6 sm:px-8 py-3 rounded-xl font-bold text-sm sm:text-base shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 active:scale-95"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              تسوق الآن
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Infinite Product Carousel - الصف الـ11 */}
       {/* Temporarily disabled due to type error */}
       {/* {products.length > 10 && (
