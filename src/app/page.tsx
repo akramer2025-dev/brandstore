@@ -190,10 +190,15 @@ function getFirstImage(images: any): string | null {
 
 async function getActiveAuctions() {
   try {
+    const now = new Date();
+    
     // @ts-ignore - Temporarily ignore until migration applied
     return await prisma.auction.findMany({
       where: {
         status: 'ACTIVE',
+        endDate: {
+          gt: now // فقط المزادات التي لم تنتهي بعد
+        }
       },
       take: 6,
       orderBy: [

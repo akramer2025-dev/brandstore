@@ -28,21 +28,45 @@ import { ProductCardPro } from '@/components/ProductCardPro'
 interface Product {
   id: string
   name: string
+  nameAr: string
   description: string | null
+  descriptionAr?: string | null
   price: number
   originalPrice: number | null
   images: string | null
-  category: {
+  category?: {
     id: string
-    name: string
-  } | null
+    nameAr: string
+  } | undefined
   stock: number
   discount: number | null
   isPromoted: boolean
 }
 
+interface EndedAuction {
+  id: string
+  title: string
+  titleAr: string | null
+  currentPrice: number
+  startingPrice: number
+  endDate: string
+  product: {
+    id: string
+    name: string
+    nameAr: string | null
+    images: string | null
+  }
+  _count: {
+    bids: number
+  }
+  winner: {
+    name: string | null
+  } | null
+}
+
 export default function OffersPage() {
   const [products, setProducts] = useState<Product[]>([])
+  const [endedAuctions, setEndedAuctions] = useState<EndedAuction[]>([])
   const [loading, setLoading] = useState(true)
   const [filterType, setFilterType] = useState<'all' | 'discount' | 'promoted'>('all')
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high' | 'discount'>('discount')
@@ -50,6 +74,7 @@ export default function OffersPage() {
   // جلب المنتجات المخفضة والعروض الخاصة
   useEffect(() => {
     fetchOffers()
+    fetchEndedAuctions()
   }, [])
 
   const fetchOffers = async () => {
@@ -65,6 +90,46 @@ export default function OffersPage() {
       console.error('Error fetching offers:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchEndedAuctions = async () => {
+    try {
+      const response = await fetch('/api/auctions?status=ENDED&limit=12')
+      const data = await response.json()
+      
+      if (data.success) {
+        setEndedAuctions(data.auctions || [])
+      }
+    } catch (error) {
+      console.error('Error fetching ended auctions:', error)
+    }
+  }
+
+  // Helper لاستخراج أول صورة
+  const getFirstImage = (images: any): string | null => {
+    if (!images) return null
+    
+    try {
+      if (Array.isArray(images)) return images[0] || null
+      
+      if (typeof images === 'string') {
+        if (images.includes(',') && images.includes('http')) {
+          return images.split(',').map(url => url.trim())[0] || null
+        }
+        
+        if (images.startsWith('http')) return images
+        
+        const parsed = JSON.parse(images)
+        return Array.isArray(parsed) ? parsed[0] : null
+      }
+      
+      return null
+    } catch (error) {
+      if (typeof images === 'string' && images.startsWith('http')) {
+        return images
+      }
+      return null
     }
   }
 
@@ -161,6 +226,104 @@ export default function OffersPage() {
       </div>
 
       <div className="container mx-auto max-w-7xl px-4 py-6">
+        {/* قسم المزادات المنتهية */}
+        {endedAuctions.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z"/>
+                    <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z"/>
+                    <path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">مزادات منتهية - عروض خاصة</h2>
+                  <p className="text-sm text-gray-600">اطلع على نتائج المزادات السابقة</p>
+                </div>
+              </div>
+              <Link 
+                href="/auctions?status=ENDED"
+                className="text-sm font-semibold text-purple-600 hover:text-purple-700 flex items-center gap-1"
+              >
+                <span>الكل</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+            </div>
+
+            <div 
+              className="flex gap-4 overflow-x-scroll pb-4 scroll-smooth"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#9333ea #f3f4f6'
+              }}
+            >
+              {endedAuctions.map((auction) => {
+                const auctionImage = getFirstImage(auction.product?.images);
+                const priceIncrease = auction.currentPrice - auction.startingPrice;
+                const percentageIncrease = ((priceIncrease / auction.startingPrice) * 100).toFixed(0);
+
+                return (
+                  <Link 
+                    key={auction.id} 
+                    href={`/auctions/${auction.id}`}
+                    className="group flex-shrink-0 w-64 sm:w-72 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-300"
+                  >
+                    <div className="flex gap-3 p-3">
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                        {auctionImage && (
+                          <Image
+                            src={auctionImage}
+                            alt={auction.titleAr || auction.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            sizes="96px"
+                          />
+                        )}
+                        <div className="absolute top-1 right-1 bg-gray-800 text-white px-2 py-0.5 rounded text-[10px] font-bold">
+                          انتهى
+                        </div>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-purple-600 transition-colors">
+                          {auction.titleAr || auction.title}
+                        </h3>
+                        
+                        <div className="mb-2">
+                          <p className="text-xs text-gray-500">السعر النهائي</p>
+                          <p className="text-lg font-black text-purple-600">
+                            {auction.currentPrice} ج.م
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                            +{percentageIncrease}% 📈
+                          </div>
+                          <div className="text-gray-600">
+                            {auction._count?.bids || 0} مزايدة
+                          </div>
+                        </div>
+
+                        {auction.winner && (
+                          <p className="text-[10px] text-gray-500 mt-1">
+                            الفائز: {auction.winner.name || 'غير محدد'}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* شريط الفلاتر والترتيب */}
         <Card className="mb-6 shadow-lg border-2 border-red-200">
           <CardContent className="p-4">
