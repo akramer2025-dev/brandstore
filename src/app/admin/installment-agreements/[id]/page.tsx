@@ -71,17 +71,52 @@ export default function InstallmentAgreementViewPage() {
   };
 
   const handlePrint = () => {
-    // Hide buttons and print directly
+    // Add comprehensive print styles
     const style = document.createElement('style');
-    style.textContent = '.no-print { display: none !important; }';
+    style.id = 'print-styles';
+    style.textContent = `
+      @media print {
+        body * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        @page {
+          margin: 1.5cm;
+          size: A4;
+        }
+        body {
+          margin: 0;
+          padding: 20px;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .print-content {
+          display: block !important;
+        }
+        /* Ensure colors print */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+      }
+    `;
     document.head.appendChild(style);
     
-    window.print();
-    
-    // Remove style after print
+    // Small delay to ensure styles are applied
     setTimeout(() => {
-      document.head.removeChild(style);
-    }, 1000);
+      window.print();
+      
+      // Remove style after print
+      setTimeout(() => {
+        const styleEl = document.getElementById('print-styles');
+        if (styleEl) {
+          document.head.removeChild(styleEl);
+        }
+      }, 1000);
+    }, 100);
     
     toast.success("تم فتح نافذة الطباعة");
   };
@@ -89,24 +124,44 @@ export default function InstallmentAgreementViewPage() {
   const handleDownloadPDF = async () => {
     try {
       toast.info("📄 جاري تحضير ملف PDF...");
+      toast.info("💡 اختر 'حفظ بصيغة PDF' من نافذة الطباعة");
       
-      // Hide buttons before generating PDF
+      // Add print styles
       const style = document.createElement('style');
+      style.id = 'pdf-print-styles';
       style.textContent = `
-        .no-print { display: none !important; }
-        @page { margin: 1cm; }
-        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        @media print {
+          body * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          @page {
+            margin: 1cm;
+            size: A4;
+          }
+          body {
+            margin: 0;
+            padding: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          }
+        }
       `;
       document.head.appendChild(style);
       
-      // Trigger print dialog (user can select "Save as PDF")
+      // Trigger print dialog
       setTimeout(() => {
         window.print();
-        toast.success("✅ اختر 'حفظ بصيغة PDF' من نافذة الطباعة");
         
         // Remove style after print
         setTimeout(() => {
-          document.head.removeChild(style);
+          const styleEl = document.getElementById('pdf-print-styles');
+          if (styleEl) {
+            document.head.removeChild(styleEl);
+          }
         }, 1000);
       }, 300);
       
@@ -177,6 +232,82 @@ ${window.location.href}
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
+      {/* Print Styles */}
+      <style jsx global>{`
+        @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            color-adjust: exact;
+          }
+          
+          .no-print {
+            display: none !important;
+          }
+          
+          .print-content {
+            display: block !important;
+          }
+          
+          @page {
+            margin: 1.5cm;
+            size: A4;
+          }
+          
+          /* Force backgrounds and colors to print */
+          .bg-gradient-to-br,
+          .bg-gradient-to-r,
+          .bg-purple-600,
+          .bg-purple-800,
+          .bg-purple-50,
+          .bg-blue-50,
+          .bg-green-50,
+          .bg-emerald-50,
+          .bg-gray-50,
+          .bg-red-50,
+          .bg-yellow-50,
+          .bg-white {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* Ensure text colors print */
+          .text-white,
+          .text-purple-600,
+          .text-purple-700,
+          .text-green-700,
+          .text-blue-700,
+          .text-red-700,
+          .text-gray-600,
+          .text-yellow-700 {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* Ensure borders print */
+          .border-r-4,
+          .border-purple-500,
+          .border-gray-200 {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* Fix image rendering */
+          img {
+            max-width: 100%;
+            height: auto;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+        }
+      `}</style>
+
       {/* Action Buttons - Hidden in Print */}
       <div className="no-print flex gap-3 mb-6 justify-between items-center flex-wrap">
         <Button variant="outline" onClick={() => router.back()} className="bg-white hover:bg-gray-50">
@@ -213,7 +344,10 @@ ${window.location.href}
                 alt="Rimo Store" 
                 width={180} 
                 height={60}
+                priority
+                unoptimized
                 className="mx-auto bg-white rounded-xl p-4 shadow-lg"
+                style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
               />
             </div>
             <h1 className="text-4xl font-bold mb-4">📄 اتفاقية تقسيط</h1>
