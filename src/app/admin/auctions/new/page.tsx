@@ -43,16 +43,20 @@ export default function NewAuctionPage() {
     termsAndConditions: "",
   });
 
-  // Fetch products on mount
+  // Fetch products on mount - منتجات الشريك فقط
   useEffect(() => {
-    fetch("/api/products?limit=1000")
+    fetch("/api/vendor/products?limit=1000")
       .then((res) => res.json())
       .then((data) => {
         const productsList = data.products || [];
         setProducts(productsList);
         setFilteredProducts(productsList);
+        console.log('✅ تم جلب', productsList.length, 'منتج للشريك');
       })
-      .catch((error) => console.error("Error fetching products:", error));
+      .catch((error) => {
+        console.error("❌ Error fetching products:", error);
+        toast.error('فشل في جلب المنتجات');
+      });
   }, []);
 
   //Filter products based on search

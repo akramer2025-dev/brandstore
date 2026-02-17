@@ -62,8 +62,8 @@ export async function GET(req: NextRequest) {
     }, 0);
 
     return NextResponse.json({ 
-      initialCapital: vendor.initialCapital || 7500,
-      capitalBalance: vendor.capitalBalance || 7500,
+      initialCapital: vendor.initialCapital || 0,
+      capitalBalance: vendor.capitalBalance || 0,
       breakdown: {
         ownedProductsCost: Number(ownedProductsCost.toFixed(2)),
         offlineStockCost: Number(offlineStockCost.toFixed(2)),
