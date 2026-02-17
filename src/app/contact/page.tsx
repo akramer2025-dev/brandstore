@@ -44,8 +44,8 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: "البريد الإلكتروني",
-      value: "remostore.egy@gmail.com",
-      link: "mailto:remostore.egy@gmail.com",
+      value: "info@remostore.net",
+      link: "mailto:info@remostore.net",
     },
     {
       icon: MapPin,

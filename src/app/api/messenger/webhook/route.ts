@@ -100,7 +100,7 @@ async function handleMessage(senderId: string, messageText: string) {
 - الاسم: ريمو ستور Remo Store
 - الموقع: www.remostore.net
 - الهاتف/واتساب: 01555512778
-- البريد: remostore.egy@gmail.com
+- البريد: info@remostore.net
 - العنوان: مصر - القاهرة
 - أوقات العمل: السبت - الخميس (9 صباحاً - 6 مساءً)
 

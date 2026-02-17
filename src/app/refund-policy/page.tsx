@@ -274,7 +274,7 @@ export default function RefundPolicyPage() {
                 📱 واتساب: 01555512778
               </a>
               <a 
-                href="mailto:remostore.egy@gmail.com"
+                href="mailto:info@remostore.net"
                 className="bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-400 transition-colors"
               >
                 📧 البريد الإلكتروني

@@ -125,7 +125,7 @@ export default function FAQPage() {
       questions: [
         {
           q: 'كيف أتواصل معكم؟',
-          a: 'يمكنك التواصل معنا عبر: الهاتف 01555512778، الماسنجر بوت 24/7، البريد remostore.egy@gmail.com، أو واتساب.'
+          a: 'يمكنك التواصل معنا عبر: الهاتف 01555512778، الماسنجر بوت 24/7، البريد info@remostore.net، أو واتساب.'
         },
         {
           q: 'ما هي مواعيد العمل؟',
@@ -241,7 +241,7 @@ export default function FAQPage() {
                 اتصل بنا
               </a>
               <a 
-                href="mailto:remostore.egy@gmail.com" 
+                href="mailto:info@remostore.net" 
                 className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform flex items-center gap-2"
               >
                 📧 ابعتلنا إيميل

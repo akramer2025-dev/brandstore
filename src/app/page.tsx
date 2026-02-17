@@ -754,11 +754,11 @@ export default async function HomePage() {
                   <span>واتساب: 01555512778</span>
                 </a>
                 <a 
-                  href="mailto:remostore.egy@gmail.com" 
+                  href="mailto:info@remostore.net" 
                   className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
                 >
                   <Mail className="w-4 h-4 text-red-400" />
-                  <span>remostore.egy@gmail.com</span>
+                  <span>info@remostore.net</span>
                 </a>
                 <div className="flex items-center gap-2 text-gray-400">
                   <MapPin className="w-4 h-4 text-orange-400" />
