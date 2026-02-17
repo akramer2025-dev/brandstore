@@ -224,18 +224,31 @@ export default function InstallmentDetailPage() {
     );
   }
 
+  const handleDownloadPDF = () => {
+    // Navigate to the agreement view page which has the PDF download functionality
+    router.push(`/admin/installment-agreements/${agreementId}`);
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/admin/installments')}
-            className="mb-2"
-          >
-            ← العودة للقائمة
-          </Button>
+          <div className="flex gap-2 mb-2 flex-wrap">
+            <Button
+              variant="ghost"
+              onClick={() => router.push('/admin/installments')}
+            >
+              ← العودة للقائمة
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDownloadPDF}
+              className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+            >
+              📄 عرض الاتفاقية وتحميل PDF
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold">مراجعة اتفاقية التقسيط</h1>
           <p className="text-muted-foreground mt-1">
             رقم الاتفاقية: <span className="font-mono">{agreement.agreementNumber}</span>

@@ -47,6 +47,8 @@ model User {
   vehicleFinancingApplications VehicleFinancing[] // طلبات تمويل المركبات
   vehicleInquiries VehicleInquiry[] // استفسارات المركبات
   testDriveRequests TestDriveRequest[] // طلبات تجربة القيادة
+  auctionsWon      Auction[] @relation("AuctionWinner") // المزادات الفائز بها
+  bids             Bid[] @relation("UserBids") // المزايدات
   
   partner          PartnerCapital? @relation(fields: [partnerId], references: [id])
 
@@ -297,6 +299,7 @@ model Product {
   marketingStaff  MarketingStaff? @relation(fields: [marketingStaffId], references: [id])
   commissions     MarketingCommission[]
   variants        ProductVariant[]
+  auctions        Auction[] // المزادات
 
   @@map("products")
 }
@@ -2191,4 +2194,110 @@ enum TestDriveStatus {
   CANCELLED         // ملغي
   NO_SHOW           // لم يحضر
 }
+
+// ============================================================
+// 🔨 نظام المزادات (Auction System)
+// ============================================================
+
+// المزادات
+model Auction {
+  id                String         @id @default(cuid())
+  productId         String         // المنتج المعروض للمزاد
+  title             String         // عنوان المزاد
+  titleAr           String?        // العنوان بالعربية
+  description       String?        // وصف المزاد
+  descriptionAr     String?        // الوصف بالعربية
+  
+  // 💰 الأسعار
+  startingPrice     Float          // السعر الابتدائي
+  currentPrice      Float          // السعر الحالي
+  reservePrice      Float?         // الحد الأدنى للبيع (سري)
+  buyNowPrice       Float?         // سعر الشراء الفوري
+  minimumBidIncrement Float        @default(10) // الحد الأدنى للزيادة
+  
+  // ⏰ التوقيت
+  startDate         DateTime       // تاريخ بدء المزاد
+  endDate           DateTime       // تاريخ انتهاء المزاد
+  extendOnBid       Boolean        @default(true) // تمديد المزاد عند المزايدة في آخر دقائق
+  
+  // 📊 حالة المزاد
+  status            AuctionStatus  @default(SCHEDULED)
+  winnerId          String?        // الفائز بالمزاد
+  winningBidId      String?        // المزايدة الفائزة
+  
+  // 📝 تفاصيل إضافية
+  featured          Boolean        @default(false) // مميز
+  images            String[]       // صور إضافية للمزاد
+  termsAndConditions String?       // الشروط والأحكام
+  viewCount         Int            @default(0) // عدد المشاهدات
+  bidCount          Int            @default(0) // عدد المزايدات
+  
+  // 🔔 الإشعارات
+  notifyOnBid       Boolean        @default(true) // إشعار البائع عند كل مزايدة
+  notifyBeforeEnd   Boolean        @default(true) // إشعار المشاركين قبل انتهاء المزاد
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  product           Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  winner            User?          @relation("AuctionWinner", fields: [winnerId], references: [id])
+  bids              Bid[]          // المزايدات
+  
+  @@map("auctions")
+  @@index([productId])
+  @@index([status])
+  @@index([endDate])
+  @@index([featured])
+}
+
+// المزايدات
+model Bid {
+  id                String         @id @default(cuid())
+  auctionId         String
+  bidderId          String         // المزايد
+  amount            Float          // قيمة المزايدة
+  
+  // 📊 الحالة
+  status            BidStatus      @default(ACTIVE)
+  isWinning         Boolean        @default(false) // هل هي المزايدة الفائزة حالياً
+  isAutoBid         Boolean        @default(false) // مزايدة تلقائية
+  maxAutoBidAmount  Float?         // الحد الأقصى للمزايدة التلقائية
+  
+  // 📝 معلومات إضافية
+  ip                String?        // IP address للمزايد
+  userAgent         String?        // معلومات المتصفح
+  notes             String?        // ملاحظات
+  
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  auction           Auction        @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  bidder            User           @relation("UserBids", fields: [bidderId], references: [id], onDelete: Cascade)
+  
+  @@map("bids")
+  @@index([auctionId])
+  @@index([bidderId])
+  @@index([createdAt(sort: Desc)])
+  @@index([amount])
+}
+
+// حالات المزاد
+enum AuctionStatus {
+  SCHEDULED         // مجدول
+  ACTIVE            // نشط
+  ENDED             // انتهى
+  SOLD              // تم البيع
+  CANCELLED         // ملغي
+  NO_SALE           // لم يصل للحد الأدنى
+}
+
+// حالات المزايدة
+enum BidStatus {
+  ACTIVE            // نشطة
+  OUTBID            // تم المزايدة عليها
+  WINNING           // فائزة
+  LOST              // خاسرة
+  CANCELLED         // ملغية
+}
+
 
