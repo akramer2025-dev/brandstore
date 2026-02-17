@@ -11,7 +11,7 @@ export async function GET(
   try {
     const session = await auth();
 
-    if (!session || (session.user?.role !== "ADMIN" && session.user?.role !== "DEVELOPER")) {
+    if (!session || session.user?.role !== "ADMIN") {
       return NextResponse.json(
         { error: "غير مصرح" },
         { status: 401 }

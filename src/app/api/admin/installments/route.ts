@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // منع الـ cache لضمان تحديث البيانات
@@ -12,7 +11,7 @@ export async function GET(request: Request) {
   try {
     console.log('🔍 [Installments API] بدء جلب الاتفاقيات...');
     
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     console.log('👤 [Installments API] Session:', session?.user?.email || 'No session');
 
     if (!session?.user) {
@@ -30,7 +29,7 @@ export async function GET(request: Request) {
     });
     console.log('🔐 [Installments API] المستخدم:', user?.email, '- الصلاحية:', user?.role);
 
-    if (user?.role !== 'ADMIN' && user?.role !== 'DEVELOPER') {
+    if (user?.role !== 'ADMIN') {
       console.warn('⚠️ [Installments API] محاولة وصول بدون صلاحيات كافية');
       return NextResponse.json(
         { error: 'غير مصرح لك بالوصول' },

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // GET - جلب اتفاقية واحدة بالتفصيل
@@ -9,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json(
@@ -24,7 +23,7 @@ export async function GET(
       select: { role: true }
     });
 
-    if (user?.role !== 'ADMIN' && user?.role !== 'DEVELOPER') {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'غير مصرح لك بالوصول' },
         { status: 403 }
@@ -50,7 +49,6 @@ export async function GET(
             orderNumber: true,
             status: true,
             totalAmount: true,
-            shippingAddress: true,
             createdAt: true,
             items: {
               include: {
@@ -94,7 +92,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json(
@@ -109,7 +107,7 @@ export async function PATCH(
       select: { role: true, name: true }
     });
 
-    if (user?.role !== 'ADMIN' && user?.role !== 'DEVELOPER') {
+    if (user?.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'غير مصرح لك بالوصول' },
         { status: 403 }
