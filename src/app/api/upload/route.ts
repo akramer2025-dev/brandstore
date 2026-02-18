@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const files = formData.getAll("files") as File[];
+    const folder = (formData.get("folder") as string) || 'products'; // Default to 'products'
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: "لم يتم توفير ملفات" }, { status: 400 });
@@ -123,7 +124,7 @@ export async function POST(req: NextRequest) {
           const result = await cloudinary.uploader.upload(
             `data:${file.type};base64,${buffer.toString('base64')}`,
             {
-              folder: 'products',
+              folder: folder, // Use dynamic folder
               public_id: safeName.split('.')[0],
               transformation: [
                 { width: 1000, height: 1000, crop: 'limit' },

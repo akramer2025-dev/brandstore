@@ -34,27 +34,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-// دالة رفع الصور إلى Cloudinary
+// دالة رفع الصور عبر API الآمن
 async function uploadToCloudinary(file: File): Promise<string> {
   const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", "remostore");
-  formData.append("folder", "vendor-stores");
+  formData.append("files", file);
+  formData.append("folder", "vendor-stores"); // Specify folder for vendor store images
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dgrcwhfl5"}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
 
   if (!response.ok) {
-    throw new Error("Failed to upload image");
+    const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+    throw new Error(errorData.error || "Failed to upload image");
   }
 
   const data = await response.json();
-  return data.secure_url;
+  
+  // API ترجع array من URLs، نأخذ أول واحد
+  if (data.urls && data.urls.length > 0) {
+    return data.urls[0];
+  }
+  
+  throw new Error("No image URL returned from upload");
 }
 
 export default function VendorSettingsPage() {
