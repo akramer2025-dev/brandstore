@@ -68,6 +68,7 @@ export function BottomNavBar() {
     '/vendor',
     '/auth/login',
     '/auth/register',
+    '/chat',
   ];
   
   const shouldHideNavBar = hideNavBarPaths.some(path => pathname.startsWith(path));

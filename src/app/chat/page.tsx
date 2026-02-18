@@ -389,8 +389,8 @@ export default function ChatPage() {
 
       {/* Main Chat Area - كامل الشاشة على المحمول */}
       <div className="flex-1 flex flex-col relative z-10">
-        {/* Chat Header - بنفس ألوان الموقع */}
-        <div className="bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 px-4 py-3 shadow-lg">
+        {/* Chat Header - مخفي على الموبايل، ظاهر على Desktop */}
+        <div className="hidden md:block bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 px-4 py-3 shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
@@ -405,25 +405,6 @@ export default function ChatPage() {
                   <span className="text-xs text-purple-200">متصل الآن</span>
                 </div>
               </div>
-            </div>
-            
-            {/* أزرار التنقل على الموبايل */}
-            <div className="flex items-center gap-2 lg:hidden">
-              <Link
-                href="/"
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
-                title="الرئيسية"
-              >
-                <Home className="w-4 h-4" />
-              </Link>
-              <a
-                href="https://wa.me/201555512778"
-                target="_blank"
-                className="w-9 h-9 rounded-full bg-green-500/20 hover:bg-green-500/30 flex items-center justify-center text-green-300 transition-all"
-                title="واتساب"
-              >
-                <Phone className="w-4 h-4" />
-              </a>
             </div>
           </div>
         </div>
