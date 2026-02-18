@@ -243,29 +243,30 @@ export default function VendorProductsPage() {
           </div>
         )}
 
-        <div className="container mx-auto px-4 relative" style={{ marginTop: vendor.coverImage ? '-100px' : '0' }}>
+        <div className="container mx-auto px-4 relative" style={{ marginTop: vendor.coverImage ? '-120px' : '0' }}>
           {/* Profile Section */}
           <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
             <div className="px-4 md:px-8 py-6 md:py-8">
               <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
-                {/* Logo */}
-                <div className="flex-shrink-0 -mt-20 md:-mt-24">
-                  <div className="w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 rounded-full bg-white p-2 shadow-2xl ring-4 md:ring-8 ring-white">
+                {/* Logo - محسّن للموبايل */}
+                <div className="flex-shrink-0 -mt-24 md:-mt-28 lg:-mt-32">
+                  <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-60 md:h-60 lg:w-64 lg:h-64 rounded-full bg-white p-2 shadow-2xl ring-6 md:ring-8 ring-white hover:ring-purple-200 transition-all duration-300">
                     {vendor.logo ? (
                       <Image
                         src={vendor.logo}
                         alt={vendorDisplayName}
-                        width={176}
-                        height={176}
+                        width={256}
+                        height={256}
+                        quality={95}
                         className="w-full h-full object-cover rounded-full"
                         priority
                         fetchPriority="high"
                         loading="eager"
-                        sizes="(max-width: 768px) 144px, 176px"
+                        sizes="(max-width: 640px) 192px, (max-width: 768px) 224px, (max-width: 1024px) 240px, 256px"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
-                        <Store className="w-16 h-16 text-purple-600" />
+                        <Store className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 text-purple-600" />
                       </div>
                     )}
                   </div>
