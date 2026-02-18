@@ -995,7 +995,7 @@ export default function ProductDetailPage() {
             {/* Browse All Vendor Products Button */}
             {product.vendor && (
               <div className="pt-4 sm:pt-6">
-                <Link href={`/products?vendorId=${product.vendor.id}`}>
+                <Link href={`/vendor/${product.vendor.id}/products`}>
                   <Button className="w-full bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white font-bold py-4 sm:py-5 text-base sm:text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 group">
                     <Store className="w-5 h-5 sm:w-6 sm:h-6 ml-2 group-hover:scale-110 transition-transform" />
                     تصفح جميع منتجات {product.vendor.storeNameAr || 'التاجر'}

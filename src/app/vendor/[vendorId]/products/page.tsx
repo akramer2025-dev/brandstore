@@ -102,6 +102,9 @@ export default function VendorProductsPage() {
       }
 
       const data = await response.json();
+      console.log('Vendor data:', data.vendor); // للتأكد من البيانات
+      console.log('Vendor logo:', data.vendor?.logo);
+      console.log('Vendor cover:', data.vendor?.coverImage);
       setVendor(data.vendor);
       setProducts(data.products);
       setFilteredProducts(data.products);
