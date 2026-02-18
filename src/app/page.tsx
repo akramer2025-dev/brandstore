@@ -8,11 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { TrendingUp, ShoppingBag, Sparkles, Shield, CheckCircle, Phone, Mail, MapPin, Facebook, Instagram, CreditCard } from 'lucide-react';
 import { Metadata } from 'next';
-import { RamadanHomeDecorations } from '@/components/RamadanHomeDecorations';
 import BrandBackgroundPattern from '@/components/BrandBackgroundPattern';
-import FloatingBubbles from '@/components/FloatingBubbles';
-import FireworksEffect from '@/components/FireworksEffect';
-import RamadanBanner from '@/components/RamadanBanner';
 import PendingPrizeHandler from '@/components/PendingPrizeHandler';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { InfiniteProductCarousel } from '@/components/InfiniteProductCarousel';
@@ -352,23 +348,11 @@ export default async function HomePage() {
 
     return (
       <>
-        {/* ديكورات رمضانية في خلفية الصفحة */}
-        <RamadanHomeDecorations />
-
         {/* Brand Background Pattern */}
         <BrandBackgroundPattern />
 
-        {/* Floating Bubbles */}
-        <FloatingBubbles />
-
-        {/* تأثير الصواريخ بعد الـ Splash */}
-        <FireworksEffect />
-
         {/* Main Content */}
         <div>
-
-        {/* 🌙 بانر رمضان كريم */}
-        <RamadanBanner />
         
         {/* Pending Prize Handler */}
         <PendingPrizeHandler />
@@ -770,24 +754,6 @@ export default async function HomePage() {
               <div className="mt-4 pt-4 border-t border-gray-800">
                 <h5 className="text-sm font-semibold text-gray-300 mb-4">تابعنا على السوشيال ميديا</h5>
                 
-                {/* Instagram Bio Section */}
-                <div className="mb-4 p-3 bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-orange-900/20 rounded-lg border border-purple-500/20">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 rounded-full flex items-center justify-center">
-                      <Instagram className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">@remostore.egy</p>
-                      <p className="text-[10px] text-gray-400">Instagram</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-300 leading-relaxed">
-                    🛍️ أزياء عصرية وأنيقة | ملابس نسائية ورجالية<br/>
-                    ✨ جودة عالية وأسعار مميزة<br/>
-                    📦 توصيل لجميع أنحاء مصر | الدفع عند الاستلام
-                  </p>
-                </div>
-
                 {/* Social Media Cards */}
                 <div className="grid grid-cols-3 gap-2">
                   <a 

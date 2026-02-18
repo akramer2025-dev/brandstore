@@ -10,7 +10,6 @@ import VisitorTracker from "@/components/VisitorTracker";
 import MobileNotifications from "@/components/MobileNotifications";
 import FacebookPixel from "@/components/FacebookPixel";
 import { EnvironmentBadge } from "@/components/EnvironmentBadge";
-import { RamadanSplashScreen } from "@/components/RamadanSplashScreen";
 import { PageTransition } from "@/components/PageTransition";
 
 const cairo = Cairo({
@@ -118,7 +117,6 @@ export default function RootLayout({
       </head>
       <body className={`${cairo.variable} font-sans antialiased`} suppressHydrationWarning>
         <Providers>
-          <RamadanSplashScreen />
           <PageTransition />
           <FacebookPixel />
           <ServiceWorkerRegistration />
