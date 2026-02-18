@@ -677,14 +677,49 @@ export default function VendorSettingsPage() {
             {/* Cover Image */}
             <Card className="overflow-hidden border-2 border-purple-200">
               <CardContent className="p-0">
-                <div className="relative h-64 md:h-80 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500">
+                <div className="relative h-64 md:h-80 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 group">
                   {coverImage ? (
-                    <Image
-                      src={coverImage}
-                      alt="Cover"
-                      fill
-                      className="object-cover"
-                    />
+                    <>
+                      <Image
+                        src={coverImage}
+                        alt="Cover"
+                        fill
+                        className="object-cover"
+                      />
+                      {/* Hover Overlay - يظهر عند التحويم */}
+                      <label className="absolute inset-0 cursor-pointer">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-75 group-hover:scale-100">
+                            {uploadingCover ? (
+                              <div className="bg-white/95 backdrop-blur-sm px-8 py-6 rounded-2xl shadow-2xl">
+                                <Loader2 className="w-16 h-16 animate-spin text-purple-600 mx-auto mb-3" />
+                                <p className="text-xl font-bold text-gray-900">جاري رفع الغلاف...</p>
+                                <p className="text-sm text-gray-600 mt-1">الرجاء الانتظار</p>
+                              </div>
+                            ) : (
+                              <div className="bg-white/95 backdrop-blur-sm px-8 py-6 rounded-2xl shadow-2xl">
+                                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-xl mx-auto mb-3">
+                                  <Camera className="w-10 h-10 text-white" />
+                                </div>
+                                <p className="text-xl font-bold text-gray-900 mb-1">تغيير صورة الغلاف</p>
+                                <p className="text-sm text-gray-600">اضغط لاختيار صورة جديدة</p>
+                                <p className="text-xs text-gray-500 mt-1">JPG, PNG, WEBP - حتى 5 ميجا</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "cover");
+                          }}
+                          disabled={uploadingCover}
+                        />
+                      </label>
+                    </>
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center text-white">
@@ -694,9 +729,8 @@ export default function VendorSettingsPage() {
                     </div>
                   )}
                   
-                  {/* Upload Button - يظهر في المنتصف إذا لم تكن هناك صورة، في الركن إذا كانت هناك صورة */}
-                  {!coverImage ? (
-                    /* زر كبير في المنتصف عند عدم وجود صورة */
+                  {/* Upload Button - يظهر في المنتصف إذا لم تكن هناك صورة */}
+                  {!coverImage && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <label className="cursor-pointer group">
                         <div className="relative">
@@ -743,35 +777,6 @@ export default function VendorSettingsPage() {
                         />
                       </label>
                     </div>
-                  ) : (
-                    /* زر صغير في الركن عند وجود صورة */
-                    <div className="absolute bottom-4 right-4">
-                      <label className="cursor-pointer group">
-                        <div className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all group-hover:scale-105 group-hover:shadow-purple-500/50">
-                          {uploadingCover ? (
-                            <>
-                              <Loader2 className="w-5 h-5 animate-spin" />
-                              <span className="font-semibold">جاري الرفع...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Camera className="w-5 h-5" />
-                              <span className="font-semibold">تغيير الغلاف</span>
-                            </>
-                          )}
-                        </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleImageUpload(file, "cover");
-                          }}
-                          disabled={uploadingCover}
-                        />
-                      </label>
-                    </div>
                   )}
 
                   {/* Remove Button */}
@@ -790,16 +795,24 @@ export default function VendorSettingsPage() {
                 <div className="relative -mt-16 px-6 pb-6">
                   <div className="flex flex-col md:flex-row items-center md:items-end gap-4">
                     {/* Logo */}
-                    <div className="relative">
-                      <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl overflow-hidden">
+                    <div className="relative group">
+                      <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl overflow-hidden relative">
                         {logo ? (
-                          <Image
-                            src={logo}
-                            alt="Logo"
-                            width={128}
-                            height={128}
-                            className="object-cover w-full h-full"
-                          />
+                          <>
+                            <Image
+                              src={logo}
+                              alt="Logo"
+                              width={128}
+                              height={128}
+                              className="object-cover w-full h-full"
+                            />
+                            {/* Hover indicator - للإشارة أنه يمكن التغيير */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-75 group-hover:scale-100">
+                                <Camera className="w-8 h-8 text-white drop-shadow-lg" />
+                              </div>
+                            </div>
+                          </>
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
                             <ImageIcon className="w-16 h-16 text-purple-400" />
@@ -808,8 +821,8 @@ export default function VendorSettingsPage() {
                       </div>
                       
                       {/* Upload Logo Button */}
-                      <label className="absolute bottom-0 right-0 cursor-pointer">
-                        <div className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full shadow-lg transition-all">
+                      <label className="absolute bottom-0 right-0 cursor-pointer group/btn">
+                        <div className="bg-purple-600 hover:bg-purple-700 text-white p-2.5 rounded-full shadow-lg transition-all group-hover/btn:scale-110 group-hover/btn:shadow-xl">
                           {uploadingLogo ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
                           ) : (
@@ -832,7 +845,7 @@ export default function VendorSettingsPage() {
                       {logo && (
                         <button
                           onClick={() => handleRemoveImage("logo")}
-                          className="absolute bottom-0 left-0 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-all"
+                          className="absolute bottom-0 left-0 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-all hover:scale-110"
                           title="إزالة الشعار"
                         >
                           <X className="w-4 h-4" />
