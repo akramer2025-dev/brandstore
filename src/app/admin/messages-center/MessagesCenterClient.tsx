@@ -95,12 +95,16 @@ export function MessagesCenterClient() {
       const formattedMessages: Message[] = messages.map((msg: any) => ({
         id: msg.id,
         content: msg.content,
-        sender: msg.role === 'user' ? 'العميل' : 'المساعد الذكي',
+        sender: msg.role === 'user' 
+          ? 'العميل' 
+          : msg.role === 'admin' 
+            ? 'فريق الدعم' 
+            : 'المساعد الذكي',
         timestamp: new Date(msg.createdAt).toLocaleTimeString('ar-EG', {
           hour: '2-digit',
           minute: '2-digit',
         }),
-        type: msg.role === 'user' ? 'user' : 'ai',
+        type: msg.role === 'user' ? 'user' : msg.role === 'admin' ? 'admin' : 'ai',
         status: 'read',
       }));
       
@@ -203,11 +207,12 @@ export function MessagesCenterClient() {
     c.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation) return;
     
-    const message: Message = {
-      id: `m${Date.now()}`,
+    // إنشاء رسالة مؤقتة للعرض
+    const tempMessage: Message = {
+      id: `temp_${Date.now()}`,
       content: newMessage,
       sender: "فريق الدعم",
       timestamp: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
@@ -215,14 +220,59 @@ export function MessagesCenterClient() {
       status: "sent"
     };
 
+    // إضافة الرسالة للعرض فوراً
     setSelectedConversation(prev => prev ? {
       ...prev,
-      messages: [...prev.messages, message],
+      messages: [...prev.messages, tempMessage],
       lastMessage: newMessage,
       lastMessageTime: "الآن"
     } : null);
 
+    const messageToSend = newMessage;
     setNewMessage("");
+
+    // إرسال الرسالة للـ API إذا كانت محادثة حقيقية
+    if (!selectedConversation.id.startsWith('sample-')) {
+      try {
+        const response = await fetch('/api/admin/chat-conversations/reply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId: selectedConversation.id,
+            content: messageToSend,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to send message');
+        }
+
+        const savedMessage = await response.json();
+
+        // تحديث الرسالة المؤقتة بالرسالة المحفوظة
+        setSelectedConversation(prev => prev ? {
+          ...prev,
+          messages: prev.messages.map(m => 
+            m.id === tempMessage.id 
+              ? {
+                  ...m,
+                  id: savedMessage.id,
+                  status: 'delivered' as const,
+                }
+              : m
+          ),
+        } : null);
+      } catch (error) {
+        console.error('Error sending message:', error);
+        // في حالة الفشل، نعرض رسالة خطأ
+        alert('فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.');
+        // إزالة الرسالة المؤقتة
+        setSelectedConversation(prev => prev ? {
+          ...prev,
+          messages: prev.messages.filter(m => m.id !== tempMessage.id),
+        } : null);
+      }
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -526,50 +576,61 @@ export function MessagesCenterClient() {
                         ))}
                       </div>
                       
-                      {/* Message Input */}
-                      {selectedConversation.type === 'customer' && (
-                        <div className="border-t p-4">
-                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm">
-                              <Paperclip className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Image className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Smile className="w-4 h-4" />
-                            </Button>
-                            
-                            <Textarea
-                              placeholder="اكتب رسالتك هنا..."
-                              value={newMessage}
-                              onChange={(e) => setNewMessage(e.target.value)}
-                              className="flex-1 min-h-[40px] max-h-[100px] resize-none"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                  e.preventDefault();
-                                  sendMessage();
-                                }
-                              }}
-                            />
-                            
-                            <Button onClick={sendMessage} disabled={!newMessage.trim()}>
-                              <Send className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {selectedConversation.type === 'ai-chat' && (
-                        <div className="border-t p-4 bg-purple-50">
-                          <div className="flex items-center gap-2 text-purple-700">
+                      {/* Message Input - متاح لجميع المحادثات */}
+                      <div className="border-t p-4">
+                        {selectedConversation.type === 'ai-chat' && !selectedConversation.id.startsWith('sample-') && (
+                          <div className="flex items-center gap-2 text-purple-700 bg-purple-50 p-2 rounded-lg mb-3">
                             <Bot className="w-4 h-4" />
                             <span className="text-sm">
-                              هذه محادثة مع المساعد الذكي - يمكنك مراقبة المحادثة فقط
+                              يمكنك التدخل والرد على العميل مباشرة
                             </span>
                           </div>
+                        )}
+                        {selectedConversation.id.startsWith('sample-') && (
+                          <div className="flex items-center gap-2 text-orange-700 bg-orange-50 p-2 rounded-lg mb-3">
+                            <AlertCircle className="w-4 h-4" />
+                            <span className="text-sm">
+                              هذه محادثة تجريبية - لا يمكن الرد عليها
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" disabled={selectedConversation.id.startsWith('sample-')}>
+                            <Paperclip className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" disabled={selectedConversation.id.startsWith('sample-')}>
+                            <Image className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" disabled={selectedConversation.id.startsWith('sample-')}>
+                            <Smile className="w-4 h-4" />
+                          </Button>
+                          
+                          <Textarea
+                            placeholder={
+                              selectedConversation.id.startsWith('sample-') 
+                                ? "محادثة تجريبية..." 
+                                : "اكتب رسالتك هنا..."
+                            }
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            className="flex-1 min-h-[40px] max-h-[100px] resize-none"
+                            disabled={selectedConversation.id.startsWith('sample-')}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                sendMessage();
+                              }
+                            }}
+                          />
+                          
+                          <Button 
+                            onClick={sendMessage} 
+                            disabled={!newMessage.trim() || selectedConversation.id.startsWith('sample-')}
+                          >
+                            <Send className="w-4 h-4" />
+                          </Button>
                         </div>
-                      )}
+                      </div>
                     </CardContent>
                   </>
                 ) : (

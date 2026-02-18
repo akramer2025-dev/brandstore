@@ -856,7 +856,7 @@ model ChatConversation {
 model ChatMessage {
   id              String           @id @default(cuid())
   conversationId  String
-  role            String           // user, assistant
+  role            String           // user, assistant, admin
   content         String
   productIds      String?          // IDs المنتجات المعروضة (مفصولة بفواصل)
   createdAt       DateTime         @default(now())
