@@ -112,10 +112,9 @@ export default function VendorSettingsPage() {
       return;
     }
 
-    // Initialize form values
-    setName(session.user.name || "");
-    setEmail(session.user.email || "");
-  }, [session, status, router]);
+    // تحميل البيانات الأولية فقط عند أول تحميل
+    // بعد ذلك نعتمد على API لتحديث البيانات
+  }, [status, session, router]);
 
   // Read tab from URL and set active tab
   useEffect(() => {
@@ -138,6 +137,9 @@ export default function VendorSettingsPage() {
         const res = await fetch("/api/users/me");
         if (res.ok) {
           const data = await res.json();
+          // تحميل كل البيانات من API
+          if (data.name) setName(data.name);
+          if (data.email) setEmail(data.email);
           if (data.phone) setPhone(data.phone);
           if (data.storeName) setStoreName(data.storeName);
           if (data.storeDescription) setStoreDescription(data.storeDescription);
@@ -150,7 +152,7 @@ export default function VendorSettingsPage() {
     if (session?.user) {
       fetchUserDetails();
     }
-  }, [session]);
+  }, [session?.user?.id]); // نعتمد على ID فقط، مش كل session
 
   // Fetch store customization settings
   useEffect(() => {
@@ -255,8 +257,16 @@ export default function VendorSettingsPage() {
         throw new Error(error.error || "فشل في تحديث الملف الشخصي");
       }
 
-      // Update session
-      await update({ name, email });
+      const updatedData = await res.json();
+      
+      // تحديث البيانات المحلية من الـ response
+      setName(updatedData.name || "");
+      setEmail(updatedData.email || "");
+      setPhone(updatedData.phone || "");
+
+      // تحديث الـ session
+      await update({ name: updatedData.name, email: updatedData.email });
+      
       toast.success("تم تحديث الملف الشخصي بنجاح");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "حدث خطأ غير متوقع");
