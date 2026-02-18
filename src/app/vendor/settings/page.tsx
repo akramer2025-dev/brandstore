@@ -199,16 +199,41 @@ export default function VendorSettingsPage() {
 
       const imageUrl = await uploadToCloudinary(file);
       
+      // حفظ الصورة فوراً في قاعدة البيانات
+      const updateData = type === "cover" 
+        ? { coverImage: imageUrl }
+        : { logo: imageUrl };
+
+      const res = await fetch("/api/vendor/store-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          coverImage: type === "cover" ? imageUrl : coverImage,
+          logo: type === "logo" ? imageUrl : logo,
+          storeBio,
+          storeBioAr,
+          storeThemeColor,
+          facebookUrl,
+          instagramUrl,
+          twitterUrl,
+          youtubeUrl,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`فشل في حفظ ${type === "cover" ? "صورة الغلاف" : "الشعار"}`);
+      }
+      
       if (type === "cover") {
         setCoverImage(imageUrl);
       } else {
         setLogo(imageUrl);
       }
       
-      toast.success(`تم رفع ${type === "cover" ? "صورة الغلاف" : "الشعار"} بنجاح`);
+      toast.success(`تم رفع وحفظ ${type === "cover" ? "صورة الغلاف" : "الشعار"} بنجاح ✅`);
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("حدث خطأ أثناء رفع الصورة");
+      toast.error(error instanceof Error ? error.message : "حدث خطأ أثناء رفع الصورة");
     } finally {
       setUploading(false);
     }
@@ -299,6 +324,40 @@ export default function VendorSettingsPage() {
       toast.error(error instanceof Error ? error.message : "حدث خطأ غير متوقع");
     } finally {
       setIsSavingStore(false);
+    }
+  };
+
+  const handleRemoveImage = async (type: "cover" | "logo") => {
+    try {
+      const res = await fetch("/api/vendor/store-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          coverImage: type === "cover" ? null : coverImage,
+          logo: type === "logo" ? null : logo,
+          storeBio,
+          storeBioAr,
+          storeThemeColor,
+          facebookUrl,
+          instagramUrl,
+          twitterUrl,
+          youtubeUrl,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("فشل في إزالة الصورة");
+      }
+
+      if (type === "cover") {
+        setCoverImage(null);
+      } else {
+        setLogo(null);
+      }
+
+      toast.success(`تم إزالة ${type === "cover" ? "صورة الغلاف" : "الشعار"} بنجاح`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "حدث خطأ");
     }
   };
 
@@ -657,8 +716,9 @@ export default function VendorSettingsPage() {
                   {/* Remove Button */}
                   {coverImage && (
                     <button
-                      onClick={() => setCoverImage(null)}
+                      onClick={() => handleRemoveImage("cover")}
                       className="absolute bottom-4 left-4 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-lg transition-all"
+                      title="إزالة صورة الغلاف"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -706,6 +766,17 @@ export default function VendorSettingsPage() {
                           disabled={uploadingLogo}
                         />
                       </label>
+
+                      {/* Remove Logo Button */}
+                      {logo && (
+                        <button
+                          onClick={() => handleRemoveImage("logo")}
+                          className="absolute bottom-0 left-0 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-all"
+                          title="إزالة الشعار"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
 
                     {/* Info */}
@@ -860,6 +931,22 @@ export default function VendorSettingsPage() {
               </CardContent>
             </Card>
 
+            {/* Info Note */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs mt-0.5">
+                  ℹ
+                </div>
+                <div className="text-sm text-blue-800">
+                  <p className="font-semibold mb-1">📌 ملاحظة هامة:</p>
+                  <ul className="list-disc list-inside space-y-1 text-blue-700">
+                    <li>الصور (الغلاف والشعار) تُحفظ تلقائياً عند رفعها ✅</li>
+                    <li>النبذة والروابط تحتاج للضغط على "حفظ إعدادات التخصيص" أدناه 👇</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             {/* Save Button */}
             <form onSubmit={handleSaveCustomization}>
               <Button
@@ -875,7 +962,7 @@ export default function VendorSettingsPage() {
                 ) : (
                   <>
                     <Save className="w-5 h-5 ml-2" />
-                    حفظ إعدادات التخصيص
+                    حفظ النبذة والروابط
                   </>
                 )}
               </Button>
