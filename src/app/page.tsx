@@ -763,9 +763,7 @@ export default async function HomePage() {
                     className="group bg-gray-800/50 hover:bg-blue-600/20 border border-gray-700 hover:border-blue-500 rounded-lg p-3 transition-all hover:scale-105"
                   >
                     <div className="flex flex-col items-center gap-1.5">
-                      <div className="w-10 h-10 bg-blue-600 group-hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors">
-                        <Facebook className="w-5 h-5 text-white" />
-                      </div>
+                      <Facebook className="w-10 h-10 text-blue-600 group-hover:text-blue-700 transition-colors" />
                       <span className="text-[10px] text-gray-400 group-hover:text-blue-400 font-medium">Facebook</span>
                     </div>
                   </a>
@@ -777,9 +775,7 @@ export default async function HomePage() {
                     className="group bg-gray-800/50 hover:bg-pink-600/20 border border-gray-700 hover:border-pink-500 rounded-lg p-3 transition-all hover:scale-105"
                   >
                     <div className="flex flex-col items-center gap-1.5">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 group-hover:from-purple-700 group-hover:via-pink-700 group-hover:to-orange-700 rounded-full flex items-center justify-center transition-all">
-                        <Instagram className="w-5 h-5 text-white" />
-                      </div>
+                      <Instagram className="w-10 h-10 text-pink-600 group-hover:text-pink-700 transition-colors" />
                       <span className="text-[10px] text-gray-400 group-hover:text-pink-400 font-medium">Instagram</span>
                     </div>
                   </a>
@@ -791,11 +787,9 @@ export default async function HomePage() {
                     className="group bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 hover:border-gray-600 rounded-lg p-3 transition-all hover:scale-105"
                   >
                     <div className="flex flex-col items-center gap-1.5">
-                      <div className="w-10 h-10 bg-black group-hover:bg-gray-900 rounded-full flex items-center justify-center transition-colors border border-gray-700">
-                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                        </svg>
-                      </div>
+                      <svg className="w-10 h-10 text-white group-hover:text-gray-300 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                      </svg>
                       <span className="text-[10px] text-gray-400 group-hover:text-white font-medium">TikTok</span>
                     </div>
                   </a>

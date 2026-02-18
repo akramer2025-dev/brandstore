@@ -73,19 +73,19 @@ export function TrustBadgesCompact() {
     <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
       <div className="flex items-center gap-2 text-sm">
         <Shield className="w-5 h-5 text-green-400" />
-        <span className="text-gray-300">SSL Secure</span>
+        <span className="text-gray-300">آمن ومشفر</span>
       </div>
       <div className="flex items-center gap-2 text-sm">
         <CheckCircle className="w-5 h-5 text-blue-400" />
-        <span className="text-gray-300">100% Original</span>
+        <span className="text-gray-300">منتجات أصلية 100%</span>
       </div>
       <div className="flex items-center gap-2 text-sm">
         <Truck className="w-5 h-5 text-purple-400" />
-        <span className="text-gray-300">Fast Shipping</span>
+        <span className="text-gray-300">شحن سريع</span>
       </div>
       <div className="flex items-center gap-2 text-sm">
         <RotateCcw className="w-5 h-5 text-teal-400" />
-        <span className="text-gray-300">14 Days Return</span>
+        <span className="text-gray-300">إرجاع خلال 14 يوم</span>
       </div>
     </div>
   );
