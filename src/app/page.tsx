@@ -855,10 +855,18 @@ export default async function HomePage() {
           
           {/* Bottom Bar */}
           <div className="pt-6 border-t border-gray-800">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-gray-400 text-center md:text-right">
+            <div className="flex flex-col items-center gap-3">
+              {/* Copyright */}
+              <p className="text-sm text-gray-400 text-center">
                 © 2026 <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent font-semibold">Remo Store</span>. جميع الحقوق محفوظة.
               </p>
+              
+              {/* Developer */}
+              <p className="text-xs text-gray-500 text-center">
+                Developed with ❤️ by <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent font-semibold">Eng/ Akram Elmasry</span>
+              </p>
+              
+              {/* SSL & Verified - Last in mobile */}
               <div className="flex items-center gap-4 text-xs text-gray-500">
                 <div className="flex items-center gap-1">
                   <Shield className="w-3 h-3 text-green-400" />
@@ -870,9 +878,6 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
-            <p className="text-xs text-gray-500 text-center mt-3">
-              Developed with ❤️ by <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent font-semibold">Eng/ Akram Elmasry</span>
-            </p>
           </div>
         </div>
       </footer>
