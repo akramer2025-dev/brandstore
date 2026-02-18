@@ -356,16 +356,16 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  {/* حقل البريد الإلكتروني */}
+                  {/* حقل البريد الإلكتروني أو اسم المستخدم */}
                   <div className="space-y-1.5">
                     <Label htmlFor="email" className="text-sm font-semibold text-gray-300">
-                      البريد الإلكتروني
+                      البريد الإلكتروني أو اسم المستخدم
                     </Label>
                     <div className="relative group/input">
                       <Input
                         id="email"
-                        type="email"
-                        placeholder="example@email.com"
+                        type="text"
+                        placeholder="example@email.com أو username"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required

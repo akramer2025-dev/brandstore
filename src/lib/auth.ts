@@ -57,7 +57,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -65,8 +65,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+        // البحث عن المستخدم بواسطة البريد الإلكتروني أو اسم المستخدم
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: credentials.email as string },
+              { username: credentials.email as string },
+            ],
+          },
         });
 
         if (!user || !user.password) {
