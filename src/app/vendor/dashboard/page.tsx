@@ -1039,7 +1039,7 @@ export default function VendorDashboard() {
               </CardContent>
             </Card>
           </Link>
-          <Link href="/vendor/store-settings">
+          <Link href="/vendor/settings?tab=customize">
             <Card className="backdrop-blur-sm bg-purple-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-purple-900/95 hover:border-purple-400/60 group">
               <CardContent className="p-3 md:p-4 text-center">
                 <div className="text-purple-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">

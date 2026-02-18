@@ -1,8 +1,9 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   Settings,
   User,
@@ -13,13 +14,53 @@ import {
   EyeOff,
   Loader2,
   Check,
+  Store,
+  Camera,
+  ImageIcon,
+  X,
+  Palette,
+  Globe,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/BackButton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+
+// دالة رفع الصور إلى Cloudinary
+async function uploadToCloudinary(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "remostore");
+  formData.append("folder", "vendor-stores");
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dgrcwhfl5"}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to upload image");
+  }
+
+  const data = await response.json();
+  return data.secure_url;
+}
 
 export default function VendorSettingsPage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Profile form
   const [name, setName] = useState("");
@@ -40,8 +81,22 @@ export default function VendorSettingsPage() {
   const [storeDescription, setStoreDescription] = useState("");
   const [isSavingStore, setIsSavingStore] = useState(false);
 
+  // Store page customization
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [logo, setLogo] = useState<string | null>(null);
+  const [storeBio, setStoreBio] = useState("");
+  const [storeBioAr, setStoreBioAr] = useState("");
+  const [storeThemeColor, setStoreThemeColor] = useState("#9333ea");
+  const [facebookUrl, setFacebookUrl] = useState("");
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [twitterUrl, setTwitterUrl] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [isSavingCustomization, setIsSavingCustomization] = useState(false);
+
   // Active tab
-  const [activeTab, setActiveTab] = useState<"profile" | "password" | "store">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "password" | "store" | "customize">("profile");
 
   useEffect(() => {
     if (status === "loading") return;
@@ -58,6 +113,20 @@ export default function VendorSettingsPage() {
     setName(session.user.name || "");
     setEmail(session.user.email || "");
   }, [session, status, router]);
+
+  // Read tab from URL and set active tab
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "customize") {
+      setActiveTab("customize");
+    } else if (tab === "password") {
+      setActiveTab("password");
+    } else if (tab === "store") {
+      setActiveTab("store");
+    } else if (tab === "profile") {
+      setActiveTab("profile");
+    }
+  }, [searchParams]);
 
   // Fetch user details
   useEffect(() => {
@@ -79,6 +148,68 @@ export default function VendorSettingsPage() {
       fetchUserDetails();
     }
   }, [session]);
+
+  // Fetch store customization settings
+  useEffect(() => {
+    const fetchCustomizationSettings = async () => {
+      try {
+        const res = await fetch("/api/vendor/store-settings");
+        if (res.ok) {
+          const data = await res.json();
+          setCoverImage(data.coverImage || null);
+          setLogo(data.logo || null);
+          setStoreBio(data.storeBio || "");
+          setStoreBioAr(data.storeBioAr || "");
+          setStoreThemeColor(data.storeThemeColor || "#9333ea");
+          setFacebookUrl(data.facebookUrl || "");
+          setInstagramUrl(data.instagramUrl || "");
+          setTwitterUrl(data.twitterUrl || "");
+          setYoutubeUrl(data.youtubeUrl || "");
+        }
+      } catch (error) {
+        console.error("Failed to fetch customization settings:", error);
+      }
+    };
+    
+    if (session?.user?.role === "VENDOR") {
+      fetchCustomizationSettings();
+    }
+  }, [session]);
+
+  const handleImageUpload = async (file: File, type: "cover" | "logo") => {
+    const setUploading = type === "cover" ? setUploadingCover : setUploadingLogo;
+    
+    try {
+      setUploading(true);
+      
+      // التحقق من نوع الملف
+      if (!file.type.startsWith("image/")) {
+        toast.error("يرجى اختيار صورة");
+        return;
+      }
+
+      // التحقق من حجم الملف (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("حجم الصورة يجب أن يكون أقل من 5 ميجا");
+        return;
+      }
+
+      const imageUrl = await uploadToCloudinary(file);
+      
+      if (type === "cover") {
+        setCoverImage(imageUrl);
+      } else {
+        setLogo(imageUrl);
+      }
+      
+      toast.success(`تم رفع ${type === "cover" ? "صورة الغلاف" : "الشعار"} بنجاح`);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("حدث خطأ أثناء رفع الصورة");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,6 +299,40 @@ export default function VendorSettingsPage() {
     }
   };
 
+  const handleSaveCustomization = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingCustomization(true);
+
+    try {
+      const res = await fetch("/api/vendor/store-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          coverImage,
+          logo,
+          storeBio,
+          storeBioAr,
+          storeThemeColor,
+          facebookUrl,
+          instagramUrl,
+          twitterUrl,
+          youtubeUrl,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "فشل في حفظ إعدادات التخصيص");
+      }
+
+      toast.success("تم حفظ إعدادات التخصيص بنجاح");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "حدث خطأ غير متوقع");
+    } finally {
+      setIsSavingCustomization(false);
+    }
+  };
+
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -180,6 +345,7 @@ export default function VendorSettingsPage() {
     { id: "profile" as const, label: "الملف الشخصي", icon: User },
     { id: "password" as const, label: "كلمة المرور", icon: Lock },
     { id: "store" as const, label: "المتجر", icon: Building },
+    { id: "customize" as const, label: "تخصيص الصفحة", icon: Store },
   ];
 
   return (
@@ -429,6 +595,287 @@ export default function VendorSettingsPage() {
                 )}
                 حفظ الإعدادات
               </button>
+            </form>
+          </div>
+        )}
+
+        {/* Customize Tab - صفحة المتجر */}
+        {activeTab === "customize" && (
+          <div className="space-y-6">
+            {/* Cover Image */}
+            <Card className="overflow-hidden border-2 border-purple-200">
+              <CardContent className="p-0">
+                <div className="relative h-64 md:h-80 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500">
+                  {coverImage ? (
+                    <Image
+                      src={coverImage}
+                      alt="Cover"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center text-white">
+                        <ImageIcon className="w-20 h-20 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg font-semibold">صورة الغلاف</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Upload Button */}
+                  <div className="absolute bottom-4 right-4">
+                    <label className="cursor-pointer">
+                      <div className="bg-white hover:bg-gray-100 text-gray-900 px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-all">
+                        {uploadingCover ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>جاري الرفع...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Camera className="w-5 h-5" />
+                            <span>تغيير الغلاف</span>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file, "cover");
+                        }}
+                        disabled={uploadingCover}
+                      />
+                    </label>
+                  </div>
+
+                  {/* Remove Button */}
+                  {coverImage && (
+                    <button
+                      onClick={() => setCoverImage(null)}
+                      className="absolute bottom-4 left-4 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-lg transition-all"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Logo Section */}
+                <div className="relative -mt-16 px-6 pb-6">
+                  <div className="flex flex-col md:flex-row items-center md:items-end gap-4">
+                    {/* Logo */}
+                    <div className="relative">
+                      <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-xl overflow-hidden">
+                        {logo ? (
+                          <Image
+                            src={logo}
+                            alt="Logo"
+                            width={128}
+                            height={128}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                            <ImageIcon className="w-16 h-16 text-purple-400" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Upload Logo Button */}
+                      <label className="absolute bottom-0 right-0 cursor-pointer">
+                        <div className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full shadow-lg transition-all">
+                          {uploadingLogo ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <Camera className="w-5 h-5" />
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "logo");
+                          }}
+                          disabled={uploadingLogo}
+                        />
+                      </label>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 text-center md:text-right">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                        {session?.user?.name || "متجرك"}
+                      </h2>
+                      <p className="text-gray-600">
+                        صمم صفحة متجرك بشكل احترافي
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Bio Section */}
+            <Card className="border-2 border-purple-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-purple-600" />
+                  نبذة عن المتجر
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>نبذة بالعربية</Label>
+                  <Textarea
+                    value={storeBioAr}
+                    onChange={(e) => setStoreBioAr(e.target.value)}
+                    placeholder="اكتب نبذة مختصرة عن متجرك..."
+                    rows={4}
+                    className="resize-none"
+                    maxLength={500}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    {storeBioAr.length} / 500 حرف
+                  </p>
+                </div>
+
+                <div>
+                  <Label>نبذة بالإنجليزية (اختياري)</Label>
+                  <Textarea
+                    value={storeBio}
+                    onChange={(e) => setStoreBio(e.target.value)}
+                    placeholder="Brief description about your store..."
+                    rows={4}
+                    className="resize-none"
+                    maxLength={500}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Theme Color */}
+            <Card className="border-2 border-purple-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-purple-600" />
+                  لون الثيم المخصص
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="color"
+                    value={storeThemeColor}
+                    onChange={(e) => setStoreThemeColor(e.target.value)}
+                    className="w-20 h-20 rounded-lg cursor-pointer border-2 border-gray-300"
+                  />
+                  <div className="flex-1">
+                    <Label>اختر لون مخصص لصفحة متجرك</Label>
+                    <Input
+                      type="text"
+                      value={storeThemeColor}
+                      onChange={(e) => setStoreThemeColor(e.target.value)}
+                      placeholder="#9333ea"
+                      className="mt-2"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      سيتم استخدام هذا اللون في العناوين والأزرار
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Social Links */}
+            <Card className="border-2 border-purple-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-purple-600" />
+                  روابط التواصل الاجتماعي
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <Facebook className="w-4 h-4 text-blue-600" />
+                    فيسبوك
+                  </Label>
+                  <Input
+                    type="url"
+                    value={facebookUrl}
+                    onChange={(e) => setFacebookUrl(e.target.value)}
+                    placeholder="https://facebook.com/yourusername"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <Instagram className="w-4 h-4 text-pink-600" />
+                    إنستجرام
+                  </Label>
+                  <Input
+                    type="url"
+                    value={instagramUrl}
+                    onChange={(e) => setInstagramUrl(e.target.value)}
+                    placeholder="https://instagram.com/yourusername"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <Twitter className="w-4 h-4 text-blue-400" />
+                    تويتر / X
+                  </Label>
+                  <Input
+                    type="url"
+                    value={twitterUrl}
+                    onChange={(e) => setTwitterUrl(e.target.value)}
+                    placeholder="https://twitter.com/yourusername"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <Youtube className="w-4 h-4 text-red-600" />
+                    يوتيوب
+                  </Label>
+                  <Input
+                    type="url"
+                    value={youtubeUrl}
+                    onChange={(e) => setYoutubeUrl(e.target.value)}
+                    placeholder="https://youtube.com/@yourchannel"
+                    className="mt-2"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Save Button */}
+            <form onSubmit={handleSaveCustomization}>
+              <Button
+                type="submit"
+                disabled={isSavingCustomization}
+                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-xl"
+              >
+                {isSavingCustomization ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                    جاري الحفظ...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5 ml-2" />
+                    حفظ إعدادات التخصيص
+                  </>
+                )}
+              </Button>
             </form>
           </div>
         )}

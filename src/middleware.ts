@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; " +
     "font-src 'self' https://fonts.gstatic.com; " +
     "img-src 'self' data: https: blob:; " +
-    "connect-src 'self' https://www.google-analytics.com https://graph.facebook.com https://accounts.google.com; " +
+    "connect-src 'self' https://www.google-analytics.com https://graph.facebook.com https://accounts.google.com https://api.cloudinary.com https://res.cloudinary.com; " +
     "frame-src 'self' https://www.facebook.com https://web.facebook.com https://accounts.google.com; " +
     "frame-ancestors 'none';"
   );
