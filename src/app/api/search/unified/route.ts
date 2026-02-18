@@ -6,6 +6,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q')?.trim() || '';
 
+    console.log('🔍 Search Query:', query);
+
     if (!query || query.length < 2) {
       return NextResponse.json({
         success: true,
@@ -63,6 +65,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             storeName: true,
+            businessName: true,
           },
         },
       },
@@ -78,6 +81,7 @@ export async function GET(request: NextRequest) {
       where: {
         OR: [
           { storeName: { contains: query, mode: 'insensitive' } },
+          { businessName: { contains: query, mode: 'insensitive' } },
           { storeDescription: { contains: query, mode: 'insensitive' } },
         ],
         isApproved: true,
@@ -99,6 +103,12 @@ export async function GET(request: NextRequest) {
 
     const totalResults = products.length + vendors.length;
 
+    console.log('📊 Search Results:', {
+      productsCount: products.length,
+      vendorsCount: vendors.length,
+      totalResults,
+    });
+
     return NextResponse.json({
       success: true,
       products: products.map(p => ({
@@ -112,12 +122,12 @@ export async function GET(request: NextRequest) {
         inStock: p.stock > 0,
         vendor: p.vendor ? {
           id: p.vendor.id,
-          name: p.vendor.storeName,
+          name: p.vendor.storeName || p.vendor.businessName || 'متجر شريك',
         } : null,
       })),
       vendors: vendors.map(v => ({
         id: v.id,
-        storeName: v.storeName,
+        storeName: v.storeName || v.businessName || 'متجر شريك',
         storeDescription: v.storeDescription,
         storeLogo: null,
         ownerName: null,

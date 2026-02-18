@@ -83,15 +83,21 @@ export function AdvancedSearch({ isOpen, onClose }: AdvancedSearchProps) {
         const response = await fetch(`/api/search/unified?q=${encodeURIComponent(searchTerm)}`);
         const data = await response.json();
         
+        console.log('🔍 Search Response:', data);
+        
         if (data.success) {
           setResults({
             products: data.products || [],
             vendors: data.vendors || [],
             totalResults: data.totalResults || 0,
           });
+          console.log('✅ Results Updated:', {
+            products: data.products?.length || 0,
+            vendors: data.vendors?.length || 0,
+          });
         }
       } catch (error) {
-        console.error('Search error:', error);
+        console.error('❌ Search error:', error);
       } finally {
         setIsSearching(false);
       }
@@ -117,6 +123,17 @@ export function AdvancedSearch({ isOpen, onClose }: AdvancedSearchProps) {
 
   const productsToShow = activeTab === 'vendors' ? [] : results.products;
   const vendorsToShow = activeTab === 'products' ? [] : results.vendors;
+
+  console.log('🎯 Render State:', {
+    isSearching,
+    searchTerm,
+    totalResults: results.totalResults,
+    productsCount: results.products.length,
+    vendorsCount: results.vendors.length,
+    activeTab,
+    productsToShow: productsToShow.length,
+    vendorsToShow: vendorsToShow.length,
+  });
 
   const discountPercentage = (product: Product) => {
     if (product.fakePrice && product.fakePrice > product.price) {
@@ -173,7 +190,7 @@ export function AdvancedSearch({ isOpen, onClose }: AdvancedSearchProps) {
           </div>
 
           {/* Tabs */}
-          {results.totalResults > 0 && (
+          {!isSearching && results.totalResults > 0 && (
             <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
               <button
                 onClick={() => setActiveTab('all')}
@@ -305,7 +322,7 @@ export function AdvancedSearch({ isOpen, onClose }: AdvancedSearchProps) {
                             {product.name}
                           </h4>
                           
-                          {product.vendor && (
+                          {product.vendor && product.vendor.name && (
                             <p className="text-xs text-purple-400 mb-1 flex items-center gap-1">
                               <Store className="w-3 h-3" />
                               {product.vendor.name}
