@@ -57,9 +57,9 @@ export const metadata: Metadata = {
     description: 'متجر إلكتروني موثوق - منتجات أصلية، شحن سريع، دفع آمن عند الاستلام',
     images: [
       {
-        url: '/logo.png',
-        width: 1200,
-        height: 630,
+        url: '/icon-512x512.png',
+        width: 512,
+        height: 512,
         alt: 'Remostore Logo',
       },
     ],
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Remostore - متجر ريموستور',
     description: 'متجر إلكتروني موثوق في مصر - منتجات أصلية وشحن سريع',
-    images: ['/logo.png'],
+    images: ['/icon-512x512.png'],
   },
   robots: {
     index: true,
@@ -86,9 +86,12 @@ export const metadata: Metadata = {
     // google: 'your-google-verification-code',
   },
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-    shortcut: '/logo.png'
+    icon: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+    shortcut: '/icon-192x192.png'
   },
   category: 'E-commerce',
 };
@@ -109,7 +112,9 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Remostore" />

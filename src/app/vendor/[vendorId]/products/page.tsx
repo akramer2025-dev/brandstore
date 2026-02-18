@@ -222,6 +222,8 @@ export default function VendorProductsPage() {
               fill
               className="object-cover"
               priority
+              fetchPriority="high"
+              loading="eager"
               sizes="100vw"
             />
             {/* Overlay */}
@@ -257,6 +259,8 @@ export default function VendorProductsPage() {
                         height={176}
                         className="w-full h-full object-cover rounded-full"
                         priority
+                        fetchPriority="high"
+                        loading="eager"
                         sizes="(max-width: 768px) 144px, 176px"
                       />
                     ) : (
