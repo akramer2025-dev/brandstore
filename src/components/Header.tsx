@@ -11,6 +11,7 @@ import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { MobileSidebar } from "@/components/MobileSidebar";
+import { AdvancedSearch } from "@/components/AdvancedSearch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +42,7 @@ export function Header() {
   const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
@@ -321,7 +323,7 @@ export function Header() {
             </h1>
           </Link>
 
-          {/* Navigation & Search */}
+          {/* Navigation */}
           <div className="flex items-center gap-2 sm:gap-4 flex-1">
             <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
               <Link href="/" className="text-gray-300 hover:text-cyan-400 transition-colors whitespace-nowrap text-xs">
@@ -337,99 +339,34 @@ export function Header() {
                 ⚡ عروض خاطفة
               </Link>
             </nav>
-
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="hidden sm:flex items-center gap-2 flex-1 max-w-lg">
-              <div ref={searchRef} className="relative flex-1">
-                <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-teal-400 w-5 h-5" />
-                <Input
-                  type="text"
-                  placeholder="ابحث عن منتج... (مثال: لاب توب، موبايل، شاشة)"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                  className="w-full pr-12 pl-4 bg-gray-800/80 border-2 border-teal-700/50 text-white placeholder:text-gray-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 h-11 text-base font-medium rounded-xl shadow-lg transition-all duration-300"
-                />
-                
-                {/* الاقتراحات المنسدلة */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border-2 border-teal-700/50 rounded-xl shadow-2xl max-h-96 overflow-y-auto z-50">
-                    {suggestions.map((product) => (
-                      <button
-                        key={product.id}
-                        type="button"
-                        onClick={() => {
-                          router.push(`/products/${product.id}`);
-                          setSearchTerm("");
-                          setShowSuggestions(false);
-                        }}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-teal-700/20 transition-colors border-b border-gray-700 last:border-0"
-                      >
-                        <img 
-                          src={product.imageUrl} 
-                          alt={product.name}
-                          className="w-14 h-14 object-cover rounded-lg"
-                        />
-                        <div className="flex-1 text-right">
-                          <p className="text-white text-base font-semibold">{product.name}</p>
-                          <p className="text-teal-400 text-sm font-bold">{product.price} جنيه</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              {/* زر البحث */}
-              <Button 
-                type="submit"
-                size="default"
-                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-6 h-11 rounded-xl font-bold shadow-lg transition-all duration-300"
+            
+            {/* Advanced Search Button - Desktop */}
+            <div className="hidden sm:flex flex-1 justify-center">
+              <Button
+                onClick={() => setIsAdvancedSearchOpen(true)}
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 h-10 rounded-xl font-bold shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 flex items-center gap-2 group"
               >
-                <Search className="w-5 h-5 ml-2" />
-                بحث
+                <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span className="hidden md:inline">بحث متقدم</span>
+                <span className="md:hidden">بحث</span>
               </Button>
-              
-              {/* زر البحث بالصورة */}
-              <Button 
-                type="button"
-                size="default"
-                variant="outline"
-                onClick={() => imageInputRef.current?.click()}
-                className="border-2 border-teal-700/50 hover:bg-teal-700/20 text-teal-400 px-4 h-11 rounded-xl"
-                title="البحث بالصورة"
-              >
-                <ImageIcon className="w-5 h-5" />
-              </Button>
-              
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleImageSearch(file);
-                  }
-                }}
-              />
-            </form>
+            </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Mobile Search Button - يظهر أولاً على اليمين */}
+            {/* Advanced Search Button - Mobile */}
             <Button
+              onClick={() => setIsAdvancedSearchOpen(true)}
               variant="ghost"
               size="icon"
-              onClick={() => setIsMobileSearchOpen(true)}
-              className="sm:hidden text-gray-300 hover:text-cyan-400 hover:bg-teal-900/50 hover:scale-110 transition-all duration-300 w-9 h-9"
+              className="sm:hidden text-gray-300 hover:text-cyan-400 hover:bg-cyan-900/50 hover:scale-110 transition-all duration-300 w-9 h-9 relative"
             >
               <Search className="w-5 h-5 animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
             </Button>
-
-            {/* Mobile Menu Button - يظهر ثانياً على اليسار */}
+            
+            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
@@ -662,130 +599,11 @@ export function Header() {
       {/* Mobile Sidebar */}
       <MobileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      {/* Mobile Search Overlay */}
-      {isMobileSearchOpen && (
-        <div className="fixed inset-0 z-[100] bg-gray-900/98 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="container mx-auto px-3 py-3">
-            <div className="flex items-center gap-2 mb-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setIsMobileSearchOpen(false);
-                  setSearchTerm("");
-                  setShowSuggestions(false);
-                }}
-                className="text-gray-300 hover:text-red-400 hover:bg-red-900/30 shrink-0 w-9 h-9"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </Button>
-              
-              <form onSubmit={handleSearch} className="flex-1 flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 w-4 h-4" />
-                  <Input
-                    ref={mobileSearchInputRef}
-                    type="text"
-                    placeholder="ابحث عن منتج..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pr-10 pl-3 h-10 bg-gray-800/80 border-2 border-teal-500/50 text-white placeholder:text-gray-400 focus:border-cyan-400 text-sm rounded-lg shadow-lg shadow-cyan-500/20"
-                  />
-                </div>
-                
-                <Button 
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  onClick={() => imageInputRef.current?.click()}
-                  className="border-2 border-teal-500/50 hover:bg-teal-700/30 text-cyan-400 w-10 h-10 shrink-0 rounded-lg"
-                  title="البحث بالصورة"
-                >
-                  <ImageIcon className="w-4 h-4" />
-                </Button>
-                
-                <Button 
-                  type="submit"
-                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-4 h-10 shrink-0 rounded-lg shadow-lg shadow-cyan-500/30 text-sm"
-                >
-                  بحث
-                </Button>
-              </form>
-            </div>
-            
-            {/* Mobile Search Suggestions */}
-            {searchTerm.trim().length >= 2 && suggestions.length > 0 && (
-              <div className="bg-gray-800/90 border-2 border-teal-500/30 rounded-lg shadow-2xl max-h-[calc(100vh-100px)] overflow-y-auto backdrop-blur-sm">
-                <div className="p-2">
-                  <p className="text-gray-400 text-xs px-2 py-1.5 font-medium">النتائج المقترحة:</p>
-                  {suggestions.map((product) => (
-                    <button
-                      key={product.id}
-                      type="button"
-                      onClick={() => {
-                        router.push(`/products/${product.id}`);
-                        setSearchTerm("");
-                        setShowSuggestions(false);
-                        setIsMobileSearchOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 p-2 hover:bg-gradient-to-r hover:from-teal-900/40 hover:to-cyan-900/40 transition-all duration-200 rounded-lg mb-1.5 active:scale-95"
-                    >
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        className="w-12 h-12 object-cover rounded-lg shadow-md flex-shrink-0"
-                      />
-                      <div className="flex-1 text-right min-w-0">
-                        <p className="text-white text-xs font-medium mb-0.5 line-clamp-1">{product.name}</p>
-                        <p className="text-cyan-400 text-sm font-bold">{product.price} ج.م</p>
-                      </div>
-                      <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Empty State */}
-            {searchTerm.trim().length >= 2 && suggestions.length === 0 && (
-              <div className="text-center py-8">
-                <div className="w-14 h-14 mx-auto mb-3 bg-gray-800/50 rounded-full flex items-center justify-center">
-                  <Search className="w-7 h-7 text-gray-600" />
-                </div>
-                <p className="text-gray-400 text-base font-medium">لا توجد نتائج</p>
-                <p className="text-gray-500 text-xs mt-1">حاول البحث بكلمات أخرى</p>
-              </div>
-            )}
-            
-            {/* Hints */}
-            {searchTerm.trim().length === 0 && (
-              <div className="text-center py-8 px-3">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-600/20 to-cyan-600/20 rounded-full flex items-center justify-center animate-pulse">
-                  <Search className="w-8 h-8 text-cyan-400" />
-                </div>
-                <h3 className="text-white text-lg font-bold mb-1.5">ابحث عن منتجاتك المفضلة</h3>
-                <p className="text-gray-400 text-xs mb-4">أدخل اسم المنتج أو الفئة أو العلامة التجارية</p>
-                
-                <div className="flex flex-wrap gap-1.5 justify-center max-w-md mx-auto">
-                  {['تيشيرتات', 'أحذية', 'مستحضرات تجميل', 'اكسسوارات', 'ذهب'].map((keyword) => (
-                    <button
-                      key={keyword}
-                      onClick={() => setSearchTerm(keyword)}
-                      className="px-3 py-1.5 bg-gray-800/50 hover:bg-teal-600/30 text-gray-300 hover:text-cyan-400 rounded-full text-xs border border-gray-700/50 hover:border-cyan-500/50 transition-all duration-200 active:scale-95"
-                    >
-                      {keyword}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Advanced Search Modal */}
+      <AdvancedSearch 
+        isOpen={isAdvancedSearchOpen} 
+        onClose={() => setIsAdvancedSearchOpen(false)} 
+      />
     </header>
   );
 }
