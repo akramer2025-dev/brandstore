@@ -817,6 +817,35 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
+              {/* رابط تصفح منتجات التاجر */}
+              {product.vendor && (
+                <Link 
+                  href={`/vendor/${product.vendor.id}/products`}
+                  className="block mb-4"
+                >
+                  <div className="group relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white rounded-xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
+                    {/* Animated Background */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-700 via-pink-700 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <div className="relative flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Store className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-base">تصفح جميع منتجات التاجر</div>
+                          <div className="text-white/90 text-xs">اكتشف المزيد من المنتجات المميزة</div>
+                        </div>
+                      </div>
+                      <ArrowRight className="w-6 h-6 group-hover:translate-x-[-4px] transition-transform" />
+                    </div>
+
+                    {/* Shine Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  </div>
+                </Link>
+              )}
+
               <div className="grid gap-3">
                 <div className="flex items-start gap-3 bg-white rounded-lg p-3 border border-purple-100">
                   <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-purple-100 rounded-full">
