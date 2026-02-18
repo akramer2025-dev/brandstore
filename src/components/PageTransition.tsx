@@ -130,6 +130,7 @@ export function PageTransition() {
               src="/logo.png"
               alt="Logo"
               fill
+              sizes="(max-width: 768px) 96px, 112px"
               className="object-cover"
               priority
             />

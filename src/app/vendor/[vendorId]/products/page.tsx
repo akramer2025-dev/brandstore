@@ -19,9 +19,6 @@ import {
   Heart,
   ShoppingCart,
   ArrowRight,
-  CheckCircle,
-  Truck,
-  Shield,
   Facebook,
   Instagram,
   Twitter,
@@ -180,10 +177,10 @@ export default function VendorProductsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center p-3 sm:p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-semibold">جاري التحميل...</p>
+          <div className="animate-spin rounded-full h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 border-b-4 border-purple-600 mx-auto"></div>
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-600 font-semibold">جاري التحميل...</p>
         </div>
       </div>
     );
@@ -191,13 +188,13 @@ export default function VendorProductsPage() {
 
   if (!vendor) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="p-8 text-center">
-            <Store className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">المتجر غير موجود</h2>
-            <p className="text-gray-600 mb-6">عذراً، لم نتمكن من العثور على هذا المتجر</p>
-            <Button onClick={() => router.push('/')} className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center p-3 sm:p-4">
+        <Card className="max-w-md w-full rounded-lg sm:rounded-xl">
+          <CardContent className="p-4 sm:p-6 md:p-8 text-center">
+            <Store className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto text-gray-400 mb-2 sm:mb-3 md:mb-4" />
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">المتجر غير موجود</h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">عذراً، لم نتمكن من العثور على هذا المتجر</p>
+            <Button onClick={() => router.push('/')} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-sm sm:text-base">
               العودة للرئيسية
             </Button>
           </CardContent>
@@ -215,7 +212,7 @@ export default function VendorProductsPage() {
       <div className="relative text-white overflow-hidden">
         {/* Cover Image or Gradient Background */}
         {vendor.coverImage ? (
-          <div className="relative h-80 sm:h-96 md:h-[400px] lg:h-[450px]">
+          <div className="relative h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[400px]">
             <Image
               src={vendor.coverImage}
               alt={vendorDisplayName}
@@ -230,7 +227,7 @@ export default function VendorProductsPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
           </div>
         ) : (
-          <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 h-80 sm:h-96 md:h-[400px]">
+          <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[400px]">
             {/* Animated Background Pattern */}
             <div className="absolute inset-0 opacity-20">
               <div className="absolute inset-0" style={{
@@ -243,30 +240,30 @@ export default function VendorProductsPage() {
           </div>
         )}
 
-        <div className="container mx-auto px-4 relative" style={{ marginTop: vendor.coverImage ? '-120px' : '0' }}>
+        <div className="container mx-auto px-3 sm:px-4 relative" style={{ marginTop: vendor.coverImage ? '-80px' : '0' }}>
           {/* Profile Section */}
-          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div className="px-4 md:px-8 py-6 md:py-8">
-              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
+          <div className="bg-white/70 backdrop-blur-lg rounded-lg sm:rounded-xl md:rounded-2xl shadow-2xl overflow-visible border border-white/30 backdrop-saturate-150">
+            <div className="px-3 sm:px-4 md:px-8 py-2 sm:py-4 md:py-6 lg:py-8">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-2 sm:gap-3 md:gap-4 lg:gap-6">
                 {/* Logo - محسّن للموبايل */}
-                <div className="flex-shrink-0 -mt-24 md:-mt-28 lg:-mt-32">
-                  <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-60 md:h-60 lg:w-64 lg:h-64 rounded-full bg-white p-3 shadow-2xl ring-6 md:ring-8 ring-white hover:ring-purple-200 transition-all duration-300">
+                <div className="flex-shrink-0 -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-28 xl:-mt-32 relative z-50">
+                  <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 xl:w-48 xl:h-48 rounded-full bg-white p-3 shadow-2xl ring-2 sm:ring-3 md:ring-4 ring-white hover:ring-purple-200 transition-all duration-300">
                     {vendor.logo ? (
                       <Image
                         src={vendor.logo}
                         alt={vendorDisplayName}
-                        width={256}
-                        height={256}
+                        width={176}
+                        height={176}
                         quality={95}
                         className="w-full h-full object-contain rounded-full"
                         priority
                         fetchPriority="high"
                         loading="eager"
-                        sizes="(max-width: 640px) 192px, (max-width: 768px) 224px, (max-width: 1024px) 240px, 256px"
+                        sizes="(max-width: 640px) 128px, (max-width: 768px) 144px, (max-width: 1024px) 160px, 176px"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
-                        <Store className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 text-purple-600" />
+                        <Store className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:w-16 text-purple-600" />
                       </div>
                     )}
                   </div>
@@ -274,13 +271,13 @@ export default function VendorProductsPage() {
 
                 {/* Info */}
                 <div className="flex-1 text-center md:text-right w-full">
-                  <div className="flex flex-col md:flex-row items-center md:items-center md:justify-between gap-3">
+                  <div className="flex flex-col md:flex-row items-center md:items-center md:justify-between gap-1.5 sm:gap-2 md:gap-3">
                     <div className="w-full md:w-auto">
-                      <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-2">
+                      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 mb-0.5 sm:mb-1 md:mb-2">
                         {vendorDisplayName}
                       </h1>
                       {(vendor.storeBioAr || vendor.storeBio) && (
-                        <p className="text-sm sm:text-base text-gray-600 mb-3 max-w-2xl mx-auto md:mx-0">
+                        <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-1 sm:mb-2 md:mb-3 max-w-2xl mx-auto md:mx-0">
                           {vendor.storeBioAr || vendor.storeBio}
                         </p>
                       )}
@@ -288,15 +285,15 @@ export default function VendorProductsPage() {
 
                     {/* Social Links */}
                     {(vendor.facebookUrl || vendor.instagramUrl || vendor.twitterUrl || vendor.youtubeUrl) && (
-                      <div className="flex items-center gap-2 mt-4 md:mt-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-2 md:mt-0">
                         {vendor.facebookUrl && (
                           <a
                             href={vendor.facebookUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white transition-all"
+                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white transition-all"
                           >
-                            <Facebook className="w-5 h-5" />
+                            <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
                           </a>
                         )}
                         {vendor.instagramUrl && (
@@ -304,9 +301,9 @@ export default function VendorProductsPage() {
                             href={vendor.instagramUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center justify-center text-white transition-all"
+                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center justify-center text-white transition-all"
                           >
-                            <Instagram className="w-5 h-5" />
+                            <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
                           </a>
                         )}
                         {vendor.twitterUrl && (
@@ -314,9 +311,9 @@ export default function VendorProductsPage() {
                             href={vendor.twitterUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-full bg-black hover:bg-gray-800 flex items-center justify-center text-white transition-all"
+                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-black hover:bg-gray-800 flex items-center justify-center text-white transition-all"
                           >
-                            <Twitter className="w-5 h-5" />
+                            <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
                           </a>
                         )}
                         {vendor.youtubeUrl && (
@@ -324,9 +321,9 @@ export default function VendorProductsPage() {
                             href={vendor.youtubeUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center text-white transition-all"
+                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center text-white transition-all"
                           >
-                            <Youtube className="w-5 h-5" />
+                            <Youtube className="w-4 h-4 sm:w-5 sm:h-5" />
                           </a>
                         )}
                       </div>
@@ -334,28 +331,28 @@ export default function VendorProductsPage() {
                   </div>
 
                   {/* Stats */}
-                  <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 mt-4">
-                    <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
-                      <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                      <span className="font-bold text-gray-900">{vendor.rating.toFixed(1)}</span>
-                      <span className="text-gray-600 text-sm">تقييم</span>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 mt-1.5 sm:mt-2 md:mt-3 lg:mt-4">
+                    <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-gray-100 rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2">
+                      <Star className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-yellow-500 fill-yellow-500" />
+                      <span className="font-bold text-gray-900 text-xs sm:text-sm md:text-base">{vendor.rating.toFixed(1)}</span>
+                      <span className="text-gray-600 text-[10px] sm:text-xs md:text-sm">تقييم</span>
                     </div>
                     
-                    <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
-                      <Package className="w-5 h-5 text-purple-600" />
-                      <span className="font-bold text-gray-900">{vendor.totalProducts}</span>
-                      <span className="text-gray-600 text-sm">منتج</span>
+                    <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-gray-100 rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2">
+                      <Package className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-purple-600" />
+                      <span className="font-bold text-gray-900 text-xs sm:text-sm md:text-base">{vendor.totalProducts}</span>
+                      <span className="text-gray-600 text-[10px] sm:text-xs md:text-sm">منتج</span>
                     </div>
                     
-                    <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
-                      <ShoppingBag className="w-5 h-5 text-pink-600" />
-                      <span className="font-bold text-gray-900">{vendor.totalOrders}+</span>
-                      <span className="text-gray-600 text-sm">طلب</span>
+                    <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-gray-100 rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2">
+                      <ShoppingBag className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-pink-600" />
+                      <span className="font-bold text-gray-900 text-xs sm:text-sm md:text-base">{vendor.totalOrders}+</span>
+                      <span className="text-gray-600 text-[10px] sm:text-xs md:text-sm">طلب</span>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full px-4 py-2">
-                      <Award className="w-5 h-5" />
-                      <span className="font-bold text-sm">بائع موثوق</span>
+                    <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2">
+                      <Award className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                      <span className="font-bold text-[10px] sm:text-xs md:text-sm">بائع موثوق</span>
                     </div>
                   </div>
                 </div>
@@ -376,115 +373,79 @@ export default function VendorProductsPage() {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Features Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="border-2 border-purple-100 hover:border-purple-300 transition-all">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900">جودة مضمونة</h3>
-                <p className="text-sm text-gray-600">منتجات أصلية 100%</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-purple-100 hover:border-purple-300 transition-all">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center">
-                <Truck className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900">شحن سريع</h3>
-                <p className="text-sm text-gray-600">توصيل لجميع المحافظات</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-purple-100 hover:border-purple-300 transition-all">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900">دفع آمن</h3>
-                <p className="text-sm text-gray-600">حماية كاملة للمدفوعات</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
         {/* Search and Filters */}
-        <Card className="mb-8 shadow-lg border-2 border-purple-100">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4">
+        <Card className="mb-4 sm:mb-6 md:mb-8 shadow-lg border-2 border-purple-100 rounded-lg sm:rounded-xl">
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="space-y-2 sm:space-y-3">
               {/* Search */}
-              <div className="flex-1 relative">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className="w-full relative">
+                <Search className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                 <Input
                   type="text"
                   placeholder="ابحث عن منتج..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-10 h-12 text-lg border-2 border-purple-200 focus:border-purple-500"
+                  className="pr-8 sm:pr-10 h-9 sm:h-10 md:h-12 text-sm sm:text-base md:text-lg border-2 border-purple-200 focus:border-purple-500"
                 />
               </div>
 
-              {/* Category Filter */}
-              {categories.length > 0 && (
+              {/* Filters Row */}
+              <div className="flex gap-1.5 sm:gap-2 md:gap-3">
+                {/* Category Filter */}
+                {categories.length > 0 && (
+                  <select
+                    value={selectedCategory || ""}
+                    onChange={(e) => setSelectedCategory(e.target.value || null)}
+                    className="flex-1 h-9 sm:h-10 md:h-12 px-2 sm:px-3 md:px-4 text-xs sm:text-sm md:text-base border-2 border-purple-200 rounded-md focus:border-purple-500 focus:outline-none"
+                  >
+                    <option value="">كل الفئات</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.nameAr}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {/* Sort */}
                 <select
-                  value={selectedCategory || ""}
-                  onChange={(e) => setSelectedCategory(e.target.value || null)}
-                  className="h-12 px-4 border-2 border-purple-200 rounded-md focus:border-purple-500 focus:outline-none"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="flex-1 h-9 sm:h-10 md:h-12 px-2 sm:px-3 md:px-4 text-xs sm:text-sm md:text-base border-2 border-purple-200 rounded-md focus:border-purple-500 focus:outline-none"
                 >
-                  <option value="">كل الفئات</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.nameAr}
-                    </option>
-                  ))}
+                  <option value="newest">الأحدث</option>
+                  <option value="price-low">السعر: الأقل أولاً</option>
+                  <option value="price-high">السعر: الأعلى أولاً</option>
+                  <option value="popular">الأكثر شعبية</option>
                 </select>
-              )}
 
-              {/* Sort */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="h-12 px-4 border-2 border-purple-200 rounded-md focus:border-purple-500 focus:outline-none"
-              >
-                <option value="newest">الأحدث</option>
-                <option value="price-low">السعر: الأقل أولاً</option>
-                <option value="price-high">السعر: الأعلى أولاً</option>
-                <option value="popular">الأكثر شعبية</option>
-              </select>
-
-              {/* View Mode */}
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setViewMode("grid")}
-                  className="h-12 w-12"
-                >
-                  <LayoutGrid className="w-5 h-5" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setViewMode("list")}
-                  className="h-12 w-12"
-                >
-                  <Grid3x3 className="w-5 h-5" />
-                </Button>
+                {/* View Mode */}
+                <div className="flex gap-1 sm:gap-2">
+                  <Button
+                    variant={viewMode === "grid" ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setViewMode("grid")}
+                    className="h-9 w-9 sm:h-10 sm:w-10 md:h-12 md:w-12"
+                  >
+                    <LayoutGrid className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "list" ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setViewMode("list")}
+                    className="h-9 w-9 sm:h-10 sm:w-10 md:h-12 md:w-12"
+                  >
+                    <Grid3x3 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </Button>
+                </div>
               </div>
             </div>
 
             {/* Results Count */}
-            <div className="mt-4 flex items-center gap-2 text-gray-600">
-              <Filter className="w-4 h-4" />
-              <span className="font-semibold">
+            <div className="mt-3 sm:mt-4 flex items-center gap-1.5 sm:gap-2 text-gray-600">
+              <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="font-semibold text-xs sm:text-sm md:text-base">
                 عرض {filteredProducts.length} من {products.length} منتج
               </span>
             </div>
@@ -493,10 +454,10 @@ export default function VendorProductsPage() {
 
         {/* Products Grid/List */}
         {filteredProducts.length === 0 ? (
-          <Card className="p-12 text-center">
-            <Package className="w-20 h-20 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">لا توجد منتجات</h3>
-            <p className="text-gray-600">
+          <Card className="p-6 sm:p-8 md:p-12 text-center rounded-lg sm:rounded-xl">
+            <Package className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 mx-auto text-gray-400 mb-2 sm:mb-3 md:mb-4" />
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">لا توجد منتجات</h3>
+            <p className="text-sm sm:text-base text-gray-600">
               {searchQuery || selectedCategory 
                 ? "حاول تغيير معايير البحث" 
                 : "لم يتم إضافة منتجات بعد"}
@@ -521,6 +482,7 @@ export default function VendorProductsPage() {
                         src={product.images.split(',')[0]}
                         alt={product.nameAr}
                         fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     ) : (
