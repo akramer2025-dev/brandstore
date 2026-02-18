@@ -250,7 +250,7 @@ export default function VendorProductsPage() {
               <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
                 {/* Logo - محسّن للموبايل */}
                 <div className="flex-shrink-0 -mt-24 md:-mt-28 lg:-mt-32">
-                  <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-60 md:h-60 lg:w-64 lg:h-64 rounded-full bg-white p-2 shadow-2xl ring-6 md:ring-8 ring-white hover:ring-purple-200 transition-all duration-300">
+                  <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-60 md:h-60 lg:w-64 lg:h-64 rounded-full bg-white p-3 shadow-2xl ring-6 md:ring-8 ring-white hover:ring-purple-200 transition-all duration-300">
                     {vendor.logo ? (
                       <Image
                         src={vendor.logo}
@@ -258,7 +258,7 @@ export default function VendorProductsPage() {
                         width={256}
                         height={256}
                         quality={95}
-                        className="w-full h-full object-cover rounded-full"
+                        className="w-full h-full object-contain rounded-full"
                         priority
                         fetchPriority="high"
                         loading="eager"
@@ -505,7 +505,7 @@ export default function VendorProductsPage() {
         ) : (
           <div className={
             viewMode === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              ? "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6"
               : "flex flex-col gap-4"
           }>
             {filteredProducts.map((product) => (
@@ -530,60 +530,63 @@ export default function VendorProductsPage() {
                     )}
 
                     {/* Badges */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-2">
+                    <div className="absolute top-1.5 sm:top-2 md:top-3 right-1.5 sm:right-2 md:right-3 flex flex-col gap-1 sm:gap-1.5 md:gap-2">
                       {product.isFlashDeal && (
-                        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-current" />
-                          عرض خاص
+                        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-0.5 md:py-1 rounded-full text-[8px] sm:text-[10px] md:text-xs font-bold shadow-lg flex items-center gap-0.5 sm:gap-1">
+                          <Star className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 fill-current" />
+                          <span className="hidden sm:inline">عرض خاص</span>
+                          <span className="inline sm:hidden">عرض</span>
                         </div>
                       )}
                       {product.stock < 5 && product.stock > 0 && (
-                        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                          آخر {product.stock} قطع
+                        <div className="bg-red-500 text-white px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-0.5 md:py-1 rounded-full text-[8px] sm:text-[10px] md:text-xs font-bold shadow-lg">
+                          <span className="hidden sm:inline">آخر {product.stock} قطع</span>
+                          <span className="inline sm:hidden">{product.stock}</span>
                         </div>
                       )}
                       {product.stock === 0 && (
-                        <div className="bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                          نفذت الكمية
+                        <div className="bg-gray-900 text-white px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-0.5 md:py-1 rounded-full text-[8px] sm:text-[10px] md:text-xs font-bold shadow-lg">
+                          <span className="hidden sm:inline">نفذت الكمية</span>
+                          <span className="inline sm:hidden">نفذ</span>
                         </div>
                       )}
                     </div>
 
                     {/* Actions */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-1.5 sm:top-2 md:top-3 left-1.5 sm:left-2 md:left-3 flex flex-col gap-1 sm:gap-1.5 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => handleToggleWishlist(product)}
-                        className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-pink-50 transition-colors"
+                        className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-pink-50 transition-colors"
                       >
                         <Heart 
-                          className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-pink-500 text-pink-500' : 'text-gray-600'}`} 
+                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 ${isInWishlist(product.id) ? 'fill-pink-500 text-pink-500' : 'text-gray-600'}`} 
                         />
                       </button>
                     </div>
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
+                  <div className="p-2 sm:p-3 md:p-4">
                     {/* Category */}
-                    <div className="text-xs text-purple-600 font-semibold mb-1">
+                    <div className="text-[10px] sm:text-xs text-purple-600 font-semibold mb-1">
                       {product.category.nameAr}
                     </div>
 
                     {/* Title */}
                     <Link href={`/products/${product.id}`}>
-                      <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 hover:text-purple-600 transition-colors min-h-[3.5rem]">
+                      <h3 className="font-bold text-gray-900 text-xs sm:text-sm md:text-base mb-1 sm:mb-2 line-clamp-2 hover:text-purple-600 transition-colors min-h-[2rem] sm:min-h-[2.5rem] md:min-h-[3.5rem]">
                         {product.nameAr}
                       </h3>
                     </Link>
 
                     {/* Rating */}
                     {product.reviewCount > 0 && (
-                      <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-4 h-4 ${
+                              className={`w-3 h-3 sm:w-4 sm:h-4 ${
                                 i < Math.round(product.rating)
                                   ? 'text-yellow-400 fill-yellow-400'
                                   : 'text-gray-300'
@@ -591,35 +594,36 @@ export default function VendorProductsPage() {
                             />
                           ))}
                         </div>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-[10px] sm:text-sm text-gray-600">
                           ({product.reviewCount})
                         </span>
                       </div>
                     )}
 
                     {/* Price */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="text-2xl font-black text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <div className="text-sm sm:text-lg md:text-2xl font-black text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
                         {product.price.toLocaleString('ar-EG')} ج.م
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 sm:gap-2">
                       <Button
                         onClick={() => handleAddToCart(product)}
                         disabled={product.stock === 0}
-                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold"
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold h-8 sm:h-9 md:h-10 text-[10px] sm:text-xs md:text-sm px-2 sm:px-4"
                       >
-                        <ShoppingCart className="w-4 h-4 ml-2" />
-                        أضف للسلة
+                        <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+                        <span className="hidden sm:inline">أضف للسلة</span>
+                        <span className="inline sm:hidden">أضف</span>
                       </Button>
                       <Button
                         onClick={() => router.push(`/products/${product.id}`)}
                         variant="outline"
-                        className="border-2 border-purple-300 hover:bg-purple-50"
+                        className="border-2 border-purple-300 hover:bg-purple-50 h-8 sm:h-9 md:h-10 w-8 sm:w-9 md:w-10 p-0"
                       >
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
                       </Button>
                     </div>
                   </div>
