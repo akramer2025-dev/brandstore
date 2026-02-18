@@ -768,36 +768,70 @@ export default async function HomePage() {
 
               {/* Social Media Links */}
               <div className="mt-4 pt-4 border-t border-gray-800">
-                <h5 className="text-xs font-semibold text-gray-400 mb-3">تابعنا على</h5>
-                <div className="flex items-center gap-3">
+                <h5 className="text-sm font-semibold text-gray-300 mb-4">تابعنا على السوشيال ميديا</h5>
+                
+                {/* Instagram Bio Section */}
+                <div className="mb-4 p-3 bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-orange-900/20 rounded-lg border border-purple-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 rounded-full flex items-center justify-center">
+                      <Instagram className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">@remostore.egy</p>
+                      <p className="text-[10px] text-gray-400">Instagram</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    🛍️ أزياء عصرية وأنيقة | ملابس نسائية ورجالية<br/>
+                    ✨ جودة عالية وأسعار مميزة<br/>
+                    📦 توصيل لجميع أنحاء مصر | الدفع عند الاستلام
+                  </p>
+                </div>
+
+                {/* Social Media Cards */}
+                <div className="grid grid-cols-3 gap-2">
                   <a 
                     href="https://www.facebook.com/share/182kW5HPmz/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-9 h-9 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                    aria-label="Facebook"
+                    className="group bg-gray-800/50 hover:bg-blue-600/20 border border-gray-700 hover:border-blue-500 rounded-lg p-3 transition-all hover:scale-105"
                   >
-                    <Facebook className="w-5 h-5 text-white" />
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="w-10 h-10 bg-blue-600 group-hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors">
+                        <Facebook className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-[10px] text-gray-400 group-hover:text-blue-400 font-medium">Facebook</span>
+                    </div>
                   </a>
+
                   <a 
                     href="https://www.instagram.com/remostore.egy?utm_source=qr&igsh=MWZiZG0zYzhtOW1ieA%3D%3D" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-9 h-9 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                    aria-label="Instagram"
+                    className="group bg-gray-800/50 hover:bg-pink-600/20 border border-gray-700 hover:border-pink-500 rounded-lg p-3 transition-all hover:scale-105"
                   >
-                    <Instagram className="w-5 h-5 text-white" />
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600 group-hover:from-purple-700 group-hover:via-pink-700 group-hover:to-orange-700 rounded-full flex items-center justify-center transition-all">
+                        <Instagram className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-[10px] text-gray-400 group-hover:text-pink-400 font-medium">Instagram</span>
+                    </div>
                   </a>
+
                   <a 
                     href="https://www.tiktok.com/@remo.store37?_r=1&_t=ZS-940eVJUQJgi" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-9 h-9 bg-black hover:bg-gray-900 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                    aria-label="TikTok"
+                    className="group bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 hover:border-gray-600 rounded-lg p-3 transition-all hover:scale-105"
                   >
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                    </svg>
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="w-10 h-10 bg-black group-hover:bg-gray-900 rounded-full flex items-center justify-center transition-colors border border-gray-700">
+                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                        </svg>
+                      </div>
+                      <span className="text-[10px] text-gray-400 group-hover:text-white font-medium">TikTok</span>
+                    </div>
                   </a>
                 </div>
               </div>
