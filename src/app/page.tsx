@@ -810,15 +810,6 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              {/* Paymob */}
-              <div className="bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50 hover:border-blue-500/50 transition-all">
-                <div className="flex items-center gap-2">
-                  <div className="bg-white rounded px-2 py-1">
-                    <span className="text-xs font-bold text-blue-600">Paymob</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Visa */}
               <div className="bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50 hover:border-blue-500/50 transition-all">
                 <svg className="h-6 w-auto" viewBox="0 0 48 32" fill="none">
