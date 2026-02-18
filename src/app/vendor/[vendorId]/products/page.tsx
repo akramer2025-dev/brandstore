@@ -22,6 +22,10 @@ import {
   CheckCircle,
   Truck,
   Shield,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +56,14 @@ interface Vendor {
   storeNameAr: string;
   businessName: string;
   logo: string | null;
+  coverImage: string | null;
+  storeBio: string | null;
+  storeBioAr: string | null;
+  storeThemeColor: string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
+  twitterUrl: string | null;
+  youtubeUrl: string | null;
   description: string | null;
   rating: number;
   totalProducts: number;
@@ -195,93 +207,164 @@ export default function VendorProductsPage() {
   }
 
   const vendorDisplayName = vendor.storeNameAr || vendor.storeName || vendor.businessName;
+  const themeColor = vendor.storeThemeColor || "#9333ea";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
-      {/* Header Banner */}
-      <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white overflow-hidden">
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, white 1px, transparent 1px),
-                             radial-gradient(circle at 80% 80%, white 1px, transparent 1px)`,
-            backgroundSize: '100px 100px',
-            animation: 'movePattern 20s linear infinite',
-          }}></div>
-        </div>
-
-        <div className="container mx-auto px-4 py-12 md:py-16 relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white p-2 shadow-2xl ring-4 ring-white/50">
-                {vendor.logo ? (
-                  <Image
-                    src={vendor.logo}
-                    alt={vendorDisplayName}
-                    width={160}
-                    height={160}
-                    className="w-full h-full object-contain rounded-full"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
-                    <Store className="w-16 h-16 text-purple-600" />
-                  </div>
-                )}
-              </div>
+      {/* Header Banner with Cover Image */}
+      <div className="relative text-white overflow-hidden">
+        {/* Cover Image or Gradient Background */}
+        {vendor.coverImage ? (
+          <div className="relative h-64 md:h-96">
+            <Image
+              src={vendor.coverImage}
+              alt={vendorDisplayName}
+              fill
+              className="object-cover"
+              priority
+            />
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+          </div>
+        ) : (
+          <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 h-64 md:h-80">
+            {/* Animated Background Pattern */}
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute inset-0" style={{
+                backgroundImage: `radial-gradient(circle at 20% 50%, white 1px, transparent 1px),
+                                 radial-gradient(circle at 80% 80%, white 1px, transparent 1px)`,
+                backgroundSize: '100px 100px',
+                animation: 'movePattern 20s linear infinite',
+              }}></div>
             </div>
+          </div>
+        )}
 
-            {/* Info */}
-            <div className="flex-1 text-center md:text-right">
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-3 mb-4">
-                <h1 className="text-3xl md:text-5xl font-black">
-                  مرحباً بكم في {vendorDisplayName}
-                </h1>
-                <Sparkles className="w-8 h-8 text-yellow-300 animate-pulse" />
-              </div>
-              
-              {vendor.description && (
-                <p className="text-lg md:text-xl text-white/90 mb-6 max-w-3xl">
-                  {vendor.description}
-                </p>
-              )}
-
-              {/* Stats */}
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 md:gap-6">
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Star className="w-5 h-5 text-yellow-300 fill-yellow-300" />
-                  <span className="font-bold">{vendor.rating.toFixed(1)}</span>
-                  <span className="text-white/80 text-sm">تقييم</span>
-                </div>
-                
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Package className="w-5 h-5" />
-                  <span className="font-bold">{vendor.totalProducts}</span>
-                  <span className="text-white/80 text-sm">منتج</span>
-                </div>
-                
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                  <ShoppingBag className="w-5 h-5" />
-                  <span className="font-bold">{vendor.totalOrders}+</span>
-                  <span className="text-white/80 text-sm">طلب</span>
+        <div className="container mx-auto px-4 relative"  style={{ marginTop: vendor.coverImage ? '-80px' : '0' }}>
+          {/* Profile Section */}
+          <div className="bg-white rounded-b-2xl shadow-2xl overflow-hidden">
+            <div className="px-4 md:px-8 py-6">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
+                {/* Logo */}
+                <div className="flex-shrink-0 -mt-16">
+                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white p-2 shadow-2xl ring-8 ring-white">
+                    {vendor.logo ? (
+                      <Image
+                        src={vendor.logo}
+                        alt={vendorDisplayName}
+                        width={160}
+                        height={160}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
+                        <Store className="w-16 h-16 text-purple-600" />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                  <Award className="w-5 h-5 text-yellow-300" />
-                  <span className="font-bold text-sm">بائع موثوق</span>
+                {/* Info */}
+                <div className="flex-1 text-center md:text-right">
+                  <div className="flex flex-col md:flex-row items-center md:items-center md:justify-between">
+                    <div>
+                      <h1 className="text-2xl md:text-4xl font-black text-gray-900 mb-2">
+                        {vendorDisplayName}
+                      </h1>
+                      {(vendor.storeBioAr || vendor.storeBio) && (
+                        <p className="text-gray-600 mb-3 max-w-2xl">
+                          {vendor.storeBioAr || vendor.storeBio}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Social Links */}
+                    {(vendor.facebookUrl || vendor.instagramUrl || vendor.twitterUrl || vendor.youtubeUrl) && (
+                      <div className="flex items-center gap-2 mt-4 md:mt-0">
+                        {vendor.facebookUrl && (
+                          <a
+                            href={vendor.facebookUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white transition-all"
+                          >
+                            <Facebook className="w-5 h-5" />
+                          </a>
+                        )}
+                        {vendor.instagramUrl && (
+                          <a
+                            href={vendor.instagramUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center justify-center text-white transition-all"
+                          >
+                            <Instagram className="w-5 h-5" />
+                          </a>
+                        )}
+                        {vendor.twitterUrl && (
+                          <a
+                            href={vendor.twitterUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 rounded-full bg-black hover:bg-gray-800 flex items-center justify-center text-white transition-all"
+                          >
+                            <Twitter className="w-5 h-5" />
+                          </a>
+                        )}
+                        {vendor.youtubeUrl && (
+                          <a
+                            href={vendor.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center text-white transition-all"
+                          >
+                            <Youtube className="w-5 h-5" />
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4">
+                    <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
+                      <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                      <span className="font-bold text-gray-900">{vendor.rating.toFixed(1)}</span>
+                      <span className="text-gray-600 text-sm">تقييم</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
+                      <Package className="w-5 h-5 text-purple-600" />
+                      <span className="font-bold text-gray-900">{vendor.totalProducts}</span>
+                      <span className="text-gray-600 text-sm">منتج</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
+                      <ShoppingBag className="w-5 h-5 text-pink-600" />
+                      <span className="font-bold text-gray-900">{vendor.totalOrders}+</span>
+                      <span className="text-gray-600 text-sm">طلب</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full px-4 py-2">
+                      <Award className="w-5 h-5" />
+                      <span className="font-bold text-sm">بائع موثوق</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Wave Shape */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-12 md:h-16">
-            <path d="M0,0 C150,100 350,0 600,50 C850,100 1050,0 1200,50 L1200,120 L0,120 Z" 
-                  fill="#fdf4ff" opacity="1"></path>
-          </svg>
-        </div>
+        {/* Wave Shape - Only if no cover image */}
+        {!vendor.coverImage && (
+          <div className="relative -mt-1">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-12 md:h-16">
+              <path d="M0,0 C150,100 350,0 600,50 C850,100 1050,0 1200,50 L1200,120 L0,120 Z" 
+                    fill="#fdf4ff" opacity="1"></path>
+            </svg>
+          </div>
+        )}
       </div>
 
       {/* Content */}

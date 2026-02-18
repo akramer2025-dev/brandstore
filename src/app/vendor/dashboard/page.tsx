@@ -1039,6 +1039,17 @@ export default function VendorDashboard() {
               </CardContent>
             </Card>
           </Link>
+          <Link href="/vendor/store-settings">
+            <Card className="backdrop-blur-sm bg-purple-950/90 border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 cursor-pointer h-full hover:-translate-y-2 hover:bg-purple-900/95 hover:border-purple-400/60 group">
+              <CardContent className="p-3 md:p-4 text-center">
+                <div className="text-purple-400 mb-1 md:mb-2 transform group-hover:scale-110 transition-transform duration-300 w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center">
+                  <Store className="w-6 h-6 md:w-8 md:h-8" />
+                </div>
+                <p className="text-white font-black group-hover:text-purple-300 transition-all text-sm md:text-base">صفحة المتجر</p>
+                <p className="text-gray-300 text-[10px] md:text-xs mt-1 group-hover:text-gray-100 transition-colors font-medium hidden md:block">تخصيص الصفحة</p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
       </div>

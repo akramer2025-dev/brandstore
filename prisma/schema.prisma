@@ -130,6 +130,14 @@ model Vendor {
   storeDescriptionAr String?
   logo               String?
   banner             String?
+  coverImage         String?        // صورة الغلاف للصفحة
+  storeBio           String?        // نبذة مختصرة عن المتجر
+  storeBioAr         String?        // نبذة مختصرة بالعربية
+  storeThemeColor    String?        // لون الثيم المخصص (hex)
+  facebookUrl        String?        // رابط الفيسبوك
+  instagramUrl       String?        // رابط الإنستجرام
+  twitterUrl         String?        // رابط تويتر
+  youtubeUrl         String?        // رابط اليوتيوب
   phone              String?
   alternativePhone   String?
   whatsapp           String?
