@@ -38,18 +38,86 @@ interface Conversation {
 }
 
 export function MessagesCenterClient() {
-  const [activeTab, setActiveTab] = useState("customer-chats");
+  const [activeTab, setActiveTab] = useState("ai-chats");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Sample data - في التطبيق الحقيقي سيتم جلبها من API
+  // جلب المحادثات من API
+  const fetchConversations = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/chat-conversations');
+      if (!response.ok) throw new Error('Failed to fetch conversations');
+      
+      const data = await response.json();
+      
+      // تحويل البيانات للتنسيق المطلوب
+      const formattedConversations: Conversation[] = data.map((conv: any) => ({
+        id: conv.id,
+        customerName: conv.sessionId || 'عميل جديد',
+        customerEmail: undefined,
+        customerPhone: undefined,
+        lastMessage: conv.lastMessage || 'لا توجد رسائل',
+        lastMessageTime: new Date(conv.lastMessageAt).toLocaleDateString('ar-EG', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        unreadCount: conv.isResolved ? 0 : 1,
+        status: conv.isResolved ? 'resolved' : 'active',
+        type: 'ai-chat', // كل المحادثات حالياً من المساعد الذكي
+        messages: [], // سيتم تحميلها عند فتح المحادثة
+      }));
+      
+      setConversations(formattedConversations);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const sampleConversations: Conversation[] = [
+    fetchConversations();
+  }, []);
+
+  // جلب رسائل محادثة معينة
+  const fetchMessages = async (conversationId: string) => {
+    try {
+      const response = await fetch(`/api/admin/chat-conversations?id=${conversationId}`);
+      if (!response.ok) throw new Error('Failed to fetch messages');
+      
+      const messages = await response.json();
+      
+      // تحويل الرسائل للتنسيق المطلوب
+      const formattedMessages: Message[] = messages.map((msg: any) => ({
+        id: msg.id,
+        content: msg.content,
+        sender: msg.role === 'user' ? 'العميل' : 'المساعد الذكي',
+        timestamp: new Date(msg.createdAt).toLocaleTimeString('ar-EG', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        type: msg.role === 'user' ? 'user' : 'ai',
+        status: 'read',
+      }));
+      
+      // تحديث المحادثة المحددة بالرسائل
+      setSelectedConversation(prev => prev ? {
+        ...prev,
+        messages: formattedMessages
+      } : null);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  // Sample data للمحادثات المباشرة (سيتم استبدالها لاحقاً)
+  const sampleCustomerChats: Conversation[] = [
       {
-        id: "1",
+        id: "sample-1",
         customerName: "أحمد محمد",
         customerEmail: "ahmed@example.com",
         customerPhone: "+201234567890",
@@ -94,7 +162,7 @@ export function MessagesCenterClient() {
         ]
       },
       {
-        id: "2",
+        id: "sample-2",
         customerName: "فاطمة علي",
         customerEmail: "fatema@example.com",
         lastMessage: "هل يمكنني إرجاع المنتج إذا لم يعجبني؟",
@@ -121,69 +189,13 @@ export function MessagesCenterClient() {
           }
         ]
       },
-      {
-        id: "3",
-        customerName: "محمود سعد",
-        customerEmail: "mahmoud@example.com",
-        lastMessage: "المساعد الذكي: يمكنك تتبع طلبك من خلال رابط التتبع المرسل على إيميلك",
-        lastMessageTime: "منذ 30 دقيقة",  
-        unreadCount: 0,
-        status: "resolved",
-        type: "ai-chat",
-        messages: [
-          {
-            id: "m7",
-            content: "أين طلبي؟ طلبت منذ أسبوع ولم يصل",
-            sender: "محمود سعد",
-            timestamp: "14:50",
-            type: "user",
-            status: "read"
-          },
-          {
-            id: "m8",
-            content: "يمكنك تتبع طلبك من خلال رابط التتبع المرسل على إيميلك. إذا كان لديك أي مشكلة، سأوصلك بفريق الدعم.",
-            sender: "المساعد الذكي",
-            timestamp: "14:50",
-            type: "ai",
-            status: "read"
-          }
-        ]
-      },
-      {
-        id: "4", 
-        customerName: "نورا حسن",
-        customerEmail: "nora@example.com",
-        lastMessage: "المساعد الذكي: بالطبع! لدينا تشكيلة واسعة من الفساتين الصيفية",
-        lastMessageTime: "منذ ساعة",
-        unreadCount: 0,
-        status: "active",
-        type: "ai-chat",
-        messages: [
-          {
-            id: "m9",
-            content: "هل لديكم فساتين صيفية جديدة؟",
-            sender: "نورا حسن",
-            timestamp: "13:30",
-            type: "user",
-            status: "read"
-          },
-          {
-            id: "m10",
-            content: "بالطبع! لدينا تشكيلة واسعة من الفساتين الصيفية الجديدة. يمكنك زيارة قسم الفساتين في المتجر لرؤية كامل التشكيلة.",
-            sender: "المساعد الذكي",
-            timestamp: "13:31", 
-            type: "ai",
-            status: "read"
-          }
-        ]
-      }
-    ];
+  ];
 
-    setConversations(sampleConversations);
-  }, []);
-
-  const customerChats = conversations.filter(c => c.type === 'customer');
-  const aiChats = conversations.filter(c => c.type === 'ai-chat');
+  // دمج المحادثات الحقيقية مع الـ sample data
+  const allConversations = [...conversations, ...sampleCustomerChats];
+  
+  const customerChats = allConversations.filter(c => c.type === 'customer');
+  const aiChats = allConversations.filter(c => c.type === 'ai-chat');
   
   const filteredConversations = activeTab === 'customer-chats' ? customerChats : aiChats;
   const searchFilteredConversations = filteredConversations.filter(c => 
@@ -255,7 +267,8 @@ export function MessagesCenterClient() {
             </div>
             <div className="flex gap-2">
               <Button
-                onClick={() => setLoading(!loading)}
+                onClick={fetchConversations}
+                disabled={loading}
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
@@ -382,7 +395,13 @@ export function MessagesCenterClient() {
                     {searchFilteredConversations.map((conversation) => (
                       <div
                         key={conversation.id}
-                        onClick={() => setSelectedConversation(conversation)}
+                        onClick={() => {
+                          setSelectedConversation(conversation);
+                          // جلب الرسائل من API إذا كانت محادثة حقيقية (مش sample)
+                          if (conversation.type === 'ai-chat' && !conversation.id.startsWith('sample-')) {
+                            fetchMessages(conversation.id);
+                          }
+                        }}
                         className={`p-4 cursor-pointer hover:bg-gray-50 border-b transition-colors ${
                           selectedConversation?.id === conversation.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                         }`}
