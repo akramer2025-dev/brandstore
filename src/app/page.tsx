@@ -854,7 +854,7 @@ export default async function HomePage() {
           </div>
           
           {/* Bottom Bar */}
-          <div className="pt-6 border-t border-gray-800">
+          <div className="pt-6 pb-0 md:pb-8 border-t border-gray-800">
             <div className="flex flex-col items-center gap-3">
               {/* Copyright */}
               <p className="text-sm text-gray-400 text-center">

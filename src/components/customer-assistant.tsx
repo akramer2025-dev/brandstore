@@ -516,7 +516,7 @@ export default function CustomerAssistant() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={showAssistant}
-        className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-[9999] bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white p-3 md:p-3.5 rounded-full shadow-2xl backdrop-blur-sm transition-all hover:scale-105"
+        className="fixed bottom-24 right-4 md:bottom-20 md:right-6 z-[9999] bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white p-3 md:p-3.5 rounded-full shadow-2xl backdrop-blur-sm transition-all hover:scale-105"
         title="إظهار المساعد الذكي"
       >
         <img 
@@ -540,7 +540,7 @@ export default function CustomerAssistant() {
             whileHover={{ scale: 1.08, rotate: [0, -5, 5, 0] }}
             whileTap={{ scale: 0.92 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-24 right-4 md:bottom-8 md:right-6 z-[9999] group"
+            className="fixed bottom-24 right-4 md:bottom-20 md:right-6 z-[9999] group"
             aria-label="مساعد ريمو الذكي"
           >
             <div className="relative">
