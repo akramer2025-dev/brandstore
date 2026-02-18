@@ -684,34 +684,85 @@ export default function VendorSettingsPage() {
                     </div>
                   )}
                   
-                  {/* Upload Button */}
-                  <div className="absolute bottom-4 right-4">
-                    <label className="cursor-pointer">
-                      <div className="bg-white hover:bg-gray-100 text-gray-900 px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-all">
-                        {uploadingCover ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            <span>جاري الرفع...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Camera className="w-5 h-5" />
-                            <span>تغيير الغلاف</span>
-                          </>
-                        )}
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleImageUpload(file, "cover");
-                        }}
-                        disabled={uploadingCover}
-                      />
-                    </label>
-                  </div>
+                  {/* Upload Button - يظهر في المنتصف إذا لم تكن هناك صورة، في الركن إذا كانت هناك صورة */}
+                  {!coverImage ? (
+                    /* زر كبير في المنتصف عند عدم وجود صورة */
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <label className="cursor-pointer group">
+                        <div className="relative">
+                          {/* الخلفية مع التأثير */}
+                          <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl group-hover:scale-105 transition-all duration-300"></div>
+                          
+                          {/* المحتوى */}
+                          <div className="relative px-8 py-4 flex flex-col items-center gap-3">
+                            {uploadingCover ? (
+                              <>
+                                <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
+                                <span className="text-lg font-bold text-gray-900">جاري رفع الغلاف...</span>
+                                <span className="text-sm text-gray-600">الرجاء الانتظار</span>
+                              </>
+                            ) : (
+                              <>
+                                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-xl group-hover:shadow-2xl group-hover:scale-110 transition-all duration-300">
+                                  <Camera className="w-10 h-10 text-white" />
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-xl font-bold text-gray-900 mb-1">
+                                    إضافة صورة الغلاف
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    اضغط هنا لاختيار صورة (JPG, PNG, WEBP)
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    الحد الأقصى: 5 ميجابايت
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "cover");
+                          }}
+                          disabled={uploadingCover}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    /* زر صغير في الركن عند وجود صورة */
+                    <div className="absolute bottom-4 right-4">
+                      <label className="cursor-pointer group">
+                        <div className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all group-hover:scale-105 group-hover:shadow-purple-500/50">
+                          {uploadingCover ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              <span className="font-semibold">جاري الرفع...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Camera className="w-5 h-5" />
+                              <span className="font-semibold">تغيير الغلاف</span>
+                            </>
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, "cover");
+                          }}
+                          disabled={uploadingCover}
+                        />
+                      </label>
+                    </div>
+                  )}
 
                   {/* Remove Button */}
                   {coverImage && (
