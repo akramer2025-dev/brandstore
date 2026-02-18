@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell, Bot, Eye, Target, Sparkles } from "lucide-react";
+import { Package, ShoppingBag, Truck, Users, TrendingUp, AlertCircle, Factory, Package2, Receipt, BarChart3, Megaphone, MessageCircle, Settings, LogOut, MapPin, Bell, Bot, Eye, Target, Sparkles, ArrowRightLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -209,6 +209,13 @@ export default async function AdminDashboard() {
             href="/admin/products"
             icon={<Package className="w-12 h-12" />}
             color="text-blue-600"
+          />
+          <ActionCard
+            title="🔄 نقل المنتجات بين البائعين"
+            description="نقل المنتجات من بائع لآخر بسهولة وأمان"
+            href="/admin/transfer-products"
+            icon={<ArrowRightLeft className="w-12 h-12" />}
+            color="text-teal-600"
           />
           <ActionCard
             title="🔨 إدارة المزادات"

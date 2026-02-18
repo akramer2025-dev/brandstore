@@ -29,6 +29,7 @@ import {
   Sparkles,
   LayoutDashboard,
   TrendingUp,
+  ArrowRightLeft,
 } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
@@ -102,6 +103,12 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           href: "/admin",
           color: "text-violet-600",
           isSpecial: true,
+        },
+        {
+          icon: ArrowRightLeft,
+          label: "🔄 نقل المنتجات بين البائعين",
+          href: "/admin/transfer-products",
+          color: "text-blue-600",
         },
         {
           icon: TrendingUp,
