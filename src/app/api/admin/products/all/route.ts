@@ -100,6 +100,7 @@ export async function GET(request: NextRequest) {
             id: product.vendor.id,
             businessName: product.vendor.businessName,
             storeName: product.vendor.storeName,
+            userName: product.vendor.user?.name,
             isActive: product.vendor.isActive,
             isSuspended: product.vendor.isSuspended,
             user: product.vendor.user,

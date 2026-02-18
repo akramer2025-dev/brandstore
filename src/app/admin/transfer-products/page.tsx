@@ -189,7 +189,13 @@ export default function TransferProductsPage() {
 
   // الحصول على اسم البائع
   const getVendorName = (vendor: any) => {
-    return vendor?.businessName || vendor?.storeName || vendor?.user?.name || 'بدون اسم';
+    // ترتيب الأولوية: اسم المتجر > الاسم التجاري > اسم المستخدم
+    const name = vendor?.storeName || vendor?.businessName || vendor?.userName || vendor?.user?.name || 'بدون اسم';
+    // إضافة "متجر" قبل الاسم إذا لم يكن موجوداً
+    if (name && name !== 'بدون اسم' && !name.includes('متجر')) {
+      return `متجر ${name}`;
+    }
+    return name;
   };
 
   // تصفية البائعين (استبعاد البائع الحالي)
