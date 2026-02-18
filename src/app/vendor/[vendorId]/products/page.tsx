@@ -215,19 +215,20 @@ export default function VendorProductsPage() {
       <div className="relative text-white overflow-hidden">
         {/* Cover Image or Gradient Background */}
         {vendor.coverImage ? (
-          <div className="relative h-64 md:h-96">
+          <div className="relative h-80 sm:h-96 md:h-[400px] lg:h-[450px]">
             <Image
               src={vendor.coverImage}
               alt={vendorDisplayName}
               fill
               className="object-cover"
               priority
+              sizes="100vw"
             />
             {/* Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
           </div>
         ) : (
-          <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 h-64 md:h-80">
+          <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 h-80 sm:h-96 md:h-[400px]">
             {/* Animated Background Pattern */}
             <div className="absolute inset-0 opacity-20">
               <div className="absolute inset-0" style={{
@@ -240,21 +241,23 @@ export default function VendorProductsPage() {
           </div>
         )}
 
-        <div className="container mx-auto px-4 relative"  style={{ marginTop: vendor.coverImage ? '-80px' : '0' }}>
+        <div className="container mx-auto px-4 relative" style={{ marginTop: vendor.coverImage ? '-100px' : '0' }}>
           {/* Profile Section */}
-          <div className="bg-white rounded-b-2xl shadow-2xl overflow-hidden">
-            <div className="px-4 md:px-8 py-6">
-              <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div className="px-4 md:px-8 py-6 md:py-8">
+              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
                 {/* Logo */}
-                <div className="flex-shrink-0 -mt-16">
-                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white p-2 shadow-2xl ring-8 ring-white">
+                <div className="flex-shrink-0 -mt-20 md:-mt-24">
+                  <div className="w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 rounded-full bg-white p-2 shadow-2xl ring-4 md:ring-8 ring-white">
                     {vendor.logo ? (
                       <Image
                         src={vendor.logo}
                         alt={vendorDisplayName}
-                        width={160}
-                        height={160}
+                        width={176}
+                        height={176}
                         className="w-full h-full object-cover rounded-full"
+                        priority
+                        sizes="(max-width: 768px) 144px, 176px"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
@@ -265,14 +268,14 @@ export default function VendorProductsPage() {
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 text-center md:text-right">
-                  <div className="flex flex-col md:flex-row items-center md:items-center md:justify-between">
-                    <div>
-                      <h1 className="text-2xl md:text-4xl font-black text-gray-900 mb-2">
+                <div className="flex-1 text-center md:text-right w-full">
+                  <div className="flex flex-col md:flex-row items-center md:items-center md:justify-between gap-3">
+                    <div className="w-full md:w-auto">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-2">
                         {vendorDisplayName}
                       </h1>
                       {(vendor.storeBioAr || vendor.storeBio) && (
-                        <p className="text-gray-600 mb-3 max-w-2xl">
+                        <p className="text-sm sm:text-base text-gray-600 mb-3 max-w-2xl mx-auto md:mx-0">
                           {vendor.storeBioAr || vendor.storeBio}
                         </p>
                       )}
@@ -326,7 +329,7 @@ export default function VendorProductsPage() {
                   </div>
 
                   {/* Stats */}
-                  <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4">
+                  <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 mt-4">
                     <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
                       <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
                       <span className="font-bold text-gray-900">{vendor.rating.toFixed(1)}</span>
