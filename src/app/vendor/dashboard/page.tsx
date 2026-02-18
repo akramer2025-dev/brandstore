@@ -27,6 +27,9 @@ import {
   BarChart3,
   ClipboardList,
   MapPin,
+  Link2,
+  Copy,
+  CheckCheck,
 } from 'lucide-react'
 import SmartAssistant from '@/components/smart-assistant'
 
@@ -76,6 +79,7 @@ export default function VendorDashboard() {
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [recentNotifications, setRecentNotifications] = useState<RecentNotification[]>([])
   const isInitialLoadRef = useRef(true)
+  const [copied, setCopied] = useState(false)
 
   // 🔒 فحص حالة التعليق للحساب
   useEffect(() => {
@@ -770,6 +774,92 @@ export default function VendorDashboard() {
                   </Link>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* لينك المتجر - كارت جديد */}
+        {vendorId && (
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-indigo-950/90 to-purple-950/90 border-indigo-500/50 shadow-2xl hover:shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-indigo-500/30 backdrop-blur p-2.5 rounded-xl border border-indigo-500/20">
+                  <Link2 className="w-5 h-5 text-indigo-300" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-base">🔗 لينك متجرك</h3>
+                  <p className="text-indigo-200 text-xs">شارك هذا الرابط مع عملائك</p>
+                </div>
+              </div>
+              <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg p-3 mb-3">
+                <p className="text-indigo-200 text-xs md:text-sm break-all font-mono">
+                  https://www.remostore.net/vendor/{vendorId}/products
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  const link = `https://www.remostore.net/vendor/${vendorId}/products`
+                  navigator.clipboard.writeText(link)
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                }}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition-all"
+              >
+                {copied ? (
+                  <>
+                    <CheckCheck className="w-4 h-4 ml-2" />
+                    تم النسخ!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 ml-2" />
+                    نسخ الرابط
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* لينك المتجر - كارت جديد */}
+        {session?.user?.id && (
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-indigo-950/90 to-purple-950/90 border-indigo-500/50 shadow-2xl hover:shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1 mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-indigo-500/30 backdrop-blur p-2.5 rounded-xl border border-indigo-500/20">
+                  <Link2 className="w-5 h-5 text-indigo-300" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-base">🔗 لينك متجرك</h3>
+                  <p className="text-indigo-200 text-xs">شارك هذا الرابط مع عملائك</p>
+                </div>
+              </div>
+              <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg p-3 mb-3">
+                <p className="text-indigo-200 text-xs md:text-sm break-all font-mono">
+                  https://www.remostore.net/vendor/{session.user.id}/products
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  const link = `https://www.remostore.net/vendor/${session.user.id}/products`
+                  navigator.clipboard.writeText(link)
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                }}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition-all"
+              >
+                {copied ? (
+                  <>
+                    <CheckCheck className="w-4 h-4 ml-2" />
+                    تم النسخ!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 ml-2" />
+                    نسخ الرابط
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         )}

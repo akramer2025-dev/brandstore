@@ -34,6 +34,9 @@ import {
   Edit,
   UserPlus,
   Shield,
+  Link2,
+  Copy,
+  CheckCheck,
 } from 'lucide-react'
 
 interface Partner {
@@ -65,6 +68,7 @@ export default function AdminPartnersPage() {
   const [suspensionReason, setSuspensionReason] = useState('')
   const [partnerToDelete, setPartnerToDelete] = useState<Partner | null>(null)
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null)
+  const [copiedPartnerId, setCopiedPartnerId] = useState<string | null>(null)
   const [staffFormData, setStaffFormData] = useState({
     name: '',
     email: '',
@@ -590,6 +594,30 @@ export default function AdminPartnersPage() {
                     </div>
 
                     <div className="flex flex-col gap-2 ml-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const link = `https://www.remostore.net/vendor/${partner.id}/products`
+                          navigator.clipboard.writeText(link)
+                          setCopiedPartnerId(partner.id)
+                          setTimeout(() => setCopiedPartnerId(null), 2000)
+                          toast.success('تم نسخ لينك المتجر')
+                        }}
+                        className="bg-indigo-500/10 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20"
+                      >
+                        {copiedPartnerId === partner.id ? (
+                          <>
+                            <CheckCheck className="h-4 w-4 mr-2" />
+                            تم النسخ
+                          </>
+                        ) : (
+                          <>
+                            <Link2 className="h-4 w-4 mr-2" />
+                            لينك المتجر
+                          </>
+                        )}
+                      </Button>
                       <Link href={`/admin/partners/${partner.id}`}>
                         <Button
                           size="sm"
