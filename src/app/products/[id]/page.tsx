@@ -94,8 +94,14 @@ export default function ProductDetailPage() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
-  const { addItem } = useCartStore();
+  const [bundleProducts, setBundleProducts] = useState<Product[]>([]);
+  const [selectedBundleItems, setSelectedBundleItems] = useState<string[]>([]);
+  const { addItem, getTotalPrice } = useCartStore();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  
+  // Free Shipping Settings
+  const FREE_SHIPPING_THRESHOLD = 550; // الحد الأدنى للشحن المجاني
+  const BUNDLE_DISCOUNT = 15; // خصم 15% على الباكدج الكامل
 
   // Get current price and stock based on selected variant or product default
   const getCurrentPrice = () => {
@@ -216,7 +222,13 @@ export default function ProductDetailPage() {
       // Fetch related products from same category
       const relatedRes = await fetch(`/api/products?categoryId=${data.categoryId}`);
       const relatedData = await relatedRes.json();
-      setRelatedProducts((relatedData.products || []).filter((p: Product) => p.id !== data.id).slice(0, 4));
+      const related = (relatedData.products || []).filter((p: Product) => p.id !== data.id);
+      setRelatedProducts(related.slice(0, 4));
+      
+      // جلب منتجات للباكدج (عشوائي من نفس الفئة)
+      setBundleProducts(related.slice(0, 2));
+      // تفعيل الباكدج افتراضياً
+      setSelectedBundleItems(related.slice(0, 2).map((p: Product) => p.id));
     } catch (error) {
       console.error("Error fetching product:", error);
       toast.error("فشل تحميل المنتج");
@@ -235,19 +247,20 @@ export default function ProductDetailPage() {
     }
 
     const currentStock = getCurrentStock();
-    const currentPrice = getCurrentPrice();
+    let currentPrice = getCurrentPrice();
 
     if (quantity > currentStock) {
       toast.error(`الكمية المتاحة فقط ${currentStock}`);
       return;
     }
 
+    // إضافة المنتج الأساسي
     addItem({
       id: product.id,
       name: product.nameAr,
       nameAr: product.nameAr,
       price: currentPrice,
-      image: images[0], // نستخدم أول صورة فقط (ليس الفيديو)
+      image: images[0],
       variant: selectedVariant ? {
         id: selectedVariant.id,
         nameAr: selectedVariant.nameAr,
@@ -255,8 +268,47 @@ export default function ProductDetailPage() {
       } : undefined,
     });
 
+    // إضافة منتجات الباكدج المختارة
+    if (selectedBundleItems.length > 0) {
+      const selectedProducts = bundleProducts.filter(p => selectedBundleItems.includes(p.id));
+      selectedProducts.forEach(bundleProduct => {
+        const bundlePrice = bundleProduct.price * (1 - BUNDLE_DISCOUNT / 100); // خصم الباكدج
+        addItem({
+          id: bundleProduct.id,
+          name: bundleProduct.nameAr,
+          nameAr: bundleProduct.nameAr,
+          price: Math.round(bundlePrice),
+          image: bundleProduct.images?.split(',')[0] || '/placeholder.jpg',
+        });
+      });
+      toast.success(`🎉 تم إضافة ${selectedProducts.length + 1} منتج مع خصم ${BUNDLE_DISCOUNT}%`);
+    }
+
     // إظهار الـ modal بدلاً من toast
     setShowCartModal(true);
+  };
+
+  const toggleBundleItem = (productId: string) => {
+    setSelectedBundleItems(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const calculateBundleTotal = () => {
+    const mainPrice = getCurrentPrice() * quantity;
+    const bundlePrice = bundleProducts
+      .filter(p => selectedBundleItems.includes(p.id))
+      .reduce((sum, p) => sum + p.price, 0);
+    const total = mainPrice + bundlePrice;
+    const discountAmount = selectedBundleItems.length > 0 ? (bundlePrice * BUNDLE_DISCOUNT / 100) : 0;
+    return {
+      originalTotal: total,
+      discountAmount,
+      finalTotal: total - discountAmount,
+      savings: discountAmount
+    };
   };
 
   const incrementQuantity = () => {
@@ -1007,6 +1059,133 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
+        {/* Frequently Bought Together - ا شترى العملاء أيضاً */}
+        {bundleProducts.length > 0 && getCurrentStock() > 0 && (
+          <Card className="bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 border-2 border-orange-300 shadow-2xl overflow-hidden">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                  🔥 عرض حصري
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-gray-900">
+                  اشترى العملاء معاً
+                </h3>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                {/* المنتج الأساسي */}
+                <div className="relative">
+                  <div className="bg-white rounded-xl p-4 border-2 border-purple-500 shadow-lg">
+                    <div className="aspect-square relative mb-3 rounded-lg overflow-hidden">
+                      <Image
+                        src={images[0] || '/placeholder.jpg'}
+                        alt={product.nameAr}
+                        fill
+                        sizes="200px"
+                        className="object-cover"
+                      />
+                    </div>
+                    <h4 className="font-bold text-sm mb-1 line-clamp-2">{product.nameAr}</h4>
+                    <p className="text-lg font-black tekstرادient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {getCurrentPrice().toLocaleString()} ج.م
+                    </p>
+                    <div className="absolute -top-2 -right-2 bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+                      ✓
+                    </div>
+                  </div>
+                  {bundleProducts.length > 0 && (
+                    <div className="hidden md:flex absolute top-1/2 -left-6 -translate-y-1/2 z-10 bg-orange-500 text-white w-12 h-12 rounded-full items-center justify-center text-2xl font-black shadow-xl">
+                      +
+                    </div>
+                  )}
+                </div>
+
+                {/* منتجات الباكدج */}
+                {bundleProducts.map((bundleProduct, index) => (
+                  <div key={bundleProduct.id} className="relative">
+                    <div
+                      onClick={() => toggleBundleItem(bundleProduct.id)}
+                      className={`cursor-pointer bg-white rounded-xl p-4 border-2 transition-all ${
+                        selectedBundleItems.includes(bundleProduct.id)
+                          ? 'border-orange-500 shadow-lg scale-105'
+                          : 'border-gray-300 opacity-70 hover:opacity-100 hover:border-orange-300'
+                      }`}
+                    >
+                      <div className="aspect-square relative mb-3 rounded-lg overflow-hidden">
+                        <Image
+                          src={bundleProduct.images?.split(',')[0] || '/placeholder.jpg'}
+                          alt={bundleProduct.nameAr}
+                          fill
+                          sizes="200px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <h4 className="font-bold text-sm mb-1 line-clamp-2">{bundleProduct.nameAr}</h4>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm line-through text-gray-400">
+                          {bundleProduct.price.toLocaleString()} ج.م
+                        </p>
+                        <p className="text-lg font-black text-orange-600">
+                          {Math.round(bundleProduct.price * (1 - BUNDLE_DISCOUNT / 100)).toLocaleString()} ج.م
+                        </p>
+                      </div>
+                      <div className="mt-2 bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded-full inline-block">
+                        وفر {BUNDLE_DISCOUNT}%
+                      </div>
+                    </div>
+                    {selectedBundleItems.includes(bundleProduct.id) && (
+                      <div className="absolute -top-2 -right-2 bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-xl animate-bounce">
+                        ✓
+                      </div>
+                    )}
+                    {index < bundleProducts.length - 1 && (
+                      <div className="hidden md:flex absolute top-1/2 -left-6 -translate-y-1/2 z-10 bg-orange-500 text-white w-12 h-12 rounded-full items-center justify-center text-2xl font-black shadow-xl">
+                        +
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* ملخص السعر */}
+              {selectedBundleItems.length > 0 && (
+                <div className="bg-white rounded-xl p-4 border-2 border-orange-300 mb-4">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">إجمالي السعر العادي:</span>
+                      <span className="line-through text-gray-400">
+                        {calculateBundleTotal().originalTotal.toLocaleString()} ج.م
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-orange-600 font-bold">
+                      <span>خصم الباكدج ({BUNDLE_DISCOUNT}%):</span>
+                      <span>- {calculateBundleTotal().discountAmount.toFixed(0)} ج.م</span>
+                    </div>
+                    <div className="flex justify-between text-xl font-black text-green-600 border-t-2 border-orange-200 pt-2">
+                      <span>الإجمالي بالخصم:</span>
+                      <span>{calculateBundleTotal().finalTotal.toFixed(0)} ج.م</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 bg-green-100 text-green-800 text-center py-2 rounded-lg font-bold">
+                    🎉 أنت توفر {calculateBundleTotal().savings.toFixed(0)} جنيه!
+                  </div>
+                </div>
+              )}
+
+              <Button
+                onClick={handleAddToCart}
+                className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white font-black py-6 text-lg shadow-xl hover:shadow-2xl transition-all"
+                disabled={selectedBundleItems.length === 0}
+              >
+                <ShoppingCart className="w-6 h-6 ml-2" />
+                {selectedBundleItems.length > 0
+                  ? `أضف ${selectedBundleItems.length + 1} منتجات بـ ${calculateBundleTotal().finalTotal.toFixed(0)} ج.م`
+                  : 'اختر منتج على الأقل'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="space-y-6">
@@ -1166,6 +1345,48 @@ export default function ProductDetailPage() {
                 </p>
               </div>
             </div>
+
+            {/* Free Shipping Progress Bar */}
+            {(() => {
+              const cartTotal = getTotalPrice();
+              const remaining = FREE_SHIPPING_THRESHOLD - cartTotal;
+              const progress = Math.min((cartTotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
+              
+              return (
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 mb-6 border-2 border-blue-200">
+                  {cartTotal >= FREE_SHIPPING_THRESHOLD ? (
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">🎉</div>
+                      <p className="text-green-600 font-black text-lg">
+                        مبروك! حصلت على شحن مجاني!
+                      </p>
+                      <p className="text-gray-600 text-sm mt-1">
+                        طلبك مؤهل للتوصيل المجاني
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm font-bold text-gray-700">
+                          🚚 أضف <span className="text-orange-600">{remaining.toFixed(0)} جنيه</span> واحصل على شحن مجاني!
+                        </p>
+                        <Truck className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="absolute top-0 right-0 h-full bg-gradient-to-l from-green-500 to-blue-500 transition-all duration-500 rounded-full"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>{cartTotal.toFixed(0)} ج.م</span>
+                        <span>{FREE_SHIPPING_THRESHOLD} ج.م</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Buttons */}
             <div className="grid grid-cols-2 gap-3">

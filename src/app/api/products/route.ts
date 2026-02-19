@@ -24,6 +24,8 @@ export async function GET(request: Request) {
     const where: any = { 
       isActive: true,
       isVisible: true, // عرض المنتجات الظاهرة فقط للعملاء
+      price: { gt: 0 }, // إخفاء المنتجات بسعر صفر
+      stock: { gt: 0 }, // إخفاء المنتجات بكمية صفر
     };
 
     // Search filter

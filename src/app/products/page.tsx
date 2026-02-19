@@ -106,7 +106,9 @@ export default function ProductsPage() {
   // فلترة محلية للسعر فقط (الـ API يتعامل مع البحث والفئة)
   const filteredProducts = products.filter((product) => {
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-    return matchesPrice;
+    const hasValidPrice = product.price > 0; // إخفاء المنتجات بسعر صفر
+    const hasStock = product.stock > 0; // إخفاء المنتجات بكمية صفر
+    return matchesPrice && hasValidPrice && hasStock;
   });
 
   const clearFilters = () => {

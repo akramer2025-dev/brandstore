@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, BellOff, Check, CheckCheck, Package, MessageCircle, AlertTriangle } from "lucide-react";
+import { Bell, BellOff, Check, CheckCheck, Package, MessageCircle, AlertTriangle, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/BackButton";
 
@@ -25,6 +25,8 @@ export default function VendorNotificationsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [markingRead, setMarkingRead] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deletingAll, setDeletingAll] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -91,6 +93,60 @@ export default function VendorNotificationsPage() {
     } catch (error) {
       console.error("Error marking all as read:", error);
       toast.error("فشل تحديث الإشعارات");
+    }
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    setDeleting(notificationId);
+    try {
+      const response = await fetch("/api/vendor/notifications", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationId }),
+      });
+
+      if (response.ok) {
+        setNotifications((prev) =>
+          prev.filter((n) => n.id !== notificationId)
+        );
+        // تقليل العداد إذا كان الإشعار غير مقروء
+        const notification = notifications.find((n) => n.id === notificationId);
+        if (notification && !notification.isRead) {
+          setUnreadCount((prev) => Math.max(0, prev - 1));
+        }
+        toast.success("تم حذف الإشعار");
+      }
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      toast.error("فشل حذف الإشعار");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const deleteAllNotifications = async () => {
+    if (!confirm("هل أنت متأكد من حذف جميع الإشعارات؟")) {
+      return;
+    }
+
+    setDeletingAll(true);
+    try {
+      const response = await fetch("/api/vendor/notifications", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deleteAll: true }),
+      });
+
+      if (response.ok) {
+        setNotifications([]);
+        setUnreadCount(0);
+        toast.success("تم حذف جميع الإشعارات");
+      }
+    } catch (error) {
+      console.error("Error deleting all notifications:", error);
+      toast.error("فشل حذف الإشعارات");
+    } finally {
+      setDeletingAll(false);
     }
   };
 
@@ -168,17 +224,31 @@ export default function VendorNotificationsPage() {
                 </p>
               </div>
             </div>
-            {unreadCount > 0 && (
-              <Button
-                onClick={markAllAsRead}
-                variant="outline"
-                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 text-xs md:text-sm"
-              >
-                <CheckCheck className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-                <span className="hidden sm:inline">تحديد الكل كمقروء</span>
-                <span className="sm:hidden">✓ الكل</span>
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {unreadCount > 0 && (
+                <Button
+                  onClick={markAllAsRead}
+                  variant="outline"
+                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 text-xs md:text-sm"
+                >
+                  <CheckCheck className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+                  <span className="hidden sm:inline">تحديد الكل كمقروء</span>
+                  <span className="sm:hidden">✓ الكل</span>
+                </Button>
+              )}
+              {notifications.length > 0 && (
+                <Button
+                  onClick={deleteAllNotifications}
+                  disabled={deletingAll}
+                  variant="outline"
+                  className="bg-red-500/20 backdrop-blur-sm border-red-300/30 text-white hover:bg-red-500/30 text-xs md:text-sm"
+                >
+                  <Trash2 className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+                  <span className="hidden sm:inline">{deletingAll ? "جاري المسح..." : "مسح الكل"}</span>
+                  <span className="sm:hidden">🗑️</span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -237,20 +307,36 @@ export default function VendorNotificationsPage() {
                         {notification.message}
                       </p>
                     </div>
-                    {!notification.isRead && (
+                    <div className="flex items-center gap-2">
+                      {!notification.isRead && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAsRead(notification.id);
+                          }}
+                          disabled={markingRead === notification.id}
+                          className="flex-shrink-0 hover:bg-green-100"
+                          title="تحديد كمقروء"
+                        >
+                          <Check className="h-4 w-4 text-green-600" />
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={(e) => {
                           e.stopPropagation();
-                          markAsRead(notification.id);
+                          deleteNotification(notification.id);
                         }}
-                        disabled={markingRead === notification.id}
-                        className="flex-shrink-0"
+                        disabled={deleting === notification.id}
+                        className="flex-shrink-0 hover:bg-red-100"
+                        title="حذف الإشعار"
                       >
-                        <Check className="h-4 w-4" />
+                        <X className="h-4 w-4 text-red-600" />
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

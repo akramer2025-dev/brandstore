@@ -109,3 +109,61 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+// DELETE - حذف الإشعارات
+export async function DELETE(request: Request) {
+  try {
+    const session = await auth();
+
+    if (!session || session.user?.role !== "VENDOR") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const vendor = await prisma.vendor.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    if (!vendor) {
+      return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+    }
+
+    const { notificationId, deleteAll } = await request.json();
+
+    if (deleteAll) {
+      // حذف جميع الإشعارات
+      await prisma.vendorNotification.deleteMany({
+        where: { vendorId: vendor.id },
+      });
+
+      return NextResponse.json({ message: "All notifications deleted" });
+    }
+
+    if (notificationId) {
+      // حذف إشعار محدد
+      const notification = await prisma.vendorNotification.findFirst({
+        where: {
+          id: notificationId,
+          vendorId: vendor.id,
+        },
+      });
+
+      if (!notification) {
+        return NextResponse.json({ error: "Notification not found" }, { status: 404 });
+      }
+
+      await prisma.vendorNotification.delete({
+        where: { id: notificationId },
+      });
+
+      return NextResponse.json({ message: "Notification deleted" });
+    }
+
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+    return NextResponse.json(
+      { error: "Failed to delete notification" },
+      { status: 500 }
+    );
+  }
+}

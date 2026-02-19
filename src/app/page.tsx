@@ -227,6 +227,11 @@ async function getActiveAuctions() {
 async function getProducts() {
   try {
     return await prisma.product.findMany({
+      where: {
+        isActive: true,
+        price: { gt: 0 }, // إخفاء المنتجات بسعر صفر
+        stock: { gt: 0 }, // إخفاء المنتجات بكمية صفر
+      },
       take: 20, // تقليل العدد لتحسين الأداء
       include: {
         category: {
