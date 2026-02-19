@@ -10,7 +10,6 @@ import { TrendingUp, ShoppingBag, Sparkles, Shield, CheckCircle, Phone, Mail, Ma
 import { Metadata } from 'next';
 import BrandBackgroundPattern from '@/components/BrandBackgroundPattern';
 import PendingPrizeHandler from '@/components/PendingPrizeHandler';
-import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { InfiniteProductCarousel } from '@/components/InfiniteProductCarousel';
 import { ProductsSlider } from '@/components/ProductsSlider';
 import FlashDeals from '@/components/FlashDeals';
@@ -634,22 +633,6 @@ export default async function HomePage() {
       {/* {products.length > 10 && (
         <InfiniteProductCarousel products={products.slice(10)} speed={80} />
       )} */}
-
-
-
-      {/* Testimonials Section */}
-      {topReviews.length > 0 && (
-        <TestimonialsSection reviews={topReviews.map(review => ({
-          ...review,
-          comment: review.comment || 'تجربة رائعة!',
-          createdAt: review.createdAt.toISOString(),
-          user: {
-            name: review.user.name || 'عميل',
-            image: review.user.image || null
-          },
-          product: { nameAr: review.product.nameAr || review.product.name }
-        }))} />
-      )}
 
 
       {/* Footer */}
