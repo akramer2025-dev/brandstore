@@ -111,6 +111,44 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
+        {/* Force Service Worker Cleanup */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              console.log('🧹 Starting aggressive Service Worker cleanup...');
+              
+              // Unregister ALL service workers
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  console.log('📋 Found ' + registrations.length + ' service worker registrations');
+                  for(let registration of registrations) {
+                    registration.unregister().then(function(success) {
+                      console.log('✅ Unregistered SW:', success);
+                    });
+                  }
+                });
+              }
+              
+              // Delete ALL caches
+              if ('caches' in window) {
+                caches.keys().then(function(cacheNames) {
+                  console.log('📦 Found ' + cacheNames.length + ' caches');
+                  return Promise.all(
+                    cacheNames.map(function(cacheName) {
+                      console.log('🗑️ Deleting cache:', cacheName);
+                      return caches.delete(cacheName);
+                    })
+                  );
+                }).then(function() {
+                  console.log('✨ All caches deleted successfully');
+                });
+              }
+              
+              console.log('🎯 Cleanup script executed');
+            })();
+          `
+        }} />
+        
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
