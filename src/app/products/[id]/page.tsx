@@ -100,7 +100,7 @@ export default function ProductDetailPage() {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   
   // Free Shipping Settings
-  const FREE_SHIPPING_THRESHOLD = 550; // الحد الأدنى للشحن المجاني
+  const FREE_SHIPPING_THRESHOLD = 750; // الحد الأدنى للشحن المجاني
   const BUNDLE_DISCOUNT = 15; // خصم 15% على الباكدج الكامل
 
   // Get current price and stock based on selected variant or product default
