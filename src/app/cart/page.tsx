@@ -506,7 +506,7 @@ export default function CartPage() {
                     
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-gray-400 text-sm">رسوم التوصيل:</span>
-                      <span className="text-teal-400 font-bold">مجاناً</span>
+                      <span className="text-amber-400 font-bold text-xs sm:text-sm">تُحسب عند الدفع</span>
                     </div>
                   </div>
 

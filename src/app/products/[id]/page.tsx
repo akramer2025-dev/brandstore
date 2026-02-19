@@ -235,8 +235,8 @@ export default function ProductDetailPage() {
       
       // جلب منتجات للباكدج (عشوائي من نفس الفئة)
       setBundleProducts(related.slice(0, 2));
-      // تفعيل الباكدج افتراضياً
-      setSelectedBundleItems(related.slice(0, 2).map((p: Product) => p.id));
+      // لا نختار أي منتج افتراضياً - يجب على المستخدم الاختيار
+      setSelectedBundleItems([]);
     } catch (error) {
       console.error("Error fetching product:", error);
       toast.error("فشل تحميل المنتج");
@@ -290,6 +290,8 @@ export default function ProductDetailPage() {
         });
       });
       toast.success(`🎉 تم إضافة ${selectedProducts.length + 1} منتج مع خصم ${BUNDLE_DISCOUNT}%`);
+    } else {
+      toast.success('✅ تم إضافة المنتج إلى السلة');
     }
 
     // إظهار الـ modal بدلاً من toast
@@ -1070,39 +1072,44 @@ export default function ProductDetailPage() {
         {/* Frequently Bought Together - ا شترى العملاء أيضاً */}
         {bundleProducts.length > 0 && getCurrentStock() > 0 && (
           <Card className="bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 border-2 border-orange-300 shadow-2xl overflow-hidden">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  🔥 عرض حصري
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex flex-col gap-2 mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="bg-orange-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold">
+                    🔥 عرض حصري
+                  </div>
+                  <h3 className="text-base sm:text-lg md:text-xl font-black text-gray-900">
+                    اشترى العملاء معاً
+                  </h3>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-gray-900">
-                  اشترى العملاء معاً
-                </h3>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  👆 اضغط على المنتجات لاختيار ما تريد • وفر {BUNDLE_DISCOUNT}% على المنتجات الإضافية
+                </p>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-4 mb-6">
+              <div className="grid md:grid-cols-3 gap-2 sm:gap-3 mb-4">
                 {/* المنتج الأساسي */}
                 <div className="relative">
-                  <div className="bg-white rounded-xl p-4 border-2 border-purple-500 shadow-lg">
-                    <div className="aspect-square relative mb-3 rounded-lg overflow-hidden">
+                  <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-purple-500 shadow-lg">
+                    <div className="aspect-square relative mb-2 rounded-lg overflow-hidden">
                       <Image
                         src={images[0] || '/placeholder.jpg'}
                         alt={product.nameAr}
                         fill
-                        sizes="200px"
+                        sizes="(max-width: 768px) 40vw, 200px"
                         className="object-cover"
                       />
                     </div>
-                    <h4 className="font-bold text-sm mb-1 line-clamp-2">{product.nameAr}</h4>
-                    <p className="text-lg font-black tekstرادient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <h4 className="font-bold text-xs sm:text-sm mb-1 line-clamp-2">{product.nameAr}</h4>
+                    <p className="text-sm sm:text-base font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       {getCurrentPrice().toLocaleString()} ج.م
                     </p>
-                    <div className="absolute -top-2 -right-2 bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
+                    <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-purple-600 text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg">
                       ✓
                     </div>
                   </div>
                   {bundleProducts.length > 0 && (
-                    <div className="hidden md:flex absolute top-1/2 -left-6 -translate-y-1/2 z-10 bg-orange-500 text-white w-12 h-12 rounded-full items-center justify-center text-2xl font-black shadow-xl">
+                    <div className="hidden md:flex absolute top-1/2 -left-6 -translate-y-1/2 z-10 bg-orange-500 text-white w-10 h-10 rounded-full items-center justify-center text-xl font-black shadow-xl">
                       +
                     </div>
                   )}
@@ -1113,41 +1120,41 @@ export default function ProductDetailPage() {
                   <div key={bundleProduct.id} className="relative">
                     <div
                       onClick={() => toggleBundleItem(bundleProduct.id)}
-                      className={`cursor-pointer bg-white rounded-xl p-4 border-2 transition-all ${
+                      className={`cursor-pointer bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 transition-all ${
                         selectedBundleItems.includes(bundleProduct.id)
                           ? 'border-orange-500 shadow-lg scale-105'
                           : 'border-gray-300 opacity-70 hover:opacity-100 hover:border-orange-300'
                       }`}
                     >
-                      <div className="aspect-square relative mb-3 rounded-lg overflow-hidden">
+                      <div className="aspect-square relative mb-2 rounded-lg overflow-hidden">
                         <Image
                           src={bundleProduct.images?.split(',')[0] || '/placeholder.jpg'}
                           alt={bundleProduct.nameAr}
                           fill
-                          sizes="200px"
+                          sizes="(max-width: 768px) 40vw, 200px"
                           className="object-cover"
                         />
                       </div>
-                      <h4 className="font-bold text-sm mb-1 line-clamp-2">{bundleProduct.nameAr}</h4>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm line-through text-gray-400">
-                          {bundleProduct.price.toLocaleString()} ج.م
+                      <h4 className="font-bold text-xs sm:text-sm mb-1 line-clamp-2">{bundleProduct.nameAr}</h4>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <p className="text-xs sm:text-sm line-through text-gray-400">
+                          {bundleProduct.price.toLocaleString()}
                         </p>
-                        <p className="text-lg font-black text-orange-600">
+                        <p className="text-sm sm:text-base font-black text-orange-600">
                           {Math.round(bundleProduct.price * (1 - BUNDLE_DISCOUNT / 100)).toLocaleString()} ج.م
                         </p>
                       </div>
-                      <div className="mt-2 bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded-full inline-block">
+                      <div className="mt-1.5 bg-orange-100 text-orange-800 text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full inline-block">
                         وفر {BUNDLE_DISCOUNT}%
                       </div>
                     </div>
                     {selectedBundleItems.includes(bundleProduct.id) && (
-                      <div className="absolute -top-2 -right-2 bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-xl animate-bounce">
+                      <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-orange-500 text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-xs sm:text-sm font-bold shadow-xl animate-bounce">
                         ✓
                       </div>
                     )}
                     {index < bundleProducts.length - 1 && (
-                      <div className="hidden md:flex absolute top-1/2 -left-6 -translate-y-1/2 z-10 bg-orange-500 text-white w-12 h-12 rounded-full items-center justify-center text-2xl font-black shadow-xl">
+                      <div className="hidden md:flex absolute top-1/2 -left-6 -translate-y-1/2 z-10 bg-orange-500 text-white w-10 h-10 rounded-full items-center justify-center text-xl font-black shadow-xl">
                         +
                       </div>
                     )}
@@ -1157,8 +1164,8 @@ export default function ProductDetailPage() {
 
               {/* ملخص السعر */}
               {selectedBundleItems.length > 0 && (
-                <div className="bg-white rounded-xl p-4 border-2 border-orange-300 mb-4">
-                  <div className="space-y-2 text-sm">
+                <div className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 border-2 border-orange-300 mb-3">
+                  <div className="space-y-1.5 text-xs sm:text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">إجمالي السعر العادي:</span>
                       <span className="line-through text-gray-400">
@@ -1169,12 +1176,12 @@ export default function ProductDetailPage() {
                       <span>خصم الباكدج ({BUNDLE_DISCOUNT}%):</span>
                       <span>- {calculateBundleTotal().discountAmount.toFixed(0)} ج.م</span>
                     </div>
-                    <div className="flex justify-between text-xl font-black text-green-600 border-t-2 border-orange-200 pt-2">
+                    <div className="flex justify-between text-base sm:text-lg font-black text-green-600 border-t-2 border-orange-200 pt-1.5">
                       <span>الإجمالي بالخصم:</span>
                       <span>{calculateBundleTotal().finalTotal.toFixed(0)} ج.م</span>
                     </div>
                   </div>
-                  <div className="mt-3 bg-green-100 text-green-800 text-center py-2 rounded-lg font-bold">
+                  <div className="mt-2 bg-green-100 text-green-800 text-center py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold">
                     🎉 أنت توفر {calculateBundleTotal().savings.toFixed(0)} جنيه!
                   </div>
                 </div>
@@ -1182,13 +1189,12 @@ export default function ProductDetailPage() {
 
               <Button
                 onClick={handleAddToCart}
-                className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white font-black py-6 text-lg shadow-xl hover:shadow-2xl transition-all"
-                disabled={selectedBundleItems.length === 0}
+                className="w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white font-black py-3 sm:py-4 text-sm sm:text-base shadow-xl hover:shadow-2xl transition-all"
               >
-                <ShoppingCart className="w-6 h-6 ml-2" />
+                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                 {selectedBundleItems.length > 0
                   ? `أضف ${selectedBundleItems.length + 1} منتجات بـ ${calculateBundleTotal().finalTotal.toFixed(0)} ج.م`
-                  : 'اختر منتج على الأقل'}
+                  : 'أضف المنتج للسلة فقط'}
               </Button>
             </CardContent>
           </Card>
