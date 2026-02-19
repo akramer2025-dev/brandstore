@@ -158,6 +158,7 @@ async function addFakeReviews() {
               userId: user.id,
               rating: rating,
               comment: comment,
+              isApproved: true, // التقييمات الوهمية معتمدة تلقائياً
               createdAt: createdAt,
               updatedAt: createdAt,
             },

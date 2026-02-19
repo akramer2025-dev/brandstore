@@ -217,6 +217,14 @@ export default function ProductDetailPage() {
       const res = await fetch(`/api/products/${productId}`);
       if (!res.ok) throw new Error("فشل تحميل المنتج");
       const data = await res.json();
+
+      // Fetch reviews for this product
+      const reviewsRes = await fetch(`/api/reviews?productId=${productId}`);
+      if (reviewsRes.ok) {
+        const reviewsData = await reviewsRes.json();
+        data.reviews = reviewsData; // Add reviews to product
+      }
+
       setProduct(data);
 
       // Fetch related products from same category
