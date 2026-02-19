@@ -5,38 +5,66 @@ import { useSession } from 'next-auth/react';
 
 export function ServiceWorkerRegistration() {
   const { data: session } = useSession();
+  const isVendor = session?.user?.role === 'VENDOR';
 
   useEffect(() => {
-    // تسجيل Service Worker فقط إذا كان المستخدم شريك
-    if (session?.user?.role !== 'VENDOR') {
-      return;
-    }
-
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      console.log('🔔 بدء تسجيل Service Worker للإشعارات...');
+    if ('serviceWorker' in navigator) {
+      console.log('🔄 Service Worker: Starting registration...');
       
       navigator.serviceWorker
         .register('/service-worker.js')
         .then((registration) => {
-          console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+          console.log('✅ Service Worker registered:', registration.scope);
           
-          // التحقق من حالة Service Worker
-          if (registration.active) {
-            console.log('✅ Service Worker نشط ويعمل');
+          // ✅ فحص التحديثات دورياً (كل دقيقة)
+          setInterval(() => {
+            registration.update();
+          }, 60000);
+
+          // ✅ الاستماع للتحديثات الجديدة
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'activated' && !navigator.serviceWorker.controller) {
+                  // Service worker جديد تم تفعيله - إعادة تحميل الصفحة
+                  console.log('🔄 New Service Worker activated - Reloading...');
+                  window.location.reload();
+                }
+              });
+            }
+          });
+          
+          // الاشتراك في Push Notifications فقط للـ Vendors
+          if (isVendor && registration.active) {
+            console.log('✅ Service Worker active for VENDOR');
+            checkAndSubscribe(registration);
           }
-          
-          // الاشتراك في Push Notifications إذا لم يكن مشترك
-          checkAndSubscribe(registration);
         })
         .catch((error) => {
-          console.error('❌ فشل تسجيل Service Worker:', error);
+          console.error('❌ Service Worker registration failed:', error);
         });
-    } else {
-      console.log('⚠️ المتصفح لا يدعم Service Worker أو Push Notifications');
-    }
-  }, [session?.user?.role]);
 
-  return null; // هذا Component لا يعرض شيء
+      // ✅ تنظيف الـ Cache القديم
+      caches.keys().then((cacheNames) => {
+        caches.keys().then((names) => {
+          console.log('📦 Found caches:', names);
+          names.forEach((name) => {
+            // حذف الـ caches القديمة
+            if (name.startsWith('remostore-v1') || name.startsWith('workbox-')) {
+              console.log('🗑️ Deleting old cache:', name);
+              caches.delete(name);
+            }
+          });
+        });
+      });
+    } else {
+      console.log('⚠️ Service Worker not supported');
+    }
+  }, [isVendor]);
+
+  return null;
 }
 
 async function checkAndSubscribe(registration: ServiceWorkerRegistration) {

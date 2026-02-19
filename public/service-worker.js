@@ -1,26 +1,28 @@
-// Service Worker للإشعارات
-const CACHE_NAME = 'remostore-v1';
+// Service Worker للإشعارات - تحديث فبراير 2026
+const CACHE_NAME = 'remostore-v2-feb2026'; // ✅ رقم إصدار جديد
 
 // تثبيت Service Worker
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
+  console.log('Service Worker: Installing v2...');
   // تفعيل Service Worker الجديد فوراً
   self.skipWaiting();
 });
 
 // تفعيل Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activated');
+  console.log('Service Worker: Activated v2 - Clearing OLD caches');
   // السيطرة على جميع الصفحات فوراً
   event.waitUntil(
     Promise.all([
       self.clients.claim(),
-      // حذف caches القديمة
+      // ✅ حذف جميع الـ caches القديمة
       caches.keys().then((cacheNames) => {
+        console.log('Found caches:', cacheNames);
         return Promise.all(
-          cacheNames
-            .filter((name) => name !== CACHE_NAME)
-            .map((name) => caches.delete(name))
+          cacheNames.map((name) => {
+            console.log('Deleting cache:', name);
+            return caches.delete(name);
+          })
         );
       }),
       // حذف جميع الإشعارات القديمة عند التفعيل
@@ -28,7 +30,9 @@ self.addEventListener('activate', (event) => {
         console.log(`Clearing ${notifications.length} old notifications`);
         notifications.forEach(notification => notification.close());
       })
-    ])
+    ]).then(() => {
+      console.log('✅ All old caches cleared successfully!');
+    })
   );
 });
 
