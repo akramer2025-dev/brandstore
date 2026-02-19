@@ -9,7 +9,15 @@ export function ServiceWorkerRegistration() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      console.log('🔄 Service Worker: Starting registration...');
+      console.log('🔄 Service Worker: Starting registration v3...');
+      
+      // ✅ الاستماع لرسائل من Service Worker (إجبار إعادة التحميل)
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'FORCE_RELOAD') {
+          console.log('🔄 Service Worker requested FORCE RELOAD');
+          window.location.reload();
+        }
+      });
       
       navigator.serviceWorker
         .register('/service-worker.js')

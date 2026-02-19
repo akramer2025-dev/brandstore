@@ -1,5 +1,8 @@
-// Service Worker للإشعارات - تحديث فبراير 2026
-const CACHE_NAME = 'remostore-v2-feb2026'; // ✅ رقم إصدار جديد
+// Service Worker للإشعارات - تحديث فبراير 2026 v3
+const CACHE_NAME = 'remostore-v3-feb2026-fix'; // ✅ رقم إصدار جديد
+const VERSION = 'v3.0.0';
+
+console.log('🚀 Service Worker Version:', VERSION);
 
 // تثبيت Service Worker
 self.addEventListener('install', (event) => {
@@ -10,20 +13,27 @@ self.addEventListener('install', (event) => {
 
 // تفعيل Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activated v2 - Clearing OLD caches');
+  console.log('🔄 Service Worker: Activated v3 - FORCE CLEARING ALL CACHES');
   // السيطرة على جميع الصفحات فوراً
   event.waitUntil(
     Promise.all([
       self.clients.claim(),
-      // ✅ حذف جميع الـ caches القديمة
+      // ✅ حذف جميع الـ caches القديمة بالقوة
       caches.keys().then((cacheNames) => {
-        console.log('Found caches:', cacheNames);
+        console.log('🗑️ Found caches:', cacheNames);
         return Promise.all(
           cacheNames.map((name) => {
-            console.log('Deleting cache:', name);
+            console.log('🗑️ Deleting cache:', name);
             return caches.delete(name);
           })
         );
+      }),
+      // إجبار جميع المتصفحات على إعادة التحميل
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          console.log('🔄 Forcing reload for client:', client.url);
+          client.postMessage({ type: 'FORCE_RELOAD' });
+        });
       }),
       // حذف جميع الإشعارات القديمة عند التفعيل
       self.registration.getNotifications().then(notifications => {
