@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // 📋 GET: جلب سلة المستخدم
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user?.id) {
       console.log('🔒 [CART API] No session - user not logged in');
@@ -109,7 +108,7 @@ export async function GET(request: NextRequest) {
 // ➕ POST: إضافة منتج إلى السلة
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -241,7 +240,7 @@ export async function POST(request: NextRequest) {
 // ✏️ PUT: تعديل كمية منتج في السلة
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -335,7 +334,7 @@ export async function PUT(request: NextRequest) {
 // 🗑️ DELETE: حذف جميع عناصر السلة
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user?.id) {
       return NextResponse.json(
