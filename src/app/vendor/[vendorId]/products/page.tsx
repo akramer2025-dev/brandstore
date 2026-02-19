@@ -14,15 +14,10 @@ import {
   LayoutGrid,
   TrendingUp,
   Package,
-  Award,
   Sparkles,
   Heart,
   ShoppingCart,
   ArrowRight,
-  Facebook,
-  Instagram,
-  Twitter,
-  Youtube,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -243,120 +238,62 @@ export default function VendorProductsPage() {
           </div>
         )}
 
-        <div className="container mx-auto px-3 sm:px-4 relative" style={{ marginTop: vendor.coverImage ? '-80px' : '0' }}>
-          {/* Profile Section */}
-          <div className="bg-white/70 backdrop-blur-lg rounded-lg sm:rounded-xl md:rounded-2xl shadow-2xl overflow-visible border border-white/30 backdrop-saturate-150">
-            <div className="px-3 sm:px-4 md:px-8 py-2 sm:py-4 md:py-6 lg:py-8">
-              <div className="flex flex-col md:flex-row items-center md:items-end gap-2 sm:gap-3 md:gap-4 lg:gap-6">
-                {/* Logo - محسّن للموبايل */}
-                <div className="flex-shrink-0 -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-28 xl:-mt-32 relative z-50">
-                  <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 xl:w-48 xl:h-48 rounded-full bg-white p-3 shadow-2xl ring-2 sm:ring-3 md:ring-4 ring-white hover:ring-purple-200 transition-all duration-300">
-                    {vendor.logo ? (
-                      <Image
-                        src={vendor.logo}
-                        alt={vendorDisplayName}
-                        width={176}
-                        height={176}
-                        quality={95}
-                        className="w-full h-full object-contain rounded-full"
-                        priority
-                        fetchPriority="high"
-                        loading="eager"
-                        sizes="(max-width: 640px) 128px, (max-width: 768px) 144px, (max-width: 1024px) 160px, 176px"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
-                        <Store className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:w-16 text-purple-600" />
-                      </div>
-                    )}
-                  </div>
+        <div className="container mx-auto px-3 sm:px-4 relative" style={{ marginTop: vendor.coverImage ? '-40px' : '0' }}>
+          {/* Vendor Card - Professional Design */}
+          <div className="bg-transparent rounded-2xl p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 md:gap-6 text-center sm:text-right">
+              {/* Logo */}
+              <div className="flex-shrink-0">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-white p-2 sm:p-2.5 shadow-lg ring-4 ring-purple-100">
+                  {vendor.logo ? (
+                    <Image
+                      src={vendor.logo}
+                      alt={vendorDisplayName}
+                      width={128}
+                      height={128}
+                      quality={95}
+                      className="w-full h-full object-contain rounded-full"
+                      priority
+                      fetchPriority="high"
+                      loading="eager"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
+                      <Store className="w-12 h-12 sm:w-14 sm:h-14 text-purple-600" />
+                    </div>
+                  )}
                 </div>
+              </div>
 
-                {/* Info */}
-                <div className="flex-1 text-center md:text-right w-full">
-                  <div className="flex flex-col md:flex-row items-center md:items-center md:justify-between gap-1.5 sm:gap-2 md:gap-3">
-                    <div className="w-full md:w-auto">
-                      <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 mb-0.5 sm:mb-1 md:mb-2">
-                        {vendorDisplayName}
-                      </h1>
-                      {(vendor.storeBioAr || vendor.storeBio) && (
-                        <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-1 sm:mb-2 md:mb-3 max-w-2xl mx-auto md:mx-0">
-                          {vendor.storeBioAr || vendor.storeBio}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Social Links */}
-                    {(vendor.facebookUrl || vendor.instagramUrl || vendor.twitterUrl || vendor.youtubeUrl) && (
-                      <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-2 md:mt-0">
-                        {vendor.facebookUrl && (
-                          <a
-                            href={vendor.facebookUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white transition-all"
-                          >
-                            <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </a>
-                        )}
-                        {vendor.instagramUrl && (
-                          <a
-                            href={vendor.instagramUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center justify-center text-white transition-all"
-                          >
-                            <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </a>
-                        )}
-                        {vendor.twitterUrl && (
-                          <a
-                            href={vendor.twitterUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-black hover:bg-gray-800 flex items-center justify-center text-white transition-all"
-                          >
-                            <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </a>
-                        )}
-                        {vendor.youtubeUrl && (
-                          <a
-                            href={vendor.youtubeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center text-white transition-all"
-                          >
-                            <Youtube className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </a>
-                        )}
-                      </div>
-                    )}
+              {/* Info */}
+              <div className="flex-1 min-w-0 w-full sm:w-auto">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-2 sm:mb-3 mt-4 sm:mt-6">
+                  {vendorDisplayName}
+                </h1>
+                {(vendor.storeBioAr || vendor.storeBio) && (
+                  <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 line-clamp-2 max-w-2xl mx-auto sm:mx-0">
+                    {vendor.storeBioAr || vendor.storeBio}
+                  </p>
+                )}
+                
+                {/* Stats in compact row */}
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-yellow-50 rounded-lg px-3 py-1.5 sm:py-2">
+                    <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 fill-yellow-500" />
+                    <span className="font-bold text-gray-900 text-sm sm:text-base">{vendor.rating.toFixed(1)}</span>
+                    <span className="text-gray-600 text-xs sm:text-sm">تقييم</span>
                   </div>
-
-                  {/* Stats */}
-                  <div className="flex flex-wrap justify-center md:justify-start gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 mt-1.5 sm:mt-2 md:mt-3 lg:mt-4">
-                    <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-gray-100 rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2">
-                      <Star className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-yellow-500 fill-yellow-500" />
-                      <span className="font-bold text-gray-900 text-xs sm:text-sm md:text-base">{vendor.rating.toFixed(1)}</span>
-                      <span className="text-gray-600 text-[10px] sm:text-xs md:text-sm">تقييم</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-gray-100 rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2">
-                      <Package className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-purple-600" />
-                      <span className="font-bold text-gray-900 text-xs sm:text-sm md:text-base">{vendor.totalProducts}</span>
-                      <span className="text-gray-600 text-[10px] sm:text-xs md:text-sm">منتج</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-gray-100 rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2">
-                      <ShoppingBag className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-pink-600" />
-                      <span className="font-bold text-gray-900 text-xs sm:text-sm md:text-base">{vendor.totalOrders}+</span>
-                      <span className="text-gray-600 text-[10px] sm:text-xs md:text-sm">طلب</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2">
-                      <Award className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
-                      <span className="font-bold text-[10px] sm:text-xs md:text-sm">بائع موثوق</span>
-                    </div>
+                  
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-purple-50 rounded-lg px-3 py-1.5 sm:py-2">
+                    <Package className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+                    <span className="font-bold text-gray-900 text-sm sm:text-base">{vendor.totalProducts}</span>
+                    <span className="text-gray-600 text-xs sm:text-sm">منتج</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-pink-50 rounded-lg px-3 py-1.5 sm:py-2">
+                    <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-pink-600" />
+                    <span className="font-bold text-gray-900 text-sm sm:text-base">{vendor.totalOrders}+</span>
+                    <span className="text-gray-600 text-xs sm:text-sm">طلب</span>
                   </div>
                 </div>
               </div>

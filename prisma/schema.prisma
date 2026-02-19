@@ -248,6 +248,8 @@ model Product {
   descriptionAr   String?
   price           Float
   originalPrice   Float?
+  wholesalePrice  Float?         // سعر الجملة/الدستة
+  minWholesaleQuantity Int       @default(6) // الحد الأدنى للشراء بالجملة
   categoryId      String
   images          String?
   videoUrl        String?        // رابط فيديو المنتج

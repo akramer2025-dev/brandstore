@@ -1,0 +1,121 @@
+=========================================
+   Environment Variables للنسخ المباشر
+=========================================
+
+انسخ كل متغير وضعه في Vercel واحد واحد:
+
+-------------------
+المتغير 1 من 8:
+-------------------
+Name: 
+DATABASE_URL
+
+Value:
+postgresql://neondb_owner:npg_maJHy8UkQ9qP@ep-lucky-frost-ahx6zz7q.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
+
+Environment:
+✅ Production ✅ Preview ✅ Development
+
+
+-------------------
+المتغير 2 من 8:
+-------------------
+Name:
+NEXTAUTH_SECRET
+
+Value:
+dPJmbxjVNQHfR03jS22yl9jVY2DOsiQQmSHBJv/xZms=
+
+Environment:
+✅ Production ✅ Preview ✅ Development
+
+
+-------------------
+المتغير 3 من 8:
+-------------------
+Name:
+NEXTAUTH_URL
+
+Value:
+https://www.remostore.net
+
+Environment:
+✅ Production فقط
+
+
+-------------------
+المتغير 4 من 8:
+-------------------
+Name:
+NEXT_PUBLIC_APP_URL
+
+Value:
+https://www.remostore.net
+
+Environment:
+✅ Production
+
+
+-------------------
+المتغير 5 من 8:
+-------------------
+Name:
+NEXT_PUBLIC_SITE_URL
+
+Value:
+https://www.remostore.net
+
+Environment:
+✅ Production
+
+
+-------------------
+المتغير 6 من 8:
+-------------------
+Name:
+PRODUCTION_URL
+
+Value:
+https://www.remostore.net
+
+Environment:
+✅ Production
+
+
+-------------------
+المتغير 7 من 8:
+-------------------
+Name:
+NEXT_PUBLIC_SITE_NAME
+
+Value:
+RemoStore
+
+Environment:
+✅ Production
+
+
+-------------------
+المتغير 8 من 8:
+-------------------
+Name:
+CSRF_SECRET
+
+Value:
+A7kN9pR2vX5wZ8bQ3mY6dF4hL1jT0sC9eG7uI2oP5nK8
+
+Environment:
+✅ Production ✅ Preview ✅ Development
+
+
+=========================================
+   ✅ بعد الانتهاء:
+=========================================
+
+1. اذهب لـ Deployments
+2. اضغط على آخر deployment
+3. اضغط ... → Redeploy
+4. انتظر 2-3 دقائق
+5. افتح https://www.remostore.net
+
+=========================================
