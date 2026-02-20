@@ -44,7 +44,8 @@ async function getCategory(categoryId: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const category = await getCategory(params.id);
+  const { id } = await params;
+  const category = await getCategory(id);
 
   if (!category) {
     return {
@@ -59,7 +60,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function CategoryPage({ params }: PageProps) {
-  const category = await getCategory(params.id);
+  const { id } = await params;
+  const category = await getCategory(id);
 
   if (!category) {
     notFound();

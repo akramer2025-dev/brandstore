@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build and Deploy",
+			"type": "shell",
+			"command": "taskkill /F /IM node.exe 2>nul; timeout /t 2 /nobreak >nul; npm run build && git add . && git commit -m \"✨ Add subcategories dropdown + Fix Next.js 15 params\" && git push origin main",
+			"isBackground": false
+		},
+		{
+			"label": "Build and Deploy",
+			"type": "shell",
+			"command": "taskkill /F /IM node.exe 2>$null; Start-Sleep -Seconds 2; npm run build; if ($LASTEXITCODE -eq 0) { git add .; git commit -m 'Add subcategories dropdown + Fix Next.js 15 params'; git push origin main; Write-Host 'DEPLOYMENT SUCCESSFUL!' -ForegroundColor Green } else { Write-Host 'BUILD FAILED!' -ForegroundColor Red }",
+			"isBackground": false
+		}
+	]
+}
