@@ -18,6 +18,7 @@ import {
   Heart,
   ShoppingCart,
   ArrowRight,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
+import { ImageLightbox } from "@/components/ImageLightbox";
 
 interface Product {
   id: string;
@@ -75,6 +77,12 @@ export default function VendorProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "price-low" | "price-high" | "popular">("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  // Lightbox state
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxInitialIndex, setLightboxInitialIndex] = useState(0);
+  const [lightboxProductName, setLightboxProductName] = useState("");
 
   const { addItem } = useCartStore();
   const { addToWishlist, isInWishlist } = useWishlist();
@@ -151,12 +159,35 @@ export default function VendorProductsPage() {
     addItem({
       id: product.id,
       name: product.nameAr,
+      price: pBuyNow = (product: Product) => {
+    // Add to cart
+    addItem({
+      id: product.id,
+      name: product.nameAr,
       price: product.price,
       image: product.images?.split(',')[0] || '',
     });
-    toast.success('تم إضافة المنتج إلى السلة');
+    // Navigate to checkout
+    router.push('/checkout');
+    toast.success('جاري التوجيه للدفع...');
   };
 
+  const handleToggleWishlist = (product: Product) => {
+    if (isInWishlist(product.id)) {
+      toast.info('تمت الإزالة من المفضلة');
+    } else {
+      addToWishlist(product.id);
+      toast.success('تم إضافة المنتج للمفضلة');
+    }
+  };
+
+  const handleImageClick = (product: Product, initialIndex: number = 0) => {
+    const images = product.images ? product.images.split(',') : [];
+    if (images.length > 0) {
+      setLightboxImages(images);
+      setLightboxInitialIndex(initialIndex);
+      setLightboxProductName(product.nameAr);
+      setIsLightboxOpen(true
   const handleToggleWishlist = (product: Product) => {
     if (isInWishlist(product.id)) {
       toast.info('تمت الإزالة من المفضلة');
@@ -392,16 +423,34 @@ export default function VendorProductsPage() {
           </CardContent>
         </Card>
 
-        {/* Products Grid/List */}
-        {filteredProducts.length === 0 ? (
-          <Card className="p-6 sm:p-8 md:p-12 text-center rounded-lg sm:rounded-xl">
-            <Package className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 mx-auto text-gray-400 mb-2 sm:mb-3 md:mb-4" />
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">لا توجد منتجات</h3>
-            <p className="text-sm sm:text-base text-gray-600">
-              {searchQuery || selectedCategory 
-                ? "حاول تغيير معايير البحث" 
-                : "لم يتم إضافة منتجات بعد"}
-            </p>
+        {/* Products Grid/Li- Clickable */}
+                  <div 
+                    className="relative aspect-square overflow-hidden bg-gray-100 cursor-pointer"
+                    onClick={() => handleImageClick(product, 0)}
+                  >
+                    {product.images ? (
+                      <>
+                        <Image
+                          src={product.images.split(',')[0]}
+                          alt={product.nameAr}
+                          fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        {/* Image Count Badge */}
+                        {product.images.split(',').length > 1 && (
+                          <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                            <span>{product.images.split(',').length}</span>
+                            <span>صور</span>
+                          </div>
+                        )}
+                        {/* Hover Zoom Indicator */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
+                            <Search className="w-6 h-6 text-purple-600" />
+                          </div>
+                        </div>
+                      <
           </Card>
         ) : (
           <div className={
@@ -468,24 +517,47 @@ export default function VendorProductsPage() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-2 sm:p-3 md:p-4">
-                    {/* Category */}
-                    <div className="text-[10px] sm:text-xs text-purple-600 font-semibold mb-1">
-                      {product.category.nameAr}
-                    </div>
-
-                    {/* Title */}
-                    <Link href={`/products/${product.id}`}>
-                      <h3 className="font-bold text-gray-900 text-xs sm:text-sm md:text-base mb-1 sm:mb-2 line-clamp-2 hover:text-purple-600 transition-colors min-h-[2rem] sm:min-h-[2.5rem] md:min-h-[3.5rem]">
-                        {product.nameAr}
-                      </h3>
-                    </Link>
-
-                    {/* Rating */}
-                    {product.reviewCount > 0 && (
-                      <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
+                  <div className- Improved with Buy Now */}
+                    <div className="flex flex-col gap-1.5 sm:gap-2">
+                      {/* Buy Now - Primary Action */}
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBuyNow(product);
+                        }}
+                        disabled={product.stock === 0}
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold h-9 sm:h-10 md:h-11 text-xs sm:text-sm shadow-lg"
+                      >
+                        <Zap className="w-4 h-4 sm:w-5 sm:h-5 ml-2 fill-current" />
+                        <span>اشتري الآن</span>
+                      </Button>
+                      
+                      {/* Secondary Actions Row */}
+                      <div className="flex gap-1.5 sm:gap-2">
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
+                          disabled={product.stock === 0}
+                          variant="outline"
+                          className="flex-1 border-2 border-purple-300 hover:bg-purple-50 text-purple-700 font-bold h-8 sm:h-9 text-[10px] sm:text-xs px-2"
+                        >
+                          <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                          <span className="hidden sm:inline">للسلة</span>
+                          <span className="inline sm:hidden">سلة</span>
+                        </Button>
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/products/${product.id}`);
+                          }}
+                          variant="outline"
+                          className="border-2 border-purple-300 hover:bg-purple-50 h-8 sm:h-9 w-8 sm:w-9 p-0"
+                        >
+                          <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </Button>
+                      </div.Array(5)].map((_, i) => (
                             <Star
                               key={i}
                               className={`w-3 h-3 sm:w-4 sm:h-4 ${
@@ -495,6 +567,15 @@ export default function VendorProductsPage() {
                               }`}
                             />
                           ))}
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages}
+        initialIndex={lightboxInitialIndex}
+        productName={lightboxProductName}
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+      />
+
                         </div>
                         <span className="text-[10px] sm:text-sm text-gray-600">
                           ({product.reviewCount})
