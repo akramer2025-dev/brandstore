@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
+import { trackViewContent, trackAddToCart } from "@/lib/facebook-pixel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -227,6 +228,13 @@ export default function ProductDetailPage() {
 
       setProduct(data);
 
+      // Track ViewContent event for Facebook Pixel
+      trackViewContent({
+        id: data.id,
+        name: data.nameAr,
+        price: data.price,
+      });
+
       // Fetch related products from same category
       const relatedRes = await fetch(`/api/products?categoryId=${data.categoryId}`);
       const relatedData = await relatedRes.json();
@@ -293,6 +301,13 @@ export default function ProductDetailPage() {
     } else {
       toast.success('✅ تم إضافة المنتج إلى السلة');
     }
+
+    // Track AddToCart event for Facebook Pixel
+    trackAddToCart({
+      id: product.id,
+      name: product.nameAr,
+      price: currentPrice,
+    }, quantity);
 
     // إظهار الـ modal بدلاً من toast
     setShowCartModal(true);

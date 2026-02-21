@@ -12,6 +12,7 @@ import { PerformanceIndicators } from "./PerformanceIndicators";
 import { QuickActions } from "./QuickActions";
 import { CampaignComparison } from "./CampaignComparison";
 import { CampaignWizard } from "./CampaignWizard";
+import { FacebookBalanceCard } from "./FacebookBalanceCard";
 
 export function MediaBuyerTabs({ campaigns, analytics, orders }: any) {
   // Calculate key metrics
@@ -67,12 +68,21 @@ export function MediaBuyerTabs({ campaigns, analytics, orders }: any) {
 
       {/* Campaign Wizard Tab - NEW */}
       <TabsContent value="wizard">
-        <CampaignWizard />
+        <div className="space-y-6">
+          {/* Facebook Balance */}
+          <FacebookBalanceCard />
+          
+          {/* Campaign Wizard */}
+          <CampaignWizard />
+        </div>
       </TabsContent>
 
       {/* Overview Tab */}
       <TabsContent value="overview">
         <div className="space-y-6">
+          {/* Facebook Balance */}
+          <FacebookBalanceCard />
+          
           {/* Smart Alerts */}
           <SmartAlerts campaigns={campaigns} metrics={metrics} />
 

@@ -42,6 +42,7 @@ const PARTNER_TYPES = [
 export default function NewPartnerPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [accountMode, setAccountMode] = useState<'PARTNER' | 'MARKETING_STAFF'>('PARTNER')
   const [formData, setFormData] = useState({
     partnerName: '',
     email: '',
@@ -55,6 +56,10 @@ export default function NewPartnerPage() {
     canDeleteOrders: true,
     canUploadShein: false,
     canAddOfflineProducts: false,
+    // Media Buyer fields
+    commissionRate: '',
+    baseSalary: '',
+    performanceBonus: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +67,7 @@ export default function NewPartnerPage() {
     
     // التحقق من الحقول المطلوبة
     if (!formData.partnerName || !formData.partnerName.trim()) {
-      toast.error('⚠️ اسم الشريك مطلوب')
+      toast.error(`⚠️ ${accountMode === 'PARTNER' ? 'اسم الشريك' : 'اسم Media Buyer'} مطلوب`)
       return
     }
 
@@ -71,31 +76,35 @@ export default function NewPartnerPage() {
       return
     }
 
-    if (!formData.capitalAmount || formData.capitalAmount.trim() === '') {
-      toast.error('⚠️ مبلغ رأس المال مطلوب')
-      return
-    }
+    if (accountMode === 'PARTNER') {
+      if (!formData.capitalAmount || formData.capitalAmount.trim() === '') {
+        toast.error('⚠️ مبلغ رأس المال مطلوب')
+        return
+      }
 
-    if (!formData.capitalPercent || formData.capitalPercent.trim() === '') {
-      toast.error('⚠️ نسبة المساهمة مطلوبة')
-      return
+      if (!formData.capitalPercent || formData.capitalPercent.trim() === '') {
+        toast.error('⚠️ نسبة المساهمة مطلوبة')
+        return
+      }
     }
 
     // التحقق من صحة الأرقام
-    const capitalAmount = parseFloat(formData.capitalAmount)
-    const capitalPercent = parseFloat(formData.capitalPercent)
+    if (accountMode === 'PARTNER') {
+      const capitalAmount = parseFloat(formData.capitalAmount)
+      const capitalPercent = parseFloat(formData.capitalPercent)
 
-    if (isNaN(capitalAmount) || capitalAmount < 0) {
-      toast.error('⚠️ المبلغ يجب أن يكون رقم صحيح')
-      return
+      if (isNaN(capitalAmount) || capitalAmount < 0) {
+        toast.error('⚠️ المبلغ يجب أن يكون رقم صحيح')
+        return
+      }
+
+      if (isNaN(capitalPercent) || capitalPercent < 0 || capitalPercent > 100) {
+        toast.error('⚠️ النسبة يجب أن تكون بين 0 و 100')
+        return
+      }
     }
 
-    if (isNaN(capitalPercent) || capitalPercent < 0 || capitalPercent > 100) {
-      toast.error('⚠️ النسبة يجب أن تكون بين 0 و 100')
-      return
-    }
-
-    if (formData.createUserAccount && (!formData.password || formData.password.length < 6)) {
+    if (!formData.password || formData.password.length < 6) {
       toast.error('⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل')
       return
     }
@@ -103,37 +112,50 @@ export default function NewPartnerPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/admin/partners', {
+      const endpoint = accountMode === 'PARTNER' ? '/api/admin/partners' : '/api/admin/marketing-staff'
+      
+      const payload: any = {
+        name: formData.partnerName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+        notes: formData.notes.trim(),
+      }
+
+      if (accountMode === 'PARTNER') {
+        payload.capitalAmount = parseFloat(formData.capitalAmount)
+        payload.capitalPercent = parseFloat(formData.capitalPercent)
+        payload.partnerType = formData.partnerType
+        payload.partnerName = formData.partnerName.trim()
+        payload.createUserAccount = true // Always create for partner
+        payload.canDeleteOrders = formData.canDeleteOrders
+        payload.canUploadShein = formData.canUploadShein
+        payload.canAddOfflineProducts = formData.canAddOfflineProducts
+      } else {
+        // Media Buyer
+        payload.commissionRate = formData.commissionRate ? parseFloat(formData.commissionRate) : 0
+        payload.baseSalary = formData.baseSalary ? parseFloat(formData.baseSalary) : 0
+        payload.performanceBonus = formData.performanceBonus ? parseFloat(formData.performanceBonus) : 0
+      }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          partnerName: formData.partnerName.trim(),
-          email: formData.email.trim(),
-          phone: formData.phone.trim(),
-          password: formData.password,
-          capitalAmount: capitalAmount,
-          capitalPercent: capitalPercent,
-          partnerType: formData.partnerType,
-          notes: formData.notes.trim(),
-          createUserAccount: formData.createUserAccount,
-          canDeleteOrders: formData.canDeleteOrders,
-          canUploadShein: formData.canUploadShein,
-          canAddOfflineProducts: formData.canAddOfflineProducts,
-        }),
+        body: JSON.stringify(payload),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'فشل في إضافة الشريك')
+        throw new Error(data.error || `فشل في إضافة ${accountMode === 'PARTNER' ? 'الشريك' : 'Media Buyer'}`)
       }
 
-      toast.success('تم إضافة الشريك بنجاح! 🎉')
+      toast.success(`تم إضافة ${accountMode === 'PARTNER' ? 'الشريك' : 'Media Buyer'} بنجاح! 🎉`)
       router.push('/admin/partners')
       router.refresh()
     } catch (error: any) {
-      console.error('خطأ في إضافة الشريك:', error)
-      toast.error(error.message || 'حدث خطأ أثناء إضافة الشريك')
+      console.error(`خطأ في إضافة ${accountMode === 'PARTNER' ? 'الشريك' : 'Media Buyer'}:`, error)
+      toast.error(error.message || `حدث خطأ أثناء إضافة ${accountMode === 'PARTNER' ? 'الشريك' : 'Media Buyer'}`)
     } finally {
       setLoading(false)
     }
@@ -153,61 +175,141 @@ export default function NewPartnerPage() {
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
                 <Users className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              إضافة شريك جديد
+              إضافة {accountMode === 'PARTNER' ? 'شريك' : 'Media Buyer'} جديد
             </h1>
-            <p className="text-gray-400 mt-1 text-sm sm:text-base">أدخل جميع بيانات الشريك بالتفصيل</p>
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">
+              {accountMode === 'PARTNER' ? 'أدخل جميع بيانات الشريك بالتفصيل' : 'أدخل بيانات موظف التسويق (Media Buyer)'}
+            </p>
           </div>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* نوع الشريك - أول شيء */}
-          <Card className="bg-white/5 backdrop-blur-sm border-purple-500/30">
-            <CardHeader className="border-b border-white/10">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Shield className="h-5 w-5 text-purple-400" />
-                نوع الشريك
+          {/* اختيار نوع الحساب */}
+          <Card className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 border-purple-500/50 shadow-xl">
+            <CardHeader className="border-b border-white/20">
+              <CardTitle className="text-white text-xl flex items-center gap-2">
+                🎯 اختر نوع الحساب
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {PARTNER_TYPES.map((type) => {
-                  const Icon = type.icon
-                  const isSelected = formData.partnerType === type.value
-                  return (
-                    <button
-                      key={type.value}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, partnerType: type.value })}
-                      className={`
-                        relative p-4 rounded-xl border-2 transition-all duration-300
-                        flex flex-col items-center gap-3 text-center
-                        ${isSelected 
-                          ? 'bg-gradient-to-br from-purple-600/30 to-blue-600/30 border-purple-400 shadow-lg shadow-purple-500/50' 
-                          : 'bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10'
-                        }
-                      `}
-                    >
-                      <div className={`
-                        h-12 w-12 rounded-full flex items-center justify-center
-                        ${isSelected ? 'bg-purple-500/30' : 'bg-white/10'}
-                      `}>
-                        <Icon className={`h-6 w-6 ${isSelected ? 'text-purple-300' : 'text-gray-400'}`} />
-                      </div>
-                      <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-gray-300'}`}>
-                        {type.label}
-                      </span>
-                      {isSelected && (
-                        <div className="absolute top-2 right-2 h-5 w-5 bg-purple-500 rounded-full flex items-center justify-center">
-                          <ArrowRight className="h-3 w-3 text-white rotate-180" />
-                        </div>
-                      )}
-                    </button>
-                  )
-                })}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setAccountMode('PARTNER')}
+                  className={`
+                    relative p-6 rounded-xl border-2 transition-all duration-300
+                    ${accountMode === 'PARTNER'
+                      ? 'bg-gradient-to-br from-purple-600/40 to-blue-600/40 border-purple-400 shadow-lg shadow-purple-500/50'
+                      : 'bg-white/5 border-white/20 hover:border-white/40 hover:bg-white/10'
+                    }
+                  `}
+                >
+                  <div className="text-center">
+                    <div className={`
+                      h-16 w-16 rounded-full mx-auto mb-4 flex items-center justify-center
+                      ${accountMode === 'PARTNER' ? 'bg-purple-500/30' : 'bg-white/10'}
+                    `}>
+                      <Store className={`h-8 w-8 ${accountMode === 'PARTNER' ? 'text-purple-300' : 'text-gray-400'}`} />
+                    </div>
+                    <h3 className={`text-xl font-bold mb-2 ${accountMode === 'PARTNER' ? 'text-white' : 'text-gray-300'}`}>
+                      👤 شريك (Partner)
+                    </h3>
+                    <p className={`text-sm ${accountMode === 'PARTNER' ? 'text-purple-200' : 'text-gray-400'}`}>
+                      شريك تجاري مع رأس مال ونسبة مساهمة
+                    </p>
+                  </div>
+                  {accountMode === 'PARTNER' && (
+                    <div className="absolute top-3 right-3 h-6 w-6 bg-purple-500 rounded-full flex items-center justify-center">
+                      <ArrowRight className="h-4 w-4 text-white rotate-180" />
+                    </div>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAccountMode('MARKETING_STAFF')}
+                  className={`
+                    relative p-6 rounded-xl border-2 transition-all duration-300
+                    ${accountMode === 'MARKETING_STAFF'
+                      ? 'bg-gradient-to-br from-pink-600/40 to-purple-600/40 border-pink-400 shadow-lg shadow-pink-500/50'
+                      : 'bg-white/5 border-white/20 hover:border-white/40 hover:bg-white/10'
+                    }
+                  `}
+                >
+                  <div className="text-center">
+                    <div className={`
+                      h-16 w-16 rounded-full mx-auto mb-4 flex items-center justify-center
+                      ${accountMode === 'MARKETING_STAFF' ? 'bg-pink-500/30' : 'bg-white/10'}
+                    `}>
+                      <Users className={`h-8 w-8 ${accountMode === 'MARKETING_STAFF' ? 'text-pink-300' : 'text-gray-400'}`} />
+                    </div>
+                    <h3 className={`text-xl font-bold mb-2 ${accountMode === 'MARKETING_STAFF' ? 'text-white' : 'text-gray-300'}`}>
+                      📊 Media Buyer
+                    </h3>
+                    <p className={`text-sm ${accountMode === 'MARKETING_STAFF' ? 'text-pink-200' : 'text-gray-400'}`}>
+                      موظف تسويق مع نظام عمولة وراتب
+                    </p>
+                  </div>
+                  {accountMode === 'MARKETING_STAFF' && (
+                    <div className="absolute top-3 right-3 h-6 w-6 bg-pink-500 rounded-full flex items-center justify-center">
+                      <ArrowRight className="h-4 w-4 text-white rotate-180" />
+                    </div>
+                  )}
+                </button>
               </div>
             </CardContent>
           </Card>
+
+          {/* نوع الشريك - فقط للـ PARTNER */}
+          {accountMode === 'PARTNER' && (
+            <Card className="bg-white/5 backdrop-blur-sm border-purple-500/30">
+              <CardHeader className="border-b border-white/10">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-purple-400" />
+                  نوع الشريك
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {PARTNER_TYPES.map((type) => {
+                    const Icon = type.icon
+                    const isSelected = formData.partnerType === type.value
+                    return (
+                      <button
+                        key={type.value}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, partnerType: type.value })}
+                        className={`
+                          relative p-4 rounded-xl border-2 transition-all duration-300
+                          flex flex-col items-center gap-3 text-center
+                          ${isSelected 
+                            ? 'bg-gradient-to-br from-purple-600/30 to-blue-600/30 border-purple-400 shadow-lg shadow-purple-500/50' 
+                            : 'bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10'
+                          }
+                        `}
+                      >
+                        <div className={`
+                          h-12 w-12 rounded-full flex items-center justify-center
+                          ${isSelected ? 'bg-purple-500/30' : 'bg-white/10'}
+                        `}>
+                          <Icon className={`h-6 w-6 ${isSelected ? 'text-purple-300' : 'text-gray-400'}`} />
+                        </div>
+                        <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                          {type.label}
+                        </span>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 h-5 w-5 bg-purple-500 rounded-full flex items-center justify-center">
+                            <ArrowRight className="h-3 w-3 text-white rotate-180" />
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* البيانات الأساسية */}
           <Card className="bg-white/5 backdrop-blur-sm border-purple-500/30">
@@ -219,18 +321,18 @@ export default function NewPartnerPage() {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* اسم الشريك */}
+                {/* اسم الشخص */}
                 <div className="space-y-2">
                   <Label htmlFor="partnerName" className="text-white flex items-center gap-2">
                     <Users className="h-4 w-4 text-purple-400" />
-                    اسم الشريك *
+                    {accountMode === 'PARTNER' ? 'اسم الشريك *' : 'اسم Media Buyer *'}
                   </Label>
                   <Input
                     id="partnerName"
                     value={formData.partnerName}
                     onChange={(e) => setFormData({ ...formData, partnerName: e.target.value })}
                     className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
-                    placeholder="أدخل اسم الشريك الكامل"
+                    placeholder={accountMode === 'PARTNER' ? 'أدخل اسم الشريك الكامل' : 'أدخل اسم موظف التسويق'}
                     required
                   />
                 </div>
@@ -268,17 +370,36 @@ export default function NewPartnerPage() {
                   />
                 </div>
 
-                {/* نوع الشريك المحدد */}
+                {/* كلمة المرور */}
                 <div className="space-y-2">
-                  <Label className="text-white flex items-center gap-2">
-                    <TypeIcon className="h-4 w-4 text-yellow-400" />
-                    نوع الشراكة
+                  <Label htmlFor="password" className="text-white flex items-center gap-2">
+                    🔑 كلمة المرور *
                   </Label>
-                  <div className="h-11 bg-purple-600/20 border-2 border-purple-400/40 rounded-md px-4 flex items-center gap-3">
-                    <TypeIcon className="h-5 w-5 text-purple-300" />
-                    <span className="text-white font-medium">{selectedType.label}</span>
-                  </div>
+                  <Input
+                    id="password"
+                    type="text"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
+                    placeholder="أدخل كلمة المرور (6 أحرف على الأقل)"
+                    required
+                    minLength={6}
+                  />
                 </div>
+
+                {/* نوع الشريك المحدد - فقط للـ PARTNER */}
+                {accountMode === 'PARTNER' && selectedType && (
+                  <div className="space-y-2">
+                    <Label className="text-white flex items-center gap-2">
+                      <TypeIcon className="h-4 w-4 text-yellow-400" />
+                      نوع الشراكة
+                    </Label>
+                    <div className="h-11 bg-purple-600/20 border-2 border-purple-400/40 rounded-md px-4 flex items-center gap-3">
+                      <TypeIcon className="h-5 w-5 text-purple-300" />
+                      <span className="text-white font-medium">{selectedType.label}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -288,52 +409,109 @@ export default function NewPartnerPage() {
             <CardHeader className="border-b border-white/10">
               <CardTitle className="text-white flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-green-400" />
-                البيانات المالية
+                {accountMode === 'PARTNER' ? 'البيانات المالية' : 'بيانات الراتب والعمولة'}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* مبلغ رأس المال */}
-                <div className="space-y-2">
-                  <Label htmlFor="capitalAmount" className="text-white flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-green-400" />
-                    مبلغ رأس المال (جنيه) *
-                  </Label>
-                  <Input
-                    id="capitalAmount"
-                    type="number"
-                    step="0.01"
-                    value={formData.capitalAmount}
-                    onChange={(e) => setFormData({ ...formData, capitalAmount: e.target.value })}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
+              {accountMode === 'PARTNER' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* مبلغ رأس المال */}
+                  <div className="space-y-2">
+                    <Label htmlFor="capitalAmount" className="text-white flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-green-400" />
+                      مبلغ رأس المال (جنيه) *
+                    </Label>
+                    <Input
+                      id="capitalAmount"
+                      type="number"
+                      step="0.01"
+                      value={formData.capitalAmount}
+                      onChange={(e) => setFormData({ ...formData, capitalAmount: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
+                      placeholder="0.00"
+                      required={accountMode === 'PARTNER'}
+                    />
+                  </div>
 
-                {/* نسبة المساهمة */}
-                <div className="space-y-2">
-                  <Label htmlFor="capitalPercent" className="text-white flex items-center gap-2">
-                    <Percent className="h-4 w-4 text-orange-400" />
-                    نسبة المساهمة (%) *
-                  </Label>
-                  <Input
-                    id="capitalPercent"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={formData.capitalPercent}
-                    onChange={(e) => setFormData({ ...formData, capitalPercent: e.target.value })}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
-                    placeholder="0.00"
-                    required
-                  />
-                  <p className="text-xs text-blue-300">
-                    ℹ️ سيتم حساب النسبة الفعلية تلقائياً
-                  </p>
+                  {/* نسبة المساهمة */}
+                  <div className="space-y-2">
+                    <Label htmlFor="capitalPercent" className="text-white flex items-center gap-2">
+                      <Percent className="h-4 w-4 text-orange-400" />
+                      نسبة المساهمة (%) *
+                    </Label>
+                    <Input
+                      id="capitalPercent"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={formData.capitalPercent}
+                      onChange={(e) => setFormData({ ...formData, capitalPercent: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
+                      placeholder="0.00"
+                      required={accountMode === 'PARTNER'}
+                    />
+                    <p className="text-xs text-blue-300">
+                      ℹ️ سيتم حساب النسبة الفعلية تلقائياً
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* الراتب الأساسي */}
+                  <div className="space-y-2">
+                    <Label htmlFor="baseSalary" className="text-white flex items-center gap-2">
+                      💵 الراتب الأساسي (جنيه)
+                    </Label>
+                    <Input
+                      id="baseSalary"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.baseSalary}
+                      onChange={(e) => setFormData({ ...formData, baseSalary: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  {/* نسبة العمولة */}
+                  <div className="space-y-2">
+                    <Label htmlFor="commissionRate" className="text-white flex items-center gap-2">
+                      <Percent className="h-4 w-4 text-green-400" />
+                      نسبة العمولة (%)
+                    </Label>
+                    <Input
+                      id="commissionRate"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={formData.commissionRate}
+                      onChange={(e) => setFormData({ ...formData, commissionRate: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  {/* مكافأة الأداء */}
+                  <div className="space-y-2">
+                    <Label htmlFor="performanceBonus" className="text-white flex items-center gap-2">
+                      🎁 مكافأة الأداء (جنيه)
+                    </Label>
+                    <Input
+                      id="performanceBonus"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.performanceBonus}
+                      onChange={(e) => setFormData({ ...formData, performanceBonus: e.target.value })}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-11"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -354,8 +532,9 @@ export default function NewPartnerPage() {
             </CardContent>
           </Card>
 
-          {/* إنشاء حساب VENDOR */}
-          <Card className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 border-purple-500/50">
+          {/* إنشاء حساب VENDOR - فقط للشركاء */}
+          {accountMode === 'PARTNER' && (
+            <Card className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 border-purple-500/50">
             <CardHeader className="border-b border-white/10">
               <div className="flex items-center gap-3">
                 <input
@@ -451,8 +630,9 @@ export default function NewPartnerPage() {
                   </div>
                 </div>
               </CardContent>
-            )}
-          </Card>
+            </Card>
+          )}
+        )}
 
           {/* Action Buttons */}
           <div className="flex gap-4 sticky bottom-4 bg-gray-900/95 backdrop-blur-sm p-4 rounded-xl border border-white/10">
@@ -466,7 +646,7 @@ export default function NewPartnerPage() {
               ) : (
                 <>
                   <Save className="h-5 w-5 mr-2" />
-                  إضافة الشريك
+                  إضافة {accountMode === 'PARTNER' ? 'الشريك' : 'Media Buyer'}
                 </>
               )}
             </Button>

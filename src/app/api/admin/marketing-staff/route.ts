@@ -24,13 +24,16 @@ export async function POST(request: NextRequest) {
       email,
       password,
       phone,
-      commissionRate = 5,
+      commissionRate = 0,
+      baseSalary = 0,
+      performanceBonus = 0,
+      notes = '',
     } = body
 
     // التحقق من البيانات المطلوبة
-    if (!name || !email || !password || !phone) {
+    if (!name || !email || !password) {
       return NextResponse.json(
-        { error: 'الاسم والبريد الإلكتروني وكلمة المرور والهاتف مطلوبة' },
+        { error: 'الاسم والبريد الإلكتروني وكلمة المرور مطلوبة' },
         { status: 400 }
       )
     }
@@ -67,36 +70,26 @@ export async function POST(request: NextRequest) {
     const marketingStaff = await prisma.marketingStaff.create({
       data: {
         userId: user.id,
-        phone,
+        phone: phone || '',
         commissionRate: parseFloat(commissionRate.toString()),
+        baseSalary: parseFloat(baseSalary.toString()),
+        performanceBonus: parseFloat(performanceBonus.toString()),
+        notes: notes,
         totalCommission: 0,
-        paidCommission: 0,
-        pendingCommission: 0,
         isApproved: true,
       },
     })
 
     console.log('✅ تم إنشاء موظف التسويق:', marketingStaff.id)
-
-    // إنشاء طريقة دفع افتراضية (InstaPay)
-    await prisma.marketingPaymentMethod.create({
-      data: {
-        marketingStaffId: marketingStaff.id,
-        type: 'INSTAPAY',
-        details: phone,
-        isDefault: true,
-      },
-    })
-
-    console.log('✅ تم إنشاء طريقة الدفع الافتراضية')
-
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-    console.log('✅ تم إنشاء موظف تسويق بنجاح!')
+    console.log('✅ تم إنشاء موظف تسويق (Media Buyer) بنجاح!')
     console.log(`   الاسم: ${name}`)
     console.log(`   البريد: ${email}`)
-    console.log(`   الهاتف: ${phone}`)
+    console.log(`   الهاتف: ${phone || 'غير محدد'}`)
     console.log(`   نسبة العمولة: ${commissionRate}%`)
-    console.log(`   Role: ${user.role}`) // للتأكد
+    console.log(`   الراتب الأساسي: ${baseSalary} ج`)
+    console.log(`   مكافأة الأداء: ${performanceBonus} ج`)
+    console.log(`   Role: ${user.role}`)
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
 
     return NextResponse.json({
@@ -108,6 +101,11 @@ export async function POST(request: NextRequest) {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        commissionRate: marketingStaff.commissionRate,
+        baseSalary: marketingStaff.baseSalary,
+        performanceBonus: marketingStaff.performanceBonus,
+      }
+    })
         commissionRate: marketingStaff.commissionRate,
       }
     })

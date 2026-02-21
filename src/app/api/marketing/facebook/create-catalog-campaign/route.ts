@@ -15,11 +15,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get Facebook credentials from env
-    const accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
-    const adAccountId = process.env.FACEBOOK_AD_ACCOUNT_ID; // act_1962278932225
-    const pageId = process.env.FACEBOOK_PAGE_ID; // 103042954595602
+    // Get Facebook credentials from env or database
+    let accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+    let adAccountId = process.env.FACEBOOK_AD_ACCOUNT_ID; 
+    let pageId = process.env.FACEBOOK_PAGE_ID;
     const catalogId = '900247573275779'; // Remo Store Bot
+    const pixelId = '1242154784695296'; // Meta Pixel ID
+
+    // Try to get from database if not in env
+    if (!accessToken) {
+      try {
+        const dbToken = await prisma.systemSetting.findUnique({
+          where: { key: "facebook_access_token" }
+        });
+        if (dbToken) accessToken = dbToken.value;
+        
+        const dbAccountId = await prisma.systemSetting.findUnique({
+          where: { key: "facebook_ad_account_id" }
+        });
+        if (dbAccountId) adAccountId = dbAccountId.value;
+        
+        const dbPageId = await prisma.systemSetting.findUnique({
+          where: { key: "facebook_page_id" }
+        });
+        if (dbPageId) pageId = dbPageId.value;
+      } catch (e) {
+        console.log("Could not fetch from database, using env only");
+      }
+    }
 
     if (!accessToken || !adAccountId || !pageId) {
       return NextResponse.json(
@@ -37,8 +60,8 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: name,
-        objective: 'OUTCOME_TRAFFIC', // For catalog traffic (compatible with Dynamic Ads)
-        status: 'PAUSED', // Start paused, will be activated after setup
+        objective: 'OUTCOME_SALES', // For catalog sales (Dynamic Product Ads)
+        status: 'PAUSED', // Start paused for safety
         special_ad_categories: [],
         access_token: accessToken,
       }),
@@ -67,9 +90,9 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         name: `${name} - Ad Set`,
         campaign_id: facebookCampaignId,
-        daily_budget: Math.round(budget * 100), // Convert to cents
+        daily_budget: Math.round(budget * 100), // Convert to cents (e.g., 50 EGP = 5000)
         billing_event: 'IMPRESSIONS',
-        optimization_goal: 'LINK_CLICKS', // For catalog clicks (compatible with v21.0)
+        optimization_goal: 'OFFSITE_CONVERSIONS', // For catalog sales
         bid_strategy: 'LOWEST_COST_WITHOUT_CAP',
         
         // Targeting: Egypt, Broad
@@ -79,12 +102,13 @@ export async function POST(request: NextRequest) {
           age_max: 65,
         },
 
-        // Dynamic Product Ads settings
+        // Dynamic Product Ads settings - requires both catalog and pixel
         promoted_object: {
           product_catalog_id: catalogId,
+          pixel_id: pixelId,
         },
 
-        status: 'PAUSED',
+        status: 'PAUSED', // Start paused
         access_token: accessToken,
       }),
     });
@@ -159,8 +183,8 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         name: `${name} - Ad`,
         adset_id: adSetId,
-        creative: { creative_id: creativeId },
-        status: 'PAUSED',
+        creative:PAUSED', // Start paused for safet
+        status: 'ACTIVE', // Active automatically
         access_token: accessToken,
       }),
     });
@@ -184,51 +208,22 @@ export async function POST(request: NextRequest) {
 
     const adId = adData.id;
     console.log('Ad created:', adId);
-
-    // Step 5: Activate Campaign (set to ACTIVE)
-    console.log('Activating campaign...');
-    await fetch(`${baseUrl}/${facebookCampaignId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        status: 'ACTIVE',
-        access_token: accessToken,
-      }),
-    });
-
-    await fetch(`${baseUrl}/${adSetId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        status: 'ACTIVE',
-        access_token: accessToken,
-      }),
-    });
-
-    await fetch(`${baseUrl}/${adId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        status: 'ACTIVE',
-        access_token: accessToken,
-      }),
-    });
-
-    // Step 6: Save to database
+متوقفة مؤقتاً - يتم تفعيلها يدوياً)
+    console.log('Saving campaign to database...');
     const campaign = await prisma.marketingCampaign.create({
       data: {
         name,
         type: 'FACEBOOK_ADS',
         platform: 'FACEBOOK',
         budget,
-        status: 'ACTIVE',
+        status: 'PAUSED',
         targetAudience: 'مصر، 18-65 سنة',
         adCopy: message || 'اكتشفي أحدث صيحات الموضة! 🛍️',
         startDate: new Date(),
         facebookCampaignId: facebookCampaignId,
         facebookAdSetId: adSetId,
         facebookAdId: adId,
-        notes: 'إعلان ديناميكي للكتالوج - Campaign created automatically',
+        notes: `Dynamic Product Ads - Catalog: ${catalogId} - Pixel: ${pixelId}`,
       },
     });
 
@@ -238,7 +233,10 @@ export async function POST(request: NextRequest) {
       success: true,
       campaignId: campaign.id,
       facebookCampaignId,
-      message: 'تم إنشاء حملة الكتالوج بنجاح! 🎉',
+      adSetId,
+      adId,
+      message: '🎉 تم إنشاء حملة الكتالوج بنجاح!\n\n⚠️ الحملة متوقفة مؤقتاً - افتح Facebook Ads Manager لمراجعتها وتفعيلها.\n\nالحملة جاهزة للعمل وتتضمن:\n✅ Catalog: ' + catalogId + '\n✅ Pixel: ' + pixelId
+      message: '🎉 تم إنشاء حملة الكتالوج وتفعيلها بنجاح! الإعلان الآن نشط على Facebook',
     });
 
   } catch (error: any) {

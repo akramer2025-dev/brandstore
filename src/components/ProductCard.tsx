@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import ProductBadge from "./ProductBadge";
+import { trackAddToCart, trackAddToWishlist } from "@/lib/facebook-pixel";
 
 interface ProductCardProps {
   product: {
@@ -71,6 +72,13 @@ export function ProductCard({ product }: ProductCardProps) {
       image: firstImage,
     });
 
+    // Track AddToCart event for Facebook Pixel
+    trackAddToCart({
+      id: product.id,
+      name: product.nameAr,
+      price: product.price,
+    }, 1);
+
     toast.success("تمت الإضافة إلى السلة");
   };
 
@@ -90,6 +98,14 @@ export function ProductCard({ product }: ProductCardProps) {
         toast.success("تم الحذف من المفضلة");
       } else {
         await addToWishlist(product.id);
+        
+        // Track AddToWishlist event for Facebook Pixel
+        trackAddToWishlist({
+          id: product.id,
+          name: product.nameAr,
+          price: product.price,
+        });
+        
         toast.success("تمت الإضافة للمفضلة");
       }
     } catch (error) {

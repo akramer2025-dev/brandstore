@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import InstallmentCalculator from "@/components/InstallmentCalculator";
 import AddressSelector from "@/components/AddressSelector";
 import AddressForm from "@/components/AddressForm";
+import { trackInitiateCheckout, trackPurchase } from "@/lib/facebook-pixel";
 
 type PaymentMethod = 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'E_WALLET_TRANSFER' | 'WE_PAY' | 'GOOGLE_PAY' | 'INSTALLMENT_4' | 'INSTALLMENT_6' | 'INSTALLMENT_12' | 'INSTALLMENT_24' | 'PARTIAL_PAYMENT_50' | 'FULL_PAYMENT';
 type EWalletType = 'etisalat_cash' | 'vodafone_cash' | 'we_pay';
@@ -757,6 +758,17 @@ export default function CheckoutPage() {
       return;
     }
     
+    // Track InitiateCheckout event for Facebook Pixel
+    trackInitiateCheckout(
+      items.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      getTotalPrice() + deliveryFee
+    );
+    
     // Validate COD is only for clothing (but not Shein/Trendyol)
     if (paymentMethod === 'CASH_ON_DELIVERY') {
       if (!isAllClothing) {
@@ -998,6 +1010,18 @@ export default function CheckoutPage() {
       }
 
       const order = await response.json();
+      
+      // Track Purchase event for Facebook Pixel
+      trackPurchase(
+        items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        getTotalPrice() + deliveryFee,
+        order.orderNumber
+      );
       
       clearCart();
       

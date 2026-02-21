@@ -89,6 +89,7 @@ export default function AdminPartnersPage() {
     partnerType: 'PARTNER',
     notes: '',
     createUserAccount: false,
+    accountType: 'PARTNER', // PARTNER or MARKETING_STAFF
     canDeleteOrders: true,
     canUploadShein: false,
     canAddOfflineProducts: false,
@@ -348,6 +349,7 @@ export default function AdminPartnersPage() {
           partnerType: 'PARTNER',
           notes: '',
           createUserAccount: false,
+          accountType: 'PARTNER', // PARTNER or MARKETING_STAFF
           canDeleteOrders: true,
           canUploadShein: false,
           canAddOfflineProducts: false,
@@ -943,16 +945,17 @@ export default function AdminPartnersPage() {
               </DialogTitle>
               <DialogDescription className="text-gray-300 text-base mt-4">
                 هل أنت متأكد من حذف الشريك <strong className="text-white">{partnerToDelete?.partnerName}</strong>؟
-                <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-                  <p className="text-red-300 font-semibold mb-2">⚠️ تحذير:</p>
-                  <ul className="text-sm text-red-200 space-y-1 list-disc list-inside">
-                    <li>سيتم حذف جميع بيانات الشريك</li>
-                    <li>سيتم حذف حساب تسجيل الدخول (إن وُجد)</li>
-                    <li>لا يمكن التراجع عن هذا الإجراء</li>
-                  </ul>
-                </div>
               </DialogDescription>
             </DialogHeader>
+
+            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-red-300 font-semibold mb-2">⚠️ تحذير:</p>
+              <ul className="text-sm text-red-200 space-y-1 list-disc list-inside">
+                <li>سيتم حذف جميع بيانات الشريك</li>
+                <li>سيتم حذف حساب تسجيل الدخول (إن وُجد)</li>
+                <li>لا يمكن التراجع عن هذا الإجراء</li>
+              </ul>
+            </div>
 
             <div className="flex gap-3 mt-6">
               <Button

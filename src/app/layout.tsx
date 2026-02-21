@@ -15,6 +15,9 @@ import { PageTransition } from "@/components/PageTransition";
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
   variable: "--font-cairo",
+  display: 'swap', // Prevent font blocking
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -86,12 +89,8 @@ export const metadata: Metadata = {
     // google: 'your-google-verification-code',
   },
   icons: {
-    icon: [
-      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
+    icon: '/icon-192x192.png',
     apple: '/apple-touch-icon.png',
-    shortcut: '/icon-192x192.png'
   },
   category: 'E-commerce',
 };
@@ -111,10 +110,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png" />
+        {/* Icons and manifest already defined in metadata - removed duplicates */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Remostore" />

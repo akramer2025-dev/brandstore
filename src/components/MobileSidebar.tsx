@@ -1,3 +1,4 @@
+"use client";
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -30,6 +31,9 @@ import {
   LayoutDashboard,
   TrendingUp,
   ArrowRightLeft,
+  BookOpen,
+  Target,
+  Megaphone,
 } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
@@ -169,6 +173,49 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         },
       ],
     });
+  } else if (session?.user?.role === "MARKETING_STAFF") {
+    menuSections.push({
+      title: "🎓 لوحة Media Buyer",
+      items: [
+        {
+          icon: LayoutDashboard,
+          label: "📚 لوحة التدريب",
+          href: "/marketing-staff/training",
+          color: "text-purple-600",
+          isSpecial: true,
+        },
+        {
+          icon: BookOpen,
+          label: "📖 المحاضرات",
+          href: "/marketing-staff/training/lectures",
+          color: "text-blue-600",
+        },
+        {
+          icon: LayoutDashboard,
+          label: "✏️ السبورة التفاعلية",
+          href: "/marketing-staff/whiteboard",
+          color: "text-green-600",
+        },
+        {
+          icon: Target,
+          label: "📊 تحليل SWOT",
+          href: "/marketing-staff/tools/swot",
+          color: "text-blue-600",
+        },
+        {
+          icon: Megaphone,
+          label: "📢 مخطط الحملات",
+          href: "/marketing-staff/tools/campaign",
+          color: "text-pink-600",
+        },
+        {
+          icon: TrendingUp,
+          label: "🛠️ أدوات أخرى",
+          href: "/marketing-staff/tools",
+          color: "text-orange-600",
+        },
+      ],
+    });
   }
 
   // القائمة الرئيسية
@@ -263,7 +310,10 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                 </div>
                 {session.user.role && (
                   <span className="inline-block mt-2 px-3 py-1 bg-white/20 rounded-full text-white text-xs font-semibold">
-                    {session.user.role === "ADMIN" ? "مدير" : session.user.role === "PARTNER" ? "بائع" : "عميل"}
+                    {session.user.role === "ADMIN" ? "مدير" : 
+                     session.user.role === "PARTNER" ? "بائع" : 
+                     session.user.role === "MARKETING_STAFF" ? "Media Buyer" : 
+                     "عميل"}
                   </span>
                 )}
               </div>

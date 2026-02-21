@@ -542,6 +542,9 @@ model MarketingStaff {
   phone                 String                @unique
   email                 String?               @unique
   commissionRate        Float                 @default(5) // نسبة العمولة (افتراضي 5%)
+  baseSalary            Float                 @default(0) // الراتب الأساسي
+  performanceBonus      Float                 @default(0) // مكافأة الأداء
+  notes                 String?               // ملاحظات إضافية
   totalSales            Float                 @default(0) // إجمالي المبيعات
   totalCommission       Float                 @default(0) // إجمالي العمولات
   isActive              Boolean               @default(true)
@@ -561,6 +564,15 @@ model MarketingStaff {
   user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   products              Product[]             // المنتجات المضافة
   commissions           MarketingCommission[] // سجل العمولات
+  
+  // 🎓 علاقات النظام التدريبي
+  lectureProgress       LectureProgress[]     // تقدم المحاضرات
+  assignments           MarketingAssignment[] // الواجبات المخصصة
+  assignmentSubmissions AssignmentSubmission[] // تسليمات الواجبات
+  swotAnalyses          SWOTAnalysis[]        // تحليلات SWOT
+  marketingFunnels      MarketingFunnel[]     // قوالب الفانل
+  campaignPlans         CampaignPlan[]        // خطط الحملات
+  contentLibrary        ContentLibrary[]      // مكتبة المحتوى
 
   @@map("marketing_staff")
 }
@@ -752,6 +764,11 @@ model MarketingCampaign {
   createdBy      String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+  
+  // 🎯 علاقات أدوات التخطيط
+  swotAnalyses   SWOTAnalysis[]
+  funnels        MarketingFunnel[]
+  plans          CampaignPlan[]
 
   @@map("marketing_campaigns")
 }
@@ -2312,6 +2329,381 @@ enum BidStatus {
   WINNING           // فائزة
   LOST              // خاسرة
   CANCELLED         // ملغية
+}
+
+// ============================================
+// 🎓 نظام التدريب التسويقي
+// ============================================
+
+// المحاضرات التدريبية
+model MarketingLecture {
+  id                String              @id @default(cuid())
+  title             String              // عنوان المحاضرة
+  titleAr           String              // العنوان بالعربي
+  description       String?             @db.Text // الوصف
+  week              Int                 // الأسبوع (1-4)
+  orderIndex        Int                 @default(0) // ترتيب المحاضرة
+  duration          Int                 @default(90) // المدة بالدقائق
+  level             LectureLevel        @default(BEGINNER) // المستوى
+  
+  // المحتوى
+  objectives        Json?               // أهداف المحاضرة (array)
+  topics            Json?               // المواضيع (array of sections)
+  resources         Json?               // الموارد والملفات (links, files)
+  
+  // الواجبات والاختبارات
+  hasAssignment     Boolean             @default(false)
+  hasQuiz           Boolean             @default(false)
+  quizQuestions     Json?               // أسئلة الاختبار
+  passingScore      Int                 @default(70) // درجة النجاح %
+  
+  // الحالة
+  isPublished       Boolean             @default(true)
+  publishedAt       DateTime?
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  progress          LectureProgress[]   // تقدم الموظفين
+  assignments       MarketingAssignment[] // الواجبات المرتبطة
+  
+  @@map("marketing_lectures")
+  @@index([week])
+  @@index([isPublished])
+}
+
+// تتبع تقدم الموظفين في المحاضرات
+model LectureProgress {
+  id                String              @id @default(cuid())
+  staffId           String              // معرف الموظف
+  lectureId         String              // معرف المحاضرة
+  
+  // التقدم
+  isCompleted       Boolean             @default(false)
+  completedAt       DateTime?
+  progress          Int                 @default(0) // نسبة الإكمال (0-100)
+  timeSpent         Int                 @default(0) // الوقت المستغرق (دقائق)
+  
+  // الاختبار
+  quizAttempts      Int                 @default(0)
+  quizScore         Int?                // آخر درجة
+  quizPassed        Boolean             @default(false)
+  
+  // الملاحظات
+  notes             String?             @db.Text
+  bookmarkedAt      DateTime?           // إضافة للمفضلة
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  staff             MarketingStaff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  lecture           MarketingLecture    @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  
+  @@unique([staffId, lectureId])
+  @@map("lecture_progress")
+  @@index([staffId])
+  @@index([lectureId])
+}
+
+// الواجبات والمشاريع التطبيقية
+model MarketingAssignment {
+  id                String              @id @default(cuid())
+  lectureId         String?             // المحاضرة المرتبطة (اختياري)
+  staffId           String?             // موظف محدد أو للجميع
+  
+  title             String              // عنوان الواجب
+  titleAr           String              // العنوان بالعربي
+  description       String              @db.Text // الوصف والتعليمات
+  type              AssignmentType      // نوع الواجب
+  
+  // المتطلبات
+  requirements      Json?               // المتطلبات (array)
+  deliverables      Json?               // المطلوب تسليمه (array)
+  rubric            Json?               // معايير التقييم
+  
+  // التوقيتات
+  dueDate           DateTime?           // موعد التسليم
+  isRequired        Boolean             @default(true)
+  maxScore          Int                 @default(100)
+  
+  // الحالة
+  status            AssignmentStatus    @default(ACTIVE)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  lecture           MarketingLecture?   @relation(fields: [lectureId], references: [id], onDelete: SetNull)
+  staff             MarketingStaff?     @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  submissions       AssignmentSubmission[]
+  
+  @@map("marketing_assignments")
+  @@index([lectureId])
+  @@index([staffId])
+  @@index([status])
+}
+
+// تسليمات الواجبات
+model AssignmentSubmission {
+  id                String              @id @default(cuid())
+  assignmentId      String
+  staffId           String
+  
+  // المحتوى
+  content           String              @db.Text // المحتوى المكتوب
+  attachments       Json?               // الملفات المرفقة (links)
+  
+  // التقييم
+  status            SubmissionStatus    @default(PENDING)
+  score             Int?                // الدرجة
+  feedback          String?             @db.Text // ملاحظات المدرب
+  reviewedBy        String?             // من راجع الواجب
+  reviewedAt        DateTime?
+  
+  isLate            Boolean             @default(false)
+  submittedAt       DateTime            @default(now())
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  assignment        MarketingAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  staff             MarketingStaff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  @@unique([assignmentId, staffId])
+  @@map("assignment_submissions")
+  @@index([assignmentId])
+  @@index([staffId])
+  @@index([status])
+}
+
+// ============================================
+// 🎯 أدوات التخطيط والتحليل
+// ============================================
+
+// تحليل SWOT للحملات
+model SWOTAnalysis {
+  id                String              @id @default(cuid())
+  staffId           String              // من أنشأه
+  campaignId        String?             // الحملة المرتبطة (اختياري)
+  
+  name              String              // اسم التحليل
+  description       String?             @db.Text
+  category          String?             // تصنيف (منتج، خدمة، حملة، الخ)
+  
+  // التحليل الرباعي
+  strengths         Json                // نقاط القوة (array of strings)
+  weaknesses        Json                // نقاط الضعف (array)
+  opportunities     Json                // الفرص (array)
+  threats           Json                // التهديدات (array)
+  
+  // الاستراتيجيات المستخلصة
+  strategies        Json?               // الاستراتيجيات (SO, WO, ST, WT)
+  actionItems       Json?               // خطوات العمل
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  staff             MarketingStaff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  campaign          MarketingCampaign?  @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  
+  @@map("swot_analyses")
+  @@index([staffId])
+  @@index([campaignId])
+}
+
+// قوالب الفانل التسويقي (Marketing Funnel)
+model MarketingFunnel {
+  id                String              @id @default(cuid())
+  staffId           String
+  campaignId        String?
+  
+  name              String              // اسم الفانل
+  description       String?             @db.Text
+  
+  // مراحل الفانل (Awareness → Interest → Decision → Action)
+  stages            Json                // تفاصيل كل مرحلة
+  
+  // الأرقام والإحصائيات
+  totalReach        Int                 @default(0)       // Awareness
+  totalInterest     Int                 @default(0)       // Interest
+  totalConsideration Int                @default(0)       // Decision
+  totalConversions  Int                 @default(0)       // Action
+  
+  // معدلات التحويل بين المراحل
+  awarenessToInterest Float             @default(0)       // %
+  interestToDecision  Float             @default(0)       // %
+  decisionToAction    Float             @default(0)       // %
+  
+  conversionRate    Float               @default(0)       // معدل التحويل الكلي
+  
+  isActive          Boolean             @default(true)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  staff             MarketingStaff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  campaign          MarketingCampaign?  @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  
+  @@map("marketing_funnels")
+  @@index([staffId])
+  @@index([campaignId])
+  @@index([isActive])
+}
+
+// خطط الحملات (4Ps/4Cs Framework)
+model CampaignPlan {
+  id                String              @id @default(cuid())
+  staffId           String
+  campaignId        String?
+  
+  name              String              // اسم الخطة
+  description       String?             @db.Text
+  
+  // المزيج التسويقي - 4Ps
+  product           Json?               // المنتج (features, benefits, USP)
+  price             Json?               // السعر (strategy, competitors)
+  place             Json?               // المكان (channels, distribution)
+  promotion         Json?               // الترويج (tactics, budget)
+  
+  // النموذج الحديث - 4Cs
+  customerValue     Json?               // قيمة العميل
+  cost              Json?               // التكلفة الكلية
+  convenience       Json?               // الراحة
+  communication     Json?               // التواصل
+  
+  // USP (Unique Selling Proposition)
+  usp               String?             @db.Text // عرض البيع الفريد
+  
+  // الجمهور المستهدف
+  targetAudience    Json?               // تفاصيل الجمهور
+  
+  // الأهداف والمقاييس
+  objectives        Json?               // الأهداف
+  kpis              Json?               // مؤشرات الأداء
+  budget            Float?              // الميزانية
+  
+  status            PlanStatus          @default(DRAFT)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  staff             MarketingStaff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  campaign          MarketingCampaign?  @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  
+  @@map("campaign_plans")
+  @@index([staffId])
+  @@index([campaignId])
+  @@index([status])
+}
+
+// مكتبة المحتوى التسويقي
+model ContentLibrary {
+  id                String              @id @default(cuid())
+  staffId           String
+  
+  title             String              // العنوان
+  type              ContentType         // نوع المحتوى
+  platform          String?             // المنصة (Facebook, Instagram, etc)
+  
+  content           String              @db.Text // النص
+  images            Json?               // الصور
+  videos            Json?               // الفيديوهات
+  hashtags          Json?               // الهاشتاجات
+  
+  // التصنيف (80% قيمة، 20% بيع)
+  contentCategory   ContentCategory     // VALUE أو SALES
+  
+  // الأداء
+  isPublished       Boolean             @default(false)
+  publishedAt       DateTime?
+  
+  likes             Int                 @default(0)
+  comments          Int                 @default(0)
+  shares            Int                 @default(0)
+  reach             Int                 @default(0)
+  engagement        Float               @default(0)
+  
+  // العلامات
+  tags              Json?               // تاجات للبحث
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  staff             MarketingStaff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  @@map("content_library")
+  @@index([staffId])
+  @@index([type])
+  @@index([contentCategory])
+  @@index([isPublished])
+}
+
+// ============================================
+// 🎯 Enums للنظام التدريبي
+// ============================================
+
+// مستويات المحاضرات
+enum LectureLevel {
+  BEGINNER          // مبتدئ
+  INTERMEDIATE      // متوسط
+  ADVANCED          // متقدم
+  EXPERT            // خبير
+}
+
+// أنواع الواجبات
+enum AssignmentType {
+  ANALYSIS          // تحليل (SWOT, competitors)
+  PROJECT           // مشروع (campaign plan, funnel)
+  RESEARCH          // بحث
+  CASE_STUDY        // دراسة حالة
+  PRACTICAL         // تطبيق عملي
+  QUIZ              // اختبار
+  PRESENTATION      // عرض تقديمي
+}
+
+// حالات الواجبات
+enum AssignmentStatus {
+  DRAFT             // مسودة
+  ACTIVE            // نشط
+  CLOSED            // مغلق
+  ARCHIVED          // مؤرشف
+}
+
+// حالات التسليمات
+enum SubmissionStatus {
+  PENDING           // قيد المراجعة
+  APPROVED          // معتمد
+  NEEDS_REVISION    // يحتاج تعديل
+  REJECTED          // مرفوض
+  LATE              // متأخر
+}
+
+// حالات الخطط
+enum PlanStatus {
+  DRAFT             // مسودة
+  IN_REVIEW         // قيد المراجعة
+  APPROVED          // معتمد
+  IN_PROGRESS       // قيد التنفيذ
+  COMPLETED         // مكتمل
+  CANCELLED         // ملغي
+}
+
+// أنواع المحتوى
+enum ContentType {
+  POST              // منشور نصي
+  IMAGE             // صورة
+  VIDEO             // فيديو
+  REEL              // ريلز
+  STORY             // ستوري
+  CAROUSEL          // كاروسيل
+  ARTICLE           // مقال
+  INFOGRAPHIC       // إنفوجرافيك
+}
+
+// تصنيف المحتوى
+enum ContentCategory {
+  VALUE             // محتوى قيمة (80%)
+  SALES             // محتوى بيعي (20%)
+  MIXED             // مختلط
 }
 
 

@@ -2,15 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   eslint: {
-    // تعطيل ESLint أثناء البناء - سيتم إصلاحها لاحقاً
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // تعطيل TypeScript errors أثناء البناء
     ignoreBuildErrors: true,
   },
+  
+  // ⚡ Performance Optimizations
+  optimizeFonts: true,
+  
   images: {
-    // السماح بالنطاقات الموثوقة فقط
     remotePatterns: [
       {
         protocol: 'https',
@@ -18,15 +19,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'lh3.googleusercontent.com', // Google avatars
+        hostname: 'lh3.googleusercontent.com',
       },
       {
         protocol: 'https',
-        hostname: 'platform-lookaside.fbsbx.com', // Facebook avatars
+        hostname: 'platform-lookaside.fbsbx.com',
       },
       {
         protocol: 'https',
-        hostname: 'avatars.githubusercontent.com', // GitHub avatars
+        hostname: 'avatars.githubusercontent.com',
       },
       {
         protocol: 'https',
@@ -36,7 +37,6 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'via.placeholder.com',
       },
-      // فقط في التطوير، السماح بـ localhost
       ...(process.env.NODE_ENV === 'development' ? [
         {
           protocol: 'http' as const,
@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
     ],
   },
   
-  // 🛡️ Enhanced Security Headers (A+ Grade)
+  // 🛡️ Merged Security Headers
   async headers() {
     return [
       {
@@ -56,6 +56,11 @@ const nextConfig: NextConfig = {
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on'
+          },
+          // Cache Control
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400',
           },
           // Prevent MIME type sniffing
           {
@@ -104,45 +109,6 @@ const nextConfig: NextConfig = {
               "form-action 'self'",
               "upgrade-insecure-requests",
             ].join('; ')
-          },
-        ],
-      },
-    ];
-  },
-  
-  // إضافة headers لمنع الـ cache على الموبايل
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate, max-age=0',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-          {
-            key: 'Expires',
-            value: '0',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
           },
         ],
       },

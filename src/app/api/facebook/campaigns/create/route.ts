@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const campaignData = {
       name,
       objective,
-      status: 'PAUSED', // Start paused for safety
+      status: 'ACTIVE', // Active automatically
       special_ad_categories: '[]',
       buying_type: 'AUCTION',
       is_skadnetwork_attribution: false,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         geo_locations: { countries: ['EG'] },
         interests: target_description ? [{ id: '6003107902433', name: 'Shopping and fashion' }] : []
       }),
-      status: 'PAUSED',
+      status: 'ACTIVE',
       is_adset_budget_sharing_enabled: false,
       access_token: FACEBOOK_ACCESS_TOKEN
     };
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
           }
         }
       }),
-      status: 'PAUSED',
+      status: 'ACTIVE',
       access_token: pageAccessToken
     };
 
@@ -130,13 +130,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Campaign created successfully',
+      message: '✅ تم إنشاء الحملة وتفعيلها بنجاح! الإعلان الآن نشط على Facebook',
       campaign: {
         campaignId,
         adSetId,
         adId: adResult.id,
         name,
-        status: 'PAUSED'
+        status: 'ACTIVE'
       }
     });
 
