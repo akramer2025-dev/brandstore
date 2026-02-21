@@ -208,7 +208,8 @@ export async function POST(request: NextRequest) {
 
     const adId = adData.id;
     console.log('Ad created:', adId);
-متوقفة مؤقتاً - يتم تفعيلها يدوياً)
+
+    // Step 5: Save to database (حملة متوقفة مؤقتاً - يتم تفعيلها يدوياً)
     console.log('Saving campaign to database...');
     const campaign = await prisma.marketingCampaign.create({
       data: {
