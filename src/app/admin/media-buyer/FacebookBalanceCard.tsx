@@ -9,15 +9,18 @@ export function FacebookBalanceCard() {
   const [balance, setBalance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<any>(null);
 
   const fetchBalance = async () => {
     setLoading(true);
     setError(null);
+    setErrorDetails(null);
     try {
       const response = await fetch('/api/marketing/facebook/balance');
       const data = await response.json();
 
       if (!response.ok) {
+        setErrorDetails(data.details);
         throw new Error(data.error || 'فشل في جلب الرصيد');
       }
 
@@ -62,7 +65,44 @@ export function FacebookBalanceCard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-red-600 mb-3">{error}</p>
+          <p className="text-sm text-red-600 mb-2 font-semibold">{error}</p>
+          
+          {errorDetails && (
+            <div className="bg-red-100 border border-red-300 rounded p-3 mb-3 text-xs">
+              <p className="font-semibold text-red-800 mb-1">تفاصيل الخطأ:</p>
+              {errorDetails.message && (
+                <p className="text-red-700 mb-1">
+                  <strong>الرسالة:</strong> {errorDetails.message}
+                </p>
+              )}
+              {errorDetails.type && (
+                <p className="text-red-700 mb-1">
+                  <strong>النوع:</strong> {errorDetails.type}
+                </p>
+              )}
+              {errorDetails.code && (
+                <p className="text-red-700 mb-1">
+                  <strong>الكود:</strong> {errorDetails.code}
+                </p>
+              )}
+              {errorDetails.fbtrace_id && (
+                <p className="text-red-700 mb-1">
+                  <strong>FB Trace ID:</strong> {errorDetails.fbtrace_id}
+                </p>
+              )}
+            </div>
+          )}
+          
+          <div className="bg-yellow-50 border border-yellow-300 rounded p-2 mb-3 text-xs text-yellow-800">
+            <p className="font-semibold mb-1">💡 حلول محتملة:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>تأكد من وجود Access Token في إعدادات Vercel</li>
+              <li>تحقق من صلاحيات الـ Token (ads_management)</li>
+              <li>جدد الـ Access Token إذا كان منتهي</li>
+              <li>تأكد من Ad Account ID الصحيح (act_xxxxx)</li>
+            </ul>
+          </div>
+          
           <Button 
             onClick={fetchBalance} 
             size="sm" 

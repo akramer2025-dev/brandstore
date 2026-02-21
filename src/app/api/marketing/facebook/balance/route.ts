@@ -36,6 +36,11 @@ export async function GET(req: NextRequest) {
     }
 
     if (!accessToken || !adAccountId) {
+      console.error('Missing Facebook credentials:', {
+        hasAccessToken: !!accessToken,
+        hasAdAccountId: !!adAccountId,
+        adAccountId: adAccountId ? `${adAccountId.substring(0, 10)}...` : 'missing'
+      });
       return NextResponse.json(
         { error: 'Facebook credentials غير موجودة. أضفها في إعدادات Facebook.' },
         { status: 400 }
@@ -44,6 +49,8 @@ export async function GET(req: NextRequest) {
 
     const baseUrl = 'https://graph.facebook.com/v21.0';
 
+    console.log('Fetching Facebook balance for account:', adAccountId);
+
     // جلب بيانات Ad Account (يشمل الرصيد والإنفاق)
     const accountResponse = await fetch(
       `${baseUrl}/${adAccountId}?fields=account_id,name,account_status,currency,balance,amount_spent,spend_cap,disable_reason&access_token=${accessToken}`
@@ -51,10 +58,23 @@ export async function GET(req: NextRequest) {
 
     if (!accountResponse.ok) {
       const errorData = await accountResponse.json();
-      console.error('Facebook API Error:', errorData);
+      console.error('Facebook API Error:', {
+        status: accountResponse.status,
+        statusText: accountResponse.statusText,
+        error: errorData,
+        adAccountId: adAccountId
+      });
       return NextResponse.json(
-        { error: 'فشل في جلب بيانات الحساب من Facebook', details: errorData },
-        { status: accountResponse.status }
+        { 
+          error: 'فشل في جلب بيانات الحساب من Facebook', 
+          details: {
+            message: errorData.error?.message || 'Unknown error',
+            type: errorData.error?.type || 'Unknown',
+            code: errorData.error?.code || accountResponse.status,
+            fbtrace_id: errorData.error?.fbtrace_id
+          }
+        },
+        { status: 400 }
       );
     }
 
