@@ -69,8 +69,8 @@ export function MediaBuyerTabs({ campaigns, analytics, orders }: any) {
       {/* Campaign Wizard Tab - NEW */}
       <TabsContent value="wizard">
         <div className="space-y-6">
-          {/* Facebook Balance */}
-          <FacebookBalanceCard />
+          {/* Facebook Balance - Hidden per user request */}
+          {/* <FacebookBalanceCard /> */}
           
           {/* Campaign Wizard */}
           <CampaignWizard />
@@ -80,8 +80,8 @@ export function MediaBuyerTabs({ campaigns, analytics, orders }: any) {
       {/* Overview Tab */}
       <TabsContent value="overview">
         <div className="space-y-6">
-          {/* Facebook Balance */}
-          <FacebookBalanceCard />
+          {/* Facebook Balance - Hidden per user request */}
+          {/* <FacebookBalanceCard /> */}
           
           {/* Smart Alerts */}
           <SmartAlerts campaigns={campaigns} metrics={metrics} />
