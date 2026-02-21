@@ -632,7 +632,7 @@ export default function NewPartnerPage() {
               </CardContent>
             )}
           </Card>
-          )}
+        )}
 
           {/* Action Buttons */
           <div className="flex gap-4 sticky bottom-4 bg-gray-900/95 backdrop-blur-sm p-4 rounded-xl border border-white/10">
