@@ -105,7 +105,7 @@ export default function VendorProductsPage() {
       }
 
       const data = await response.json();
-      console.log('Vendor data:', data.vendor); // للتأكد من البيانات
+      console.log('Vendor data:', data.vendor);
       console.log('Vendor logo:', data.vendor?.logo);
       console.log('Vendor cover:', data.vendor?.coverImage);
       setVendor(data.vendor);
@@ -159,15 +159,19 @@ export default function VendorProductsPage() {
     addItem({
       id: product.id,
       name: product.nameAr,
-      price: pBuyNow = (product: Product) => {
-    // Add to cart
+      price: product.price,
+      image: product.images?.split(',')[0] || '',
+    });
+    toast.success('تم إضافة المنتج إلى السلة');
+  };
+
+  const handleBuyNow = (product: Product) => {
     addItem({
       id: product.id,
       name: product.nameAr,
       price: product.price,
       image: product.images?.split(',')[0] || '',
     });
-    // Navigate to checkout
     router.push('/checkout');
     toast.success('جاري التوجيه للدفع...');
   };
@@ -187,13 +191,7 @@ export default function VendorProductsPage() {
       setLightboxImages(images);
       setLightboxInitialIndex(initialIndex);
       setLightboxProductName(product.nameAr);
-      setIsLightboxOpen(true
-  const handleToggleWishlist = (product: Product) => {
-    if (isInWishlist(product.id)) {
-      toast.info('تمت الإزالة من المفضلة');
-    } else {
-      addToWishlist(product.id);
-      toast.success('تم إضافة المنتج للمفضلة');
+      setIsLightboxOpen(true);
     }
   };
 
@@ -239,7 +237,6 @@ export default function VendorProductsPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
       {/* Header Banner with Cover Image */}
       <div className="relative text-white overflow-hidden">
-        {/* Cover Image or Gradient Background */}
         {vendor.coverImage ? (
           <div className="relative h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[400px]">
             <Image
@@ -252,12 +249,10 @@ export default function VendorProductsPage() {
               loading="eager"
               sizes="100vw"
             />
-            {/* Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
           </div>
         ) : (
           <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[400px]">
-            {/* Animated Background Pattern */}
             <div className="absolute inset-0 opacity-20">
               <div className="absolute inset-0" style={{
                 backgroundImage: `radial-gradient(circle at 20% 50%, white 1px, transparent 1px),
@@ -270,10 +265,8 @@ export default function VendorProductsPage() {
         )}
 
         <div className="container mx-auto px-3 sm:px-4 relative" style={{ marginTop: vendor.coverImage ? '-40px' : '0' }}>
-          {/* Vendor Card - Professional Design */}
           <div className="bg-transparent rounded-2xl p-3 sm:p-4 md:p-6 max-w-4xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 md:gap-6 text-center sm:text-right">
-              {/* Logo */}
               <div className="flex-shrink-0">
                 <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-white p-2 sm:p-2.5 shadow-lg ring-4 ring-purple-100">
                   {vendor.logo ? (
@@ -296,7 +289,6 @@ export default function VendorProductsPage() {
                 </div>
               </div>
 
-              {/* Info */}
               <div className="flex-1 min-w-0 w-full sm:w-auto">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-2 sm:mb-3 mt-4 sm:mt-6">
                   {vendorDisplayName}
@@ -307,7 +299,6 @@ export default function VendorProductsPage() {
                   </p>
                 )}
                 
-                {/* Stats in compact row */}
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3">
                   <div className="flex items-center gap-1.5 sm:gap-2 bg-yellow-50 rounded-lg px-3 py-1.5 sm:py-2">
                     <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 fill-yellow-500" />
@@ -332,7 +323,6 @@ export default function VendorProductsPage() {
           </div>
         </div>
 
-        {/* Wave Shape - Only if no cover image */}
         {!vendor.coverImage && (
           <div className="relative -mt-1">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-12 md:h-16">
@@ -345,11 +335,9 @@ export default function VendorProductsPage() {
 
       {/* Content */}
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
-        {/* Search and Filters */}
         <Card className="mb-4 sm:mb-6 md:mb-8 shadow-lg border-2 border-purple-100 rounded-lg sm:rounded-xl">
           <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="space-y-2 sm:space-y-3">
-              {/* Search */}
               <div className="w-full relative">
                 <Search className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                 <Input
@@ -361,9 +349,7 @@ export default function VendorProductsPage() {
                 />
               </div>
 
-              {/* Filters Row */}
               <div className="flex gap-1.5 sm:gap-2 md:gap-3">
-                {/* Category Filter */}
                 {categories.length > 0 && (
                   <select
                     value={selectedCategory || ""}
@@ -379,7 +365,6 @@ export default function VendorProductsPage() {
                   </select>
                 )}
 
-                {/* Sort */}
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
@@ -391,7 +376,6 @@ export default function VendorProductsPage() {
                   <option value="popular">الأكثر شعبية</option>
                 </select>
 
-                {/* View Mode */}
                 <div className="flex gap-1 sm:gap-2">
                   <Button
                     variant={viewMode === "grid" ? "default" : "outline"}
@@ -413,7 +397,6 @@ export default function VendorProductsPage() {
               </div>
             </div>
 
-            {/* Results Count */}
             <div className="mt-3 sm:mt-4 flex items-center gap-1.5 sm:gap-2 text-gray-600">
               <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="font-semibold text-xs sm:text-sm md:text-base">
@@ -423,34 +406,15 @@ export default function VendorProductsPage() {
           </CardContent>
         </Card>
 
-        {/* Products Grid/Li- Clickable */}
-                  <div 
-                    className="relative aspect-square overflow-hidden bg-gray-100 cursor-pointer"
-                    onClick={() => handleImageClick(product, 0)}
-                  >
-                    {product.images ? (
-                      <>
-                        <Image
-                          src={product.images.split(',')[0]}
-                          alt={product.nameAr}
-                          fill
-                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        {/* Image Count Badge */}
-                        {product.images.split(',').length > 1 && (
-                          <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                            <span>{product.images.split(',').length}</span>
-                            <span>صور</span>
-                          </div>
-                        )}
-                        {/* Hover Zoom Indicator */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
-                            <Search className="w-6 h-6 text-purple-600" />
-                          </div>
-                        </div>
-                      <
+        {filteredProducts.length === 0 ? (
+          <Card className="p-6 sm:p-8 md:p-12 text-center rounded-lg sm:rounded-xl">
+            <Package className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 mx-auto text-gray-400 mb-2 sm:mb-3 md:mb-4" />
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">لا توجد منتجات</h3>
+            <p className="text-sm sm:text-base text-gray-600">
+              {searchQuery || selectedCategory 
+                ? "حاول تغيير معايير البحث" 
+                : "لم يتم إضافة منتجات بعد"}
+            </p>
           </Card>
         ) : (
           <div className={
@@ -464,23 +428,37 @@ export default function VendorProductsPage() {
                 className="group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-purple-300 overflow-hidden"
               >
                 <CardContent className="p-0">
-                  {/* Image */}
-                  <div className="relative aspect-square overflow-hidden bg-gray-100">
+                  <div 
+                    className="relative aspect-square overflow-hidden bg-gray-100 cursor-pointer"
+                    onClick={() => handleImageClick(product, 0)}
+                  >
                     {product.images ? (
-                      <Image
-                        src={product.images.split(',')[0]}
-                        alt={product.nameAr}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
+                      <>
+                        <Image
+                          src={product.images.split(',')[0]}
+                          alt={product.nameAr}
+                          fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        {product.images.split(',').length > 1 && (
+                          <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                            <span>{product.images.split(',').length}</span>
+                            <span>صور</span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
+                            <Search className="w-6 h-6 text-purple-600" />
+                          </div>
+                        </div>
+                      </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
                         <Package className="w-20 h-20 text-purple-300" />
                       </div>
                     )}
 
-                    {/* Badges */}
                     <div className="absolute top-1.5 sm:top-2 md:top-3 right-1.5 sm:right-2 md:right-3 flex flex-col gap-1 sm:gap-1.5 md:gap-2">
                       {product.isFlashDeal && (
                         <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-0.5 md:py-1 rounded-full text-[8px] sm:text-[10px] md:text-xs font-bold shadow-lg flex items-center gap-0.5 sm:gap-1">
@@ -503,10 +481,12 @@ export default function VendorProductsPage() {
                       )}
                     </div>
 
-                    {/* Actions */}
                     <div className="absolute top-1.5 sm:top-2 md:top-3 left-1.5 sm:left-2 md:left-3 flex flex-col gap-1 sm:gap-1.5 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => handleToggleWishlist(product)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleWishlist(product);
+                        }}
                         className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-pink-50 transition-colors"
                       >
                         <Heart 
@@ -516,10 +496,44 @@ export default function VendorProductsPage() {
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className- Improved with Buy Now */}
+                  <div className="p-2 sm:p-3 md:p-4">
+                    <div className="text-[10px] sm:text-xs text-purple-600 font-semibold mb-1">
+                      {product.category.nameAr}
+                    </div>
+
+                    <Link href={`/products/${product.id}`}>
+                      <h3 className="font-bold text-gray-900 text-xs sm:text-sm md:text-base mb-1 sm:mb-2 line-clamp-2 hover:text-purple-600 transition-colors min-h-[2rem] sm:min-h-[2.5rem] md:min-h-[3.5rem]">
+                        {product.nameAr}
+                      </h3>
+                    </Link>
+
+                    {product.reviewCount > 0 && (
+                      <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                                i < Math.round(product.rating)
+                                  ? 'text-yellow-400 fill-yellow-400'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[10px] sm:text-sm text-gray-600">
+                          ({product.reviewCount})
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <div className="text-sm sm:text-lg md:text-2xl font-black text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
+                        {product.price.toLocaleString('ar-EG')} ج.م
+                      </div>
+                    </div>
+
                     <div className="flex flex-col gap-1.5 sm:gap-2">
-                      {/* Buy Now - Primary Action */}
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -532,7 +546,6 @@ export default function VendorProductsPage() {
                         <span>اشتري الآن</span>
                       </Button>
                       
-                      {/* Secondary Actions Row */}
                       <div className="flex gap-1.5 sm:gap-2">
                         <Button
                           onClick={(e) => {
@@ -557,57 +570,7 @@ export default function VendorProductsPage() {
                         >
                           <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
-                      </div.Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                                i < Math.round(product.rating)
-                                  ? 'text-yellow-400 fill-yellow-400'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-      {/* Image Lightbox */}
-      <ImageLightbox
-        images={lightboxImages}
-        initialIndex={lightboxInitialIndex}
-        productName={lightboxProductName}
-        isOpen={isLightboxOpen}
-        onClose={() => setIsLightboxOpen(false)}
-      />
-
-                        </div>
-                        <span className="text-[10px] sm:text-sm text-gray-600">
-                          ({product.reviewCount})
-                        </span>
                       </div>
-                    )}
-
-                    {/* Price */}
-                    <div className="flex items-center justify-between mb-2 sm:mb-3">
-                      <div className="text-sm sm:text-lg md:text-2xl font-black text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
-                        {product.price.toLocaleString('ar-EG')} ج.م
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-1 sm:gap-2">
-                      <Button
-                        onClick={() => handleAddToCart(product)}
-                        disabled={product.stock === 0}
-                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold h-8 sm:h-9 md:h-10 text-[10px] sm:text-xs md:text-sm px-2 sm:px-4"
-                      >
-                        <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
-                        <span className="hidden sm:inline">أضف للسلة</span>
-                        <span className="inline sm:hidden">أضف</span>
-                      </Button>
-                      <Button
-                        onClick={() => router.push(`/products/${product.id}`)}
-                        variant="outline"
-                        className="border-2 border-purple-300 hover:bg-purple-50 h-8 sm:h-9 md:h-10 w-8 sm:w-9 md:w-10 p-0"
-                      >
-                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -616,6 +579,14 @@ export default function VendorProductsPage() {
           </div>
         )}
       </div>
+
+      <ImageLightbox
+        images={lightboxImages}
+        initialIndex={lightboxInitialIndex}
+        productName={lightboxProductName}
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+      />
 
       <style jsx global>{`
         @keyframes movePattern {
