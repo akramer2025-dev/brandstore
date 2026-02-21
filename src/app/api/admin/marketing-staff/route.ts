@@ -106,9 +106,6 @@ export async function POST(request: NextRequest) {
         performanceBonus: marketingStaff.performanceBonus,
       }
     })
-        commissionRate: marketingStaff.commissionRate,
-      }
-    })
 
   } catch (error) {
     console.error('❌ خطأ في إنشاء موظف التسويق:', error)

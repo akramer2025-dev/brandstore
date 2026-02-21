@@ -183,8 +183,8 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         name: `${name} - Ad`,
         adset_id: adSetId,
-        creative:PAUSED', // Start paused for safet
-        status: 'ACTIVE', // Active automatically
+        creative: { creative_id: creativeId },
+        status: 'PAUSED', // Start paused for safety
         access_token: accessToken,
       }),
     });
