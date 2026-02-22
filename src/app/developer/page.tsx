@@ -14,7 +14,8 @@ import {
   MessageCircle,
   Settings,
   BarChart3,
-  FileText
+  FileText,
+  Calculator
 } from "lucide-react"
 import Link from "next/link"
 
@@ -172,6 +173,14 @@ export default function DeveloperDashboard() {
             href="/admin/orders"
             icon={<ShoppingCart className="w-12 h-12" />}
             color="text-yellow-600"
+          />
+
+          <ActionCard
+            title="🧮 حاسبة تسعير المنتج"
+            description="احسب سعر البيع المثالي لمنتجاتك بدقة"
+            href="/developer/pricing"
+            icon={<Calculator className="w-12 h-12" />}
+            color="text-pink-600"
           />
 
           <ActionCard
